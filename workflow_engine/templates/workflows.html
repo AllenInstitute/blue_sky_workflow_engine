@@ -1,0 +1,53 @@
+{% include "home.html" %}
+{% load static %}
+<script type="text/javascript" src="{% static 'workflow_engine/javascript/treant.js' %}"></script> 
+<script type="text/javascript" src="{% static 'workflow_engine/javascript/raphael.js' %}"></script> 
+<script type="text/javascript" src="{% static 'workflow_engine/javascript/tree_creator.js' %}"></script> 
+
+<link rel="stylesheet" type="text/css" href="{% static 'workflow_engine/css/treant.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'workflow_engine/css/perfect-scrollbar.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'workflow_engine/css/workflow_checkbox.css' %}" />
+
+<div id='page_content'>
+
+<div id='header_options'>
+	{% include "number_of_records.html" %}
+	<span class='header_buttons'>
+		<span class='search_button' onclick="base_workflow.open_search_dialog()">Search</span>
+	</span>
+</div>
+
+{% for workflow_setup in workflow_setups %}
+	<div class="{{workflow_setup.disabled_class}}">
+		<div>
+		<span class='workflow_name'>{{workflow_setup.name}} {{workflow_setup.id}}</span>
+		<span class='workflow_update' workflow_id='{{workflow_setup.id}}'> | update</span>
+		<span class='create_workflow_job' onclick="base_workflow.create_workflow_job('{{workflow_setup.id}}')"> | create job</span>
+		
+		</div>
+		<div class="checkbox_pbs">
+		
+		{% if workflow_setup.use_pbs %}	
+				<input onclick="base_workflow.update_pbs('pbs_{{workflow_setup.id}}', '{{workflow_setup.id}}')" type="checkbox" class='pbs_slider_checkbox' id="pbs_{{workflow_setup.id}}" name="" checked/>
+				<label for="pbs_{{workflow_setup.id}}"></label>
+		{% else %}
+				<input onclick="base_workflow.update_pbs('pbs_{{workflow_setup.id}}', '{{workflow_setup.id}}')" type="checkbox" class='pbs_slider_checkbox' id="pbs_{{workflow_setup.id}}" name="" />
+				<label for="pbs_{{workflow_setup.id}}"></label>
+		{% endif %}
+		</div>
+
+		<div id="workflow_{{workflow_setup.id}}"></div>
+	</div>
+
+
+{% endfor %}
+
+<div id='search_dialog'></div>
+
+<script language="javascript">
+	var workflows = {{workflows | safe}};
+	var base_workflow = new TreeCreator(workflows, '{{milliseconds_between_refresh}}');
+	base_workflow.set_search_dialog();
+</script>
+<div>
+

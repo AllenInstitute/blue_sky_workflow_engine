@@ -1,0 +1,46 @@
+{% include "home.html" %}
+{% load static %}
+
+{% if contained_error %}
+	<p>{{error_message}}</p>
+
+{% else %}
+
+<div class='logs'><h3>Logs</h3></div>
+
+{% for log_holder in log_holders %}
+	<div class='logs'>
+
+		{% if log_holder.task_id != None %}
+			<a class='link_to_page' href="/workflow_engine/tasks?task_ids={{ log_holder.task_id }}">Task id: {{log_holder.task_id}}</a><br>
+		{% endif %}
+
+		{% if log_holder.executable_id != None and log_holder.executable_name != None%}
+			<a class='link_to_page' href="/workflow_engine/executables?executable_ids={{ log_holder.executable_id }}">Executable: {{log_holder.executable_name}}</a><br>
+		{% endif %}
+
+		{% if log_holder.job_queue_name != None and log_holder.job_queue_id != None%}
+			<a class='link_to_page' href="/workflow_engine/job_queues?job_queue_ids={{ log_holder.job_queue_id }}">Job Queue: {{log_holder.job_queue_name}}</a><br>
+		{% endif %}
+
+		{% if log_holder.run_state != None %}
+			Run State: {{log_holder.run_state}}<br>
+		{% endif %}
+
+		{% if log_holder.enqueued_object_id != None %}
+			Enqueued Object: {{log_holder.enqueued_object_id}}</p>
+		{% endif %}
+
+		{% if log_holder.full_executable != None %}
+			<p>Command:</p><pre class='log_content'><p>{{log_holder.full_executable}}</p></pre>
+			<hr>
+		{% endif %}
+
+		{% for file_holder in log_holder.file_holders %}
+			{{ file_holder.get_html | safe }}
+		{% endfor %}
+
+	</div>
+{% endfor %}
+	
+{% endif %}

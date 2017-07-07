@@ -1,0 +1,345 @@
+body{
+	margin: 8px !important;
+}
+
+th.search{
+	padding: 8px !important;
+}
+
+th{
+	padding-top: 2px !important;
+	padding-bottom: 2px !important;
+}
+
+.btn{
+	padding: 9px 12px !important;
+}
+
+#selected_link{
+    color: #1A68BE !important;
+}
+
+#workflow_table{
+	border-spacing: 2;
+	border-collapse: separate;
+}
+
+ul.ui-autocomplete {
+    z-index: 1100;
+}
+
+.sort_link{
+	text-decoration: none !important;
+	color: white !important;
+}
+
+.ui-dialog {
+	z-index:  1000 !important;
+}
+
+.show_link{
+	color: #1A68BE !important;
+}
+
+.max_retry_input, .batch_size{
+	width: 50px;
+}
+
+.log_warn{
+    background-color: yellow;
+    color: black;
+}
+
+.log_er{
+    background-color: #FF6666;
+    color: black;
+}
+
+.log_s{
+    background-color: #32CD32;
+    color: black;
+}
+
+.create_workflow_job, .workflow_update{
+	color: #1A68BE !important;
+	font-family:  'Courier New', Courier, monospace;
+	cursor:pointer;
+	font-size: 16px;
+}
+
+.search_button{
+	color: #1A68BE !important;
+	font-family:  'Courier New', Courier, monospace;
+	cursor:pointer;
+	font-size: 16px;
+}
+
+.run_link, .show_link{
+	cursor:pointer;
+	text-align: center;
+	font-size: 16px !important;
+}
+
+.workflow_name{
+	font-family:  'Courier New', Courier, monospace;
+	font-size: 18px;
+	font-weight: bold;
+}
+
+.save_update{
+	width: 1000px;
+}
+
+div#button_header{
+	margin: 20px;
+	font-family:  'Courier New', Courier, monospace;
+}
+
+.invalid_input{
+	background: #FA8072;
+}
+
+#header_options{
+	margin-bottom: 20px;
+	font-family:  'Courier New', Courier, monospace;
+}
+
+.header_buttons{
+	float: right;
+	/*text-align: right;*/
+}
+
+.ui-widget-header{
+	background: #1A68BE !important;
+	color: white !important;
+}
+
+.color_pending{
+	background: #808000;
+	color: white !important;
+}
+
+.update_create_error_messages, .create_job_error_messages{
+	background: #FA8072;
+}
+
+div.workflow_node{
+	font-family:  'Courier New', Courier, monospace;
+	border-radius: 10px;
+	padding-top: 10px;
+	padding-left: 5px;
+	padding-right: 5px;
+	border:2px solid black;
+	text-decoration: none;
+	color: black;
+}
+
+div.disabled_node, .disabled_workflow{
+	box-shadow: 0 0 3pt 2pt red;
+}
+
+.node {
+	line-height: 20px;
+}
+
+div.workflow_node{
+	vertical-align: middle;
+}
+
+a.page_link, .node{
+	text-decoration: none !important;
+	color: black !important;
+}
+
+div.success_state{
+	background: #8aa1ec;
+}
+
+div.failed_state{
+	background: #FA8072;
+}
+
+div.running_state{
+	background: #90EE90;
+}
+
+p.node_enqueued_object_class{
+	text-align: center;
+}
+
+p.create_workflow_node_job{
+	text-align: center;
+}
+
+p.workflow_node_header{
+	text-align: center;
+	font-size:large;
+	font-weight: bold;
+}
+
+span.content_key{
+	font-weight: bold;
+}
+
+.color_queued{
+	background: #FFEFD5;
+}
+
+.color_running{
+	background: #90EE90;
+}
+
+.color_finished_execution{
+	background: #32CD32;
+}
+
+.color_failed{
+	background: #800000;
+	color: white !important;
+}
+
+.color_process_killed{
+	background: black;
+	color: white !important;
+}
+
+.color_failed_execution{
+	background: #FA8072;
+}
+
+.color_success{
+	background: #006400;
+	color: white !important;
+}
+
+a.page_number_link, .page_number_link_bold{
+	text-decoration: none;
+    color: #1A68BE;
+}
+
+a.page_number_link_bold{
+	font-weight: bold;
+}
+
+.log_content{
+	background-color: #666666;
+	color: white;
+	/*line-height: 10px;*/
+	/*line-height: .7em;*/
+}
+
+div.logs{
+	margin: 20px;
+	font-family:  'Courier New', Courier, monospace;
+	font-size: 16px !important;
+}
+
+#number_of_records{
+	font-size: 16px !important;
+}
+
+div#job_link, div#task_link{
+	margin: 20px;
+	color: #1A68BE;
+	font-family:  'Courier New', Courier, monospace;
+	font-size: 16px !important;
+}
+
+span.bold{
+	font-weight: bold;
+}
+
+#index_info{
+	font-size: 16px !important;
+}
+
+.link_to_page{
+	text-decoration: none !important;
+    color: #1A68BE !important;
+}
+
+div#index_info{
+	font-family:  'Courier New', Courier, monospace;
+	margin: 20px;
+}
+
+.menu_link{
+    text-decoration: none !important;
+    color: black !important;
+    font-size: 20;
+    font-family:  'Courier New', Courier, monospace;
+}
+
+div#page_content{
+	margin: 20px;
+}
+
+#workflow_table{
+	/*padding: 15px;*/
+}
+
+.workflow_th{
+	padding-right: 15px;
+	padding-left: 15px;
+}
+
+.wf_th{
+	background: #1A68BE;
+	color: white;
+	padding: 8px;
+	font-family:  'Courier New', Courier, monospace;
+}
+
+#wf_table{
+	text-align: left;
+	border-collapse:  collapse;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+#pagination_links{
+	margin: 20px;
+}
+
+.w_th{
+	/*background: #1A68BE;*/
+	/*color: white;*/
+	padding: 8px;
+	/*font-family:  'Courier New', Courier, monospace;*/
+}
+
+#w_table{
+	text-align: left;
+	border-collapse:  collapse;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.wf_tr:nth-child(even) {background-color: #f2f2f2}
+.wf_tr:hover {background-color: lightgray}
+.show_rows:nth-child(odd) {background-color: #f2f2f2}
+
+.wf_td{
+	text-decoration: none !important;
+	border-top-width: 1px;
+	border-top-style: solid;
+	border-top-color: #ddd;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+	border-bottom-color: #ddd;
+
+	color: black;
+	padding: 8px;
+	font-family:  'Courier New', Courier, monospace;
+}
+
+.page_number_link, .page_number_link_bold{
+	text-decoration: none;
+	color: black;
+}
+
+.page_number_link_bold{
+	font-weight: bold;
+	color: black;
+}
+

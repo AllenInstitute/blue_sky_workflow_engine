@@ -1,0 +1,31 @@
+<div id='pagination_links'>
+
+{% if has_previous or has_next %}
+
+	{% if display_start_link %}
+		<span><a class='page_number_link' href="{{ full_start_link }}">1..</a> </span>
+	{% endif %}
+
+	{% if has_previous %}
+		<span><a class='page_number_link' href="{{ previous_page_link }}">Previous</a></span>
+	{% endif %}
+
+	{% for page_link in page_links %}
+		{% if page_link.value ==  page %}
+			<span><a class='page_number_link_bold' href="{{ page_link.link }}">{{ page_link.value }}</a> </span>
+		{% else %}
+			<span><a class='page_number_link' href="{{page_link.link }}">{{ page_link.value }}</a> </span>
+		{% endif %}
+	{% endfor %}
+
+	{% if has_next %}
+		<span><a class='page_number_link' href="{{ next_page_link }}">Next</a> </span>
+	{% endif %}
+
+	{% if display_end_link %}
+		<span><a class='page_number_link' href="{{ full_end_link }}">..{{full_end}}</a> </span>
+	{% endif %}
+
+{% endif %}
+
+</div>

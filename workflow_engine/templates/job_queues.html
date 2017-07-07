@@ -1,0 +1,53 @@
+{% include "home.html" %}
+{% load static %}
+
+<div id='page_content'>
+<div id='header_options'>
+	{% include "number_of_records.html" %}
+	<span class='header_buttons'>
+		<span class='show_link' onclick="base_workflow.open_search_dialog('Job Queues')">Search</span>
+		<span class='show_link' onclick="base_workflow.create_new('job_queue')">| Create</span>
+	</span>
+</div>
+
+<table id='wf_table'>
+
+<tr>
+	<th class="wf_th"><a class='sort_link' href="{{id_sort}}">id</a></th>
+	<th class="wf_th"><a class='sort_link' href="{{name_sort}}">name</a></th>
+	<th class="wf_th"><a class='sort_link' href="{{description_sort}}">description</a></th>
+	<th class="wf_th"><a class='sort_link' href="{{job_strategy_class_sort}}">job strategy class</a></th>
+	<th class="wf_th"><a class='sort_link' href="{{enqueued_object_class_sort}}">enqueued object class</a></th>
+	<th class="wf_th"><a class='sort_link' href="{{executable_sort}}">executable</a></th>
+	<th class="wf_th"><a class='sort_link' href="{{created_at_sort}}">created at</a></th>
+	<th class="wf_th"><a class='sort_link' href="{{updated_at_sort}}">updated at</a></th>
+	<th class="wf_th"></th>
+	<th class="wf_th"></th>
+	<th class="wf_th"></th>
+</tr>
+
+{% for record in records %}
+	<tr class="wf_tr">
+	<td class="wf_td">{{record.id}}</td>
+	<td class="wf_td">{{record.name}}</td>
+	<td class="wf_td">{{record.description}}</td>
+	<td class="wf_td">{{record.job_strategy_class}}</td>
+	<td class="wf_td">{{record.enqueued_object_class}}</td>
+	<td class="wf_td"><a class='link_to_page' href="/workflow_engine/logs?executable_id={{ record.executable.id }}">{{record.executable.executable_path}}</a></td>
+	<td class="wf_td">{{record.get_created_at}}</td>
+	<td class="wf_td">{{record.get_updated_at}}</td>
+	<td class="wf_td show_link" onclick="base_workflow.update_record('job_queue', {{record.id}})">Update</td>
+	<td class="wf_td show_link" onclick="base_workflow.delete_record('job_queue', {{record.id}})">Delete</td>
+	<td class="wf_td show_link" onclick="base_workflow.set_show_dialog('Job Queue', 'job_queue', {{record.id}})">Show</td>
+	</tr>
+{% endfor %}
+
+</table>
+</div>
+
+{% include "pagination.html" %}
+{% include "search_dialog.html" %}
+
+<script language="javascript">
+	base_workflow.set_search_dialog('Job Queues');
+</script>

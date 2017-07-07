@@ -1,0 +1,55 @@
+{% include "home.html" %}
+{% load static %}
+
+<div id='page_content'>
+<div id='header_options'>
+	{% include "number_of_records.html" %}
+	<span class='header_buttons'>
+		<span class='show_link' onclick="base_workflow.open_search_dialog('Executables')">Search</span>
+		<span class='show_link' onclick="base_workflow.create_new('executable')">| Create</span>
+	</span>
+</div>
+
+<table id='wf_table'>
+
+<tr>
+	<th class="wf_th"><a class='sort_link' href="{{id_sort}}">id</a></th>
+	<th class="wf_th"><a class='sort_link' href="{{name_sort}}">name</a></th>
+	<th class="wf_th"><a class='sort_link' href="{{description_sort}}">description</a></th>
+	<th class="wf_th"><a class='sort_link' href="{{executable_path_sort}}">executable path</a></th>
+	<th class="wf_th"><a class='sort_link' href="{{static_arguments_sort}}">static arguments</a></th>
+	<th class="wf_th"><a class='sort_link' href="{{pbs_processor_sort}}">pbs_processor</a></th>
+	<th class="wf_th"><a class='sort_link' href="{{pbs_walltime_sort}}">pbs_walltime</a></th>
+	<th class="wf_th"><a class='sort_link' href="{{pbs_queue_sort}}">pbs_queue</a></th>
+	<th class="wf_th"><a class='sort_link' href="{{created_at_sort}}">created at</a></th>
+	<th class="wf_th"><a class='sort_link' href="{{updated_at_sort}}">updated at</a></th>
+	<th class="wf_th"></th>
+	<th class="wf_th"></th>
+</tr>
+
+{% for record in records %}
+	<tr class="wf_tr">
+	<td class="wf_td">{{record.id}}</td>
+	<td class="wf_td">{{record.name}}</td>
+	<td class="wf_td">{{record.description}}</td>
+	<td class="wf_td"><a class='link_to_page' href="/workflow_engine/logs?executable_id={{ record.id }}">{{record.executable_path}}</a></td>
+	<td class="wf_td">{{record.static_arguments}}</td>
+	<td class="wf_td">{{record.pbs_processor}}</td>
+	<td class="wf_td">{{record.pbs_walltime}}</td>
+	<td class="wf_td">{{record.pbs_queue}}</td>
+	<td class="wf_td">{{record.get_created_at}}</td>
+	<td class="wf_td">{{record.get_updated_at}}</td>
+	<td class="wf_td show_link" onclick="base_workflow.update_record('executable', {{record.id}})">Update</td>
+	<td class="wf_td show_link" onclick="base_workflow.delete_record('executable', {{record.id}})">Delete</td>
+	</tr>
+{% endfor %}
+
+</table>
+</div>
+
+{% include "pagination.html" %}
+{% include "search_dialog.html" %}
+
+<script language="javascript">
+	base_workflow.set_search_dialog('Executables');
+</script>

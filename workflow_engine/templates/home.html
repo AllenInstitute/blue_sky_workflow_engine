@@ -1,0 +1,35 @@
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'workflow_engine/css/style.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'workflow_engine/css/jquery-ui.css' %}" />
+<script type="text/javascript" src="{% static 'workflow_engine/javascript/base_workflow.js' %}"></script> 
+<script type="text/javascript" src="{% static 'workflow_engine/javascript/jquery-3.2.1.min.js' %}"></script> 
+
+<link rel="stylesheet" type="text/css" href="{% static 'workflow_engine/css/bootstrap.min.css' %}" />
+<script type="text/javascript" src="{% static 'workflow_engine/javascript/bootstrap.min.js' %}"></script> 
+
+<script type="text/javascript" src="{% static 'workflow_engine/javascript/bootstrap-multiselect.js' %}"></script> 
+<link rel="stylesheet" type="text/css" href="{% static 'workflow_engine/css/bootstrap-multiselect.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'workflow_engine/css/bootstrap.min.css.map' %}" />
+
+<script type="text/javascript" src="{% static 'workflow_engine/javascript/jquery-ui.js' %}"></script> 
+
+<script language="javascript">
+	var base_workflow = new BaseWorkflow('{{milliseconds_between_refresh}}');
+</script>
+
+<title>Blue Sky</title>
+<link rel="icon" type="ico" href="{% static 'workflow_engine/images/leaf.ico' %}"/>
+
+<table id='workflow_table'>
+<tr>
+{% for page in pages %}
+
+	{% if page == 'index' %}
+		<th class='workflow_th'><a id='{% if page == selected_page %}selected_link{% endif %}' class='menu_link' href="/workflow_engine">home</a></th>
+	{% else %}
+		<th class='workflow_th'><a id='{% if page == selected_page %}selected_link{% endif %}' class='menu_link' href="/workflow_engine/{{ page }}">{{ page }}</a></th>
+	{% endif %}
+{% endfor %}
+</tr>
+</table>
