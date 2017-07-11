@@ -19,7 +19,6 @@ workflow_engine/datafixes/workflow_engine_init_14985955051399932.py
 workflow_engine/management/commands/generate_datafix.py
 workflow_engine/management/commands/generate_manual_strategy.py
 workflow_engine/management/commands/generate_strategy.py
-workflow_engine/management/commands/populate_database.py
 workflow_engine/management/commands/run_all_datafixes.py
 workflow_engine/management/commands/run_datafix.py
 workflow_engine/management/commands/run_execution_worker.py
