@@ -2,7 +2,6 @@ from django.db import models
 from development.strategies import *
 import development
 import workflow_engine
-from development.models import Numberr
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -557,7 +556,7 @@ class Datafix(models.Model):
 		files = os.listdir(workflow_datafix_dir) + os.listdir(dev_datafix_dir)
 
 		for file in files:
-			if Datafix.get_extension(file) == '.py':
+			if Datafix.get_extension(file) == '.py' and os.path.basename(file) != '__init__.py':
 				name = os.path.basename(file).replace('.py', '')
 
 				try:
