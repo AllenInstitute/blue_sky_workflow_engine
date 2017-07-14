@@ -16,7 +16,7 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 
 	#override if needed
 	#get the data for the input file
-	def get_input(self, enqueued_object):
+	def get_input(self, enqueued_object, storage_directory):
 		input_data = {}
 		input_data['input'] = str(enqueued_object)
 
@@ -34,7 +34,7 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 		input_file = self.get_input_file(task)
 
 		#populate the input file
-		self.create_input_file(input_file, task.get_enqueued_object())
+		self.create_input_file(input_file, task.get_enqueued_object(), self.get_task_storage_directory(task))
 
 		output_file = self.get_output_file(task)
 
@@ -49,9 +49,11 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 			executable_elements.append(arguments)
 
 		if input_file != None:
+			executable_elements.append('--input_json')
 			executable_elements.append(input_file)
 
 		if output_file != None:
+			executable_elements.append('--output_json')
 			executable_elements.append(output_file)
 
 		return (' '.join(executable_elements))
@@ -150,11 +152,11 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 
 	#this method creates the input file
 	#Do not override
-	def create_input_file(self, input_file, enqueued_object):
-		input_data = self.get_input(enqueued_object)
+	def create_input_file(self, input_file, enqueued_object, storage_directory):
+		input_data = self.get_input(enqueued_object, storage_directory)
 
 		with open(input_file, 'w') as in_file:
-			json.dump(input_data, in_file)
+			json.dump(input_data, in_file, indent=4)
 
 	#Do not override
 	def get_output_file(self, task):
