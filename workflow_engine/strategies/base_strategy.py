@@ -7,6 +7,11 @@ class BaseStrategy(object):
 	#####everthing bellow this can be overriden#####
 
 	#override if needed
+	#called before the job starts running
+	def prep_job(self, job):
+		pass
+
+	#override if needed
 	#called before the task starts running
 	def prep_task(self, task):
 		pass
@@ -74,6 +79,11 @@ class BaseStrategy(object):
 			os.makedirs(storage_directory)  
 
 		return storage_directory
+
+	#Do not override
+	def check_key(self, dictionary, key):
+	    if key not in dictionary:
+	      raise Exception("expected '" + str(key) + "' key in results")
 
 	#Do not override
 	def get_or_create_storage_directory(self, job):

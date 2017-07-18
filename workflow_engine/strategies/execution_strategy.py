@@ -209,6 +209,10 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 	#Do not override
 	def read_output(self, task):
 		output_file = self.get_output_file(task)
+
+		if not os.path.isfile(output_file):
+			raise Exception('Expected output file to be created at: ' + str(output_file) + ' but it was not')
+
 		result = {}
 		with open(output_file) as json_data:  
 			results = json.load(json_data)

@@ -5,6 +5,7 @@ import workflow_engine
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+import traceback
 
 import os
 from django.utils import timezone
@@ -324,7 +325,9 @@ class Job(models.Model):
 
 	def set_error_message(self, error_message, task):
 
-		if error_message != None:
+		if not task:
+			self.error_message = 'job failed: ' + error_message
+		elif error_message != None:
 			self.error_message = 'task with id of ' + str(task.id) + ' failed: '  + error_message
 		else:
 			self.error_message = 'task with id of ' + str(task.id) + ' failed'
@@ -386,29 +389,36 @@ class Job(models.Model):
 				task.save()
 
 	def create_tasks(self):
-		resused_tasks = {}
-		strategy = self.get_strategy()
+		try:
+			resused_tasks = {}
+			strategy = self.get_strategy()
 
-		pending_state = RunState.get_pending_state()
-		task_objects = strategy.get_task_objects_for_queue(self.get_enqueued_object())
+			pending_state = RunState.get_pending_state()
+			strategy.prep_job(self)
 
-		for task_object in task_objects:
-			if self.workflow_node.overwrite_previous_job:
-				try:
-					#try to reuse a previous task
-					task = Task.objects.get(enqueued_task_object_id=task_object.id, enqueued_task_object_class=type(task_object).__name__,job=self)
-					task.run_state = pending_state
-					task.archived = False
-					task.retry_count = ZERO
-					task.save()
-				except:
+			task_objects = strategy.get_task_objects_for_queue(self.get_enqueued_object())
+
+			for task_object in task_objects:
+				if self.workflow_node.overwrite_previous_job:
+					try:
+						#try to reuse a previous task
+						task = Task.objects.get(enqueued_task_object_id=task_object.id, enqueued_task_object_class=type(task_object).__name__,job=self)
+						task.run_state = pending_state
+						task.archived = False
+						task.retry_count = ZERO
+						task.save()
+					except:
+						task = Task(enqueued_task_object_id=task_object.id, enqueued_task_object_class=type(task_object).__name__, run_state=pending_state, job=self)
+						task.save()
+				else:
 					task = Task(enqueued_task_object_id=task_object.id, enqueued_task_object_class=type(task_object).__name__, run_state=pending_state, job=self)
 					task.save()
-			else:
-				task = Task(enqueued_task_object_id=task_object.id, enqueued_task_object_class=type(task_object).__name__, run_state=pending_state, job=self)
-				task.save()
 
-			resused_tasks[task.id] = True
+				resused_tasks[task.id] = True
+
+		except Exception as e:
+			self.set_error_message(str(e) + ' - ' + str(traceback.format_exc()), None)
+			self.set_failed_state()
 
 		return resused_tasks
 
@@ -483,22 +493,33 @@ class Job(models.Model):
 			strategy = child.get_strategy()
 			enqueued_objects = strategy.get_objects_for_queue(self)
 			for enqueued_object in enqueued_objects:
-				job = None
 
-				try:
-					#try to get the job
-					job = Job.objects.get(enqueued_object_id=enqueued_object.id, workflow_node_id=child.id)
-					job.run_state = RunState.get_pending_state()
-					job.priority = child.priority
-					job.archived = False
-					job.save()
+				#try to get the job
+				jobs = Job.objects.filter(enqueued_object_id=enqueued_object.id, workflow_node_id=child.id, archived=False)
 
-				except Exception as e:
-					#create job if needed
+				if len(jobs) > ZERO:
+					index = ZERO
+					for job in jobs:
+						#reset job if needed
+						if index == ZERO:
+							job.run_state = RunState.get_pending_state()
+							job.priority = child.priority
+							job.archived = False
+							job.save()
+							job.set_for_run()
+							
+						#should not have more than one job but just in case
+						else:
+							job.archived = True
+							job.save()
+
+						index+=ONE
+				else:
+					#create the job if needed
 					job = Job(enqueued_object_id=enqueued_object.id, workflow_node=child, run_state=RunState.get_pending_state(),priority=child.priority)
 					job.save()
+					job.set_for_run()
 
-				job.set_for_run()
 
 	#check if all tasks have finished
 	def all_tasks_finished(self):

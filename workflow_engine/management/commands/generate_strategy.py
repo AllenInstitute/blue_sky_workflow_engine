@@ -71,6 +71,11 @@ class Command(BaseCommand):
             strategy_file.write('  #  return os.path.join(base_storage_directory, str(enqueued_object.id))\n\n')
 
             strategy_file.write('  #override if needed\n')
+            strategy_file.write('  #called before the job starts running\n')
+            strategy_file.write('  #def prep_job(self, job):\n')
+            strategy_file.write('  #    pass\n\n')
+
+            strategy_file.write('  #override if needed\n')
             strategy_file.write('  #called before the task starts running\n')
             strategy_file.write('  #def prep_task(self, task):\n')
             strategy_file.write('  #    pass\n\n')
