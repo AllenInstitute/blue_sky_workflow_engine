@@ -24,7 +24,7 @@ class BaseStrategy(object):
 	#override if needed
 	#called after the execution finishes
 	#process and save results to the database
-	def on_finishing(self, enqueued_object, results):
+	def on_finishing(self, enqueued_object, results, task):
 		pass
 
 	#override if needed
@@ -97,3 +97,13 @@ class BaseStrategy(object):
 		task.job.set_failed_state()
 		task.job.set_end_run_time()
 		task.rerun()
+
+	#Do not override
+	def set_well_known_file(self, full_path, attachable_object, well_known_file_type, task=None):
+		from workflow_engine.models import WellKnownFile
+		WellKnownFile.set(full_path, attachable_object, well_known_file_type, task)
+
+	#Do not override
+	def get_well_known_file(self, attachable_object, well_known_file_type):
+		from workflow_engine.models import WellKnownFile
+		return WellKnownFile.get(attachable_object, well_known_file_type)

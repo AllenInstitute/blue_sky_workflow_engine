@@ -30,6 +30,7 @@ class Command(BaseCommand):
     def write_strategy_file(self, filename, class_name):
         with open(filename, 'w') as strategy_file:
             strategy_file.write('from workflow_engine.strategies import execution_strategy\n')
+            strategy_file.write('from workflow_engine.models import *\n')
             strategy_file.write('from development.models import *\n\n')
             strategy_file.write('import os\n\n')
 
@@ -37,7 +38,7 @@ class Command(BaseCommand):
 
             strategy_file.write('  #override if needed\n')
             strategy_file.write('  #set the data for the input file\n')
-            strategy_file.write('  def get_input(self, enqueued_object, storage_directory):\n')
+            strategy_file.write('  def get_input(self, enqueued_object, storage_directory, task):\n')
             strategy_file.write('    input_data = {}\n')
             strategy_file.write("    input_data['input'] = str(enqueued_object)\n")
             strategy_file.write('    return input_data\n\n')
@@ -45,7 +46,7 @@ class Command(BaseCommand):
             strategy_file.write('  #override if needed\n')
             strategy_file.write('  #called after the execution finishes\n')
             strategy_file.write('  #process and save results to the database\n')
-            strategy_file.write('  def on_finishing(self, enqueued_object, results):\n')
+            strategy_file.write('  def on_finishing(self, enqueued_object, results, task):\n')
             strategy_file.write('    pass\n\n')
 
             strategy_file.write('  #override if needed\n')

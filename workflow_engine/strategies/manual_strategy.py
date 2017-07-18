@@ -23,7 +23,7 @@ class ManualStrategy(base_strategy.BaseStrategy):
 			task.set_success_state()
 			task.set_end_run_time()
 
-			self.on_finishing(task.get_enqueued_object(), {})
+			self.on_finishing(task.get_enqueued_object(), {}, task)
 
 			if task.job.all_tasks_finished():
 				task.job.set_success_state()
