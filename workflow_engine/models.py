@@ -389,36 +389,29 @@ class Job(models.Model):
 				task.save()
 
 	def create_tasks(self):
-		try:
-			resused_tasks = {}
-			strategy = self.get_strategy()
+		resused_tasks = {}
+		strategy = self.get_strategy()
+		pending_state = RunState.get_pending_state()
 
-			pending_state = RunState.get_pending_state()
-			strategy.prep_job(self)
+		task_objects = strategy.get_task_objects_for_queue(self.get_enqueued_object())
 
-			task_objects = strategy.get_task_objects_for_queue(self.get_enqueued_object())
-
-			for task_object in task_objects:
-				if self.workflow_node.overwrite_previous_job:
-					try:
-						#try to reuse a previous task
-						task = Task.objects.get(enqueued_task_object_id=task_object.id, enqueued_task_object_class=type(task_object).__name__,job=self)
-						task.run_state = pending_state
-						task.archived = False
-						task.retry_count = ZERO
-						task.save()
-					except:
-						task = Task(enqueued_task_object_id=task_object.id, enqueued_task_object_class=type(task_object).__name__, run_state=pending_state, job=self)
-						task.save()
-				else:
+		for task_object in task_objects:
+			if self.workflow_node.overwrite_previous_job:
+				try:
+					#try to reuse a previous task
+					task = Task.objects.get(enqueued_task_object_id=task_object.id, enqueued_task_object_class=type(task_object).__name__,job=self)
+					task.run_state = pending_state
+					task.archived = False
+					task.retry_count = ZERO
+					task.save()
+				except:
 					task = Task(enqueued_task_object_id=task_object.id, enqueued_task_object_class=type(task_object).__name__, run_state=pending_state, job=self)
 					task.save()
+			else:
+				task = Task(enqueued_task_object_id=task_object.id, enqueued_task_object_class=type(task_object).__name__, run_state=pending_state, job=self)
+				task.save()
 
-				resused_tasks[task.id] = True
-
-		except Exception as e:
-			self.set_error_message(str(e) + ' - ' + str(traceback.format_exc()), None)
-			self.set_failed_state()
+			resused_tasks[task.id] = True
 
 		return resused_tasks
 
@@ -436,18 +429,29 @@ class Job(models.Model):
 		self.set_pending_state()
 		self.run_jobs()
 
+	def prep_job(self):
+		strategy = self.get_strategy()
+		strategy.prep_job(self)
+
 	def run(self):
-		self.set_queued_state()
+		try:
+			self.set_queued_state()
 
-		self.set_start_run_time()
-		self.clear_error_message()
+			self.set_start_run_time()
+			self.clear_error_message()
 
-		resused_tasks = self.create_tasks()
+			self.prep_job()
 
-		self.remove_tasks(resused_tasks)
+			resused_tasks = self.create_tasks()
 
-		for task in self.get_tasks():
-			task.run_task()
+			self.remove_tasks(resused_tasks)
+
+			for task in self.get_tasks():
+				task.run_task()
+
+		except Exception as e:
+			self.set_error_message(str(e) + ' - ' + str(traceback.format_exc()), None)
+			self.set_failed_state()
 
 	def run_jobs(self):
 		self.workflow_node.run_workflow_node_jobs()
