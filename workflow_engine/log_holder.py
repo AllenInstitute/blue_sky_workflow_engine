@@ -14,3 +14,4 @@ class LogHolder(object):
 		self.executable_name = None
 		self.run_state = None
 		self.enqueued_object_id = None
+		self.error_message = None

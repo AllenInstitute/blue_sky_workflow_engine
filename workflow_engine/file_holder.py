@@ -9,6 +9,18 @@ class FileHolder(object):
 			with open(filename) as f:
 				self.lines = f.readlines()
 
+
+	@staticmethod
+	def add_color_highlighting(html):
+		if html != None:
+			html = re.sub(r"[^( |\)|\(|\n)]*(success)[^( |\)|\(|\n)]*", "<span class = log_s>\g<0></span>", html, flags=re.IGNORECASE)
+			html = re.sub(r"[^( |\)|\(|\n)]*(warnings)[^( |\)|\(|\n)]*", "<span class = log_warn>\g<0></span>", html, flags=re.IGNORECASE)
+			html = re.sub(r"[^( |\)|\(|\n|:)]*(error)[^( |\)|\(|\n|:)]*", "<span class = log_er>\g<0></span>", html, flags=re.IGNORECASE)
+			html = re.sub(r"[^( |\)|\(|\n)]*(exception)[^( |\)|\(\n)]*", "<span class = log_er>\g<0></span>", html, flags=re.IGNORECASE)
+			html = re.sub(r"[^( |\)|\(|\n|:)]*(failure)[^( |\)|\(|\n|:)]*", "<span class = log_er>\g<0></span>", html, flags=re.IGNORECASE)
+
+		return html
+
 	def get_html(self):
 		html = '<p>'+ self.type_name + ' file: ' + str(self.filename) + '</p>'
 		html+= '<p>Updated: ' + str(self.updated_time) + '</p>'
@@ -22,12 +34,7 @@ class FileHolder(object):
 			html+='<p>This file does not exist yet.</p>'
 		html+='<hr>'
 
-		#add color highlighting
-		html = re.sub(r"[^( |\)|\(|\n)]*(success)[^( |\)|\(|\n)]*", "<span class = log_s>\g<0></span>", html, flags=re.IGNORECASE)
-		html = re.sub(r"[^( |\)|\(|\n)]*(warnings)[^( |\)|\(|\n)]*", "<span class = log_warn>\g<0></span>", html, flags=re.IGNORECASE)
-		html = re.sub(r"[^( |\)|\(|\n|:)]*(errors)[^( |\)|\(|\n|:)]*", "<span class = log_er>\g<0></span>", html, flags=re.IGNORECASE)
-		html = re.sub(r"[^( |\)|\(|\n)]*(exception)[^( |\)|\(\n)]*", "<span class = log_er>\g<0></span>", html, flags=re.IGNORECASE)
-		html = re.sub(r"[^( |\)|\(|\n|:)]*(failure)[^( |\)|\(|\n|:)]*", "<span class = log_er>\g<0></span>", html, flags=re.IGNORECASE)
+		html = FileHolder.add_color_highlighting(html)
 
 		return html
 

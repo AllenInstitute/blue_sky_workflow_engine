@@ -36,6 +36,12 @@
 			<hr>
 		{% endif %}
 
+		{% if log_holder.error_message != None %}
+			<p>Error Message:</p><pre class='log_content'><p>{{log_holder.error_message | safe}}</p></pre>
+			<hr>
+		{% endif %}
+
+
 		{% for file_holder in log_holder.file_holders %}
 			{{ file_holder.get_html | safe }}
 		{% endfor %}

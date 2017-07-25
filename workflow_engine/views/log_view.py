@@ -151,6 +151,8 @@ def get_task_log_holder(task_id, types, context):
         log_holder.executable_id = executable.id
         log_holder.executable_name = executable.name
 
+        log_holder.error_message = FileHolder.add_color_highlighting(task.error_message)
+
         log_holder.run_state = task.run_state.name
         log_holder.enqueued_object_id = task.enqueued_task_object_id
     except Exception as e:
