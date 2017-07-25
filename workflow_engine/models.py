@@ -127,6 +127,28 @@ class Workflow(models.Model):
 	def get_head_workfow_nodes(self):
 		return WorkflowNode.objects.filter(is_head=True, workflow=self.id)
 
+	@staticmethod
+	def start_workflow(worklfow_name, enqueued_object):
+		try:
+			workflow = Workflow.objects.get(name=worklfow_name)
+			workflow_nodes = workflow_node.objects.filter(workflow=workflow, parent=None)
+
+			if len(workflow_nodes) != ONE:
+				raise Exception('Expected to find a single head workflow node but found: ' + str(len(workflow_nodes)))
+
+			workflow_node = workflow_nodes[ZERO]
+
+			job = Job()
+			job.enqueued_object_id=enqueued_object.id
+			job.workflow_node=workflow_node
+			job.run_state=RunState.get_pending_state()
+			job.priority = workflow_node.priority
+			job.save()
+			job.run_jobs()
+
+		except:
+			print('Something went wrong: ' + str(e))
+
 class WellKnownFile(models.Model):
 	attachable_id = models.PositiveIntegerField()
 	attachable_type = models.ForeignKey(ContentType)
