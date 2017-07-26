@@ -41,7 +41,7 @@ class ManualStrategy(base_strategy.BaseStrategy):
 			self.on_running(task)
 
 			job = task.job
-			job.set_running_state()
+			job.set_running_state_from_queued()
 
 			self.check_if_task_finished(task)
 

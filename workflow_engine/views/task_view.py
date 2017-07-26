@@ -138,7 +138,10 @@ def queue_task(request):
             task.run_task()
             if task.job.can_rerun:
                 task.reset_retry_count()
-                task.job.set_pending_state()
+
+                #this will be failed if task fails on prep
+                if task.run_state.name != 'FAILED':
+                    task.job.set_pending_state()
         else:
             success = False
             message = 'Missing task_id'

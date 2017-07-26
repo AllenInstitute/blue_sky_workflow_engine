@@ -132,6 +132,8 @@ div.workflow_node{
 	border:2px solid black;
 	text-decoration: none;
 	color: black;
+	white-space: nowrap;
+
 }
 
 div.disabled_node, .disabled_workflow{
