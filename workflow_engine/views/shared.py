@@ -1,11 +1,12 @@
 from django.core.paginator import Paginator
 from workflow_engine.models import *
 from django.conf import settings
+import workflow_engine
 
 def add_settings_info_to_context(context):
     context['milliseconds_between_refresh'] = settings.MILLISECONDS_BETWEEN_REFRESH
     # context['csrf_token'] = settings.MILLISECONDS_BETWEEN_REFRESH
-    context['workflow_version'] = settings.WORKFLOW_VERSION
+    context['workflow_version'] = workflow_engine.__version__
 
 def to_none(value):
     result = value

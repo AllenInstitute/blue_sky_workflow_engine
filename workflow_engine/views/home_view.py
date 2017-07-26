@@ -5,6 +5,7 @@ from django.template import loader
 from workflow_engine.views import shared
 import django
 import sys
+import workflow_engine
 
 pages = ['index', 'jobs', 'workflows', 'workflow_creator', 'job_queues', 'executables']
 context = {
@@ -23,7 +24,7 @@ def get_python_version():
 def index(request):
     context['selected_page'] = 'index'
     context['base_path'] = settings.BASE_FILE_PATH
-    context['workflow_version']  = settings.WORKFLOW_VERSION
+    context['workflow_version']  = workflow_engine.__version__
     context['python_version']  = get_python_version()
     context['django_version']  = django.get_version()
     context['database_host'] = settings.DATABASES['default']['HOST']
