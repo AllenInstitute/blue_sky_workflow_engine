@@ -129,25 +129,22 @@ class Workflow(models.Model):
 
 	@staticmethod
 	def start_workflow(worklfow_name, enqueued_object):
-		try:
-			workflow = Workflow.objects.get(name=worklfow_name)
-			workflow_nodes = workflow_node.objects.filter(workflow=workflow, parent=None)
+		workflow = Workflow.objects.get(name=worklfow_name)
+		workflow_nodes = WorkflowNode.objects.filter(workflow=workflow, parent=None)
 
-			if len(workflow_nodes) != ONE:
-				raise Exception('Expected to find a single head workflow node but found: ' + str(len(workflow_nodes)))
+		if len(workflow_nodes) != ONE:
+			raise Exception('Expected to find a single head workflow node but found: ' + str(len(workflow_nodes)))
 
-			workflow_node = workflow_nodes[ZERO]
+		workflow_node = workflow_nodes[ZERO]
 
-			job = Job()
-			job.enqueued_object_id=enqueued_object.id
-			job.workflow_node=workflow_node
-			job.run_state=RunState.get_pending_state()
-			job.priority = workflow_node.priority
-			job.save()
-			job.run_jobs()
+		job = Job()
+		job.enqueued_object_id=enqueued_object.id
+		job.workflow_node=workflow_node
+		job.run_state=RunState.get_pending_state()
+		job.priority = workflow_node.priority
+		job.save()
+		job.run_jobs()
 
-		except:
-			print('Something went wrong: ' + str(e))
 
 class WellKnownFile(models.Model):
 	attachable_id = models.PositiveIntegerField()
@@ -234,7 +231,7 @@ class WorkflowNode(models.Model):
 	is_head = models.BooleanField(default=False)
 	workflow = models.ForeignKey(Workflow)
 	disabled = models.BooleanField(default=False)
-	batch_size = models.IntegerField(default=10)
+	batch_size = models.IntegerField(default=50)
 	priority = models.IntegerField(default=50)
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
