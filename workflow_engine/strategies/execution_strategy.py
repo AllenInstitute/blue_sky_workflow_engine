@@ -1,7 +1,6 @@
 from workflow_engine.models import *
-from execution_runner import run_celery_task
-from pbs_runner import run_pbs_celery_task
-from pbs_runner import cancel_task
+from development.runners import pbs_runner
+from development.runners import execution_runner
 from workflow_engine.strategies import base_strategy
 from development.models import *
 
@@ -136,7 +135,7 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 
 	def kill_pbs_task(self, task):
 		if task.pbs_id != None:
-			cancel_task.delay(task.pbs_id)
+			pbs_runner.cancel_task.delay(task.pbs_id)
 
 	#Do not override
 	def run_asynchronous_task(self, task):
@@ -145,10 +144,10 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 		if task.pbs_task():
 			pbs_file = self.get_pbs_file(task)
 			task.create_pbs_file(pbs_file)
-			run_pbs_celery_task.delay(pbs_file, task.id)
+			pbs_runner.run_pbs_celery_task.delay(pbs_file, task.id)
 		else:
 			executable = self.add_write_to_log_command(task.full_executable, task.log_file)
-			run_celery_task.delay(executable, task.id, task.log_file)
+			execution_runner.run_celery_task.delay(executable, task.id, task.log_file)
 
 	#this method creates the input file
 	#Do not override

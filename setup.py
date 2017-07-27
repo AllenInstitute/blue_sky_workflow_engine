@@ -9,13 +9,13 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='django-blue-sky-workflow-engine',
-    version='0.70',
+    version='0.75',
     packages=find_packages(),
     include_package_data=True,
     license='BSD License',  # example license
     description='Blue Sky Workflow Engine',
     long_description=README,
-    url='TODO',
+    url='https://github.com/AllenInstitute',
     author='Nathan Sjoquist',
     author_email='nathans@alleninstitute.org',
     classifiers=[

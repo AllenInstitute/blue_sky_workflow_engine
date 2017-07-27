@@ -1,8 +1,8 @@
 Metadata-Version: 1.1
 Name: django-blue-sky-workflow-engine
-Version: 0.70
+Version: 0.75
 Summary: Blue Sky Workflow Engine
-Home-page: TODO
+Home-page: https://github.com/AllenInstitute
 Author: Nathan Sjoquist
 Author-email: nathans@alleninstitute.org
 License: BSD License
