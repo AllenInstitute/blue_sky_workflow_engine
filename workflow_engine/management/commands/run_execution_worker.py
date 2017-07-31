@@ -6,9 +6,10 @@ STATE = 0
 TASK_ID = 1
 PBS_ID = 2
 
-connection = pika.BlockingConnection(pika.ConnectionParameters(host=settings.MESSAGE_QUEUE_HOST))
-channel = connection.channel()
+credentials = pika.PlainCredentials(settings.MESSAGE_QUEUE_USER, settings.MESSAGE_QUEUE_PASSWORD)
+connection = pika.BlockingConnection(pika.ConnectionParameters(settings.MESSAGE_QUEUE_HOST, settings.MESSAGE_QUEUE_PORT,'/', credentials))
 
+channel = connection.channel()
 channel.queue_declare(queue=settings.MESSAGE_QUEUE_NAME)
 
 def process_running(task, strategy):
