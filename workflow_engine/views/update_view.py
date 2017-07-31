@@ -32,6 +32,7 @@ def update_record(request):
                 executable.description = data['description']
                 executable.static_arguments = shared.to_none(data['static_arguments'])
                 executable.executable_path = data['executable_path']
+                executable.pbs_executable_path = data['pbs_executable_path']
                 executable.pbs_processor = data['pbs_processor']
                 executable.pbs_queue = data['pbs_queue']
                 executable.pbs_walltime = data['pbs_walltime']

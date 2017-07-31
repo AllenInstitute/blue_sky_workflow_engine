@@ -1,6 +1,6 @@
 from workflow_engine.models import *
 from execution_runner import run_celery_task
-from pbs_runner import cancel_task
+from execution_runner import cancel_task
 from workflow_engine.strategies import base_strategy
 from development.models import *
 
@@ -42,7 +42,10 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 		task.save()
 
 		executable_elements = []
-		executable_elements.append(executable.executable_path)
+		if task.pbs_task() and executable.pbs_executable_path != None:
+			executable_elements.append(executable.pbs_executable_path)
+		else:
+			executable_elements.append(executable.executable_path)
 
 		if arguments != None:
 			executable_elements.append(arguments)
@@ -135,7 +138,7 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 
 	def kill_pbs_task(self, task):
 		if task.pbs_id != None:
-			cancel_task.delay(task.pbs_id)
+			cancel_task.delay(True, task.pbs_id)
 
 	#Do not override
 	def run_asynchronous_task(self, task):

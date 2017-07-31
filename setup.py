@@ -9,7 +9,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='django-blue-sky-workflow-engine',
-    version='0.78',
+    version='0.86',
     packages=find_packages(),
     include_package_data=True,
     license='BSD License',  # example license

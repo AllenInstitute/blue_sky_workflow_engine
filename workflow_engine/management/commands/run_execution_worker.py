@@ -9,7 +9,7 @@ PBS_ID = 2
 connection = pika.BlockingConnection(pika.ConnectionParameters(host=settings.MESSAGE_QUEUE_HOST))
 channel = connection.channel()
 
-channel.queue_declare(queue='tasks')
+channel.queue_declare(queue=settings.MESSAGE_QUEUE_NAME)
 
 def process_running(task, strategy):
 	strategy.running_task(task)
@@ -45,7 +45,7 @@ def callback(ch, method, properties, body):
 	except Exception as e:
 		print('Something went wrong: ' + str(e))
 
-channel.basic_consume(callback,queue='tasks',no_ack=True)
+channel.basic_consume(callback,queue=settings.MESSAGE_QUEUE_NAME,no_ack=True)
 
 print(' [*] Waiting for messages. To exit press CTRL+C')
 channel.start_consuming()
