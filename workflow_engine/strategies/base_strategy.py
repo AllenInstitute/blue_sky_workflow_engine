@@ -81,6 +81,14 @@ class BaseStrategy(object):
 		return storage_directory
 
 	#Do not override
+	def check_if_manual_jobs_finished(self):
+		tasks = Task.objects.filter(run_state=RunState.get_running_state(), archived=False)
+		for task in tasks:
+			strategy = task.get_strategy()
+			if strategy.is_manual_strategy():
+				strategy.check_if_task_finished(task)
+
+	#Do not override
 	def check_key(self, dictionary, key):
 	    if key not in dictionary:
 	      raise Exception("expected '" + str(key) + "' key in results")

@@ -30,7 +30,6 @@ class Command(BaseCommand):
     def write_strategy_file(self, filename, class_name):
         with open(filename, 'w') as strategy_file:
             strategy_file.write('from workflow_engine.strategies import manual_strategy\n')
-            strategy_file.write('from workflow_engine.strategies import manual_strategy\n')
             strategy_file.write('from workflow_engine.models import *\n')
             strategy_file.write('from development.models import *\n\n')
             strategy_file.write('class ' + class_name + '(manual_strategy.ManualStrategy):\n\n')
