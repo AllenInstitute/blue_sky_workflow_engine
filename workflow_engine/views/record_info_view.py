@@ -175,14 +175,10 @@ def get_search_data(request):
                 names[executable.name] = executable.name
                 pbs_queues[executable.pbs_queue] = executable.pbs_queue
                 ids[executable.id] = executable.id
-                pbs_processors[executable.pbs_processor] = executable.pbs_processor
-                pbs_walltimes[executable.pbs_walltime] = executable.pbs_walltime
 
             payload['ids'] = ids
             payload['names'] = names
             payload['pbs_queues'] = pbs_queues
-            payload['pbs_processors'] = pbs_processors
-            payload['pbs_walltimes'] = pbs_walltimes
         elif(search_type == 'job_queue'):
             job_queues = JobQueue.objects.all()
             ids = {}

@@ -292,8 +292,6 @@ function BaseWorkflow(milliseconds_between_refresh){
         html+= add_select_dropdown_html(ids, 'Id', 'executable_ids', selected);
         html+= add_select_dropdown_html(names, 'Name', 'names', selected);
         html+= add_select_dropdown_html(pbs_queues, 'Pbs Queue', 'pbs_queues', selected);
-        html+= add_select_dropdown_html(pbs_processors, 'Pbs Processor', 'pbs_processors', selected);
-        html+= add_select_dropdown_html(pbs_walltimes, 'Pbs Walltime', 'pbs_walltimes', selected);
 
         html+= '</table></div>';
 
@@ -302,8 +300,6 @@ function BaseWorkflow(milliseconds_between_refresh){
         multiselect_init('executable_ids');
         multiselect_init('names');
         multiselect_init('pbs_queues');
-        multiselect_init('pbs_processors');
-        multiselect_init('pbs_walltimes');
     }
 
     function set_search_html(dialog, type){
