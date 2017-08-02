@@ -419,15 +419,15 @@ def get_node_info(request):
             payload['success_count'] = success_count
             payload['process_killed'] = process_killed
 
-            payload['number_of_jobs_link'] = 'jobs?workflow_node_ids=' + workflow_node_id
-            payload['pending_link'] = 'jobs?run_state_ids=' + str(pending_state.id) + '&workflow_node_ids=' + workflow_node_id
-            payload['queued_link'] = 'jobs?run_state_ids=' + str(queued_state.id) + '&workflow_node_ids=' + workflow_node_id
-            payload['running_link'] = 'jobs?run_state_ids=' + str(running_state.id) + '&workflow_node_ids=' + workflow_node_id
-            payload['finished_execution_link'] = 'jobs?run_state_ids=' + str(finished_execution_state.id) + '&workflow_node_ids=' + workflow_node_id
-            payload['failed_execution_link'] = 'jobs?run_state_ids=' + str(failed_execution_state.id) + '&workflow_node_ids=' + workflow_node_id
-            payload['failed_link'] = 'jobs?run_state_ids=' + str(failed_state.id) + '&workflow_node_ids=' + workflow_node_id
-            payload['success_count_link'] = 'jobs?run_state_ids=' + str(success_state.id) + '&workflow_node_ids=' + workflow_node_id
-            payload['process_killed_link'] = 'jobs?run_state_ids=' + str(process_killed_state.id) + '&workflow_node_ids=' + workflow_node_id
+            payload['number_of_jobs_link'] = 'jobs/1/?workflow_node_ids=' + workflow_node_id
+            payload['pending_link'] = 'jobs/1/?run_state_ids=' + str(pending_state.id) + '&workflow_node_ids=' + workflow_node_id
+            payload['queued_link'] = 'jobs/1/?run_state_ids=' + str(queued_state.id) + '&workflow_node_ids=' + workflow_node_id
+            payload['running_link'] = 'jobs/1/?run_state_ids=' + str(running_state.id) + '&workflow_node_ids=' + workflow_node_id
+            payload['finished_execution_link'] = 'jobs/1/?run_state_ids=' + str(finished_execution_state.id) + '&workflow_node_ids=' + workflow_node_id
+            payload['failed_execution_link'] = 'jobs/1/?run_state_ids=' + str(failed_execution_state.id) + '&workflow_node_ids=' + workflow_node_id
+            payload['failed_link'] = 'jobs/1/?run_state_ids=' + str(failed_state.id) + '&workflow_node_ids=' + workflow_node_id
+            payload['success_count_link'] = 'jobs/1/?run_state_ids=' + str(success_state.id) + '&workflow_node_ids=' + workflow_node_id
+            payload['process_killed_link'] = 'jobs/1/?run_state_ids=' + str(process_killed_state.id) + '&workflow_node_ids=' + workflow_node_id
 
     except ObjectDoesNotExist as e:
         success = False
