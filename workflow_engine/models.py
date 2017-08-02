@@ -877,10 +877,10 @@ class Task(models.Model):
 		commands.append('#PBS -N ' + self.get_task_name())
 		commands.append('#PBS -V') # Import system variables
 		commands.append('#PBS -r n') # Not re-runable
-		commands.append('#PBS -W umask=' + self.get_umask()) # file creation permissions
+		# commands.append('#PBS -W umask=' + self.get_umask()) # file creation permissions
 		commands.append('#PBS -j oe') # Join error and output streams
 		commands.append('#PBS -o ' + self.log_file)
-		commands.append('umask ' + self.get_umask()) # Shell command to open umask
+		# commands.append('umask ' + self.get_umask()) # Shell command to open umask
 		commands.append(self.full_executable)
 		commands.append('rtn_code=$?')
 		commands.append('/shared/utils.x86_64/python-2.7/bin/python ' + settings.PBS_FINISH_PATH + ' $rtn_code ' + str(self.id))
