@@ -186,7 +186,8 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 
 		#create directory if needed
 		if not os.path.exists(storage_directory):
-			os.makedirs(storage_directory)  
+			os.makedirs(storage_directory) 
+			subprocess.call(['chmod', '0777', storage_directory]) 
 
 		return storage_directory
 
@@ -201,7 +202,8 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 
 		#create directory if needed
 		if not os.path.exists(storage_directory):
-			os.makedirs(storage_directory)  
+			os.makedirs(storage_directory) 
+			subprocess.call(['chmod', '0777', storage_directory]) 
 
 		return storage_directory
 

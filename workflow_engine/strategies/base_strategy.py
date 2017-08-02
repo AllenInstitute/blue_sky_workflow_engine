@@ -1,5 +1,6 @@
 from workflow_engine.models import *
 from django.conf import settings
+import subprocess
 
 import os
 
@@ -77,6 +78,7 @@ class BaseStrategy(object):
 		#create directory if needed
 		if not os.path.exists(storage_directory):
 			os.makedirs(storage_directory)  
+			subprocess.call(['chmod', '0777', storage_directory])
 
 		return storage_directory
 
@@ -99,7 +101,9 @@ class BaseStrategy(object):
 
 		#create directory if needed
 		if not os.path.exists(storage_directory):
-			os.makedirs(storage_directory)  
+			os.makedirs(storage_directory)
+			subprocess.call(['chmod', '0777', storage_directory])
+
 
 		return storage_directory
 
