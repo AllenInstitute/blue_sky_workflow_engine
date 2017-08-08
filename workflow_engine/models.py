@@ -376,8 +376,8 @@ class Job(models.Model):
 		self.save()
 		self.run_jobs()
 
-	def set_running_state_from_queued(self):
-		if(self.run_state.name == 'QUEUED'):
+	def set_running_state_from_queued_or_pending(self):
+		if(self.run_state.name == 'QUEUED' or self.run_state.name == 'PENDING'):
 			self.set_running_state()
 
 	def set_running_state(self):

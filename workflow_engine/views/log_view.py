@@ -148,8 +148,9 @@ def get_task_log_holder(task_id, types, context):
         log_holder.job_queue_id = job_queue.id
 
         executable = task.get_executable()
-        log_holder.executable_id = executable.id
-        log_holder.executable_name = executable.name
+        if executable != None:
+            log_holder.executable_id = executable.id
+            log_holder.executable_name = executable.name
 
         log_holder.error_message = FileHolder.add_color_highlighting(task.error_message)
 

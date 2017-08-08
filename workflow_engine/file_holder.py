@@ -53,7 +53,7 @@ class FileHolder(object):
 
 	def check_out_of_date(self, start_run_time, filename):
 		out_of_date = False
-		if self.is_valid != None:
+		if self.is_valid and start_run_time != None:
 			local = pytz.timezone(settings.TIME_ZONE)
 			naive = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
 			local_dt = local.localize(naive, is_dst=None)
