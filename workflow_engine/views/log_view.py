@@ -128,20 +128,20 @@ def get_task_log_holder(task_id, types, context):
             log_holder.full_executable = task.full_executable
 
         if include_log_file:
-            log_holder.add_file_holder(FileHolder(task.log_file, 'Log'))
+            log_holder.add_file_holder(FileHolder(task.log_file, 'Log', task.start_run_time))
 
         if include_input_file:
-            log_holder.add_file_holder(FileHolder(task.input_file, 'Input'))
+            log_holder.add_file_holder(FileHolder(task.input_file, 'Input', task.start_run_time))
 
         if include_output_file:
-            log_holder.add_file_holder(FileHolder(task.output_file, 'Output'))
+            log_holder.add_file_holder(FileHolder(task.output_file, 'Output', task.start_run_time))
 
         if include_executable_file:
             executable_file = get_executable_file(task.full_executable)
-            log_holder.add_file_holder(FileHolder(executable_file, 'Executable'))
+            log_holder.add_file_holder(FileHolder(executable_file, 'Executable', task.start_run_time))
 
         if include_pbs_file:
-            log_holder.add_file_holder(FileHolder(task.pbs_file, 'Pbs'))
+            log_holder.add_file_holder(FileHolder(task.pbs_file, 'Pbs', task.start_run_time))
 
         job_queue = task.get_job_queue()
         log_holder.job_queue_name = job_queue.name
