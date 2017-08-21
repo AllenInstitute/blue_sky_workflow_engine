@@ -176,7 +176,7 @@ def build_workflow_children(node):
     result['innerHTML'] = get_node_content(node)
     result['connectors'] = child_connector()
 
-    child_nodes = WorkflowNode.objects.filter(parent_id=node.id)
+    child_nodes = node.get_children()
 
     children = []
     for child_node in child_nodes:
@@ -192,7 +192,7 @@ def build_node_structure(node):
     node_structure['innerHTML'] = get_node_content(node)
     node_structure['connectors'] = child_connector()
 
-    child_nodes = WorkflowNode.objects.filter(parent_id=node.id)
+    child_nodes = node.get_children()
 
     children = []
     for child_node in child_nodes:
