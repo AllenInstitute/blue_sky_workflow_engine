@@ -60,6 +60,10 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 
 		return (' '.join(executable_elements))
 
+	#override if needed
+	def skip_execution(self, enqueued_object):
+		return False
+
 	#####everthing bellow this should not be overriden#####
 
 	#Do not override
@@ -146,14 +150,19 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 	def run_asynchronous_task(self, task):
 		task.clear_error_message()
 
-		if task.pbs_task():
-			pbs_file = self.get_pbs_file(task)
-			task.create_pbs_file(pbs_file)
-			executable = 'qsub ' + pbs_file
-			run_celery_task.delay(executable, task.id, task.log_file, True)
+		if self.skip_execution(task.get_enqueued_object()):
+			self.running_task(task)
+			self.finish_task(task)
 		else:
-			executable = self.add_write_to_log_command(task.full_executable, task.log_file)
-			run_celery_task.delay(executable, task.id, task.log_file, False)
+
+			if task.pbs_task():
+				pbs_file = self.get_pbs_file(task)
+				task.create_pbs_file(pbs_file)
+				executable = 'qsub ' + pbs_file
+				run_celery_task.delay(executable, task.id, task.log_file, True)
+			else:
+				executable = self.add_write_to_log_command(task.full_executable, task.log_file)
+				run_celery_task.delay(executable, task.id, task.log_file, False)
 
 	#this method creates the input file
 	#Do not override

@@ -530,32 +530,32 @@ class Job(models.Model):
 			strategy = child.get_strategy()
 			enqueued_objects = strategy.get_objects_for_queue(self)
 			for enqueued_object in enqueued_objects:
+				if strategy.can_transition(enqueued_object):
+					#try to get the job
+					jobs = Job.objects.filter(enqueued_object_id=enqueued_object.id, workflow_node_id=child.id, archived=False)
 
-				#try to get the job
-				jobs = Job.objects.filter(enqueued_object_id=enqueued_object.id, workflow_node_id=child.id, archived=False)
+					if len(jobs) > ZERO:
+						index = ZERO
+						for job in jobs:
+							#reset job if needed
+							if index == ZERO:
+								job.run_state = RunState.get_pending_state()
+								job.priority = child.priority
+								job.archived = False
+								job.save()
+								job.set_for_run()
+								
+							#should not have more than one job but just in case
+							else:
+								job.archived = True
+								job.save()
 
-				if len(jobs) > ZERO:
-					index = ZERO
-					for job in jobs:
-						#reset job if needed
-						if index == ZERO:
-							job.run_state = RunState.get_pending_state()
-							job.priority = child.priority
-							job.archived = False
-							job.save()
-							job.set_for_run()
-							
-						#should not have more than one job but just in case
-						else:
-							job.archived = True
-							job.save()
-
-						index+=ONE
-				else:
-					#create the job if needed
-					job = Job(enqueued_object_id=enqueued_object.id, workflow_node=child, run_state=RunState.get_pending_state(),priority=child.priority)
-					job.save()
-					job.set_for_run()
+							index+=ONE
+					else:
+						#create the job if needed
+						job = Job(enqueued_object_id=enqueued_object.id, workflow_node=child, run_state=RunState.get_pending_state(),priority=child.priority)
+						job.save()
+						job.set_for_run()
 
 
 	#check if all tasks have finished

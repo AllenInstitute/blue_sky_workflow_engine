@@ -54,6 +54,10 @@ class BaseStrategy(object):
 
 		return objects
 
+	#override if needed
+	def can_transition(self, enqueued_object):
+		return True
+
 	#####everthing bellow this should not be overriden#####
 	#Do not override
 	def get_base_storage_directory(self):

@@ -89,7 +89,14 @@ class Command(BaseCommand):
             strategy_file.write('  #called when the task starts running\n')
             strategy_file.write('  #def on_running(self, task):\n')
             strategy_file.write('  #  pass\n\n')
-            
+
+            strategy_file.write('  #override if needed\n')
+            strategy_file.write('  #def can_transition(self, enqueued_object):\n')
+            strategy_file.write('  #  return True\n') 
+
+            strategy_file.write('  #override if needed\n')
+            strategy_file.write('  #def skip_execution(self, enqueued_object):\n')
+            strategy_file.write('  #  return False\n') 
 
     def handle(self, *args, **options):
         name = options['name']
