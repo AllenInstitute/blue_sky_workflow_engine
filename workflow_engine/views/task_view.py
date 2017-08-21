@@ -140,7 +140,7 @@ def queue_task(request):
                 task.reset_retry_count()
 
                 #this will be failed if task fails on prep
-                if task.run_state.name != 'FAILED':
+                if not task.job.has_failed_tasks():
                     task.job.set_pending_state()
         else:
             success = False

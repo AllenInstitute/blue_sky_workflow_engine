@@ -92,7 +92,9 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 			task.set_start_run_time()
 			task.set_running_state()
 			job = task.job
-			job.set_running_state_from_queued_or_pending()
+			if not job.has_failed_tasks():
+				job.set_running_state()
+				
 		except Exception as e:
 			task.set_error_message(str(e) + ' - ' + str(traceback.format_exc()))
 			self.fail_task(task)

@@ -358,6 +358,15 @@ class Job(models.Model):
 		self.error_message = None
 		self.save()
 
+	def has_failed_tasks(self):
+		has_failed = False
+		tasks = self.get_tasks()
+		for task in tasks:
+			if task.in_failed_state():
+				has_failed = True
+
+		return has_failed
+
 	def can_rerun(self):
 		run_state_name = self.run_state.name
 		return (run_state_name == 'PENDING' or run_state_name == 'FAILED' or run_state_name == 'SUCCESS' or run_state_name == 'PROCESS_KILLED' or run_state_name == 'FAILED_EXECUTION')
@@ -770,6 +779,10 @@ class Task(models.Model):
 		self.end_run_time = timezone.now()
 		self.duration = str(self.end_run_time - self.start_run_time)
 		self.save()
+
+	def in_failed_state(self):
+		run_state_name = self.run_state.name
+		return (run_state_name == 'FAILED' or run_state_name == 'PROCESS_KILLED' or run_state_name == 'FAILED_EXECUTION')
 
 	def can_rerun(self):
 		run_state_name = self.run_state.name
