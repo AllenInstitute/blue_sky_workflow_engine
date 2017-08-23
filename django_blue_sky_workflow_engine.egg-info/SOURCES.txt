@@ -9,6 +9,7 @@ django_blue_sky_workflow_engine.egg-info/top_level.txt
 workflow_engine/__init__.py
 workflow_engine/admin.py
 workflow_engine/apps.py
+workflow_engine/blue_sky_state_machine.py
 workflow_engine/celeryconfig.py
 workflow_engine/file_holder.py
 workflow_engine/log_holder.py
