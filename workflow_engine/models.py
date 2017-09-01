@@ -30,6 +30,7 @@ class Executable(models.Model):
 	pbs_processor = models.CharField(max_length=255, default='vmem=6g')
 	pbs_walltime = models.CharField(max_length=255, default='walltime=5:00:00')
 	pbs_queue = models.CharField(max_length=255, default='lims')
+	version = models.CharField(max_length=255, default='0.1')
 
 	def get_created_at(self):
 		return timezone.localtime(self.created_at).strftime('%m/%d/%Y %I:%M:%S')
@@ -307,6 +308,7 @@ class Job(models.Model):
 	updated_at = models.DateTimeField(auto_now=True)
 	priority = models.IntegerField(default=50)
 	archived = models.NullBooleanField(default=False)
+	tags = models.CharField(max_length=255, null=True)
 
 	def archive_record(self):
 		for task in self.get_tasks():
@@ -707,6 +709,8 @@ class Task(models.Model):
 	updated_at = models.DateTimeField(auto_now=True)
 	pbs_id = models.CharField(max_length=255, null=True)
 	retry_count = models.IntegerField(default=0)
+	tags = models.CharField(max_length=255, null=True)
+
 
 	def __str__(self):
 		return 'task: ' + str(self.id)

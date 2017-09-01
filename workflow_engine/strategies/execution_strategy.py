@@ -3,6 +3,7 @@ from execution_runner import run_celery_task
 from execution_runner import cancel_task
 from workflow_engine.strategies import base_strategy
 from development.models import *
+from django.conf import settings
 
 import os
 import subprocess
@@ -39,6 +40,7 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 
 		task.input_file = input_file
 		task.output_file = output_file
+		task.tags = executable.version
 		task.save()
 
 		executable_elements = []
@@ -159,11 +161,17 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 				pbs_file = self.get_pbs_file(task)
 				task.create_pbs_file(pbs_file)
 				executable = 'qsub ' + pbs_file
-				run_celery_task.delay(executable, task.id, task.log_file, True)
+				if hasattr(settings, 'CELERY_MESSAGE_QUEUE_NAME'):
+					run_celery_task.apply_async(args=[executable, task.id, task.log_file, True], queue = settings.CELERY_MESSAGE_QUEUE_NAME)
+				else:
+					run_celery_task.delay(executable, task.id, task.log_file, True)
 			else:
 				executable = self.add_write_to_log_command(task.full_executable, task.log_file)
-				run_celery_task.delay(executable, task.id, task.log_file, False)
-
+				if hasattr(settings, 'CELERY_MESSAGE_QUEUE_NAME'):
+					run_celery_task.apply_async(args=[executable, task.id, task.log_file, False], queue = settings.CELERY_MESSAGE_QUEUE_NAME)
+				else:
+					run_celery_task.delay(executable, task.id, task.log_file, False)
+				
 	#this method creates the input file
 	#Do not override
 	def create_input_file(self, input_file, enqueued_object, storage_directory, task):
