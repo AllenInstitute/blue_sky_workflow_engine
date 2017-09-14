@@ -7,23 +7,31 @@ with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
+with open('requirements.txt', 'r') as f:
+    required = f.read().splitlines()
+
+with open('test_requirements.txt', 'r') as f:
+    test_required = f.read().splitlines()
+
 setup(
     name='django-blue-sky-workflow-engine',
     version='0.120',
     packages=find_packages(),
     include_package_data=True,
-    license='BSD License',  # example license
+    license='Allen Institute Software License',
     description='Blue Sky Workflow Engine',
     long_description=README,
     url='https://github.com/AllenInstitute',
     author='Nathan Sjoquist',
     author_email='nathans@alleninstitute.org',
+    install_requires = required,
+    tests_require=test_required,
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',
         'Framework :: Django :: 1.11',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: BSD License',  # example license
+        'License :: Allen Institute Software License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
