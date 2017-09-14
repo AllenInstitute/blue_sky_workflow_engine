@@ -1,1 +1,8 @@
+.eggs
+.settings
+.project
+.pydevproject
+.coverage
+.cache
 *.pyc
+doc/
