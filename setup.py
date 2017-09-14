@@ -26,6 +26,9 @@ setup(
     author_email='nathans@alleninstitute.org',
     install_requires = required,
     tests_require=test_required,
+    setup_requires=[
+        'flake8'
+    ],
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',
