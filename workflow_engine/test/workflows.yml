@@ -1,0 +1,158 @@
+lens_correction:
+    states:
+        - key: "ingest"
+          label: "Ingest Reference Set"
+        - key: "generate"
+          label: "generate_lens_correction_transform"
+        - key: "move"
+          label: "move_reverence_set_files_to_long_term_storage"
+    graph:
+        - [ "start", [ "ingest" ] ]
+        - [ "ingest", [ "generate" ] ]
+        - [ "generate", [ "move" ] ]
+        - [ "move", [ "end" ] ]
+em_2d_montage:
+    states:
+        - key: "ingest_generate"
+          label: "Ingest / Generate Render Stack"
+        - key: "mic_task_builder"
+          label: "Multiplicative Intensity Task Builder"
+        - key: "mic_tasks"
+          parallel: true
+          label: "Multiplicative Intensity Correction Tasks"
+        - key: "generate_mipmaps"
+          label: "Generate MipMaps / Write to SAN"
+        - key: "long_term_storage"
+          label: "Move Raw Montage Set Files to Long Term Storage"
+        - key: "lens_correction"
+          label: "Apply Lens Correction"
+        - key: "point_match"
+          label: "2D Montage Point Match"
+        - key: "solver"
+          label: "2D Montage Solver"
+        - key: "manual_qc"
+          label: "Manual QC / High Degree Polynomial or Point Match Regeneration"
+          manual: true
+        - key: "alignment"
+          label: "Alignment"
+          workflow: true
+    graph:
+        - [ "start", [ "ingest_generate" ] ]
+        - [ "ingest_generate", [ "mic_task_builder" ] ]
+        - [ "mic_task_builder", [ "mic_tasks" ] ]
+        - [ "mic_tasks", [ "generate_mipmaps" ] ]
+        - [ "generate_mipmaps", [ "long_term_storage", "lens_correction" ] ]
+        - [ "lens_correction", [ "point_match" ] ]
+        - [ "point_match", [ "solver" ] ]
+        - [ "solver", [ "manual_qc" ] ]
+        - [ "manual_qc", [ "alignment" ] ]
+at_2d_montage:
+    states:
+        - key: "ingest"
+          label: "Ingest"
+        - key: "mic_task_builder"
+          label: "Multiplicative Intensity Task Builder"
+        - key: "mic_tasks"
+          parallel: true
+          label: "Multiplicative Intensity Correction Tasks"
+        - key: "lens_correction"
+          label: "Assign Lens Correction"
+        - key: "generate_mipmaps"
+          label: "Generate MipMaps / Write to SAN"
+        - key: "long_term_storage"
+          label: "Transfer Raw Montage Set Files to Long Term Storage"
+        - key: "cross_correlation"
+          label: "Cross Correlation"
+        - key: "montage_qc"
+          label: "AT 2D Montage QC"
+        - key: "drop_fails"
+          label: "Drop Failing Tiles / No Action if Passes QC"
+        - key: "stitch"
+          label: "Stitch Synthetic Point Matches"
+        - key: "registration"
+          label: "Registration / No Action w/o Ref Staining Session"
+        - key: "assign_z"
+          label: "Assign Z"
+          manual: true
+        - key: "alignment"
+          label: "Alignment"
+          workflow: true
+    graph:
+        - [ "start", [ "ingest" ] ]
+        - [ "ingest", [ "mic_task_builder" ] ]
+        - [ "mic_task_builder", [ "mic_tasks" ] ]
+        - [ "mic_tasks", [ "lens_correction" ] ]
+        - [ "lens_correction", [ "generate_mipmaps" ] ]
+        - [ "generate_mipmaps", [ "long_term_storage" ] ]
+        - [ "long_term_storage", [ "cross_correlation" ] ]
+        - [ "cross_correlation", [ "montage_qc" ] ]
+        - [ "montage_qc", [ "drop_fails" ] ]
+        - [ "drop_fails", [ "point_match" ] ]
+        - [ "point_match", [ "registration" ] ]
+        - [ "registration", [ "assign_z" ] ]
+        - [ "assign_z", [ "alignment" ] ]
+alignment:
+    states:
+        - key: "define_chunks"
+          label: "Assign Montage Set to Chunk(s)"
+        - key: "downsample_section_image"
+          label: "Downsample Section Image"
+        - key: "rough_point_generation"
+          label: "Point Match Generation"
+        - key: "rough_solver"
+          label: "Rough Solver"
+        - key: "rough_qc"
+          label: "Rough Alignment QC"
+          manual: true
+        - key: "rough_align_application"
+          label: "Rough Alignment Application"
+        - key: "fine_point_generation"
+          label: "Point Match Generation"
+        - key: "fine_qc"
+          label: "Point Match QC"
+        - key: "consolidate"
+          label: "Consolidate Transformations in the Stack"
+        - key: "fine_solver"
+          label: "Fine Solver"
+        - key: "fine_qc"
+          label: "Fine Alignment QC"
+        - key: "stack_splitter"
+          label: "Stack Splitter"
+        - key: "reversion"
+          label: "Stack Split Reversion"
+        - key: "fusion"
+          label: "Fusion"
+          workflow: true
+    graph:
+        - [ "start", [ "define_chunks" ] ]
+        - [ "define_chunks", [ "downsample_section_image", "end" ] ]
+        - [ "downsample_section_image", [ "rough_point_generation" ] ]
+        - [ "rough_point_generation", [ "rough_solver" ] ]
+        - [ "rough_solver", [ "rough_qc" ] ]
+        - [ "rough_qc", [ "rough_align_application" ] ]
+        - [ "rough_align_application", [ "fine_point_generation" ] ]
+        - [ "fine_point_generation", [ "fine_qc" ] ]
+        - [ "fine_qc", [ "stack_splitter" ] ]
+        - [ "stack_splitter", [ "reversion" ] ]
+        - [ "reversion", [ "fusion" ] ]
+fusion:
+    states:
+        - key: "ready"
+          label: "Adjacent Chunk Ready for Fusing?"
+        - key: "register"
+          label: "Register Adjacent Chunks"
+        - key: "manual_qc"
+          label: "Manual QC"
+          manual: true
+        - key: "manual_global_fusion"
+          label: "Manual Global Fusion"
+          manual: true
+        - key: "render_volume"
+          label: "Render Volume"
+          manual: true
+    graph:
+        - [ "start", [ "ready" ] ]
+        - [ "ready", [ "register", "end" ] ]
+        - [ "register", [ "manual_qc" ] ]
+        - [ "manual_qc", [ "manual_global_fusion" ] ]
+        - [ "manual_global_fusion", [ "render_volume" ] ]

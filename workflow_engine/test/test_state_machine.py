@@ -40,7 +40,27 @@ from workflow_engine.blue_sky_state_machine \
 
 @pytest.fixture
 def state_machine():
-    return BlueSkyStateMachine
+    return BlueSkyStateMachine()
+
 
 def test_state_machine(state_machine):
     assert state_machine is not None
+
+
+def test_add_transition(state_machine):
+    test_add_transition.PENDING = 'pending'
+    test_add_transition.PROCESSING = 'processing'
+    test_add_transition.DONE = 'done'
+    test_add_transition.DONE = 'failed'
+    state_machine.add_transition(test_add_transition.PENDING,
+                                 test_add_transition.PROCESSING)
+    state_machine.add_transition(test_add_transition.PENDING,
+                                 test_add_transition.FAILED)
+    state_machine.add_transition(test_add_transition.PROCESSING,
+                                 test_add_transition.DONE)
+    state_machine.add_transition(test_add_transition.PROCESSING,
+                                 test_add_transition.FAILED)
+    state_machine.add_transition(test_add_transition.PROCESSING,
+                                 test_add_transition.FAILED)
+
+
