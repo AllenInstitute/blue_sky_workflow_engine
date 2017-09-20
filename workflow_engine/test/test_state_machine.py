@@ -51,7 +51,7 @@ def test_add_transition(state_machine):
     test_add_transition.PENDING = 'pending'
     test_add_transition.PROCESSING = 'processing'
     test_add_transition.DONE = 'done'
-    test_add_transition.DONE = 'failed'
+    test_add_transition.FAILED = 'failed'
     state_machine.add_transition(test_add_transition.PENDING,
                                  test_add_transition.PROCESSING)
     state_machine.add_transition(test_add_transition.PENDING,
