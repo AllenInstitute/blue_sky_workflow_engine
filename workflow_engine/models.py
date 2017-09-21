@@ -67,6 +67,9 @@ class Executable(models.Model):
     pbs_queue = models.CharField(max_length=255, default='lims')
     version = models.CharField(max_length=255, default='0.1')
 
+    def __str__(self):
+        return self.name
+
     def get_created_at(self):
         return timezone.localtime(self.created_at).strftime('%m/%d/%Y %I:%M:%S')
 
@@ -90,6 +93,9 @@ class JobQueue(models.Model):
     executable = models.ForeignKey(Executable, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
 
     def get_strategy(self):
         return eval(self.job_strategy_class)()
@@ -160,6 +166,9 @@ class Workflow(models.Model):
     use_pbs = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
 
     def get_head_workfow_nodes(self):
         return WorkflowNode.objects.filter(is_head=True, workflow=self.id)
@@ -274,6 +283,9 @@ class WorkflowNode(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     overwrite_previous_job = models.BooleanField(default=True)
     max_retries = models.IntegerField(default=3)
+
+    def __str__(self):
+        return self.get_node_name()
 
     def get_node_name(self):
         return self.job_queue.name + '(' + str(self.get_total_number_of_jobs()) + ') ' + str(self.get_number_of_queued_and_running_jobs()) + ' / '+ str(self.batch_size)
@@ -616,6 +628,9 @@ class Datafix(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return self.name
+
     @staticmethod
     def get_extension(filename):
         try:
@@ -725,7 +740,6 @@ class Datafix(models.Model):
             datafix_file.write('populate_database()')
         
 class Task(models.Model):
-
     enqueued_task_object_id = models.IntegerField(null=True)
     enqueued_task_object_class = models.CharField(max_length=255, null=True)
     job = models.ForeignKey(Job)
@@ -745,7 +759,6 @@ class Task(models.Model):
     pbs_id = models.CharField(max_length=255, null=True)
     retry_count = models.IntegerField(default=0)
     tags = models.CharField(max_length=255, null=True)
-
 
     def __str__(self):
         return 'task: ' + str(self.id)
@@ -980,6 +993,9 @@ class FileRecord(models.Model):
     task = models.ForeignKey(Task, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.get_full_name() 
 
     def get_full_name(self):
         return os.path.join(self.storage_directory, self.filename)
