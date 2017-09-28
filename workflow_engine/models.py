@@ -34,8 +34,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 from django.db import models
-from development.strategies import *
-import development
+#from development.strategies import *
+#import development
 import workflow_engine
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -48,11 +48,14 @@ from celery.task.control import revoke
 from django.conf import settings
 import sys
 import re
+import logging
 
 ZERO = 0
 ONE = 1
 SECONDS_IN_MIN = 60
 TWO = 2
+
+_model_logger = logging.getLogger('workflow_engine.models')
 
 class Executable(models.Model):
     name = models.CharField(max_length=255, unique=True)
@@ -341,7 +344,7 @@ class WorkflowNode(models.Model):
                             job.run()
 
         except Exception as e:
-            print('Semothing went wrong running jobs:  ' + str(e))
+            _model_logger.error('Something went wrong running jobs:  ' + str(e))
 
 class Job(models.Model):
     enqueued_object_id = models.IntegerField()
@@ -643,25 +646,25 @@ class Datafix(models.Model):
     def get_workflow_path():
         return os.path.dirname(workflow_engine.__file__)
 
-    def get_development_path():
-        return os.path.dirname(development.__file__)
+    def get_module_path(module):
+        return os.path.dirname(module.__file__)
 
     @staticmethod
-    def get_development_strategy_path():
-        return os.path.join(Datafix.get_development_path(),'strategies/')
+    def get_module_strategy_path(module):
+        return os.path.join(Datafix.get_module_path(module),'strategies/')
 
     @staticmethod
     def get_workflow_datafix_path():
         return os.path.join(Datafix.get_workflow_path(),'datafixes/')
 
     @staticmethod
-    def get_development_datafix_path():
-        return os.path.join(Datafix.get_development_path(),'datafixes/')
+    def get_module_datafix_path(module):
+        return os.path.join(Datafix.get_module_path(module),'datafixes/')
 
     @staticmethod
-    def create_datafix_records_if_needed():
+    def create_datafix_records_if_needed(module):
         workflow_datafix_dir = Datafix.get_workflow_datafix_path()
-        dev_datafix_dir = Datafix.get_development_datafix_path()
+        dev_datafix_dir = Datafix.get_module_datafix_path(module)
 
         files = os.listdir(workflow_datafix_dir) + os.listdir(dev_datafix_dir)
 
@@ -675,9 +678,9 @@ class Datafix(models.Model):
                     Datafix.create_datafix(name)
 
     @staticmethod
-    def create_datafix(name):
+    def create_datafix(name, module):
         workflow_datafix_dir = Datafix.get_workflow_datafix_path()
-        datafix_dir = Datafix.get_development_datafix_path()
+        datafix_dir = Datafix.get_module_datafix_path(module)
 
         file_name = datafix_dir + name + '.py'
         workflow_file_name = workflow_datafix_dir + name + '.py'
@@ -693,10 +696,10 @@ class Datafix(models.Model):
         return datafix
 
     def run(self):
-        print('running datafix: ' + self.name)
+        _model_logger.info('running datafix: ' + self.name)
 
         workflow_datafix_dir =  Datafix.get_workflow_datafix_path()
-        datafix_dir = Datafix.get_development_datafix_path()
+        datafix_dir = Datafix.get_module_datafix_path(module)
 
         file_name = datafix_dir + self.name + '.py'
         workflow_file_name = workflow_datafix_dir + self.name + '.py'
@@ -715,12 +718,13 @@ class Datafix(models.Model):
         with open(datafix_file,"r") as code:
             exec(code.read())
 
-    def create_file(self, use_workflow_engine):
+    # TODO: deprecate - hardcoded development
+    def create_file(self, use_workflow_engine, module):
 
         if use_workflow_engine:
             datafix_dir = Datafix.get_workflow_datafix_path()
         else:
-            datafix_dir = Datafix.get_development_datafix_path()
+            datafix_dir = Datafix.get_module_datafix_path(module)
 
         if not os.path.exists(datafix_dir):
             os.makedirs(datafix_dir)
@@ -731,7 +735,7 @@ class Datafix(models.Model):
             datafix_file.write('#!/usr/bin/python\n')
             datafix_file.write('from django.db import transaction\n')
             datafix_file.write('from workflow_engine.models import *\n')
-            datafix_file.write('from development.models import *\n\n')
+            datafix_file.write('from ' + module.__name__ + '.models import *\n\n')
             datafix_file.write('@transaction.atomic\n')
             datafix_file.write('def populate_database():\n')
             datafix_file.write('    #put your code here\n')

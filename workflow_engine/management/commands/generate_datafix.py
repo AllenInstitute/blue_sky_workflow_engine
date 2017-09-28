@@ -65,5 +65,3 @@ class Command(BaseCommand):
         datafix = Datafix(name=full_name, timestamp=timestamp)
         datafix.save()
         datafix.create_file(use_workflow_engine)
-
-        
