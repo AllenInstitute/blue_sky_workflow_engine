@@ -177,8 +177,8 @@ class Workflow(models.Model):
         return WorkflowNode.objects.filter(is_head=True, workflow=self.id)
 
     @staticmethod
-    def start_workflow(worklfow_name, enqueued_object):
-        workflow = Workflow.objects.get(name=worklfow_name)
+    def start_workflow(workflow_name, enqueued_object):
+        workflow = Workflow.objects.get(name=workflow_name)
         workflow_nodes = WorkflowNode.objects.filter(workflow=workflow, parent=None)
 
         if len(workflow_nodes) != ONE:
