@@ -2,7 +2,7 @@ import yaml
 import logging
 import importlib
 from workflow_engine.models import \
-    Workflow, Executable, WorkflowNode, JobQueue
+    Workflow, Executable, WorkflowNode, JobQueue, RunState
 
 
 class WorkflowConfig:
@@ -19,9 +19,16 @@ class WorkflowConfig:
     @classmethod
     def from_yaml(cls, y):
         definition = yaml.load(y)
-        workflows = []
+        workflows = {
+            'run_states': definition['run_states'],
+            'executables': definition['executables'],
+            'flows': []
+        }
 
-        for k,v in definition.items():
+        
+        workflow_definition = definition['workflows']
+
+        for k,v in workflow_definition.items():
             parents = {}
             
             for gs in v['graph']:
@@ -60,10 +67,8 @@ class WorkflowConfig:
                 states[s['key']] = state
                 state_list.append(s['key'])
 
-            workflows.append(cls(k,
-                                 states,
-                                 v['graph'],
-                                 state_list))
+            workflows['flows'].append(
+                cls(k, states, v['graph'], state_list))
 
         return workflows
 
@@ -82,8 +87,11 @@ class WorkflowConfig:
         pbs_processor = 'vmem=16g',
         pbs_walltime = 'walltime=5:00:00'
         wc = cls.from_yaml_file(workflows_yml)
+        
+        for run_state_name in wc['run_states']:
+            RunState(name=run_state_name).save()
     
-        for workflow_spec in wc:
+        for workflow_spec in wc['flows']:
             workflow_name = workflow_spec.name
     
             workflow = Workflow(name=workflow_name,
