@@ -1,6 +1,6 @@
 import yaml
 import logging
-import importlib
+#import importlib
 from workflow_engine.models import \
     Workflow, Executable, WorkflowNode, JobQueue, RunState
 
@@ -59,10 +59,20 @@ class WorkflowConfig:
                 else:
                     state['workflow'] = False
 
-                if 'class' in s and s['class'] is True:
+                if 'class' in s:
                     state['class'] = s['class']
                 else:
                     state['class'] = None
+
+                if 'enqueued_class' in s:
+                    state['enqueued_class'] = s['enqueued_class']
+                else:
+                    state['enqueued_class'] = 'None'
+
+                if 'executable' in s:
+                    state['executable'] = s['executable']
+                else:
+                    state['executable'] = 'None'
 
                 states[s['key']] = state
                 state_list.append(s['key'])
@@ -80,13 +90,32 @@ class WorkflowConfig:
 
     @classmethod
     def create_workflow(cls, app_package, workflows_yml):
-        app_models = importlib.import_module(app_package + '.models')
-        app_strategies = importlib.import_module(app_package + '.strategies')
     
         pbs_queue = 'mindscope'
         pbs_processor = 'vmem=16g',
         pbs_walltime = 'walltime=5:00:00'
         wc = cls.from_yaml_file(workflows_yml)
+        
+        null_executable =  Executable(name='Null Executable',
+                           description='Error Case',
+                           executable_path='/lorem/ipsum',
+                           pbs_queue='NULLQUEUE',
+                           pbs_processor='ERROR',
+                           pbs_walltime='ERROR')
+        null_executable.save()
+
+        executables = { 'None': null_executable}
+        
+        for k, e in wc['executables'].items():
+            executables[k] = \
+                Executable(name=e['name'],
+                           description='N/A',
+                           executable_path=e['path'],
+                           pbs_queue=e['pbs_queue'],
+                           pbs_processor=e['pbs_processor'],
+                           pbs_walltime=e['pbs_walltime'])
+            executables[k].save()
+        
         
         for run_state_name in wc['run_states']:
             RunState(name=run_state_name).save()
@@ -98,41 +127,36 @@ class WorkflowConfig:
                                 description='N/A',
                                 use_pbs=False)
             workflow.save()
-    
-            executable_number = 1
-    
-            executable = \
-                Executable(name='%s mock executable %d' % (workflow_name,
-                                                           executable_number),
-                           description='N/A',
-                           executable_path='/data/mock_executable.sh',
-                           pbs_queue=pbs_queue,
-                           pbs_processor=pbs_processor,
-                           pbs_walltime=pbs_walltime)
-            executable_number = executable_number + 1
-            executable.save()
+                
             nodes = {}
             nodes[None] = None
             nodes['None'] = None
     
             for k in workflow_spec.state_list:
                 node = workflow_spec.states[k]
-                node['enqueued_class'] = app_models.ReferenceSet
+                
+                queue_name = '%s %s' % (workflow_name, node['label'])
+                WorkflowConfig._log.info(
+                    "Creating job queue %s %s %s %s" % (
+                        queue_name,
+                        node['class'],
+                        node['enqueued_class'],
+                        node['executable']))
     
-                if node['class'] is None:
-                    node['class'] = app_strategies.IngestReferenceSetStrategy
-                queue = JobQueue(name='%s %s' % (workflow_name,
-                                                 node['label']),
-                                 job_strategy_class=node['class'],
+                queue = JobQueue(name=queue_name,
+                                 job_strategy_class=str(node['class']),
                                  enqueued_object_class=node['enqueued_class'],
-                                 executable=executable)
+                                 executable=executables[node['executable']])
    
                 queue.save()
     
                 batch_size = 1
                 max_retries = 1
 
-                WorkflowConfig._log.info("parent: %s->%s %s" % (node['key'], node['parent'], str(nodes[node['parent']])))
+                WorkflowConfig._log.info(
+                    "parent: %s->%s %s" % (node['key'],
+                                           node['parent'],
+                                           str(nodes[node['parent']])))
 
                 if node['parent'] in nodes and node['parent'] in nodes:
                     parent_node = nodes[node['parent']]

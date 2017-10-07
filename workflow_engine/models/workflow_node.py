@@ -36,6 +36,7 @@
 from django.db import models
 from .job_queue import JobQueue
 from .workflow import Workflow
+from .run_state import RunState
 from . import ONE, ZERO
 import logging
 _model_logger = logging.getLogger('workflow_engine.models')
@@ -70,14 +71,20 @@ class WorkflowNode(models.Model):
         return WorkflowNode.objects.filter(parent=self)
 
     def get_total_number_of_jobs(self):
-        return Job.objects.filter(workflow_node=self, archived=False).count()
+        return Job.objects.filter(
+            workflow_node=self,
+            archived=False).count()
 
     def get_number_of_queued_and_running_jobs(self):
         return len(self.get_queued_and_running_jobs())
 
     def get_queued_and_running_jobs(self):
         try: 
-            result = Job.objects.filter(run_state_id__in=[RunState.get_queued_state().id, RunState.get_running_state().id], workflow_node=self, archived=False)
+            result = Job.objects.filter(
+                run_state_id__in=[RunState.get_queued_state().id,
+                RunState.get_running_state().id],
+                workflow_node=self,
+                archived=False)
         except Exception as e:
             result = []
 
@@ -91,11 +98,13 @@ class WorkflowNode(models.Model):
                 batch_size = self.batch_size
 
                 try:
-                    number_of_queued_and_running_jobs = self.get_number_of_queued_and_running_jobs()
+                    number_of_queued_and_running_jobs = \
+                        self.get_number_of_queued_and_running_jobs()
                 except Exception as e:
                     number_of_queued_and_running_jobs = ZERO
 
-                number_jobs_to_run = batch_size - number_of_queued_and_running_jobs
+                number_jobs_to_run = \
+                    batch_size - number_of_queued_and_running_jobs
                 
                 _model_logger.info(
                     "%d jobs to be run. %d queued and running, batch size %d in workflow %s" % \
@@ -106,10 +115,16 @@ class WorkflowNode(models.Model):
 
                 #run more jobs
                 if number_jobs_to_run > ZERO:
-
                     try:
-                        pending_jobs = Job.objects.filter(run_state_id=RunState.get_pending_state().id, workflow_node=self, archived=False).order_by('priority', '-updated_at')
+                        pending_jobs = \
+                            Job.objects.filter(
+                                run_state_id=RunState.get_pending_state().id,
+                                workflow_node=self,
+                                archived=False).order_by('priority',
+                                                         '-updated_at')
+                        _model_logger.info('pending jobs: %d' % (len(pending_jobs)))
                     except Exception as e:
+                        _model_logger.info('pending jobs exception: %s' % (str(e)))
                         pending_jobs = []
 
                     for i in range(number_jobs_to_run):

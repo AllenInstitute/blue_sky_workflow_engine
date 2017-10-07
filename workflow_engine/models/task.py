@@ -40,6 +40,7 @@ from celery.task.control import revoke
 from .job import Job
 from .run_state import RunState
 from . import ONE, ZERO
+from .import_class import import_class
 import logging
 _model_logger = logging.getLogger('workflow_engine.models')
 
@@ -66,7 +67,7 @@ class Task(models.Model):
     tags = models.CharField(max_length=255, null=True)
 
     def __str__(self):
-        return 'task: ' + str(self.id)
+        return 'task: %s (%d)' % (self.full_executable, self.id)
 
     def get_created_at(self):
         return timezone.localtime(self.created_at).strftime('%m/%d/%Y %I:%M:%S')
@@ -139,11 +140,17 @@ class Task(models.Model):
 
     def in_failed_state(self):
         run_state_name = self.run_state.name
-        return (run_state_name == 'FAILED' or run_state_name == 'PROCESS_KILLED' or run_state_name == 'FAILED_EXECUTION')
+        return (run_state_name == 'FAILED' or
+                run_state_name == 'PROCESS_KILLED' or
+                run_state_name == 'FAILED_EXECUTION')
 
     def can_rerun(self):
         run_state_name = self.run_state.name
-        return (run_state_name == 'PENDING' or run_state_name == 'FAILED' or run_state_name == 'SUCCESS' or run_state_name == 'PROCESS_KILLED' or run_state_name == 'FAILED_EXECUTION')
+        return (run_state_name == 'PENDING' or
+                run_state_name == 'FAILED' or
+                run_state_name == 'SUCCESS' or
+                run_state_name == 'PROCESS_KILLED' or
+                run_state_name == 'FAILED_EXECUTION')
 
     def get_color_class(self):
         color = 'color_' + self.run_state.name.lower()
@@ -184,6 +191,7 @@ class Task(models.Model):
         self.increment_retry_count()
         self.set_start_run_time()
         strategy = self.get_strategy()
+        _model_logger.info("Running task with strategy %s" % (str(strategy)))
         strategy.run_task(self)
 
     def set_pending_state(self):
@@ -268,17 +276,30 @@ class Task(models.Model):
         self.save()
 
     def get_enqueued_object(self):
+        _model_logger.info('Task.get_enqueued_object')
         if self.enqueued_task_object_class == None:
+            _model_logger.info('enqueued_task_object_class is nil for task')
             raise Exception('enqueued_task_object_class is nil for task: ' + str(self.id))
 
         if self.enqueued_task_object_id == None:
+            _model_logger.info('enqueued_task_object_id is nil for task')
             raise Exception('enqueued_task_object_id is nil for task: ' + str(self.id))
 
-        enqueued_object_class = eval(self.enqueued_task_object_class)
+        _model_logger.info('task enqueued object class: %s' % (self.enqueued_task_object_class))
+        enqueued_object_class = import_class(self.enqueued_task_object_class)
         enqueued_object = enqueued_object_class.objects.get(id=self.enqueued_task_object_id)
 
         if enqueued_object == None:
-            raise Exception('enqueued_object does not exist for enqueued_object_class of ' + str(self.enqueued_task_object_class) + ' and id of ' + str(self.enqueued_task_object_id))  
+            _model_logger.info('enqueued_object is None')
+            msg = \
+                'enqueued_object does not exist for enqueued_object_class of ' + \
+                str(self.enqueued_task_object_class) + \
+                ' and id of ' + \
+                str(self.enqueued_task_object_id)
+            _model_logger.info(msg)   
+            raise Exception(msg)  
+        
+        _model_logger.info('task enqueued object: %s' % (enqueued_object))
 
         return enqueued_object
 

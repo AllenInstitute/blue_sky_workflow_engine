@@ -37,6 +37,7 @@ from django.db import models
 from django.utils import timezone
 from .workflow_node import WorkflowNode
 from .run_state import RunState
+from .import_class import import_class
 from . import ONE, ZERO
 import traceback
 import logging
@@ -118,7 +119,11 @@ class Job(models.Model):
 
     def can_rerun(self):
         run_state_name = self.run_state.name
-        return (run_state_name == 'PENDING' or run_state_name == 'FAILED' or run_state_name == 'SUCCESS' or run_state_name == 'PROCESS_KILLED' or run_state_name == 'FAILED_EXECUTION')
+        return (run_state_name == 'PENDING' or
+                run_state_name == 'FAILED' or
+                run_state_name == 'SUCCESS' or
+                run_state_name == 'PROCESS_KILLED' or
+                run_state_name == 'FAILED_EXECUTION')
 
     def set_pending_state(self):
         self.run_state = RunState.get_pending_state()
@@ -153,8 +158,15 @@ class Job(models.Model):
         self.run_jobs()
 
     def get_enqueued_object(self):
-        enqueued_object_class = eval(self.workflow_node.job_queue.enqueued_object_class)
-        return enqueued_object_class.objects.get(id=self.enqueued_object_id)
+        _model_logger.info(
+            "importing %s" % (
+                self.workflow_node.job_queue.enqueued_object_class)) 
+
+        claz = import_class(self.workflow_node.job_queue.enqueued_object_class)
+        enqueued_object = claz.objects.get(id=self.enqueued_object_id)
+
+        return enqueued_object
+    
 
     def get_strategy(self):
         return self.workflow_node.get_strategy()
@@ -171,31 +183,54 @@ class Job(models.Model):
                 task.save()
 
     def create_tasks(self):
-        resused_tasks = {}
+        reused_tasks = {}
         strategy = self.get_strategy()
         pending_state = RunState.get_pending_state()
 
-        task_objects = strategy.get_task_objects_for_queue(self.get_enqueued_object())
+        task_objects = \
+            strategy.get_task_objects_for_queue(
+                self.get_enqueued_object())
 
         for task_object in task_objects:
+            enqueued_object_full_class = \
+                type(task_object).__module__ + '.' + type(task_object).__name__
+        
             if self.workflow_node.overwrite_previous_job:
                 try:
-                    #try to reuse a previous task
-                    task = Task.objects.get(enqueued_task_object_id=task_object.id, enqueued_task_object_class=type(task_object).__name__,job=self)
+                    _model_logger.info(
+                        'overwriting task with enqueued class: %s' %
+                        (enqueued_object_full_class))
+                    task = Task.objects.get(
+                        enqueued_task_object_id=task_object.id,
+                        enqueued_task_object_class=enqueued_object_full_class,
+                        job=self)
                     task.run_state = pending_state
                     task.archived = False
                     task.retry_count = ZERO
                     task.save()
                 except:
-                    task = Task(enqueued_task_object_id=task_object.id, enqueued_task_object_class=type(task_object).__name__, run_state=pending_state, job=self)
+                    _model_logger.info(
+                        'creating task with enqueued class: %s' %
+                        (enqueued_object_full_class))
+                    task = Task(
+                        enqueued_task_object_id=task_object.id,
+                        enqueued_task_object_class=enqueued_object_full_class,
+                        run_state=pending_state,
+                        job=self)
                     task.save()
             else:
-                task = Task(enqueued_task_object_id=task_object.id, enqueued_task_object_class=type(task_object).__name__, run_state=pending_state, job=self)
+                _model_logger.info(
+                    'creating task with enqueued class: %s' %
+                    (enqueued_object_full_class))
+                task = Task(
+                    enqueued_task_object_id=task_object.id,
+                    enqueued_task_object_class=enqueued_object_full_class,
+                    run_state=pending_state, job=self)
                 task.save()
 
-            resused_tasks[task.id] = True
+            reused_tasks[task.id] = True
 
-        return resused_tasks
+        return reused_tasks
 
     def get_tasks(self):
         return Task.objects.filter(job_id=self.id, archived=False)
@@ -213,6 +248,7 @@ class Job(models.Model):
 
     def prep_job(self):
         strategy = self.get_strategy()
+        _model_logger.info("got strategy: " + str(strategy))
         strategy.prep_job(self)
 
     def run(self):
@@ -233,6 +269,7 @@ class Job(models.Model):
 
         except Exception as e:
             self.set_error_message(str(e) + ' - ' + str(traceback.format_exc()), None)
+            _model_logger.info("Job exception: %s" % (self.error_message))
             self.set_failed_state()
 
     def run_jobs(self):
@@ -281,7 +318,9 @@ class Job(models.Model):
             for enqueued_object in enqueued_objects:
                 if strategy.can_transition(enqueued_object):
                     #try to get the job
-                    jobs = Job.objects.filter(enqueued_object_id=enqueued_object.id, workflow_node_id=child.id, archived=False)
+                    jobs = Job.objects.filter(enqueued_object_id=enqueued_object.id,
+                                              workflow_node_id=child.id,
+                                              archived=False)
 
                     if len(jobs) > ZERO:
                         index = ZERO
@@ -299,10 +338,13 @@ class Job(models.Model):
                                 job.archived = True
                                 job.save()
 
-                            index+=ONE
+                            index += ONE
                     else:
                         #create the job if needed
-                        job = Job(enqueued_object_id=enqueued_object.id, workflow_node=child, run_state=RunState.get_pending_state(),priority=child.priority)
+                        job = Job(enqueued_object_id=enqueued_object.id,
+                                  workflow_node=child,
+                                  run_state=RunState.get_pending_state(),
+                                  priority=child.priority)
                         job.save()
                         job.set_for_run()
 
@@ -320,3 +362,6 @@ class Job(models.Model):
     def kill_tasks(self):
         for task in self.get_tasks():
             task.kill_task()
+
+# circular imports
+from .task import Task

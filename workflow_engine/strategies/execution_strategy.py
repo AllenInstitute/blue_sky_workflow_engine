@@ -37,16 +37,17 @@ from workflow_engine.models import *
 from execution_runner import run_celery_task
 from execution_runner import cancel_task
 from workflow_engine.strategies import base_strategy
-#from development.models import *
 from django.conf import settings
 
 import os
 import subprocess
 import traceback
+import logging
 import sys
-import json
+import simplejson as json
 
 class ExecutionStrategy(base_strategy.BaseStrategy):
+    _log = logging.getLogger('workflow_engine.strategies.execution_strategy')
     #####everthing bellow this can be overriden#####
 
     #override if needed
@@ -65,13 +66,23 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
             raise Exception('Could not find executable associated with task: ' + str(task.id) + ' - ' + str(e))
 
         arguments = executable.static_arguments
+        ExecutionStrategy._log.info('static arguments %s' % (str(arguments)))
 
         input_file = self.get_input_file(task)
+        ExecutionStrategy._log.info('input file %s' % (str(input_file)))
 
         #populate the input file
-        self.create_input_file(input_file, task.get_enqueued_object(), self.get_task_storage_directory(task), task)
+        storage_dir = self.get_task_storage_directory(task)
+        ExecutionStrategy._log.info('task storage dir %s' % (storage_dir))
+        enqueued_object = task.get_enqueued_object()
+        ExecutionStrategy._log.info('enqueued_object')        
+        self.create_input_file(input_file,
+                               enqueued_object,
+                               storage_dir,
+                               task)
 
         output_file = self.get_output_file(task)
+        ExecutionStrategy._log.info('output file %s' % (output_file))
 
         task.input_file = input_file
         task.output_file = output_file
@@ -95,7 +106,9 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
             executable_elements.append('--output_json')
             executable_elements.append(output_file)
 
-        return (' '.join(executable_elements))
+        full_executable_string = ' '.join(executable_elements)
+        ExecutionStrategy._log.info(full_executable_string)
+        return full_executable_string
 
     #override if needed
     def skip_execution(self, enqueued_object):
@@ -164,8 +177,9 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
     def run_task(self, task):
         try:
             self.prep_task(task)
-
             task.full_executable = self.get_full_executable(task)
+            ExecutionStrategy._log.info(
+                'executable: %s' % (str(task.full_executable)))
             task.log_file = self.get_log_file(task)
             task.pbs_id = None
             task.save()
@@ -210,7 +224,11 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
     #this method creates the input file
     #Do not override
     def create_input_file(self, input_file, enqueued_object, storage_directory, task):
+        ExecutionStrategy._log.info("input data")
+
         input_data = self.get_input(enqueued_object, storage_directory, task)
+        
+        ExecutionStrategy._log.info(json.dumps(input_data))
 
         with open(input_file, 'w') as in_file:
             json.dump(input_data, in_file, indent=2)
@@ -228,6 +246,7 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
     #Do not override
     def get_input_file(self, task):
         storage_directory = self.get_or_create_task_storage_directory(task)
+        ExecutionStrategy._log.info("Storage_directory: %s" % (storage_directory))
         return os.path.join(storage_directory, 'input_' + str(task.id) + '.json')
 
     #Do not override
@@ -237,6 +256,7 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
     #Do not override
     def get_or_create_task_storage_directory(self, task):
         storage_directory = self.get_task_storage_directory(task)
+        ExecutionStrategy._log.info("Storage_directory: %s" % (storage_directory))
 
         #create directory if needed
         if not os.path.exists(storage_directory):

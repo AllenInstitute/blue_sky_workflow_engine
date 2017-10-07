@@ -36,6 +36,7 @@
 from django.db import models
 from django.utils import timezone
 from .executable import Executable
+from .import_class import import_class
 import logging
 _model_logger = logging.getLogger('workflow_engine.models')
 
@@ -53,7 +54,12 @@ class JobQueue(models.Model):
         return self.name
 
     def get_strategy(self):
-        return eval(self.job_strategy_class)()
+        _model_logger.info(
+            "importing %s" % (self.job_strategy_class))
+        claz = import_class(self.job_strategy_class)
+        strategy_object = claz()
+
+        return strategy_object
 
     def get_created_at(self):
         return timezone.localtime(self.created_at).strftime('%m/%d/%Y %I:%M:%S')

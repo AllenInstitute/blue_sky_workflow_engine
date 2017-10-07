@@ -33,49 +33,13 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-from django.db import models
-from . import ONE, ZERO
-import logging
-_model_logger = logging.getLogger('workflow_engine.models')
+import importlib
 
+def import_class(class_full_name):
+    pkgs = class_full_name.split('.')
+    module_name = '.'.join(pkgs[0:-1])
+    class_name = pkgs[-1]
+    mdl = importlib.import_module(module_name)
+    claz = getattr(mdl,class_name)
 
-class Workflow(models.Model):
-    name = models.CharField(max_length=255)
-    description = models.CharField(max_length=255, null=True)
-    disabled = models.BooleanField(default=False)
-    use_pbs = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.name
-
-    def get_head_workfow_nodes(self):
-        return WorkflowNode.objects.filter(is_head=True, workflow=self.id)
-
-    @staticmethod
-    def start_workflow(workflow_name, enqueued_object):
-        workflow = Workflow.objects.get(name=workflow_name)
-        _model_logger.info("starting %s" % (workflow_name))
-        workflow_nodes = WorkflowNode.objects.filter(workflow=workflow, parent=None)
-
-        if len(workflow_nodes) != ONE:
-            raise Exception('Expected to find a single head workflow node but found: ' + str(len(workflow_nodes)))
-
-        workflow_node = workflow_nodes[ZERO]
-
-        job = Job()
-        job.enqueued_object_id=enqueued_object.id
-        job.workflow_node=workflow_node
-        job.run_state=RunState.get_pending_state()
-        job.priority = workflow_node.priority
-        job.save()
-        
-        _model_logger.info("Start workflow job state: %s" % (str(job.run_state)))
-        
-        job.run_jobs()
-
-# circular imports
-from .workflow_node import WorkflowNode 
-from .job import Job
-from .run_state import RunState
+    return claz
