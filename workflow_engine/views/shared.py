@@ -37,6 +37,7 @@ from django.core.paginator import Paginator
 from workflow_engine.models import *
 from django.conf import settings
 import workflow_engine
+import re
 
 def add_settings_info_to_context(context):
     context['milliseconds_between_refresh'] = settings.MILLISECONDS_BETWEEN_REFRESH

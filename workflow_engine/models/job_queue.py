@@ -74,3 +74,4 @@ class JobQueue(models.Model):
             result = []
 
         return results
+

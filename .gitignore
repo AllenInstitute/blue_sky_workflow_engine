@@ -6,3 +6,6 @@
 .cache
 *.pyc
 doc/
+htmlcov/
+dist/
+test-reports/

@@ -38,7 +38,7 @@ from django.utils import timezone
 from .workflow_node import WorkflowNode
 from .run_state import RunState
 from .import_class import import_class
-from . import ONE, ZERO
+from . import TWO, ONE, ZERO, SECONDS_IN_MIN
 import traceback
 import logging
 _model_logger = logging.getLogger('workflow_engine.models')

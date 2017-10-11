@@ -39,7 +39,7 @@ from django.conf import settings
 from celery.task.control import revoke
 from .job import Job
 from .run_state import RunState
-from . import ONE, ZERO
+from . import ONE, ZERO, TWO, SECONDS_IN_MIN
 from .import_class import import_class
 import logging
 _model_logger = logging.getLogger('workflow_engine.models')

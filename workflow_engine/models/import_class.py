@@ -34,12 +34,21 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 import importlib
+import logging
 
 def import_class(class_full_name):
     pkgs = class_full_name.split('.')
     module_name = '.'.join(pkgs[0:-1])
     class_name = pkgs[-1]
-    mdl = importlib.import_module(module_name)
+    try:
+        mdl = importlib.import_module(module_name)
+    except:
+        logging.getLogger('workflow_engine.models.import_module').\
+            warn('could not import model module "%s",'
+                 'falling back to "development.models' % (module_name))
+        mdl = importlib.import_module('development.models')
+
     claz = getattr(mdl,class_name)
 
     return claz
+
