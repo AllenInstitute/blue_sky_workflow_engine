@@ -33,27 +33,28 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-import importlib
+from django.core.management.base import BaseCommand, CommandError
+from django.core.exceptions import ObjectDoesNotExist
+from workflow_engine.workflow_config import WorkflowConfig
 import logging
 
-_log = logging.getLogger('workflow_engine.models.import_module')
+_log = logging.getLogger(
+    'workflow_engine.mananagement.commands.import_workflows')
 
-def import_class(class_full_name):
-    pkgs = class_full_name.split('.')
-    module_name = '.'.join(pkgs[0:-1])
-    class_name = pkgs[-1]
-    try:
-        _log.info('importing module "%s"' % (module_name))
-        mdl = importlib.import_module(module_name)
-    except Exception as e:
-        _log.warn(
-            'could not import module "%s",'
-            'falling back to "development.models\n %s' % (
-                module_name,
-                str(e.args)))
-        mdl = importlib.import_module('development.models')
 
-    claz = getattr(mdl,class_name)
+class Command(BaseCommand):
+    help = 'Import Workflow Definitions from YAML'
 
-    return claz
+    def add_arguments(self, parser):
+        parser.add_argument('file')
 
+    def handle(self, *args, **options):
+        file_path = options['file']
+
+        try:
+            WorkflowConfig.create_workflow(file_path)
+
+        except Exception as e:
+            _log.error('Something went wrong: ' + str(e))
+
+       

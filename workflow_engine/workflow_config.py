@@ -1,6 +1,5 @@
 import yaml
 import logging
-#import importlib
 from workflow_engine.models import \
     Workflow, Executable, WorkflowNode, JobQueue, RunState
 
@@ -25,7 +24,6 @@ class WorkflowConfig:
             'flows': []
         }
 
-        
         workflow_definition = definition['workflows']
 
         for k,v in workflow_definition.items():
@@ -89,44 +87,48 @@ class WorkflowConfig:
 
 
     @classmethod
-    def create_workflow(cls, app_package, workflows_yml):
-    
+    def create_workflow(cls, workflows_yml):
         pbs_queue = 'mindscope'
         pbs_processor = 'vmem=16g',
         pbs_walltime = 'walltime=5:00:00'
         wc = cls.from_yaml_file(workflows_yml)
         
-        null_executable =  Executable(name='Null Executable',
-                           description='Error Case',
-                           executable_path='/lorem/ipsum',
-                           pbs_queue='NULLQUEUE',
-                           pbs_processor='ERROR',
-                           pbs_walltime='ERROR')
-        null_executable.save()
+        null_executable, created = \
+            Executable.objects.get_or_create(
+                name='Null Executable',
+                defaults={
+                    'description': 'Error Case',
+                    'executable_path': '/lorem/ipsum',
+                    'pbs_queue': 'NULLQUEUE',
+                    'pbs_processor': 'ERROR',
+                    'pbs_walltime': 'ERROR'})
 
         executables = { 'None': null_executable}
         
         for k, e in wc['executables'].items():
-            executables[k] = \
-                Executable(name=e['name'],
-                           description='N/A',
-                           executable_path=e['path'],
-                           pbs_queue=e['pbs_queue'],
-                           pbs_processor=e['pbs_processor'],
-                           pbs_walltime=e['pbs_walltime'])
-            executables[k].save()
-        
+            executables[k], _ = \
+                Executable.objects.update_or_create(
+                    name=e['name'],
+                    defaults= {
+                        'description': 'N/A',
+                        'executable_path': e['path'],
+                        'pbs_queue': e['pbs_queue'],
+                        'pbs_processor': e['pbs_processor'],
+                        'pbs_walltime': e['pbs_walltime']})
         
         for run_state_name in wc['run_states']:
-            RunState(name=run_state_name).save()
+            RunState.objects.update_or_create(
+                name=run_state_name)
     
         for workflow_spec in wc['flows']:
             workflow_name = workflow_spec.name
     
-            workflow = Workflow(name=workflow_name,
-                                description='N/A',
-                                use_pbs=False)
-            workflow.save()
+            workflow, _ = \
+                Workflow.objects.update_or_create(
+                    name=workflow_name,
+                    defaults={
+                        'description': 'N/A',
+                        'use_pbs': False})
                 
             nodes = {}
             nodes[None] = None
@@ -143,12 +145,13 @@ class WorkflowConfig:
                         node['enqueued_class'],
                         node['executable']))
     
-                queue = JobQueue(name=queue_name,
-                                 job_strategy_class=str(node['class']),
-                                 enqueued_object_class=node['enqueued_class'],
-                                 executable=executables[node['executable']])
-   
-                queue.save()
+                queue, _ = \
+                    JobQueue.objects.update_or_create(
+                        name=queue_name,
+                        defaults={
+                            'job_strategy_class': str(node['class']),
+                            'enqueued_object_class': node['enqueued_class'],
+                            'executable': executables[node['executable']]})
     
                 batch_size = 1
                 max_retries = 1
@@ -158,19 +161,20 @@ class WorkflowConfig:
                                            node['parent'],
                                            str(nodes[node['parent']])))
 
-                if node['parent'] in nodes and node['parent'] in nodes:
+                if node['parent'] in nodes and node['parent'] is not None:
                     parent_node = nodes[node['parent']]
                     head = False
                 else:
                     parent_node = None
                     head = True
 
-                nodes[node['key']] = \
-                    WorkflowNode(job_queue=queue,
-                                 parent=parent_node,
-                                 is_head=head,
-                                 workflow=workflow,
-                                 batch_size=batch_size,
-                                 max_retries=max_retries)
+                nodes[node['key']], _ = \
+                    WorkflowNode.objects.update_or_create(
+                        job_queue=queue,
+                        parent=parent_node,
+                        is_head=head,
+                        workflow=workflow,
+                        defaults={
+                            'batch_size': batch_size,
+                            'max_retries': max_retries})
 
-                nodes[node['key']].save()

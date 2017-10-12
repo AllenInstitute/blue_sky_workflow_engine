@@ -39,9 +39,13 @@ from django.core.exceptions import ObjectDoesNotExist
 import traceback
 from django.template import loader
 from workflow_engine.models import *
+from workflow_engine.models.import_class import import_class
 from workflow_engine.views import shared
+import logging
 import json
 
+
+_log = logging.getLogger('workflow_engine.views.workflow_view')
 pages = ['index', 'jobs', 'workflows', 'workflow_creator', 'job_queues', 'executables']
 context = {
     'pages': pages,
@@ -76,6 +80,9 @@ def workflows(request):
 
     workflows_data = []
     for workflow in workflows:
+        _log.info(
+            'viewing workflow %s. disabled: %s' % (workflow.name,
+                                                   str(workflow.disabled)))
         disabled_class = ''
         if workflow.disabled:
             disabled_class = 'disabled_workflow'
@@ -83,7 +90,10 @@ def workflows(request):
         workflow_setups.append({'name': workflow.name, 'id':workflow.id, 'use_pbs':workflow.use_pbs, 'disabled_class': disabled_class})
 
         head_workflow_nodes = workflow.get_head_workfow_nodes()
+        _log.info('found %d head nodes' % (len(head_workflow_nodes)))
+
         for node in head_workflow_nodes:
+            _log.info('head node: %s' % (str(node)))
             workflow_info = {}
             workflow_info['chart'] = build_chart(workflow)
             workflow_info['nodeStructure'] = build_node_structure(node)
@@ -327,7 +337,12 @@ def get_enqueued_objects(request):
         else:
             workflow_node = WorkflowNode.objects.get(id=workflow_node_id)
             enqueued_object_class = workflow_node.job_queue.enqueued_object_class
-            enqueued_object_class_instance = eval(enqueued_object_class)
+            _log.debug('Workflow node job queue enqueued class name: %s' % (
+                (enqueued_object_class)))
+            enqueued_object_class_instance = \
+                import_class(enqueued_object_class)
+            _log.debug('Workflow node job queue enqueued class: %s' % (
+                str(enqueued_object_class)))
             for record in enqueued_object_class_instance.objects.all():
                 record_names.append(str(record))
                 record_ids[str(record)] = record.id
