@@ -50,6 +50,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         file_path = options['file']
+        logging.basicConfig(level=logging.INFO)
+        logging.getLogger('workflow_engine').setLevel(logging.INFO)
 
         try:
             WorkflowConfig.create_workflow(file_path)

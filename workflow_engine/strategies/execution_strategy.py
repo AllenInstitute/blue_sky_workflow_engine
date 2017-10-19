@@ -62,6 +62,8 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
     def get_full_executable(self, task):
         try:
             executable = task.job.workflow_node.job_queue.executable
+            ExecutionStrategy._log.info(
+                'executable %s' % (str(executable)))
         except Exception as e:
             raise Exception('Could not find executable associated with task: ' + str(task.id) + ' - ' + str(e))
 
@@ -202,24 +204,53 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
         task.clear_error_message()
 
         if self.skip_execution(task.get_enqueued_object()):
+            ExecutionStrategy._log.info('skipping execution')
             self.running_task(task)
             self.finish_task(task)
         else:
 
             if task.pbs_task():
+                ExecutionStrategy._log.info('pbs task')
                 pbs_file = self.get_pbs_file(task)
                 task.create_pbs_file(pbs_file)
                 executable = 'qsub ' + pbs_file
                 if hasattr(settings, 'CELERY_MESSAGE_QUEUE_NAME'):
-                    run_celery_task.apply_async(args=[executable, task.id, task.log_file, True], queue = settings.CELERY_MESSAGE_QUEUE_NAME)
+                    ExecutionStrategy._log.info(
+                        'apply async qsub celery queue: %s' % (
+                            settings.CELERY_MESSAGE_QUEUE_NAME))
+                    run_celery_task.apply_async(
+                        args=[executable,
+                              task.id,
+                              task.log_file,
+                              True],
+                        queue = settings.CELERY_MESSAGE_QUEUE_NAME)
                 else:
-                    run_celery_task.delay(executable, task.id, task.log_file, True)
+                    ExecutionStrategy._log.info(
+                        'delay celery queue: %s' % (
+                            settings.CELERY_MESSAGE_QUEUE_NAME))
+                    run_celery_task.delay(executable,
+                                          task.id,
+                                          task.log_file,
+                                          True)
             else:
-                executable = self.add_write_to_log_command(task.full_executable, task.log_file)
+                executable = self.add_write_to_log_command(
+                    task.full_executable, task.log_file)
                 if hasattr(settings, 'CELERY_MESSAGE_QUEUE_NAME'):
-                    run_celery_task.apply_async(args=[executable, task.id, task.log_file, False], queue = settings.CELERY_MESSAGE_QUEUE_NAME)
+                    ExecutionStrategy._log.info(
+                        'apply async celery queue: %s' % (
+                            settings.CELERY_MESSAGE_QUEUE_NAME))
+                    run_celery_task.apply_async(
+                        args=[executable,
+                              task.id,
+                              task.log_file,
+                              False],
+                        queue = settings.CELERY_MESSAGE_QUEUE_NAME)
                 else:
-                    run_celery_task.delay(executable, task.id, task.log_file, False)
+                    ExecutionStrategy._log.info(
+                        'delay celery queue: %s' % (
+                            settings.CELERY_MESSAGE_QUEUE_NAME))
+                    run_celery_task.delay(
+                        executable, task.id, task.log_file, False)
                 
     #this method creates the input file
     #Do not override
