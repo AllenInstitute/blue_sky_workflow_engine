@@ -361,7 +361,8 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 
         if not os.path.isfile(output_file):
             raise Exception(
-                'Expected output file to be created at: ' + \                                   str(output_file) + ' but it was not')
+                'Expected output file to be created at: ' + \
+                str(output_file) + ' but it was not')
 
         result = {}
         with open(output_file) as json_data:  
