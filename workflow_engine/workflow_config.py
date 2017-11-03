@@ -24,6 +24,10 @@ class WorkflowConfig:
             'flows': []
         }
 
+        for e in workflows['executables'].values():
+            if 'remote_queue' not in e:
+                e['remote_queue'] = 'default'
+
         workflow_definition = definition['workflows']
 
         for k,v in workflow_definition.items():
@@ -99,6 +103,8 @@ class WorkflowConfig:
                 defaults={
                     'description': 'Error Case',
                     'executable_path': '/lorem/ipsum',
+                    'static_arguments': None,
+                    'remote_queue': 'default',
                     'pbs_queue': 'NULLQUEUE',
                     'pbs_processor': 'ERROR',
                     'pbs_walltime': 'ERROR'})
@@ -106,12 +112,19 @@ class WorkflowConfig:
         executables = { 'None': null_executable}
         
         for k, e in wc['executables'].items():
+            if 'args' in e:
+                args = ' '.join(e['args'])
+            else:
+                args = None
+
             executables[k], _ = \
                 Executable.objects.update_or_create(
                     name=e['name'],
                     defaults= {
                         'description': 'N/A',
                         'executable_path': e['path'],
+                        'static_arguments': args,
+                        'remote_queue': e['remote_queue'],
                         'pbs_queue': e['pbs_queue'],
                         'pbs_processor': e['pbs_processor'],
                         'pbs_walltime': e['pbs_walltime']})

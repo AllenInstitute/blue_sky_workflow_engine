@@ -46,10 +46,17 @@ class RunState(models.Model):
 
     @staticmethod
     def is_failed_type_state(job_state_name):
-        return (job_state_name == RunState.get_failed_execution_state().name or job_state_name == RunState.get_failed_state().name or job_state_name == RunState.get_process_killed_state().name)
+        return (
+            job_state_name == RunState.get_failed_execution_state().name or
+            job_state_name == RunState.get_failed_state().name or
+            job_state_name == RunState.get_process_killed_state().name)
 
     def is_running_type_state(job_state_name):
-        return (job_state_name == RunState.get_pending_state().name or job_state_name == RunState.get_running_state().name or job_state_name == RunState.get_queued_state().name or job_state_name == RunState.get_finished_execution_state().name)
+        return (
+            job_state_name == RunState.get_pending_state().name or
+            job_state_name == RunState.get_running_state().name or
+            job_state_name == RunState.get_queued_state().name or
+            job_state_name == RunState.get_finished_execution_state().name)
 
     @staticmethod
     def get_pending_state():

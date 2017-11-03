@@ -48,24 +48,33 @@ import simplejson as json
 
 class ExecutionStrategy(base_strategy.BaseStrategy):
     _log = logging.getLogger('workflow_engine.strategies.execution_strategy')
-    #####everthing bellow this can be overriden#####
+    # ## ## everthing bellow this can be overriden# ## ##
 
-    #override if needed
-    #get the data for the input file
+    # override if needed
+    # get the data for the input file
     def get_input(self, enqueued_object, storage_directory, task):
         input_data = {}
         input_data['input'] = str(enqueued_object)
 
         return input_data
 
-    #override if needed - return the full executable path with all arguments and parameters
+    def get_executable(self, task):
+        return task.job.workflow_node.job_queue.executable
+
+    def get_remote_queue(self, task):
+        return self.get_executable(task).remote_queue
+
+    # override if needed
+    # return the full executable path with all arguments and parameters
     def get_full_executable(self, task):
         try:
-            executable = task.job.workflow_node.job_queue.executable
+            executable = self.get_executable(task)
             ExecutionStrategy._log.info(
                 'executable %s' % (str(executable)))
         except Exception as e:
-            raise Exception('Could not find executable associated with task: ' + str(task.id) + ' - ' + str(e))
+            raise Exception(
+                'Could not find executable associated with task: ' + \
+                str(task.id) + ' - ' + str(e))
 
         arguments = executable.static_arguments
         ExecutionStrategy._log.info('static arguments %s' % (str(arguments)))
@@ -73,7 +82,7 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
         input_file = self.get_input_file(task)
         ExecutionStrategy._log.info('input file %s' % (str(input_file)))
 
-        #populate the input file
+        # populate the input file
         storage_dir = self.get_task_storage_directory(task)
         ExecutionStrategy._log.info('task storage dir %s' % (storage_dir))
         enqueued_object = task.get_enqueued_object()
@@ -112,28 +121,31 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
         ExecutionStrategy._log.info(full_executable_string)
         return full_executable_string
 
-    #override if needed
+    # override if needed
     def skip_execution(self, enqueued_object):
         return False
 
-    #####everthing bellow this should not be overriden#####
+    # ## ## everthing bellow this should not be overriden# ## ##
 
-    #Do not override
+    # Do not override
     def set_error_message_from_log(self, task):
         try:
             if os.path.isfile(task.log_file):
-                result = subprocess.run(['tail', task.log_file], stdout=subprocess.PIPE)
+                result = subprocess.run(
+                    ['tail', task.log_file], stdout=subprocess.PIPE)
                 task.set_error_message(result.stdout.decode("utf-8"))
         except Exception as e:
-            print('Something went wrong: ' + str(e))
+            ExecutionStrategy._log.error('Something went wrong: ' + str(e))
+            print('Something went wrong: ' + str(e)) # TODO: remove?
 
-    #Do not override
+    # Do not override
     def fail_execution_task(self, task):
         try:
             self.set_error_message_from_log(task)
             self.on_failure(task)
         except Exception as e:
-            task.set_error_message(str(e) + ' - ' + str(traceback.format_exc()))
+            task.set_error_message(
+                str(e) + ' - ' + str(traceback.format_exc()))
 
         task.set_failed_execution_state()
         task.set_end_run_time()
@@ -141,7 +153,7 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
         task.job.set_end_run_time()
         task.rerun()
 
-    #Do not override
+    # Do not override
     def running_task(self, task):
         try:
             self.on_running(task)
@@ -152,30 +164,39 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
                 job.set_running_state()
                 
         except Exception as e:
-            task.set_error_message(str(e) + ' - ' + str(traceback.format_exc()))
+            task.set_error_message(
+                str(e) + ' - ' + str(traceback.format_exc()))
             self.fail_task(task)
 
-    #Do not override
+    # Do not override
     def finish_task(self, task):
+        ExecutionStrategy._log.info('finish task')
         try:
+            ExecutionStrategy._log.info('setting finished execution state')
             task.set_finished_execution_state()
 
+            ExecutionStrategy._log.info('reading output')
             self.read_output(task)
 
+            ExecutionStrategy._log.info('setting success state')
             task.set_success_state()
             task.set_end_run_time()
+
+            ExecutionStrategy._log.info('checking tasks')
             if task.job.all_tasks_finished():
                 task.job.set_success_state()
                 task.job.set_end_run_time()
                 task.job.enqueue_next_queue()
 
         except Exception as e:
-            print(str(e) + ' - ' + str(traceback.format_exc()))
+            ExecutionStrategy._log.error(
+                str(e) + ' - ' + str(traceback.format_exc()))
 
-            task.set_error_message(str(e) + ' - ' + str(traceback.format_exc()))
+            task.set_error_message(
+                str(e) + ' - ' + str(traceback.format_exc()))
             self.fail_task(task)
 
-    #Do not override
+    # Do not override
     def run_task(self, task):
         try:
             self.prep_task(task)
@@ -188,10 +209,11 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
             self.run_asynchronous_task(task)
             task.set_queued_state()
         except Exception as e:
-            task.set_error_message(str(e) + ' - ' + str(traceback.format_exc()))
+            task.set_error_message(
+                str(e) + ' - ' + str(traceback.format_exc()))
             self.fail_task(task)
 
-    #Do not override
+    # Do not override
     def add_write_to_log_command(self, executable, log_file):
         return str(executable) + ' > ' + str(log_file) + ' 2>&1'
 
@@ -199,7 +221,7 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
         if task.pbs_id != None:
             cancel_task.delay(True, task.pbs_id)
 
-    #Do not override
+    # Do not override
     def run_asynchronous_task(self, task):
         task.clear_error_message()
 
@@ -208,7 +230,6 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
             self.running_task(task)
             self.finish_task(task)
         else:
-
             if task.pbs_task():
                 ExecutionStrategy._log.info('pbs task')
                 pbs_file = self.get_pbs_file(task)
@@ -226,8 +247,7 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
                         queue = settings.CELERY_MESSAGE_QUEUE_NAME)
                 else:
                     ExecutionStrategy._log.info(
-                        'delay celery queue: %s' % (
-                            settings.CELERY_MESSAGE_QUEUE_NAME))
+                        'delay celery default queue')
                     run_celery_task.delay(executable,
                                           task.id,
                                           task.log_file,
@@ -235,26 +255,34 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
             else:
                 executable = self.add_write_to_log_command(
                     task.full_executable, task.log_file)
-                if hasattr(settings, 'CELERY_MESSAGE_QUEUE_NAME'):
-                    ExecutionStrategy._log.info(
-                        'apply async celery queue: %s' % (
-                            settings.CELERY_MESSAGE_QUEUE_NAME))
-                    run_celery_task.apply_async(
-                        args=[executable,
-                              task.id,
-                              task.log_file,
-                              False],
-                        queue = settings.CELERY_MESSAGE_QUEUE_NAME)
+
+                remote_queue = self.get_remote_queue(task)
+
+                if 'spark' == remote_queue:
+                    queue_name = settings.SPARK_MESSAGE_QUEUE_NAME
                 else:
-                    ExecutionStrategy._log.info(
-                        'delay celery queue: %s' % (
-                            settings.CELERY_MESSAGE_QUEUE_NAME))
-                    run_celery_task.delay(
-                        executable, task.id, task.log_file, False)
+                    queue_name = settings.MESSAGE_QUEUE_NAME
+
+                ExecutionStrategy._log.info(
+                    'apply async celery queue: %s' % (queue_name))
+                result = run_celery_task.apply_async(
+                    args=[executable,
+                          task.id,
+                          task.log_file,
+                          False],
+                    queue=queue_name)
+                ExecutionStrategy._log.info(
+                    'queue result: %s %s\n%s' % (result.status,
+                                                 str(result.result),
+                                                 str(result)))
                 
-    #this method creates the input file
-    #Do not override
-    def create_input_file(self, input_file, enqueued_object, storage_directory, task):
+    # this method creates the input file
+    # Do not override
+    def create_input_file(self,
+                          input_file,
+                          enqueued_object,
+                          storage_directory,
+                          task):
         ExecutionStrategy._log.info("input data")
 
         input_data = self.get_input(enqueued_object, storage_directory, task)
@@ -264,64 +292,76 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
         with open(input_file, 'w') as in_file:
             json.dump(input_data, in_file, indent=2)
 
-    #Do not override
+    # Do not override
+    # TODO: this seems too rigid
     def get_output_file(self, task):
         storage_directory = self.get_or_create_task_storage_directory(task)
-        return os.path.join(storage_directory, 'output_' + str(task.id) + '.json')
+        return os.path.join(storage_directory,
+                            'output_' + str(task.id) + '.json')
 
-    #Do not override
+    # Do not override
     def get_pbs_file(self, task):
         storage_directory = self.get_or_create_task_storage_directory(task)
         return os.path.join(storage_directory, 'pbs_' + str(task.id) + '.pbs')
 
-    #Do not override
+    # Do not override
     def get_input_file(self, task):
         storage_directory = self.get_or_create_task_storage_directory(task)
-        ExecutionStrategy._log.info("Storage_directory: %s" % (storage_directory))
-        return os.path.join(storage_directory, 'input_' + str(task.id) + '.json')
+        ExecutionStrategy._log.info(
+            "Storage_directory: %s" % (storage_directory))
+        return os.path.join(storage_directory,
+                            'input_' + str(task.id) + '.json')
 
-    #Do not override
+    # Do not override
     def get_task_storage_directory(self, task):
-        return os.path.join(self.get_job_storage_directory(self.get_base_storage_directory(), task.job), 'tasks','task_' + str(task.id))
+        return os.path.join(
+            self.get_job_storage_directory(
+                self.get_base_storage_directory(), task.job),
+            'tasks',
+            'task_' + str(task.id))
 
-    #Do not override
+    # Do not override
     def get_or_create_task_storage_directory(self, task):
         storage_directory = self.get_task_storage_directory(task)
-        ExecutionStrategy._log.info("Storage_directory: %s" % (storage_directory))
+        ExecutionStrategy._log.info(
+            "Storage_directory: %s" % (storage_directory))
 
-        #create directory if needed
+        # create directory if needed
         if not os.path.exists(storage_directory):
             os.makedirs(storage_directory) 
             subprocess.call(['chmod', '0777', storage_directory]) 
 
         return storage_directory
 
-    #Do not override
+    # Do not override
     def get_log_file(self, task):
         storage_directory = self.get_or_create_task_storage_directory(task)
         return os.path.join(storage_directory, 'log_' + str(task.id) + '.txt')
 
-    #Do not override
+    # Do not override
     def get_or_create_storage_directory(self, job):
-        storage_directory = self.get_job_storage_directory(self.get_base_storage_directory(), job)
+        storage_directory = \
+            self.get_job_storage_directory(
+                self.get_base_storage_directory(), job)
 
-        #create directory if needed
+        # create directory if needed
         if not os.path.exists(storage_directory):
             os.makedirs(storage_directory) 
             subprocess.call(['chmod', '0777', storage_directory]) 
 
         return storage_directory
 
-    #Do not override
+    # Do not override
     def is_execution_strategy(self):
         return True
 
-    #Do not override
+    # Do not override
     def read_output(self, task):
         output_file = self.get_output_file(task)
 
         if not os.path.isfile(output_file):
-            raise Exception('Expected output file to be created at: ' + str(output_file) + ' but it was not')
+            raise Exception(
+                'Expected output file to be created at: ' + \                                   str(output_file) + ' but it was not')
 
         result = {}
         with open(output_file) as json_data:  

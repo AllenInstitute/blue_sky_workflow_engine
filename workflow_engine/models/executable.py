@@ -47,6 +47,7 @@ class Executable(models.Model):
     pbs_executable_path = models.CharField(max_length=1000, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    remote_queue = models.CharField(max_length=255, default='pbs')
     pbs_processor = models.CharField(max_length=255, default='vmem=6g')
     pbs_walltime = models.CharField(max_length=255, default='walltime=5:00:00')
     pbs_queue = models.CharField(max_length=255, default='lims')

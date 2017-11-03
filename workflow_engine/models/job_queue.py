@@ -71,7 +71,7 @@ class JobQueue(models.Model):
         try:
             results = WorkflowNode.objects.filter(job_queue=self)
         except Exception as e:
-            result = []
+            results = []
 
         return results
 

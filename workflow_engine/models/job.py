@@ -109,6 +109,7 @@ class Job(models.Model):
         self.save()
 
     def has_failed_tasks(self):
+        _model_logger.info('has failed tasks')
         has_failed = False
         tasks = self.get_tasks()
         for task in tasks:
@@ -118,6 +119,7 @@ class Job(models.Model):
         return has_failed
 
     def can_rerun(self):
+        _model_logger.info('can rerun')
         run_state_name = self.run_state.name
         return (run_state_name == 'PENDING' or
                 run_state_name == 'FAILED' or
@@ -126,15 +128,18 @@ class Job(models.Model):
                 run_state_name == 'FAILED_EXECUTION')
 
     def set_pending_state(self):
+        _model_logger.info('set pending')
         self.run_state = RunState.get_pending_state()
         self.save()
 
     def set_failed_state(self):
+        _model_logger.info('set failed')
         self.run_state = RunState.get_failed_state()
         self.save()
         self.run_jobs()
 
     def set_failed_execution_state(self):
+        _model_logger.info('set failed execution')
         self.run_state = RunState.get_failed_execution_state()
         self.save()
         self.run_jobs()
@@ -144,15 +149,18 @@ class Job(models.Model):
             self.set_running_state()
 
     def set_running_state(self):
+        _model_logger.info('set running')
         self.run_state = RunState.get_running_state()
         self.save()
 
     def set_success_state(self):
+        _model_logger.info('set success')
         self.run_state = RunState.get_success_state()
         self.save()
         self.run_jobs()
 
     def set_process_killed_state(self):
+        _model_logger.info('set process_killed')
         self.run_state = RunState.get_process_killed_state()
         self.save()
         self.run_jobs()
@@ -243,6 +251,7 @@ class Job(models.Model):
             self.set_for_run()
 
     def set_for_run(self):
+        _model_logger.info('set for run')
         self.set_pending_state()
         self.run_jobs()
 
@@ -252,6 +261,7 @@ class Job(models.Model):
         strategy.prep_job(self)
 
     def run(self):
+        _model_logger.info('run')
         try:
             self.set_queued_state()
 
@@ -273,6 +283,7 @@ class Job(models.Model):
             self.set_failed_state()
 
     def run_jobs(self):
+        _model_logger.info('run jobs')
         self.workflow_node.run_workflow_node_jobs()
 
     def get_start_run_time(self):
@@ -311,6 +322,7 @@ class Job(models.Model):
         self.save()
 
     def enqueue_next_queue(self):
+        _model_logger.info('enqueue_next_queue')
         children = self.workflow_node.get_children()
         for child in children:
             strategy = child.get_strategy()
@@ -340,7 +352,7 @@ class Job(models.Model):
 
                             index += ONE
                     else:
-                        #create the job if needed
+                        # create the job if needed
                         job = Job(enqueued_object_id=enqueued_object.id,
                                   workflow_node=child,
                                   run_state=RunState.get_pending_state(),
@@ -349,8 +361,9 @@ class Job(models.Model):
                         job.set_for_run()
 
 
-    #check if all tasks have finished
+    # check if all tasks have finished
     def all_tasks_finished(self):
+        _model_logger.info('check all tasks finished')
         all_finished = True
 
         for task in self.get_tasks():

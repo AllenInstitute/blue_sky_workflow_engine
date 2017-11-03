@@ -38,11 +38,10 @@ from django.core.exceptions import ObjectDoesNotExist
 from workflow_engine.workflow_config import WorkflowConfig
 import logging
 
-_log = logging.getLogger(
-    'workflow_engine.mananagement.commands.import_workflows')
-
 
 class Command(BaseCommand):
+    _log = logging.getLogger(
+    'workflow_engine.mananagement.commands.import_workflows')
     help = 'Import Workflow Definitions from YAML'
 
     def add_arguments(self, parser):
@@ -55,8 +54,8 @@ class Command(BaseCommand):
 
         try:
             WorkflowConfig.create_workflow(file_path)
-
         except Exception as e:
-            _log.error('Something went wrong: ' + str(e))
+            Command._log.error('Something went wrong: ' + str(e))
+            raise(e)
 
        
