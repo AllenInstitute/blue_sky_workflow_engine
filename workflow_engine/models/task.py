@@ -82,7 +82,10 @@ class Task(models.Model):
         self.job.set_error_message(self.error_message, self)
 
     def pbs_task(self):
-        return self.job.workflow_node.workflow.use_pbs
+        pbs_workflow = self.job.workflow_node.workflow.use_pbs
+        pbs_executable = self.get_job_queue().executable.remote_queue == 'pbs'
+
+        return pbs_executable or pbs_workflow
 
     def kill_task(self):
         self.set_process_killed_state()
