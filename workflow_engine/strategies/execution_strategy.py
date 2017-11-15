@@ -144,8 +144,11 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
             self.set_error_message_from_log(task)
             self.on_failure(task)
         except Exception as e:
-            task.set_error_message(
-                str(e) + ' - ' + str(traceback.format_exc()))
+            err_msg = '%s - %s' % (
+                str(e),
+                str(traceback.format_exc()))
+            ExecutionStrategy.log.info(err_msg) 
+            task.set_error_message(err_msg)
 
         task.set_failed_execution_state()
         task.set_end_run_time()
@@ -226,56 +229,42 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
         task.clear_error_message()
 
         if self.skip_execution(task.get_enqueued_object()):
+            # TODO: make this a "skip" remote queue
             ExecutionStrategy._log.info('skipping execution')
             self.running_task(task)
             self.finish_task(task)
         else:
+            remote_queue = self.get_remote_queue(task)
+            use_pbs = False
             if task.pbs_task():
+                use_pbs = True
                 ExecutionStrategy._log.info('pbs task')
+
                 pbs_file = self.get_pbs_file(task)
                 task.create_pbs_file(pbs_file)
+
                 executable = 'qsub ' + pbs_file
-                if hasattr(settings, 'CELERY_MESSAGE_QUEUE_NAME'):
-                    ExecutionStrategy._log.info(
-                        'apply async qsub celery queue: %s' % (
-                            settings.CELERY_MESSAGE_QUEUE_NAME))
-                    run_celery_task.apply_async(
-                        args=[executable,
-                              task.id,
-                              task.log_file,
-                              True],
-                        queue = settings.CELERY_MESSAGE_QUEUE_NAME)
-                else:
-                    ExecutionStrategy._log.info(
-                        'delay celery default queue')
-                    run_celery_task.delay(executable,
-                                          task.id,
-                                          task.log_file,
-                                          True)
+                queue_name = settings.PBS_MESSAGE_QUEUE_NAME
+            elif 'spark' == remote_queue:
+                queue_name = settings.SPARK_MESSAGE_QUEUE_NAME
             else:
+                queue_name = settings.MESSAGE_QUEUE_NAME
                 executable = self.add_write_to_log_command(
                     task.full_executable, task.log_file)
 
-                remote_queue = self.get_remote_queue(task)
+            ExecutionStrategy._log.info(
+                'apply async celery queue: %s' % (queue_name))
+            result = run_celery_task.apply_async(
+                args=[executable,
+                      task.id,
+                      task.log_file,
+                      use_pbs],
+                queue=queue_name)
+            ExecutionStrategy._log.info(
+                'queue result: %s %s\n%s' % (result.status,
+                                             str(result.result),
+                                             str(result)))
 
-                if 'spark' == remote_queue:
-                    queue_name = settings.SPARK_MESSAGE_QUEUE_NAME
-                else:
-                    queue_name = settings.MESSAGE_QUEUE_NAME
-
-                ExecutionStrategy._log.info(
-                    'apply async celery queue: %s' % (queue_name))
-                result = run_celery_task.apply_async(
-                    args=[executable,
-                          task.id,
-                          task.log_file,
-                          False],
-                    queue=queue_name)
-                ExecutionStrategy._log.info(
-                    'queue result: %s %s\n%s' % (result.status,
-                                                 str(result.result),
-                                                 str(result)))
-                
     # this method creates the input file
     # Do not override
     def create_input_file(self,

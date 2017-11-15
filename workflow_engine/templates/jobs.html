@@ -33,7 +33,7 @@
 	<tr class="wf_tr">
 	<td class="wf_td class_job_id" id='{{record.id}}'>{{record.id}}</td>
 	<td class="wf_td">{{record.enqueued_object_id}}</td>
-	<td class="wf_td">{{record.get_enqueued_object}}</td>
+	<td class="wf_td">TODO: fix<!--{record.get_enqueued_object}--></td>
 	<td class="wf_td" id="duration_{{ record.id }}">{{record.get_duration}}</td>
 	<td class="wf_td"><a class='link_to_page' href="/workflow_engine/workflows?workflow_ids={{ record.workflow_node.workflow.id }}">{{record.workflow_node.workflow.name}}</a></td>
 	<td class="wf_td"><a class='link_to_page' href="/workflow_engine/job_queues?job_queue_ids={{ record.workflow_node.job_queue.id }}">{{record.workflow_node.job_queue.name}}</a></td>

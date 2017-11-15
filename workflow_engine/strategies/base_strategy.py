@@ -131,8 +131,6 @@ class BaseStrategy(object):
 
     # Do not override
     def check_if_manual_jobs_finished(self):
-        # from workflow_engine.models import Task
-        # from workflow_engine.models import RunState
         tasks = Task.objects.filter(run_state=RunState.get_running_state(),
                                     archived=False)
         for task in tasks:

@@ -85,7 +85,11 @@ class Task(models.Model):
         pbs_workflow = self.job.workflow_node.workflow.use_pbs
         pbs_executable = self.get_job_queue().executable.remote_queue == 'pbs'
 
-        return pbs_executable or pbs_workflow
+        is_pbs = pbs_executable or pbs_workflow 
+        _model_logger.info("pbs_task: %s" % (is_pbs))
+
+        return is_pbs
+
 
     def kill_task(self):
         self.set_process_killed_state()
@@ -99,14 +103,16 @@ class Task(models.Model):
     def get_start_run_time(self):
         result = None
         if self.start_run_time != None:
-            result = timezone.localtime(self.start_run_time).strftime('%m/%d/%Y %I:%M:%S')
+            result = timezone.localtime(
+                self.start_run_time).strftime('%m/%d/%Y %I:%M:%S')
 
         return result
 
     def get_end_run_time(self):
         result = None
         if self.end_run_time != None:
-            result = timezone.localtime(self.end_run_time).strftime('%m/%d/%Y %I:%M:%S')
+            result = timezone.localtime(
+                self.end_run_time).strftime('%m/%d/%Y %I:%M:%S')
 
         return result
 
@@ -256,6 +262,7 @@ class Task(models.Model):
     def get_umask(self):
         return '022'
 
+    # TODO: replace this with a Jinja template?
     def get_pbs_commands(self):
         executable = self.get_executable()
 
@@ -269,9 +276,15 @@ class Task(models.Model):
         commands.append('#PBS -r n') # Not re-runable
         commands.append('#PBS -j oe') # Join error and output streams
         commands.append('#PBS -o ' + self.log_file)
+        #conda_environment = 'root'
+        #commands.append('source /opt/conda/bin/activate %s' % (conda_environment))
+        activate = '/shared/utils.x86_64/python-2.7/bin/activate'
+        # conda_environment = '/allen/aibs/pipeline/image_processing/volume_assembly/conda_envs/volume_assembly/render-modules_linked'
+        conda_environment = '/data/aibstemp/timf/example_data/blue_sky_27'
+        commands.append('source %s %s' % (activate, conda_environment))
         commands.append(self.full_executable)
         commands.append('rtn_code=$?')
-        commands.append('/shared/utils.x86_64/python-2.7/bin/python ' + settings.PBS_FINISH_PATH + ' $rtn_code ' + str(self.id))
+        commands.append('python ' + settings.PBS_FINISH_PATH + ' $rtn_code ' + str(self.id))
 
         return commands
 
