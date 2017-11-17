@@ -34,8 +34,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 from workflow_engine.models import *
-from execution_runner import run_celery_task
-from execution_runner import cancel_task
+from workflow_client.worker_client import run_celery_task, cancel_task
 from workflow_engine.strategies import base_strategy
 from django.conf import settings
 

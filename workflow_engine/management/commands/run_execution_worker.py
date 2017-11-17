@@ -54,6 +54,7 @@ class Command(BaseCommand):
     PBS_ID = 2
 
 
+    # TODO: change this to use workflow_client.ingest_client
     def handle(self, *args, **options):
         logging.basicConfig(level=logging.INFO)
         logging.getLogger('run_execution_worker').setLevel(logging.INFO)
