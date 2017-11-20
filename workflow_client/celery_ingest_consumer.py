@@ -33,12 +33,15 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-from celery import Celery 
+from celery import Celery, shared_task 
 from kombu import Exchange, Queue, binding
 from workflow_client.client_settings import settings, config_object
 from workflow_engine.workflow_config import WorkflowConfig
+from workflow_engine.import_class import import_class
 import logging
+import os
 
+_log = logging.getLogger('workflow_client.celery_ingest_consumer')
 
 def load_workflow_config(yaml_file):
     workflow_config = WorkflowConfig.from_yaml_file(yaml_file)
@@ -89,22 +92,39 @@ def route_task(name, args, kwargs, options, task=None, **kw):
         else:
             return { 'queue': 'null' }
 
-app_name = 'workflow_client.celery_ingest_consumer'
-app = Celery(app_name)
-app.config_from_object(config_object(settings))
-workflows = load_workflow_config(settings.WORKFLOW_CONFIG_YAML)
-configure_task_queues(app, 'at_em_imaging_workflow', workflows)
-app.conf.task_routes = [route_task]
+def ingest_consumer(): 
+    app_name = 'workflow_client.celery_ingest_consumer'
+    app = Celery(app_name)
+    app.config_from_object(config_object(settings))
+    workflows = load_workflow_config(settings.WORKFLOW_CONFIG_YAML)
+    configure_task_queues(app, 'at_em_imaging_workflow', workflows)
+    app.conf.task_routes = [route_task]
+
+    return app
+
+app = ingest_consumer()
+
+# if os.environ.get('DJANGO_SETTINGS_MODULE', None) is not None:
+#     from django.conf import settings as django_settings
+#     django_settings.configure()
+#     app.autodiscover_tasks(lambda: django_settings.INSTALLED_APPS) 
+
 
 @app.task(bind=True)
-def ingest_task(self, name, args):
-    ret = None
-
+def ingest_task(self, workflow, message):
+    ret = 'YAY'
+ 
     try: 
-        ret = 'Yay'
+        _log.info('ingest ' + str(workflow) + ' ' + str(message))
+
+        clz = import_class(
+            'development.strategies.lens_correction_ingest.LensCorrectionIngest')
+        ingest_strategy = clz()
+        ret = ingest_strategy.ingest_message(message)
         self.update_state(state="SUCCESS")
-    except:
-        self.update_state(state="FAIL")
+    except e:
+        self.update_state(state="FAILURE")
+        ret = "YUCK" + str(e)
 
     return ret
 
@@ -127,8 +147,9 @@ def success(msg):
 
 @app.task
 def fail(uuid):
-    e = result.get(propagate=False)
-    print('Error: %s %s %s' % (uuid, e, e.traceback))
+    # e = result.get(propagate=False)
+    # print('Error: %s %s %s' % (uuid, e, e.traceback))
+    print('error')
 
 def on_raw_message(body):
     print(body)

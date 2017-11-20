@@ -33,32 +33,24 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-import os
-import simplejson as json
-from workflow_client.ingest_consumer import IngestConsumer
-from workflow_engine.models import RunState, Task, Workflow
 from workflow_engine.models.import_class import import_class
 from django.core.management.base import BaseCommand, CommandError
-from django.core.exceptions import ObjectDoesNotExist
-from django.conf import settings
+#from django.core.exceptions import ObjectDoesNotExist
+#from django.conf import settings
 import logging
 import traceback
 
 
-def callback(ch, method, properties, body):
-    Command.cb(ch, method, properties, body)
-
 class Command(BaseCommand):
     help = 'ingest handler for the message queues'
     _log = logging.getLogger(
-        'workflow_engine.management.commands.ingest')
-    _default_callback = callback
-    _callback = _default_callback
-
-    def set_callback(callback_fn):
-        Command._callback = callback_fn
+        'workflow_engine.management.commands.server_worker')
 
     def handle(self, *args, **options):
+        logging.basicConfig(level=logging.INFO)
+        logging.getLogger('workflow_engine').setLevel(logging.INFO)
+        logging.getLogger('workflow_client').setLevel(logging.INFO)
+
         from workflow_client.celery_ingest_consumer import app
         app.start(argv=[
             'celery', 
@@ -69,36 +61,3 @@ class Command(BaseCommand):
             '-Q', 'ingest,result,null',
             '-n', 'ingest@at_em_imaging_workflow',
             '--pidfile=ingest.pid'])
-
-    def handle_old(self, *args, **options):
-        logging.basicConfig(level=logging.INFO)
-        logging.getLogger(
-            'development.management.commands.ingest_reference_set').setLevel(
-                logging.INFO)
-
-        with IngestConsumer(
-            settings.MESSAGE_QUEUE_HOST,
-            settings.MESSAGE_QUEUE_PORT,
-            settings.MESSAGE_QUEUE_USER,
-            settings.MESSAGE_QUEUE_PASSWORD,
-            '', settings.INGEST_MESSAGE_QUEUE_NAME) as c:
-            c.consume(callback)
-
-
-    @classmethod
-    def cb(cls, ch, method, properties, body):
-        body = body.decode("utf-8") 
-        Command._log.info(" [x] Received " + str(body))
-
-        try:
-            body_data = json.loads(body)
-            Command._log.info(body_data)
-            ingester = import_class(settings.INGEST_STRATEGY)
-            workflow, enqueued_object = \
-                ingester.create_enqueued_object(body_data)
-            Workflow.start_workflow(workflow,
-                                    enqueued_object)
-        except Exception as e:
-            Command._log.error(
-                'Something went wrong: ' + traceback.print_exc(e))
-
