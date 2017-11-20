@@ -33,43 +33,30 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-import pika
-import simplejson as json
-import logging
+import pytest
+from mock import patch, mock, mock_open
+import os
+try:
+    import __builtin__ as builtins  # @UnresolvedImport
+except:
+    import builtins  # @UnresolvedImport
 
+@mock.patch.dict(os.environ, {'BLUE_SKY_SETTINGS': '/path/to/settings.yml'})
+def test_client_settings():
+    cfg = '''\
+MESSAGE_QUEUE_HOST: message_queue.example.org
+MESSAGE_QUEUE_PORT: 222
+MESSAGE_QUEUE_USER: blue_sky_test_user
+MESSAGE_QUEUE_PASSWORD: blue_sky_test_user
+CELERY_MESSAGE_QUEUE_NAME: celery_application_name
+'''
 
-class IngestClient(object):
-    _log = logging.getLogger('workflow_client.ingest_client')
+    with patch(builtins.__name__ + ".open",
+               mock_open(read_data=cfg)):
+        from workflow_client.client_settings import settings
 
-    def __init__(self,
-                 host, port,
-                 user, password,
-                 exchange, route_key):
-        self.connection = pika.BlockingConnection(
-            pika.ConnectionParameters(
-                host, port, '/',
-                pika.PlainCredentials(user, password)))
-        self.exchange = exchange
-        self.route_key = route_key
-
-    def __enter__(self):
-        self.channel = self.connection.channel()
-        return self
-
-    def __exit__(self, type, value, traceback):
-        self.connection.close()
-
-    def send_json(self, json_string):
-        self.channel.basic_publish(exchange=self.exchange,
-                                   routing_key=self.route_key,
-                                   body=json_string)
-        IngestClient._log.info("Sent '%s'" % (json_string))
-
-    def send_as_json(self, data_dict):
-        self.send_json(json.dumps(data_dict))
-
-    def send(self, body_data):
-        self.channel.basic_publish(exchange=self.exchange,
-                                   routing_key=self.route_key,
-                                   body=body_data)
-        IngestClient._log.info("Sent '%s'" % (body_data))
+    assert settings.MESSAGE_QUEUE_HOST == 'message_queue.example.org'
+    assert settings.MESSAGE_QUEUE_PORT == 222
+    assert settings.MESSAGE_QUEUE_USER == 'blue_sky_test_user'
+    assert settings.MESSAGE_QUEUE_PASSWORD == 'blue_sky_test_user'
+    assert settings.CELERY_MESSAGE_QUEUE_NAME == 'celery_application_name'

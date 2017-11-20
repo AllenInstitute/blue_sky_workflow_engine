@@ -41,6 +41,7 @@ from .job import Job
 from .run_state import RunState
 from . import ONE, ZERO, TWO, SECONDS_IN_MIN
 from .import_class import import_class
+import os
 import logging
 _model_logger = logging.getLogger('workflow_engine.models')
 
@@ -266,6 +267,7 @@ class Task(models.Model):
     def get_pbs_commands(self):
         executable = self.get_executable()
 
+        # TODO: replace this with a Jinja2 template
         commands = []
         commands.append('#!/bin/bash')
         commands.append('#PBS -q ' + executable.pbs_queue)
@@ -278,13 +280,20 @@ class Task(models.Model):
         commands.append('#PBS -o ' + self.log_file)
         #conda_environment = 'root'
         #commands.append('source /opt/conda/bin/activate %s' % (conda_environment))
-        activate = '/shared/utils.x86_64/python-2.7/bin/activate'
+        # activate = '/shared/utils.x86_64/python-2.7/bin/activate'
         # conda_environment = '/allen/aibs/pipeline/image_processing/volume_assembly/conda_envs/volume_assembly/render-modules_linked'
-        conda_environment = '/data/aibstemp/timf/example_data/blue_sky_27'
-        commands.append('source %s %s' % (activate, conda_environment))
+        # conda_environment = '/data/aibstemp/timf/example_data/blue_sky_27'
+        commands.append('source %s %s' % (
+           os.path.join(settings.PBS_CONDA_HOME, 'bin/activate'), 
+           settings.PBS_CONDA_ENV))
         commands.append(self.full_executable)
         commands.append('rtn_code=$?')
-        commands.append('python ' + settings.PBS_FINISH_PATH + ' $rtn_code ' + str(self.id))
+        commands.append(
+            'export PYTHONPATH=' +
+            settings.PBS_PYTHONPATH)
+        commands.append(
+            'BLUE_SKY_SETTINGS=' + settings.BLUE_SKY_SETTINGS + ' ' + 
+            'python -m' + settings.PBS_FINISH_MODULE + ' $rtn_code ' + str(self.id))
 
         return commands
 
