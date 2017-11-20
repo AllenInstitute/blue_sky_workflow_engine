@@ -43,14 +43,15 @@ except:
 
 @mock.patch.dict(os.environ, {'BLUE_SKY_SETTINGS': '/path/to/settings.yml'})
 def test_client_settings():
+    # TODO: make into a fixture
     cfg = '''\
 MESSAGE_QUEUE_HOST: message_queue.example.org
 MESSAGE_QUEUE_PORT: 222
 MESSAGE_QUEUE_USER: blue_sky_test_user
 MESSAGE_QUEUE_PASSWORD: blue_sky_test_user
 CELERY_MESSAGE_QUEUE_NAME: celery_application_name
+DEFAULT_MESSAGE_QUEUE_NAME: null_application_name
 '''
-
     with patch(builtins.__name__ + ".open",
                mock_open(read_data=cfg)):
         from workflow_client.client_settings import settings

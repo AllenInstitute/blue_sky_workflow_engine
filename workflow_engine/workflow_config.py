@@ -1,7 +1,5 @@
 import yaml
 import logging
-from workflow_engine.models import \
-    Workflow, Executable, WorkflowNode, JobQueue, RunState
 
 
 class WorkflowConfig:
@@ -92,10 +90,13 @@ class WorkflowConfig:
 
     @classmethod
     def create_workflow(cls, workflows_yml):
+        from workflow_engine.models import \
+            Workflow, Executable, WorkflowNode, JobQueue, RunState
+
         pbs_queue = 'mindscope'
         pbs_processor = 'vmem=16g',
         pbs_walltime = 'walltime=5:00:00'
-        wc = cls.from_yaml_file(workflows_yml)
+        workflow_config = cls.from_yaml_file(workflows_yml)
         
         null_executable, created = \
             Executable.objects.get_or_create(
@@ -111,7 +112,7 @@ class WorkflowConfig:
 
         executables = { 'None': null_executable}
         
-        for k, e in wc['executables'].items():
+        for k, e in workflow_config['executables'].items():
             if 'args' in e:
                 args = ' '.join(e['args'])
             else:
@@ -129,11 +130,11 @@ class WorkflowConfig:
                         'pbs_processor': e['pbs_processor'],
                         'pbs_walltime': e['pbs_walltime']})
         
-        for run_state_name in wc['run_states']:
+        for run_state_name in workflow_config['run_states']:
             RunState.objects.update_or_create(
                 name=run_state_name)
     
-        for workflow_spec in wc['flows']:
+        for workflow_spec in workflow_config['flows']:
             workflow_name = workflow_spec.name
     
             workflow, _ = \
