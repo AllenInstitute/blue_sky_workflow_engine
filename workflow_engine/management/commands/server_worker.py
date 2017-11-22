@@ -57,7 +57,7 @@ class Command(BaseCommand):
             '-A', 'workflow_client.celery_ingest_consumer',
             'worker',
             '--loglevel=debug',
+            '--logfile=logs/server_worker.log',
             '--concurrency=2',
             '-Q', 'ingest,result,null',
-            '-n', 'ingest@at_em_imaging_workflow',
-            '--pidfile=ingest.pid'])
+            '-n', 'ingest@at_em_imaging_workflow'])

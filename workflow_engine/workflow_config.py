@@ -5,8 +5,9 @@ import logging
 class WorkflowConfig:
     _log = logging.getLogger('workflow_engine.workflow_config')
 
-    def __init__(self, n, s, g, l):
+    def __init__(self, n, i, s, g, l):
         self.name = n
+        self.ingest_strategy = i
         self.states = s
         self.state_list = l
         self.num_states = len(s)
@@ -26,12 +27,12 @@ class WorkflowConfig:
             if 'remote_queue' not in e:
                 e['remote_queue'] = 'default'
 
-        workflow_definition = definition['workflows']
+        workflow_definitions = definition['workflows']
 
-        for k,v in workflow_definition.items():
+        for k,wf_def in workflow_definitions.items():
             parents = {}
             
-            for gs in v['graph']:
+            for gs in wf_def['graph']:
                 parent = gs[0]
                 children = gs[1]
                 for child in children:
@@ -39,7 +40,7 @@ class WorkflowConfig:
             
             states = {}
             state_list = []
-            for s in v['states']:
+            for s in wf_def['states']:
                 state = {
                     'key': s['key'], 
                     'label': s['label'],
@@ -77,8 +78,10 @@ class WorkflowConfig:
                 states[s['key']] = state
                 state_list.append(s['key'])
 
+            ingest = wf_def.get('ingest', None)
+
             workflows['flows'].append(
-                cls(k, states, v['graph'], state_list))
+                cls(k, ingest, states, wf_def['graph'], state_list))
 
         return workflows
 
@@ -142,6 +145,7 @@ class WorkflowConfig:
                     name=workflow_name,
                     defaults={
                         'description': 'N/A',
+                        'ingest_strategy_class': workflow_spec.ingest_strategy,
                         'use_pbs': False})
                 
             nodes = {}
@@ -151,7 +155,8 @@ class WorkflowConfig:
             for k in workflow_spec.state_list:
                 node = workflow_spec.states[k]
                 
-                queue_name = '%s %s' % (workflow_name, node['label'])
+                queue_name = node['label'] # TODO: check for uniqueness
+
                 WorkflowConfig._log.info(
                     "Creating job queue %s %s %s %s" % (
                         queue_name,

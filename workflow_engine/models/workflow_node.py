@@ -56,7 +56,10 @@ class WorkflowNode(models.Model):
     max_retries = models.IntegerField(default=3)
 
     def __str__(self):
-        return self.get_node_name()
+        return self.get_node_short_name()
+
+    def get_node_short_name(self):
+        return self.job_queue.name
 
     def get_node_name(self):
         return self.job_queue.name + '(' + str(self.get_total_number_of_jobs()) + ') ' + str(self.get_number_of_queued_and_running_jobs()) + ' / '+ str(self.batch_size)

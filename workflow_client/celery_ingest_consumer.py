@@ -51,6 +51,14 @@ def load_workflow_config(yaml_file):
         for workflow_spec in workflow_config['flows']
     }
 
+def load_workflow_config2(yaml_file):
+    workflow_config = WorkflowConfig.from_yaml_file(yaml_file)
+
+    return { 
+        workflow_spec.name: workflow_spec.ingest_strategy
+        for workflow_spec in workflow_config['flows']
+    }
+
 
 def configure_task_queues(app, name, workflows):
     task_queues = []
@@ -96,47 +104,53 @@ def ingest_consumer():
     app_name = 'workflow_client.celery_ingest_consumer'
     app = Celery(app_name)
     app.config_from_object(config_object(settings))
-    workflows = load_workflow_config(settings.WORKFLOW_CONFIG_YAML)
-    configure_task_queues(app, 'at_em_imaging_workflow', workflows)
+    workflow_config = load_workflow_config(settings.WORKFLOW_CONFIG_YAML)
+    # TODO: parametrize literal
+    configure_task_queues(app, 'at_em_imaging_workflow', workflow_config)
     app.conf.task_routes = [route_task]
 
     return app
 
 app = ingest_consumer()
 
-# if os.environ.get('DJANGO_SETTINGS_MODULE', None) is not None:
-#     from django.conf import settings as django_settings
-#     django_settings.configure()
-#     app.autodiscover_tasks(lambda: django_settings.INSTALLED_APPS) 
-
 
 @app.task(bind=True)
 def ingest_task(self, workflow, message):
-    ret = 'YAY'
- 
+    ret = 'OK'
+
     try: 
         _log.info('ingest ' + str(workflow) + ' ' + str(message))
+        ingest_strategies = load_workflow_config2(
+            '/data/aibstemp/timf/example_data/workflow_config.yml')
 
-        clz = import_class(
-            'development.strategies.lens_correction_ingest.LensCorrectionIngest')
+        _log.info('workflow %s' % (ingest_strategies))
+
+        # TODO: something better here
+        ingest_strategy_class_name = ingest_strategies[workflow]
+        _log.info('workflow strategy class: %s' % (ingest_strategy_class_name))
+
+        clz = import_class(ingest_strategy_class_name)
         ingest_strategy = clz()
+
         ret = ingest_strategy.ingest_message(message)
         self.update_state(state="SUCCESS")
-    except e:
+    except Exception as e:
         self.update_state(state="FAILURE")
-        ret = "YUCK" + str(e)
+        ret = "FAIL" + str(e)
 
     return ret
 
 
+# TODO: migrate this from the other worker
 @app.task(bind=True)
 def run_task(self, name, args):
     ret = None
 
     try: 
-        ret = 'Yay'
+        ret = 'OK'
         self.update_state(state="SUCCESS")
     except:
+        ret = 'FAIL'
         self.update_state(state="FAIL")
 
     return ret

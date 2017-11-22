@@ -60,6 +60,19 @@ class IngestStrategy(base_strategy.BaseStrategy):
         Workflow.start_workflow(self.get_workflow_name(),
                                 enqueued_object)
 
+    def call_ingest_strategy(wf_name, message):
+        wf = Workflow.objects.get(name=workflow)
+        _log.info('ingest ' + str(wf) + ' ' + str(message))
+
+        ingest_strategy_class_name = workflow_object.ingest_strategy_class
+        _log.info('workflow strategy class: %s' % (ingest_strategy_class_name))
+
+        clz = import_class(workflow_ingest_strategies[workflow])
+        ingest_strategy = clz()
+
+        return ingest_strategy.ingest_message(message)
+
+
     def ingest_message(self, message):
         enqueued_object = self.create_enqueued_object(message)
         ret = self.generate_response(enqueued_object)

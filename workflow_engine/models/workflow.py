@@ -42,6 +42,7 @@ _model_logger = logging.getLogger('workflow_engine.models')
 class Workflow(models.Model):
     name = models.CharField(max_length=255)
     description = models.CharField(max_length=255, null=True)
+    ingest_strategy_class = models.CharField(max_length=255, null=True)
     disabled = models.BooleanField(default=False)
     use_pbs = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
