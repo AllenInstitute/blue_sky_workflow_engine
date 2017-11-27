@@ -36,6 +36,7 @@
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from workflow_engine.models import ZERO, ONE
 import os
 import logging
 _model_logger = logging.getLogger('workflow_engine.models')
@@ -119,3 +120,6 @@ class WellKnownFile(models.Model):
             result = None
 
         return result
+
+
+from .file_record import FileRecord

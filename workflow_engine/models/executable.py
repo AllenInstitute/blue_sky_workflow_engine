@@ -43,6 +43,7 @@ class Executable(models.Model):
     name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=255, null=True)
     static_arguments = models.CharField(max_length=255, null=True)
+    environment = models.CharField(max_length=1000, null=True)
     executable_path = models.CharField(max_length=1000)
     pbs_executable_path = models.CharField(max_length=1000, null=True)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -55,3 +55,5 @@ class FileRecord(models.Model):
 
     def get_full_name(self):
         return os.path.join(self.storage_directory, self.filename)
+
+

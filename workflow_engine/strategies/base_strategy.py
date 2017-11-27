@@ -36,10 +36,11 @@
 from workflow_engine.models import Task, RunState, WellKnownFile
 from django.conf import settings
 import subprocess
-
+import logging
 import os
 
 class BaseStrategy(object):
+    _log = logging.getLogger('workflow_engine.strategies.base_strategy')
     # 
     # everthing bellow this can be overriden
     #
@@ -73,6 +74,8 @@ class BaseStrategy(object):
     # override if needed
     def get_storage_directory(self, base_storage_directory, job):
         enqueued_object = job.get_enqueued_object()
+        BaseStrategy._log.info('get_storage_directory: %s, %s:' % (
+            base_storage_directory, str(enqueued_object.id)))
         return os.path.join(base_storage_directory, str(enqueued_object.id))
 
     # override if needed

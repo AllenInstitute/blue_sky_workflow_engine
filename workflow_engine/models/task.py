@@ -82,6 +82,14 @@ class Task(models.Model):
         self.save()
         self.job.set_error_message(self.error_message, self)
 
+
+    def environment_vars(self):
+        '''
+            returns: environment variable list in form VAR=val
+        '''
+        return self.get_job_queue().executable.environment.split(';')
+        
+
     def pbs_task(self):
         pbs_workflow = self.job.workflow_node.workflow.use_pbs
         pbs_executable = self.get_job_queue().executable.remote_queue == 'pbs'
@@ -267,7 +275,15 @@ class Task(models.Model):
     def get_pbs_commands(self):
         executable = self.get_executable()
 
-        # TODO: replace this with a Jinja2 template
+        # TODO: replace commands with a Jinja2 template
+        # def get_template(self): 
+        # env = jinja2.Environment(
+        #    loader=jinja2.PackageLoader('development.strategies',
+        #                                'templates'))
+        # return env.get_template('generate_point_matches_template.json')
+        # return json.loads(
+        #     input_data_template.render(
+        #         render_service_port=port))
         commands = []
         commands.append('#!/bin/bash')
         commands.append('#PBS -q ' + executable.pbs_queue)
@@ -278,22 +294,23 @@ class Task(models.Model):
         commands.append('#PBS -r n') # Not re-runable
         commands.append('#PBS -j oe') # Join error and output streams
         commands.append('#PBS -o ' + self.log_file)
-        #conda_environment = 'root'
-        #commands.append('source /opt/conda/bin/activate %s' % (conda_environment))
-        # activate = '/shared/utils.x86_64/python-2.7/bin/activate'
-        # conda_environment = '/allen/aibs/pipeline/image_processing/volume_assembly/conda_envs/volume_assembly/render-modules_linked'
-        # conda_environment = '/data/aibstemp/timf/example_data/blue_sky_27'
+        for e in self.environment_vars():
+            commands.append("export %s" % (e)) 
         commands.append('source %s %s' % (
            os.path.join(settings.PBS_CONDA_HOME, 'bin/activate'), 
            settings.PBS_CONDA_ENV))
         commands.append(self.full_executable)
         commands.append('rtn_code=$?')
+        commands.append('source %s %s' % (
+           os.path.join(settings.PBS_CONDA_HOME, 'bin/activate'), 
+           settings.PBS_RESPONSE_CONDA_ENV))
         commands.append(
             'export PYTHONPATH=' +
             settings.PBS_PYTHONPATH)
         commands.append(
             'BLUE_SKY_SETTINGS=' + settings.BLUE_SKY_SETTINGS + ' ' + 
-            'python -m' + settings.PBS_FINISH_MODULE + ' $rtn_code ' + str(self.id))
+            'python -m' + settings.PBS_FINISH_MODULE + \
+            ' $rtn_code ' + str(self.id))
 
         return commands
 
