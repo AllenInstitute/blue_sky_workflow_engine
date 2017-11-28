@@ -13,10 +13,21 @@ with open('requirements.txt', 'r') as f:
 with open('test_requirements.txt', 'r') as f:
     test_required = f.read().splitlines()
 
+def prepend_find_packages(*roots):
+    ''' Recursively traverse nested packages under the root directories
+    '''
+    packages = []
+    
+    for root in roots:
+        packages += [root]
+        packages += [root + '.' + s for s in find_packages(root)]
+        
+    return packages
+
 setup(
     name='django-blue-sky-workflow-engine',
     version='0.120',
-    packages=find_packages(),
+    packages=prepend_find_packages('workflow_engine', 'workflow_client'),
     include_package_data=True,
     license='Allen Institute Software License',
     description='Blue Sky Workflow Engine',

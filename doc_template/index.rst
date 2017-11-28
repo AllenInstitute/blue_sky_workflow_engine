@@ -19,6 +19,7 @@ Welcome to the Blue Sky Workflow Engine
    examples
    authors
    Source Documentation <workflow_engine>
+   Client Documentation <workflow_client>
    Github Profile <https://github.com/AllenInstitute/BlueSkyWorkflowEngine>
    
 
