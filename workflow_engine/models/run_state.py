@@ -44,48 +44,50 @@ class RunState(models.Model):
     def __str__(self):
         return self.name
 
-    @staticmethod
-    def is_failed_type_state(job_state_name):
+    @classmethod
+    def is_failed_type_state(cls, job_state_name):
         return (
-            job_state_name == RunState.get_failed_execution_state().name or
-            job_state_name == RunState.get_failed_state().name or
-            job_state_name == RunState.get_process_killed_state().name)
+            job_state_name == cls.get_failed_execution_state().name or
+            job_state_name == cls.get_failed_state().name or
+            job_state_name == cls.get_process_killed_state().name)
 
-    def is_running_type_state(job_state_name):
+    # TODO: make class method
+    @classmethod
+    def is_running_type_state(cls, job_state_name):
         return (
-            job_state_name == RunState.get_pending_state().name or
-            job_state_name == RunState.get_running_state().name or
-            job_state_name == RunState.get_queued_state().name or
-            job_state_name == RunState.get_finished_execution_state().name)
+            job_state_name == cls.get_pending_state().name or
+            job_state_name == cls.get_running_state().name or
+            job_state_name == cls.get_queued_state().name or
+            job_state_name == cls.get_finished_execution_state().name)
 
-    @staticmethod
-    def get_pending_state():
-        return RunState.objects.get(name='PENDING')
+    @classmethod
+    def get_pending_state(cls):
+        return cls.objects.get(name='PENDING')
 
-    @staticmethod
-    def get_running_state():
-        return RunState.objects.get(name='RUNNING')
+    @classmethod
+    def get_running_state(cls):
+        return cls.objects.get(name='RUNNING')
 
-    @staticmethod
-    def get_finished_execution_state():
-        return RunState.objects.get(name='FINISHED_EXECUTION')
+    @classmethod
+    def get_finished_execution_state(cls):
+        return cls.objects.get(name='FINISHED_EXECUTION')
 
-    @staticmethod
-    def get_failed_execution_state():
-        return RunState.objects.get(name='FAILED_EXECUTION')
+    @classmethod
+    def get_failed_execution_state(cls):
+        return cls.objects.get(name='FAILED_EXECUTION')
 
-    @staticmethod
-    def get_failed_state():
-        return RunState.objects.get(name='FAILED')
+    @classmethod
+    def get_failed_state(cls):
+        return cls.objects.get(name='FAILED')
 
-    @staticmethod
-    def get_success_state():
-        return RunState.objects.get(name='SUCCESS')
+    @classmethod
+    def get_success_state(cls):
+        return cls.objects.get(name='SUCCESS')
 
-    @staticmethod
-    def get_queued_state():
-        return RunState.objects.get(name='QUEUED')
+    @classmethod
+    def get_queued_state(cls):
+        return cls.objects.get(name='QUEUED')
 
-    @staticmethod
-    def get_process_killed_state():
-        return RunState.objects.get(name='PROCESS_KILLED')
+    @classmethod
+    def get_process_killed_state(cls):
+        return cls.objects.get(name='PROCESS_KILLED')

@@ -35,9 +35,11 @@
 #
 from workflow_engine.strategies import base_strategy
 from workflow_engine.models.workflow import Workflow
-import traceback
+from workflow_engine.import_class import import_class
+import logging
 
 class IngestStrategy(base_strategy.BaseStrategy):
+    _log = logging.getLogger('workflow_engine.strategies.ingest_strategy')
     #####everthing bellow this can be overriden#####
 
     def get_workflow_name(self):
@@ -47,7 +49,7 @@ class IngestStrategy(base_strategy.BaseStrategy):
         return None        
 
     def generate_response(self, enqueued_object):
-        return None        
+        return None
 
     #override if needed
 
@@ -60,14 +62,16 @@ class IngestStrategy(base_strategy.BaseStrategy):
         Workflow.start_workflow(self.get_workflow_name(),
                                 enqueued_object)
 
-    def call_ingest_strategy(wf_name, message):
-        wf = Workflow.objects.get(name=workflow)
-        _log.info('ingest ' + str(wf) + ' ' + str(message))
+    @classmethod
+    def call_ingest_strategy(cls, wf_name, message):
+        wf = Workflow.objects.get(name=wf_name)
+        IngestStrategy._log.info('ingest ' + str(wf) + ' ' + str(message))
 
-        ingest_strategy_class_name = workflow_object.ingest_strategy_class
-        _log.info('workflow strategy class: %s' % (ingest_strategy_class_name))
+        ingest_strategy_class_name = wf.ingest_strategy_class
+        IngestStrategy._log.info(
+            'workflow strategy class: %s' % (ingest_strategy_class_name))
 
-        clz = import_class(workflow_ingest_strategies[workflow])
+        clz = import_class(ingest_strategy_class_name)
         ingest_strategy = clz()
 
         return ingest_strategy.ingest_message(message)

@@ -34,7 +34,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 from django.db import models
-from . import ONE, ZERO
+from workflow_engine.models import ONE, ZERO
 import logging
 _model_logger = logging.getLogger('workflow_engine.models')
 
@@ -77,6 +77,6 @@ class Workflow(models.Model):
         job.run_jobs()
 
 # circular imports
-from .workflow_node import WorkflowNode 
-from .job import Job
-from .run_state import RunState
+from workflow_engine.models.workflow_node import WorkflowNode
+from workflow_engine.models.job import Job
+from workflow_engine.models.run_state import RunState

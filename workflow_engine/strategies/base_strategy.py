@@ -37,6 +37,7 @@ from workflow_engine.models import Task, RunState, WellKnownFile
 from django.conf import settings
 import subprocess
 import logging
+import traceback
 import os
 
 class BaseStrategy(object):
@@ -183,5 +184,4 @@ class BaseStrategy(object):
 
     # Do not override
     def get_well_known_file(self, attachable_object, well_known_file_type):
-        from workflow_engine.models import WellKnownFile
         return WellKnownFile.get(attachable_object, well_known_file_type)

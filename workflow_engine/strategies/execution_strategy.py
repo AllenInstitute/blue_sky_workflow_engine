@@ -33,7 +33,6 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-from workflow_engine.models import *
 from workflow_client.worker_client import run_celery_task, cancel_task
 from workflow_engine.strategies import base_strategy
 from django.conf import settings
@@ -42,7 +41,6 @@ import os
 import subprocess
 import traceback
 import logging
-import sys
 import simplejson as json
 
 class ExecutionStrategy(base_strategy.BaseStrategy):

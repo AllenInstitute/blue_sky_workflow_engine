@@ -34,19 +34,18 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 from django.db import models
-from .job_queue import JobQueue
-from .workflow import Workflow
-from .run_state import RunState
-from . import ONE, ZERO
+from workflow_engine.models import ONE, ZERO
 import logging
 _model_logger = logging.getLogger('workflow_engine.models')
 
 
 class WorkflowNode(models.Model):
-    job_queue = models.ForeignKey(JobQueue)
+    job_queue = models.ForeignKey(
+        'workflow_engine.JobQueue')
     parent = models.ForeignKey('self', null=True)
     is_head = models.BooleanField(default=False)
-    workflow = models.ForeignKey(Workflow)
+    workflow = models.ForeignKey(
+        'workflow_engine.Workflow')
     disabled = models.BooleanField(default=False)
     batch_size = models.IntegerField(default=50)
     priority = models.IntegerField(default=50)
@@ -96,7 +95,8 @@ class WorkflowNode(models.Model):
     def run_workflow_node_jobs(self):
         try:
             if not self.workflow.disabled and not self.disabled:
-                _model_logger.info("running job in workflow %s" % (str(self.workflow)))
+                _model_logger.info(
+                    "running job in workflow %s" % (str(self.workflow)))
                 #check if more jobs can be run
                 batch_size = self.batch_size
 
@@ -110,11 +110,12 @@ class WorkflowNode(models.Model):
                     batch_size - number_of_queued_and_running_jobs
                 
                 _model_logger.info(
-                    "%d jobs to be run. %d queued and running, batch size %d in workflow %s" % \
-                        (number_jobs_to_run,
-                         number_of_queued_and_running_jobs,
-                         batch_size,
-                         str(self.workflow)))
+                    "%d jobs to be run. %d queued and running, " + \
+                    "batch size %d in workflow %s" % (
+                        number_jobs_to_run,
+                        number_of_queued_and_running_jobs,
+                        batch_size,
+                        str(self.workflow)))
 
                 #run more jobs
                 if number_jobs_to_run > ZERO:
@@ -125,9 +126,11 @@ class WorkflowNode(models.Model):
                                 workflow_node=self,
                                 archived=False).order_by('priority',
                                                          '-updated_at')
-                        _model_logger.info('pending jobs: %d' % (len(pending_jobs)))
+                        _model_logger.info(
+                            'pending jobs: %d' % (len(pending_jobs)))
                     except Exception as e:
-                        _model_logger.info('pending jobs exception: %s' % (str(e)))
+                        _model_logger.info(
+                            'pending jobs exception: %s' % (str(e)))
                         pending_jobs = []
 
                     for i in range(number_jobs_to_run):
@@ -136,9 +139,14 @@ class WorkflowNode(models.Model):
                             job = pending_jobs[i]
                             job.run()
             else:
-                _model_logger.info("not running jobs in disabled workflow %s" % (str(self.workflow)))
+                _model_logger.info(
+                    "not running jobs in disabled workflow %s" % (
+                        str(self.workflow)))
 
         except Exception as e:
-            _model_logger.error('Something went wrong running jobs:  ' + str(e))
+            _model_logger.error(
+                'Something went wrong running jobs: ' + str(e))
 
-from .job import Job  # circular import
+# circular imports
+from workflow_engine.models.job import Job
+from workflow_engine.models.run_state import RunState

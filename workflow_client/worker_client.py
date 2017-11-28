@@ -1,6 +1,6 @@
 from celery import Celery
 import os
-from workflow_client.ingest_client import IngestClient
+from workflow_client.reply_client import ReplyClient
 from workflow_client.server_command \
     import server_command, check_environment_variables
 from celery.utils.log import get_task_logger
@@ -125,12 +125,13 @@ def run_normal(full_executable, task_id, logfile):
 
 @app.task
 def publish_message(body, task_id, optional_body=None):
-    with IngestClient(MESSAGE_QUEUE_HOST,
-                      MESSAGE_QUEUE_PORT,
-                      MESSAGE_QUEUE_USER,
-                      MESSAGE_QUEUE_PASSWORD,
-                      '',
-                      CELERY_MESSAGE_QUEUE_NAME) as ic:
+    with ReplyClient(
+        MESSAGE_QUEUE_HOST,
+        MESSAGE_QUEUE_PORT,
+        MESSAGE_QUEUE_USER,
+        MESSAGE_QUEUE_PASSWORD,
+        '',
+        CELERY_MESSAGE_QUEUE_NAME) as ic:
         if optional_body is not None:
             ic.send(body + ',' + str(task_id) + ',' + str(optional_body))
         else:

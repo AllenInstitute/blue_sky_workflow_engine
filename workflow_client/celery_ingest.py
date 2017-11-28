@@ -1,6 +1,6 @@
 #from workflow_client.client_settings import settings
 from rendermodules.ingest.schemas \
-    import example as em_2d_montage_point_match_body_data
+    import example as em_2d_montage_body_data
 from workflow_client.celery_ingest_consumer import \
     run_task, ingest_task, success, fail, on_raw_message
 import logging
@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.INFO)
 _log.setLevel(logging.INFO)
 
 # They're currently very similar
-lens_correction_new_body_data = em_2d_montage_point_match_body_data
+lens_correction_new_body_data = em_2d_montage_body_data
 # lens_correction_new_body_data.pop('reference_set_id', None) # doesn't have this`
 lens_correction_new_body_data['manifest_path'] = \
     "/allen/aibs/pipeline/image_processing/volume_assembly/lc_test_data/Wij_Set_594451332/594089217_594451332/_trackem_20170502174048_295434_5LC_0064_01_20170502174047_reference_0_.txt"
@@ -20,7 +20,7 @@ lens_correction_new_body_data['storage_directory'] = \
     "/allen/aibs/pipeline/image_processing/volume_assembly/lc_test_data/Wij_Set_594451332/594089217_594451332"
 lens_correction_new_body_data['metafile'] = \
     "/allen/aibs/pipeline/image_processing/volume_assembly/dataimport_test_data/_metadata_20170829130146_295434_5LC_0064_01_redo_001050_0_.json"
-em_2d_montage_point_match_body_data['metafile'] = \
+em_2d_montage_body_data['metafile'] = \
     "/allen/aibs/pipeline/image_processing/volume_assembly/dataimport_test_data/_metadata_20170829130146_295434_5LC_0064_01_redo_001050_0_.json"
 
 def ingest(app, workflow, body):
@@ -54,8 +54,8 @@ if __name__ == '__main__':
 
     if 'lens_correction_new' == workflow_name:
         body_data = lens_correction_new_body_data
-    elif 'em_2d_montage_point_match' == workflow_name:
-        body_data = em_2d_montage_point_match_body_data
+    elif 'em_2d_montage' == workflow_name:
+        body_data = em_2d_montage_body_data
     else:
         body_data = { 'message': 'ingest_example_data' }
 

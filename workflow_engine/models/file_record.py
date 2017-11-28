@@ -34,8 +34,6 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 from django.db import models
-from .well_known_file import WellKnownFile
-from .task import Task
 import os
 import logging
 _model_logger = logging.getLogger('workflow_engine.models')
@@ -45,8 +43,10 @@ class FileRecord(models.Model):
     filename = models.CharField(max_length=255)
     storage_directory = models.CharField(max_length=500)
     order = models.IntegerField(default=0)
-    well_known_file = models.ForeignKey(WellKnownFile)
-    task = models.ForeignKey(Task, null=True)
+    well_known_file = models.ForeignKey(
+        'workflow_engine.WellKnownFile')
+    task = models.ForeignKey(
+        'workflow_engine.Task', null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -55,5 +55,4 @@ class FileRecord(models.Model):
 
     def get_full_name(self):
         return os.path.join(self.storage_directory, self.filename)
-
 

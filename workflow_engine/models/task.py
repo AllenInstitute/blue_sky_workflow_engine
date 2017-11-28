@@ -36,11 +36,9 @@
 from django.db import models
 from django.utils import timezone
 from django.conf import settings
-from celery.task.control import revoke
-from .job import Job
-from .run_state import RunState
-from . import ONE, ZERO, TWO, SECONDS_IN_MIN
-from .import_class import import_class
+#from celery.task.control import revoke
+from workflow_engine.models import ONE, ZERO, TWO, SECONDS_IN_MIN
+from workflow_engine.import_class import import_class
 import os
 import logging
 _model_logger = logging.getLogger('workflow_engine.models')
@@ -49,9 +47,11 @@ _model_logger = logging.getLogger('workflow_engine.models')
 class Task(models.Model):
     enqueued_task_object_id = models.IntegerField(null=True)
     enqueued_task_object_class = models.CharField(max_length=255, null=True)
-    job = models.ForeignKey(Job)
+    job = models.ForeignKey(
+        'workflow_engine.Job')
     archived = models.NullBooleanField(default=False)
-    run_state = models.ForeignKey(RunState)
+    run_state = models.ForeignKey(
+        'workflow_engine.RunState')
     full_executable = models.CharField(max_length=1000, null=True)
     error_message = models.TextField(null=True)
     log_file = models.CharField(max_length=255, null=True)
@@ -214,6 +214,7 @@ class Task(models.Model):
 
     def set_pending_state(self):
         _model_logger.info("set pending state")
+        strategy = self.get_strategy()
         strategy.run_task(self)
         self.run_state = RunState.get_pending_state()
         self.save()
@@ -361,3 +362,7 @@ class Task(models.Model):
             results.append(file_record.get_full_name())
 
         return results
+
+# circular imports
+from workflow_engine.models.run_state import RunState
+from workflow_engine.models.file_record import FileRecord

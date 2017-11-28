@@ -1,5 +1,4 @@
 import os
-import simplejson as json
 import yaml
 
 class _settings_attr_dict(dict):

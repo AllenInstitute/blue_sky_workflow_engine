@@ -35,10 +35,8 @@
 #
 from django.db import models
 from django.utils import timezone
-from .workflow_node import WorkflowNode
-from .run_state import RunState
-from .import_class import import_class
-from . import TWO, ONE, ZERO, SECONDS_IN_MIN
+from workflow_engine.models.import_class import import_class
+from workflow_engine.models import TWO, ONE, ZERO, SECONDS_IN_MIN
 import traceback
 import logging
 _model_logger = logging.getLogger('workflow_engine.models')
@@ -46,8 +44,10 @@ _model_logger = logging.getLogger('workflow_engine.models')
 
 class Job(models.Model):
     enqueued_object_id = models.IntegerField()
-    workflow_node = models.ForeignKey(WorkflowNode)
-    run_state = models.ForeignKey(RunState)
+    workflow_node = models.ForeignKey(
+        'workflow_engine.WorkflowNode')
+    run_state = models.ForeignKey(
+        'workflow_engine.RunState')
     duration = models.DurationField(null=True)
     start_run_time = models.DateTimeField(null=True)
     end_run_time = models.DateTimeField(null=True)
@@ -98,7 +98,9 @@ class Job(models.Model):
         if not task:
             self.error_message = 'job failed: ' + error_message
         elif error_message != None:
-            self.error_message = 'task with id of ' + str(task.id) + ' failed: '  + error_message
+            self.error_message = \
+                'task with id of ' + str(task.id) + \
+                ' failed: '  + error_message
         else:
             self.error_message = 'task with id of ' + str(task.id) + ' failed'
 
@@ -174,14 +176,9 @@ class Job(models.Model):
         enqueued_object = claz.objects.get(id=self.enqueued_object_id)
 
         return enqueued_object
-    
 
     def get_strategy(self):
         return self.workflow_node.get_strategy()
-
-    def archive_record(self):
-        self.archived = True
-        self.save()
 
     def remove_tasks(self, resused_tasks):
         strategy = self.get_strategy()
@@ -270,15 +267,16 @@ class Job(models.Model):
 
             self.prep_job()
 
-            resused_tasks = self.create_tasks()
+            reused_tasks = self.create_tasks()
 
-            self.remove_tasks(resused_tasks)
+            self.remove_tasks(reused_tasks)
 
             for task in self.get_tasks():
                 task.run_task()
 
         except Exception as e:
-            self.set_error_message(str(e) + ' - ' + str(traceback.format_exc()), None)
+            self.set_error_message(
+                str(e) + ' - ' + str(traceback.format_exc()), None)
             _model_logger.info("Job exception: %s" % (self.error_message))
             self.set_failed_state()
 
@@ -289,14 +287,16 @@ class Job(models.Model):
     def get_start_run_time(self):
         result = None
         if self.start_run_time != None:
-            result = timezone.localtime(self.start_run_time).strftime('%m/%d/%Y %I:%M:%S')
+            result = timezone.localtime(
+                self.start_run_time).strftime('%m/%d/%Y %I:%M:%S')
 
         return result
 
     def get_end_run_time(self):
         result = None
         if self.end_run_time != None:
-            result = timezone.localtime(self.end_run_time).strftime('%m/%d/%Y %I:%M:%S')
+            result = timezone.localtime(
+                self.end_run_time).strftime('%m/%d/%Y %I:%M:%S')
 
         return result
 
@@ -330,9 +330,10 @@ class Job(models.Model):
             for enqueued_object in enqueued_objects:
                 if strategy.can_transition(enqueued_object):
                     #try to get the job
-                    jobs = Job.objects.filter(enqueued_object_id=enqueued_object.id,
-                                              workflow_node_id=child.id,
-                                              archived=False)
+                    jobs = Job.objects.filter(
+                        enqueued_object_id=enqueued_object.id,
+                        workflow_node_id=child.id,
+                        archived=False)
 
                     if len(jobs) > ZERO:
                         index = ZERO
@@ -377,4 +378,6 @@ class Job(models.Model):
             task.kill_task()
 
 # circular imports
-from .task import Task
+from workflow_engine.models.task import Task
+from workflow_engine.models.run_state import RunState
+

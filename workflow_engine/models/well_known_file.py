@@ -50,20 +50,22 @@ class WellKnownFile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    @staticmethod
-    def set(full_path, attachable_object, well_known_file_type, task=None):
+    @classmethod
+    def set(cls, full_path, attachable_object, well_known_file_type, task=None):
         #make sure file is valid
         WellKnownFile.verify_file_exists(full_path)
-
-        well_known_file = WellKnownFile.get_or_create_well_known_file(attachable_object, well_known_file_type)
+        well_known_file = WellKnownFile.get_or_create_well_known_file(
+            attachable_object, well_known_file_type)
         well_known_file.create_file_record_if_needed(full_path, task)
 
-    #staticmethod
-    def get(attachable_object, well_known_file_type):
+    @classmethod
+    def get(cls, attachable_object, well_known_file_type):
         result = None
 
         try:
-            well_known_file = WellKnownFile.objects.get(attachable_id=attachable_object.id, well_known_file_type=well_known_file_type)
+            well_known_file = WellKnownFile.objects.get(
+                attachable_id=attachable_object.id,
+                well_known_file_type=well_known_file_type)
             file_record = well_known_file.get_most_recent_file_record()
             result = file_record.get_full_name()
         except:
@@ -83,14 +85,20 @@ class WellKnownFile(models.Model):
     @staticmethod
     def verify_file_exists(full_path):
         if not os.path.exists(full_path):
-            raise Exception('Expected file to exist at: ' + str(full_path) + ' but it does not')
+            raise Exception(
+                'Expected file to exist at: ' + str(full_path) + \
+                ' but it does not')
 
     @staticmethod
     def get_or_create_well_known_file(attachable_object, well_known_file_type):
         try:
-            well_known_file = WellKnownFile.objects.get(attachable_id=attachable_object.id, well_known_file_type=well_known_file_type)
+            well_known_file = WellKnownFile.objects.get(
+                attachable_id=attachable_object.id,
+                well_known_file_type=well_known_file_type)
         except:
-            well_known_file = WellKnownFile(content_object=attachable_object, well_known_file_type=well_known_file_type)
+            well_known_file = WellKnownFile(
+                content_object=attachable_object,
+                well_known_file_type=well_known_file_type)
             well_known_file.save()
 
         return well_known_file
@@ -101,15 +109,23 @@ class WellKnownFile(models.Model):
 
         most_recent_file = self.get_most_recent_file_record()
 
-        if not most_recent_file or most_recent_file.filename != filename or most_recent_file.storage_directory != storage_directory:
-            file_record = FileRecord(filename=filename, storage_directory=storage_directory, order=self.get_next_order(), well_known_file=self, task=task)
+        if not most_recent_file or \
+            most_recent_file.filename != filename or \
+            most_recent_file.storage_directory != storage_directory:
+            file_record = FileRecord(
+                filename=filename,
+                storage_directory=storage_directory,
+                order=self.get_next_order(),
+                well_known_file=self,
+                task=task)
             file_record.save()
         else:
             most_recent_file.task = task
             most_recent_file.save()
 
     def get_file_records(self):
-        return FileRecord.objects.filter(well_known_file_id=self.id).order_by('order')
+        return FileRecord.objects.filter(
+            well_known_file_id=self.id).order_by('order')
 
     def get_most_recent_file_record(self):
         try:
@@ -122,4 +138,5 @@ class WellKnownFile(models.Model):
         return result
 
 
-from .file_record import FileRecord
+# Circular imports
+from workflow_engine.models.file_record import FileRecord

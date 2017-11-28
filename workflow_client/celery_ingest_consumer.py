@@ -33,13 +33,12 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-from celery import Celery, shared_task 
+from celery import Celery
 from kombu import Exchange, Queue, binding
 from workflow_client.client_settings import settings, config_object
 from workflow_engine.workflow_config import WorkflowConfig
 from workflow_engine.import_class import import_class
 import logging
-import os
 
 _log = logging.getLogger('workflow_client.celery_ingest_consumer')
 
@@ -51,10 +50,22 @@ def load_workflow_config(yaml_file):
         for workflow_spec in workflow_config['flows']
     }
 
-def load_workflow_config2(yaml_file):
+def load_ingest_strategy_names(yaml_file):
+    '''Read workflow names and ingest strategy class names
+    from the worflow configuration file.
+
+    Parameters
+    ----------
+    yaml_file : String
+        path to the workflow configuration file
+
+    Returns
+    -------
+    dict mapping workflow name key to ingest class name
+    '''
     workflow_config = WorkflowConfig.from_yaml_file(yaml_file)
 
-    return { 
+    return {
         workflow_spec.name: workflow_spec.ingest_strategy
         for workflow_spec in workflow_config['flows']
     }
@@ -116,11 +127,26 @@ app = ingest_consumer()
 
 @app.task(bind=True)
 def ingest_task(self, workflow, message):
+    '''Receive the ingest message, look up the strategy class and
+    call its ingest_message method.
+
+    Parameters
+    ----------
+    workflow : String
+        the key of the workflow in the configuration yaml file
+    message : dict
+        the body of the ingest message
+
+    Returns
+    -------
+    dict or String
+        response message body to be sent to the sender process
+    '''
     ret = 'OK'
 
     try: 
         _log.info('ingest ' + str(workflow) + ' ' + str(message))
-        ingest_strategies = load_workflow_config2(
+        ingest_strategies = load_ingest_strategy_names(
             '/data/aibstemp/timf/example_data/workflow_config.yml')
 
         _log.info('workflow %s' % (ingest_strategies))
@@ -132,6 +158,7 @@ def ingest_task(self, workflow, message):
         clz = import_class(ingest_strategy_class_name)
         ingest_strategy = clz()
 
+        # TODO: use Celery router to call directly
         ret = ingest_strategy.ingest_message(message)
         self.update_state(state="SUCCESS")
     except Exception as e:

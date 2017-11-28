@@ -38,8 +38,8 @@ import simplejson as json
 import logging
 
 
-class IngestClient(object):
-    _log = logging.getLogger('workflow_client.ingest_client')
+class ReplyClient(object):
+    _log = logging.getLogger('workflow_client.reply_client')
 
     def __init__(self,
                  host, port,
@@ -63,7 +63,7 @@ class IngestClient(object):
         self.channel.basic_publish(exchange=self.exchange,
                                    routing_key=self.route_key,
                                    body=json_string)
-        IngestClient._log.info("Sent '%s'" % (json_string))
+        ReplyClient._log.info("Sent '%s'" % (json_string))
 
     def send_as_json(self, data_dict):
         self.send_json(json.dumps(data_dict))
@@ -72,4 +72,4 @@ class IngestClient(object):
         self.channel.basic_publish(exchange=self.exchange,
                                    routing_key=self.route_key,
                                    body=body_data)
-        IngestClient._log.info("Sent '%s'" % (body_data))
+        ReplyClient._log.info("Sent '%s'" % (body_data))
