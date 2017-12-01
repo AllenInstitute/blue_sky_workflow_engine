@@ -1,6 +1,8 @@
 import os
 from setuptools import find_packages, setup
 
+VERSION = os.environ.get('VERSION', '0.dev')
+
 with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
     README = readme.read()
 
@@ -26,7 +28,7 @@ def prepend_find_packages(*roots):
 
 setup(
     name='django-blue-sky-workflow-engine',
-    version='0.120',
+    version='0.121.%s' % (VERSION),
     packages=prepend_find_packages('workflow_engine', 'workflow_client'),
     include_package_data=True,
     license='Allen Institute Software License',
