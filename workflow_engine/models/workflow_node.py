@@ -36,6 +36,7 @@
 from django.db import models
 from workflow_engine.models import ONE, ZERO
 import logging
+import traceback
 _model_logger = logging.getLogger('workflow_engine.models')
 
 
@@ -110,8 +111,8 @@ class WorkflowNode(models.Model):
                     batch_size - number_of_queued_and_running_jobs
                 
                 _model_logger.info(
-                    "%d jobs to be run. %d queued and running, " + \
-                    "batch size %d in workflow %s" % (
+                    ("%d jobs to be run. %d queued and running, "
+                     "batch size %d in workflow %s") % (
                         number_jobs_to_run,
                         number_of_queued_and_running_jobs,
                         batch_size,
@@ -135,7 +136,6 @@ class WorkflowNode(models.Model):
 
                     for i in range(number_jobs_to_run):
                         if i < len(pending_jobs):
-
                             job = pending_jobs[i]
                             job.run()
             else:
@@ -145,7 +145,7 @@ class WorkflowNode(models.Model):
 
         except Exception as e:
             _model_logger.error(
-                'Something went wrong running jobs: ' + str(e))
+                'Something went wrong running jobs: ' + str(e) + "\n" + traceback.format_exc())
 
 # circular imports
 from workflow_engine.models.job import Job

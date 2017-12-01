@@ -33,7 +33,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-from workflow_engine.models.import_class import import_class
+from workflow_engine.import_class import import_class
 from django.core.management.base import BaseCommand, CommandError
 #from django.core.exceptions import ObjectDoesNotExist
 #from django.conf import settings

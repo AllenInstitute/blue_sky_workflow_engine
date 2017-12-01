@@ -39,7 +39,7 @@ from django.core.exceptions import ObjectDoesNotExist
 import traceback
 from django.template import loader
 from workflow_engine.models import *
-from workflow_engine.models.import_class import import_class
+from workflow_engine.import_class import import_class
 from workflow_engine.views import shared
 import logging
 import json

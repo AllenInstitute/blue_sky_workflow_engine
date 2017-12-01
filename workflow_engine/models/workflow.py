@@ -54,14 +54,26 @@ class Workflow(models.Model):
     def get_head_workfow_nodes(self):
         return WorkflowNode.objects.filter(is_head=True, workflow=self.id)
 
-    @staticmethod
-    def start_workflow(workflow_name, enqueued_object):
+    @classmethod
+    def start_workflow(cls,
+                       workflow_name,
+                       enqueued_object,
+                       start_node_name=None):
         workflow = Workflow.objects.get(name=workflow_name)
         _model_logger.info("starting %s" % (workflow_name))
-        workflow_nodes = WorkflowNode.objects.filter(workflow=workflow, parent=None)
+
+        if start_node_name is not None:
+            workflow_nodes = WorkflowNode.objects.filter(
+                job_queue__name=start_node_name)
+        else:
+            workflow_nodes = WorkflowNode.objects.filter(
+                workflow=workflow, parent=None)
 
         if len(workflow_nodes) != ONE:
-            raise Exception('Expected to find a single head workflow node but found: ' + str(len(workflow_nodes)))
+            raise Exception(
+                'Expected to find a single head workflow node but found: ' + \
+                str(len(workflow_nodes)) + ': ' + \
+                    ', '.join(str(wn) for wn in workflow_nodes))
 
         workflow_node = workflow_nodes[ZERO]
 

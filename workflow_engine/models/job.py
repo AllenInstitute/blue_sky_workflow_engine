@@ -35,10 +35,11 @@
 #
 from django.db import models
 from django.utils import timezone
-from workflow_engine.models.import_class import import_class
+from workflow_engine.import_class import import_class
 from workflow_engine.models import TWO, ONE, ZERO, SECONDS_IN_MIN
 import traceback
 import logging
+from django.core.exceptions import ObjectDoesNotExist
 _model_logger = logging.getLogger('workflow_engine.models')
 
 
@@ -174,14 +175,13 @@ class Job(models.Model):
 
         claz = import_class(self.workflow_node.job_queue.enqueued_object_class)
         enqueued_object = claz.objects.get(id=self.enqueued_object_id)
-
         return enqueued_object
 
     def get_strategy(self):
         return self.workflow_node.get_strategy()
 
     def remove_tasks(self, resused_tasks):
-        strategy = self.get_strategy()
+        # strategy = self.get_strategy()
         for task in self.get_tasks():
             if task.id not in resused_tasks:
                 task.archived = False
@@ -327,6 +327,7 @@ class Job(models.Model):
         for child in children:
             strategy = child.get_strategy()
             enqueued_objects = strategy.get_objects_for_queue(self)
+
             for enqueued_object in enqueued_objects:
                 if strategy.can_transition(enqueued_object):
                     #try to get the job

@@ -126,7 +126,7 @@ app = ingest_consumer()
 
 
 @app.task(bind=True)
-def ingest_task(self, workflow, message):
+def ingest_task(self, workflow, message, tags):
     '''Receive the ingest message, look up the strategy class and
     call its ingest_message method.
 
@@ -146,6 +146,7 @@ def ingest_task(self, workflow, message):
 
     try: 
         _log.info('ingest ' + str(workflow) + ' ' + str(message))
+        # TODO: don't hardcode this
         ingest_strategies = load_ingest_strategy_names(
             '/data/aibstemp/timf/example_data/workflow_config.yml')
 
@@ -156,10 +157,10 @@ def ingest_task(self, workflow, message):
         _log.info('workflow strategy class: %s' % (ingest_strategy_class_name))
 
         clz = import_class(ingest_strategy_class_name)
-        ingest_strategy = clz()
+        ingest_strategy = clz() 
 
         # TODO: use Celery router to call directly
-        ret = ingest_strategy.ingest_message(message)
+        ret = ingest_strategy.ingest_message(message, tags)
         self.update_state(state="SUCCESS")
     except Exception as e:
         self.update_state(state="FAILURE")

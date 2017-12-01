@@ -33,20 +33,26 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-from workflow_engine.strategies import base_strategy
+from workflow_engine.strategies.execution_strategy \
+    import ExecutionStrategy
 from workflow_engine.models.workflow import Workflow
 from workflow_engine.import_class import import_class
+import traceback
 import logging
 
-class IngestStrategy(base_strategy.BaseStrategy):
+class IngestStrategy(ExecutionStrategy):
     _log = logging.getLogger('workflow_engine.strategies.ingest_strategy')
     #####everthing bellow this can be overriden#####
 
     def get_workflow_name(self):
         return None
 
+        # override if needed
+    def skip_execution(self, enqueued_object):
+        return True
+
     def create_enqueued_object(self, dictionary):
-        return None        
+        return None
 
     def generate_response(self, enqueued_object):
         return None
@@ -77,11 +83,53 @@ class IngestStrategy(base_strategy.BaseStrategy):
         return ingest_strategy.ingest_message(message)
 
 
-    def ingest_message(self, message):
-        enqueued_object = self.create_enqueued_object(message)
+    def ingest_message(self, message, tags=None):
+        if tags == None:
+            tags = []
+
+        if 'ReferenceSet' in tags:
+            start_node = 'Generate Lens Correction Transform'
+        else:
+            start_node = 'Generate Render Stack'
+
+        enqueued_object = self.create_enqueued_object(message, tags)
         ret = self.generate_response(enqueued_object)
         workflow_name = self.get_workflow_name()
-        Workflow.start_workflow(workflow_name, enqueued_object) 
+        Workflow.start_workflow(
+            workflow_name,
+            enqueued_object,
+            start_node_name=start_node)
 
         return ret
 
+    def run_task(self, task):
+        try:
+            self.prep_task(task)
+            task.save()
+            self.run_asynchronous_task(task)
+            task.set_queued_state()
+            self.finish_task(task)
+        except Exception as e:
+            task.set_error_message(
+                str(e) + ' - ' + str(traceback.format_exc()))
+            self.fail_task(task)
+
+    def finish_task(self, task):
+        IngestStrategy._log.info('finish task')
+        try:
+            task.set_finished_execution_state()
+
+            task.set_success_state()
+            task.set_end_run_time()
+
+            task.job.set_success_state()
+            task.job.set_end_run_time()
+            task.job.enqueue_next_queue()
+
+        except Exception as e:
+            IngestStrategy._log.error(
+                str(e) + ' - ' + str(traceback.format_exc()))
+
+            task.set_error_message(
+                str(e) + ' - ' + str(traceback.format_exc()))
+            self.fail_task(task)

@@ -5,7 +5,8 @@ Summary: Blue Sky Workflow Engine
 Home-page: https://github.com/AllenInstitute
 Author: Nathan Sjoquist
 Author-email: nathans@alleninstitute.org
-License: BSD License
+License: Allen Institute Software License
+Description-Content-Type: UNKNOWN
 Description: TODO
         
 Platform: UNKNOWN
@@ -13,7 +14,7 @@ Classifier: Environment :: Web Environment
 Classifier: Framework :: Django
 Classifier: Framework :: Django :: 1.11
 Classifier: Intended Audience :: Developers
-Classifier: License :: OSI Approved :: BSD License
+Classifier: License :: Allen Institute Software License
 Classifier: Operating System :: OS Independent
 Classifier: Programming Language :: Python
 Classifier: Programming Language :: Python :: 3

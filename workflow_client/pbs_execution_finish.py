@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 import logging
-from workflow_client.ingest_client import IngestClient
+from workflow_client.reply_client import ReplyClient
 from workflow_client.client_settings import settings
 
 _log = logging.getLogger('workflow_client.pbs_execution_finish')
@@ -19,7 +19,7 @@ def set_exit_state(exit_code, task_id):
     exchange = ''
     queue = settings.CELERY_MESSAGE_QUEUE_NAME
 
-    with IngestClient(host, port, user, password, exchange, queue) as ic:
+    with ReplyClient(host, port, user, password, exchange, queue) as ic:
         if exit_code == SUCCESS_EXIT_CODE:
             state='FINISHED_EXECUTION' 
         else:

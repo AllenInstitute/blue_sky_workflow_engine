@@ -35,7 +35,7 @@
 #
 from django.db import models
 from django.utils import timezone
-from workflow_engine.models.import_class import import_class
+from workflow_engine.import_class import import_class
 import logging
 _model_logger = logging.getLogger('workflow_engine.models')
 
@@ -75,3 +75,4 @@ class JobQueue(models.Model):
 
         return results
 
+from workflow_engine.models.workflow_node import WorkflowNode
