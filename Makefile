@@ -1,7 +1,6 @@
 PROJECTNAME = workflow_engine
 DISTDIR = dist
 BUILDDIR = build
-export RELEASE=.dev
 RELEASEDIR = $(PROJECTNAME)-$(VERSION)$(RELEASE)
 EGGINFODIR = $(PROJECTNAME).egg-info
 DOCDIR = doc
