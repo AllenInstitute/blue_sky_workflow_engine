@@ -32,13 +32,13 @@ pytest: pytest_lax
 test: pytest
 
 pytest_pep8:
-	find -L . -name "test_*.py" -exec py.test --boxed --pep8 --cov-config coveragerc --cov=allensdk --cov-report html --junitxml=test-reports/test.xml {} \+
+	find -L . -name "test_*.py" -exec py.test --boxed --pep8 --cov-config coveragerc --cov=workflow_engine --cov-report html --junitxml=test-reports/test.xml {} \+
 
 pytest_lite:
 	find -L . -name "test_*.py" -exec py.test --boxed --assert=reinterp --junitxml=test-reports/test.xml {} \+
 
 pylint:
-	pylint --disable=C allensdk > htmlcov/pylint.txt || exit 0
+	pylint --disable=C workflow_engine > htmlcov/pylint.txt || exit 0
 	grep import-error htmlcov/pylint.txt > htmlcov/pylint_imports.txt
 
 flake8:
