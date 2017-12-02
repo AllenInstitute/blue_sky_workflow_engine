@@ -15,7 +15,7 @@ build:
 	cd $(DISTDIR); tar czvf $(PROJECTNAME).tgz --exclude .git $(PROJECTNAME)
 	
 
-distutils_build: clean
+distutils_build:
 	python setup.py build
 
 sdist: distutils_build
