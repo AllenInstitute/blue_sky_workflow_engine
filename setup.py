@@ -20,7 +20,7 @@ def prepend_find_packages(*roots):
     ''' Recursively traverse nested packages under the root directories
     '''
     packages = []
-    
+
     for root in roots:
         packages += [root]
         packages += [root + '.' + s for s in find_packages(root)]
@@ -31,6 +31,7 @@ setup(
     name='django-blue-sky-workflow-engine',
     version='%s%s' % (VERSION, RELEASE),
     packages=prepend_find_packages('workflow_engine', 'workflow_client'),
+    package_data={'': ['*.conf', '*.cfg', '*.json', '*.env', '*.sh', '*.txt', 'Makefile'] },
     include_package_data=True,
     license='Allen Institute Software License',
     description='Blue Sky Workflow Engine',
@@ -38,7 +39,7 @@ setup(
     url='https://github.com/AllenInstitute',
     author='Nathan Sjoquist',
     author_email='nathans@alleninstitute.org',
-    install_requires = required,
+    install_requires=required,
     tests_require=test_required,
     setup_requires=[
         'flake8'
@@ -55,7 +56,6 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
-        'Topic :: Internet :: WWW/HTTP',
-        'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
-    ],
+        'Topic :: Internet :: WWW/HTTP'
+    ]
 )
