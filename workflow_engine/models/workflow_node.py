@@ -73,6 +73,24 @@ class WorkflowNode(models.Model):
     def get_children(self):
         return WorkflowNode.objects.filter(parent=self)
 
+    @classmethod
+    def set_jobs_for_run(self, wait_queue_name):
+        '''Use workflow node or job queue name to run jobs.
+        Useful for triggering wait strategy job queues.
+
+        Parameters
+        ----------
+        wait_queue_name : String
+            human readable name to look up the associated jobs
+        '''
+        jobs = Job.objects.filter(
+            workflow_node__job_queue__name=wait_queue_name,
+            run_state=RunState.get_pending_state(),
+            archived=False)
+
+        for job in jobs:
+            job.set_for_run()
+
     def get_total_number_of_jobs(self):
         return Job.objects.filter(
             workflow_node=self,
