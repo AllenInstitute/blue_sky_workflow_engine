@@ -60,9 +60,6 @@ class Job(models.Model):
     tags = models.CharField(max_length=255, null=True)
 
     def archive_record(self):
-        for task in self.get_tasks():
-            task.archive_record()
-
         self.archived = True
         self.save()
 
@@ -87,7 +84,7 @@ class Job(models.Model):
             enqueued_object = self.get_enqueued_object()
             result = str(enqueued_object)
         except:
-            result = None
+            result = 'None'
 
         return result
 

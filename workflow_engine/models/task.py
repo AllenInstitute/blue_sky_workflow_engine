@@ -36,7 +36,6 @@
 from django.db import models
 from django.utils import timezone
 from django.conf import settings
-#from celery.task.control import revoke
 from workflow_engine.models import ONE, ZERO, TWO, SECONDS_IN_MIN
 from workflow_engine.import_class import import_class
 import os
@@ -101,6 +100,7 @@ class Task(models.Model):
 
 
     def kill_task(self):
+        from celery.task.control import revoke
         self.set_process_killed_state()
         revoke(self.id, terminate=True)
         strategy = self.get_strategy()
