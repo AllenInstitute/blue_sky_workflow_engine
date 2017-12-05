@@ -146,9 +146,9 @@ def ingest_task(self, workflow, message, tags):
 
     try: 
         _log.info('ingest ' + str(workflow) + ' ' + str(message))
-        # TODO: don't hardcode this
+
         ingest_strategies = load_ingest_strategy_names(
-            '/data/aibstemp/timf/example_data/workflow_config.yml')
+            settings.WORKFLOW_CONFIG_YAML)
 
         _log.info('workflow %s' % (ingest_strategies))
 
@@ -161,7 +161,8 @@ def ingest_task(self, workflow, message, tags):
 
         # TODO: use Celery router to call directly
         ret = ingest_strategy.ingest_message(message, tags)
-        self.update_state(state="SUCCESS")
+        self.update_state(state="SUCCESS",
+                          meta=ret)
     except Exception as e:
         self.update_state(state="FAILURE")
         ret = "FAIL" + str(e)
