@@ -1,3 +1,4 @@
+from workflow_engine.models.run_state import RunState
 from workflow_engine.strategies.execution_strategy \
     import ExecutionStrategy
 import traceback
@@ -6,26 +7,25 @@ import logging
 
 class WaitStrategy(ExecutionStrategy):
     _log = logging.getLogger(
-        'development.strategies.wait_for_lens_correction')
+        'development.strategies.wait_strategy')
 
     def must_wait(self, em_mset):
         return True
 
     def skip_execution(self, em_mset):
         WaitStrategy._log.info('Skip Execution')
-        
+
         return True
 
     def run_task(self, task):
         try:
-            self.prep_task(task)
-            task.save()
-            task.clear_error_message()
-            #self.run_asynchronous_task(task)
-            task.set_queued_state()
+            enqueued_object = task.get_enqueued_object()
 
-            em_mset = task.get_enqueued_object()
-            if not self.must_wait(em_mset):
+            if self.must_wait(enqueued_object):
+                task.set_queued_state()
+                task.job.set_queued_state()
+            else:
+                self.prep_task(task)
                 self.finish_task(task)
         except Exception as e:
             task.set_error_message(

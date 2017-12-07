@@ -85,7 +85,9 @@ class WorkflowNode(models.Model):
         '''
         jobs = Job.objects.filter(
             workflow_node__job_queue__name=wait_queue_name,
-            run_state=RunState.get_pending_state(),
+            run_state__in=[
+                RunState.get_pending_state(),
+                RunState.get_queued_state()],
             archived=False)
 
         for job in jobs:
@@ -102,8 +104,9 @@ class WorkflowNode(models.Model):
     def get_queued_and_running_jobs(self):
         try: 
             result = Job.objects.filter(
-                run_state_id__in=[RunState.get_queued_state().id,
-                RunState.get_running_state().id],
+                run_state_id__in=[
+                    RunState.get_queued_state().id,
+                    RunState.get_running_state().id],
                 workflow_node=self,
                 archived=False)
         except Exception as e:
@@ -115,7 +118,9 @@ class WorkflowNode(models.Model):
         try:
             if not self.workflow.disabled and not self.disabled:
                 _model_logger.info(
-                    "running job in workflow %s" % (str(self.workflow)))
+                    "running job in workflow %s:%s" % (
+                        str(self.workflow),
+                        str(self.job_queue.name)))
                 #check if more jobs can be run
                 batch_size = self.batch_size
 
@@ -127,14 +132,15 @@ class WorkflowNode(models.Model):
 
                 number_jobs_to_run = \
                     batch_size - number_of_queued_and_running_jobs
-                
+
                 _model_logger.info(
                     ("%d jobs to be run. %d queued and running, "
-                     "batch size %d in workflow %s") % (
+                     "batch size %d in workflow %s:%s") % (
                         number_jobs_to_run,
                         number_of_queued_and_running_jobs,
                         batch_size,
-                        str(self.workflow)))
+                        str(self.workflow),
+                        str(self.job_queue.name)))
 
                 #run more jobs
                 if number_jobs_to_run > ZERO:

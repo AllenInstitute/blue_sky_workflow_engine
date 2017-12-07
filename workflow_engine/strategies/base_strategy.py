@@ -116,6 +116,9 @@ class BaseStrategy(object):
     def is_manual_strategy(self):
         return False
 
+    def is_wait_strategy(self):
+        return False
+
     # Do not override
     def get_job_storage_directory(self, base_storage_directory, job):
         return os.path.join(

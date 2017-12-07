@@ -60,7 +60,9 @@ class Workflow(models.Model):
                        enqueued_object,
                        start_node_name=None):
         workflow = Workflow.objects.get(name=workflow_name)
-        _model_logger.info("starting %s" % (workflow_name))
+        _model_logger.info(
+            "starting %s at %s" % (
+                workflow_name, str(start_node_name)))
 
         if start_node_name is not None:
             workflow_nodes = WorkflowNode.objects.filter(

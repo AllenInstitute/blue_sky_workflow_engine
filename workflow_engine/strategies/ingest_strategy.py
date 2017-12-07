@@ -64,9 +64,21 @@ class IngestStrategy(ExecutionStrategy):
     def is_ingest_strategy(self):
         return True
 
+
+    # TODO: don't think this is hooked up.
+    # see inline implementation and remove need to read config file.
     def start_workflow(self, enqueued_object):
         Workflow.start_workflow(self.get_workflow_name(),
                                 enqueued_object)
+
+    # TODO: check if this is used
+    @classmethod
+    def workflow_ingest_strategy(cls, wf_name):
+        wf = Workflow.objects.get(name=wf_name)
+        ingest_strategy_class_name = wf.ingest_strategy_class
+        
+        return ingest_strategy_class_name
+
 
     @classmethod
     def call_ingest_strategy(cls, wf_name, message):
@@ -93,7 +105,9 @@ class IngestStrategy(ExecutionStrategy):
             start_node = 'Generate Render Stack'
 
         enqueued_object = self.create_enqueued_object(message, tags)
+        
         ret = self.generate_response(enqueued_object)
+        
         workflow_name = self.get_workflow_name()
         Workflow.start_workflow(
             workflow_name,

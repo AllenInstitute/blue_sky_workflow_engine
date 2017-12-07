@@ -90,6 +90,7 @@ if __name__ == '__main__':
 
     if 'ReferenceSet' == fix_option:
         # lens_correction_new_body_data.pop('reference_set_id', None) # doesn't have this`
+        body_data['acquisition_data']['microscope_type'] = 'TEM'
         body_data['manifest_path'] = \
             "/allen/aibs/pipeline/image_processing/volume_assembly/lc_test_data/Wij_Set_594451332/594089217_594451332/_trackem_20170502174048_295434_5LC_0064_01_20170502174047_reference_0_.txt"
         body_data['storage_directory'] = \
@@ -97,6 +98,7 @@ if __name__ == '__main__':
         body_data['metafile'] = \
             "/allen/aibs/pipeline/image_processing/volume_assembly/dataimport_test_data/_metadata_20170829130146_295434_5LC_0064_01_redo_001050_0_.json"
     elif 'EMMontageSet' == fix_option:
+        body_data['acquisition_data']['microscope_type'] = 'TEM'
         body_data['metafile'] = \
             "/allen/aibs/pipeline/image_processing/volume_assembly/dataimport_test_data/_metadata_20170829130146_295434_5LC_0064_01_redo_001050_0_.json"
     else:
