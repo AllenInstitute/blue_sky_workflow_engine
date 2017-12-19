@@ -34,8 +34,9 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 from celery import Celery
+from celery import shared_task
 from kombu import Exchange, Queue, binding
-from workflow_client.client_settings import settings, config_object
+from workflow_client.client_settings import load_settings_yaml, config_object
 from workflow_engine.workflow_config import WorkflowConfig
 from workflow_engine.import_class import import_class
 import logging
@@ -99,21 +100,23 @@ def configure_task_queues(app, name, workflows):
         Queue('result', [binding(result_exchange, routing_key='result')]),
         Queue('null', [binding(result_exchange, routing_key='null')]))
 
+
 def route_task(name, args, kwargs, options, task=None, **kw):
-        task_name = '.'.split(name)[-1]
+    task_name = '.'.split(name)[-1]
 
-        if task_name == 'ingest_task':
-            return { 'queue': 'ingest' }
-        elif task_name == 'run_task':
-            return { 'queue': 'pbs' }
-        elif task_name in set(['success', 'fail']):
-            return { 'queue': 'result' }
-        else:
-            return { 'queue': 'null' }
+    if task_name == 'ingest_task':
+        return { 'queue': 'ingest' }
+    elif task_name == 'run_task':
+        return { 'queue': 'pbs' }
+    elif task_name in set(['success', 'fail']):
+        return { 'queue': 'result' }
+    else:
+        return { 'queue': 'null' }
 
-def ingest_consumer(): 
+def ingest_consumer():
     app_name = 'workflow_client.celery_ingest_consumer'
     app = Celery(app_name)
+    settings = load_settings_yaml()
     app.config_from_object(config_object(settings))
     workflow_config = load_workflow_config(settings.WORKFLOW_CONFIG_YAML)
     # TODO: parametrize literal
@@ -122,10 +125,13 @@ def ingest_consumer():
 
     return app
 
-app = ingest_consumer()
+try:
+    app = ingest_consumer()
+except:
+    pass
 
 
-@app.task(bind=True)
+@shared_task(bind=True)
 def ingest_task(self, workflow, message, tags):
     '''Receive the ingest message, look up the strategy class and
     call its ingest_message method.
@@ -144,9 +150,10 @@ def ingest_task(self, workflow, message, tags):
     '''
     ret = 'OK'
 
-    try: 
+    try:
         _log.info('ingest ' + str(workflow) + ' ' + str(message))
 
+        settings = load_settings_yaml()
         ingest_strategies = load_ingest_strategy_names(
             settings.WORKFLOW_CONFIG_YAML)
 
@@ -171,7 +178,7 @@ def ingest_task(self, workflow, message, tags):
 
 
 # TODO: migrate this from the other worker
-@app.task(bind=True)
+@shared_task(bind=True)
 def run_task(self, name, args):
     ret = None
 
@@ -184,11 +191,11 @@ def run_task(self, name, args):
 
     return ret
 
-@app.task
+@shared_task
 def success(msg):
     print(msg)
 
-@app.task
+@shared_task
 def fail(uuid):
     # e = result.get(propagate=False)
     # print('Error: %s %s %s' % (uuid, e, e.traceback))

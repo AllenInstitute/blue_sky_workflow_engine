@@ -88,7 +88,7 @@ if __name__ == '__main__':
         print("reading body message from module variable"  + body_file)
         body_data = import_class(body_file)
 
-    if 'ReferenceSet' == fix_option:
+    if 'ReferenceSetTest' == fix_option:
         # lens_correction_new_body_data.pop('reference_set_id', None) # doesn't have this`
         body_data['acquisition_data']['microscope_type'] = 'TEM'
         body_data['manifest_path'] = \
@@ -97,10 +97,23 @@ if __name__ == '__main__':
             "/allen/aibs/pipeline/image_processing/volume_assembly/lc_test_data/Wij_Set_594451332/594089217_594451332"
         body_data['metafile'] = \
             "/allen/aibs/pipeline/image_processing/volume_assembly/dataimport_test_data/_metadata_20170829130146_295434_5LC_0064_01_redo_001050_0_.json"
-    elif 'EMMontageSet' == fix_option:
+    elif 'EMMontageSetTest' == fix_option:
         body_data['acquisition_data']['microscope_type'] = 'TEM'
         body_data['metafile'] = \
             "/allen/aibs/pipeline/image_processing/volume_assembly/dataimport_test_data/_metadata_20170829130146_295434_5LC_0064_01_redo_001050_0_.json"
+    if 'ReferenceSet' == fix_option:
+        # lens_correction_new_body_data.pop('reference_set_id', None) # doesn't have this`
+        body_data['acquisition_data']['microscope_type'] = 'TEM'
+        body_data['manifest_path'] = \
+            "/allen/programs/celltypes/workgroups/em-connectomics/data/295434_5LC_0064_reimaging_03/20171004173254_reference/0/_trackem_20171004173254_295434_5LC_0064_reimaging_03_20171004173254_reference_0_.txt"
+        body_data['storage_directory'] = \
+            "/allen/programs/celltypes/workgroups/em-connectomics/data/295434_5LC_0064_reimaging_03/20171004173254_reference/0"
+        body_data['metafile'] = \
+            "/allen/programs/celltypes/workgroups/em-connectomics/data/295434_5LC_0064_reimaging_03/20171004173254_reference/0/_metadata_20171004173254_295434_5LC_0064_reimaging_03_20171004173254_reference_0_.json"
+    elif 'EMMontageSet' == fix_option:
+        body_data['acquisition_data']['microscope_type'] = 'TEM'
+        body_data['metafile'] = \
+            "/allen/programs/celltypes/workgroups/em-connectomics/data/295434_5LC_0064_reimaging_03/001047/0/_metadata_20171004191109_295434_5LC_0064_reimaging_03_001047_0_.json"
     else:
         pass
 

@@ -30,34 +30,25 @@
 # SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
 # INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTuWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-import pytest
-from mock import patch, mock, mock_open
-import os
-try:
-    import __builtin__ as builtins  # @UnresolvedImport
-except:
-    import builtins  # @UnresolvedImport
+import jinja2
 
-@mock.patch.dict(os.environ, {'BLUE_SKY_SETTINGS': '/path/to/settings.yml'})
-def test_client_settings():
-    # TODO: make into a fixture
-    cfg = '''\
-MESSAGE_QUEUE_HOST: message_queue.example.org
-MESSAGE_QUEUE_PORT: 222
-MESSAGE_QUEUE_USER: blue_sky_test_user
-MESSAGE_QUEUE_PASSWORD: blue_sky_test_user
-CELERY_MESSAGE_QUEUE_NAME: celery_application_name
-DEFAULT_MESSAGE_QUEUE_NAME: null_application_name
-'''
-    with patch(builtins.__name__ + ".open",
-               mock_open(read_data=cfg)):
-        from workflow_client.client_settings import settings
+class PbsUtils(object):
+    def __init__(self):
+        self.package = 'workflow_client'
+        self.templates = 'templates'
+        self.script = 'script_template.pbs'
 
-    assert settings.MESSAGE_QUEUE_HOST == 'message_queue.example.org'
-    assert settings.MESSAGE_QUEUE_PORT == 222
-    assert settings.MESSAGE_QUEUE_USER == 'blue_sky_test_user'
-    assert settings.MESSAGE_QUEUE_PASSWORD == 'blue_sky_test_user'
-    assert settings.CELERY_MESSAGE_QUEUE_NAME == 'celery_application_name'
+
+    def get_template(self, executable, task, settings):
+        env = jinja2.Environment(
+           loader=jinja2.PackageLoader(
+               self.package, self.templates))
+        pbs_template = env.get_template(self.script)
+
+        return pbs_template.render(
+            executable=executable,
+            task=task,
+            settings=settings)

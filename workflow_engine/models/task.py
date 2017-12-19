@@ -38,6 +38,7 @@ from django.utils import timezone
 from django.conf import settings
 from workflow_engine.models import ONE, ZERO, TWO, SECONDS_IN_MIN
 from workflow_engine.import_class import import_class
+from workflow_client.pbs_utils import PbsUtils
 import os
 import logging
 _model_logger = logging.getLogger('workflow_engine.models')
@@ -270,59 +271,23 @@ class Task(models.Model):
         return ('task_' + str(self.id))
 
     def get_umask(self):
-        return '022'
+        return '077'
 
     # TODO: replace this with a Jinja template?
     def get_pbs_commands(self):
         executable = self.get_executable()
 
-        # TODO: replace commands with a Jinja2 template
-        # def get_template(self): 
-        # env = jinja2.Environment(
-        #    loader=jinja2.PackageLoader('development.strategies',
-        #                                'templates'))
-        # return env.get_template('generate_point_matches_template.json')
-        # return json.loads(
-        #     input_data_template.render(
-        #         render_service_port=port))
-        commands = []
-        commands.append('#!/bin/bash')
-        commands.append('#PBS -q ' + executable.pbs_queue)
-        commands.append('#PBS -l ' + executable.pbs_processor)
-        commands.append('#PBS -l ' + executable.pbs_walltime)
-        commands.append('#PBS -N ' + self.get_task_name())
-        commands.append('#PBS -V') # Import system variables
-        commands.append('#PBS -r n') # Not re-runable
-        commands.append('#PBS -j oe') # Join error and output streams
-        commands.append('#PBS -o ' + self.log_file)
-        for e in self.environment_vars():
-            commands.append("export %s" % (e)) 
-        commands.append('source %s %s' % (
-           os.path.join(settings.PBS_CONDA_HOME, 'bin/activate'), 
-           settings.PBS_CONDA_ENV))
-        commands.append(self.full_executable)
-        commands.append('rtn_code=$?')
-        commands.append('source %s %s' % (
-           os.path.join(settings.PBS_CONDA_HOME, 'bin/activate'), 
-           settings.PBS_RESPONSE_CONDA_ENV))
-        commands.append(
-            'export PYTHONPATH=' +
-            settings.PBS_PYTHONPATH)
-        commands.append(
-            'BLUE_SKY_SETTINGS=' + settings.BLUE_SKY_SETTINGS + ' ' + 
-            'python -m' + settings.PBS_FINISH_MODULE + \
-            ' $rtn_code ' + str(self.id))
+        pbs_file_contents = PbsUtils().get_template(
+            executable, self, settings)
 
-        return commands
+        return pbs_file_contents
+
 
     def create_pbs_file(self, pbs_file):
-        commands = self.get_pbs_commands()
+        pbs_file_contents = self.get_pbs_commands()
 
-        file_handle = open(pbs_file, 'w')
-        for command in commands:
-            file_handle.write(command + '\n')
-
-        file_handle.close()
+        with open(pbs_file, 'w') as file_handle:
+            file_handle.write(pbs_file_contents)
 
         self.pbs_file = pbs_file
         self.save()

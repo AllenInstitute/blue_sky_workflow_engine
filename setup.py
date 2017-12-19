@@ -31,7 +31,7 @@ setup(
     name='django-blue-sky-workflow-engine',
     version='%s%s' % (VERSION, RELEASE),
     packages=prepend_find_packages('workflow_engine', 'workflow_client'),
-    package_data={'': ['*.conf', '*.cfg', '*.json', '*.env', '*.sh', '*.txt', 'Makefile'] },
+    package_data={'': ['*.conf', '*.cfg', '*.json', '*.env', '*.sh', '*.txt', '*.pbs', 'Makefile'] },
     include_package_data=True,
     license='Allen Institute Software License',
     description='Blue Sky Workflow Engine',
