@@ -128,7 +128,7 @@ def run_normal(full_executable, task_id, logfile):
 def publish_message(body, task_id, optional_body=None):
     with ReplyClient(
         MESSAGE_QUEUE_HOST,
-        MESSAGE_QUEUE_PORT,
+        int(MESSAGE_QUEUE_PORT),
         MESSAGE_QUEUE_USER,
         MESSAGE_QUEUE_PASSWORD,
         '',
