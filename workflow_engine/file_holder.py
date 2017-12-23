@@ -44,20 +44,37 @@ ZERO = 0
 ONE_MINUTES = 60
 
 class FileHolder(object):
+    _TRUNCATE_TAIL_LINES = 500
+
     def load_file(self, filename):
         if self.is_valid:
             with open(filename) as f:
-                self.lines = f.readlines()
+                self.lines = f.readlines()[-FileHolder._TRUNCATE_TAIL_LINES:]
 
 
-    @staticmethod
-    def add_color_highlighting(html):
+    @classmethod
+    def add_color_highlighting(cls, html):
         if html != None:
-            html = re.sub(r"[^( |\)|\(|\n)]*(success)[^( |\)|\(|\n)]*", "<span class = log_s>\g<0></span>", html, flags=re.IGNORECASE)
-            html = re.sub(r"[^( |\)|\(|\n)]*(warnings)[^( |\)|\(|\n)]*", "<span class = log_warn>\g<0></span>", html, flags=re.IGNORECASE)
-            html = re.sub(r"[^( |\)|\(|\n|:)]*(error)[^( |\)|\(|\n|:)]*", "<span class = log_er>\g<0></span>", html, flags=re.IGNORECASE)
-            html = re.sub(r"[^( |\)|\(|\n)]*(exception)[^( |\)|\(\n)]*", "<span class = log_er>\g<0></span>", html, flags=re.IGNORECASE)
-            html = re.sub(r"[^( |\)|\(|\n|:)]*(failure)[^( |\)|\(|\n|:)]*", "<span class = log_er>\g<0></span>", html, flags=re.IGNORECASE)
+            html = re.sub(r"[^( |\)|\(|\n)]*(success)[^( |\)|\(|\n)]*",
+                          "<span class = log_s>\g<0></span>",
+                          html,
+                          flags=re.IGNORECASE)
+            html = re.sub(r"[^( |\)|\(|\n)]*(warnings)[^( |\)|\(|\n)]*",
+                          "<span class = log_warn>\g<0></span>",
+                          html,
+                          flags=re.IGNORECASE)
+            html = re.sub(r"[^( |\)|\(|\n|:)]*(error)[^( |\)|\(|\n|:)]*",
+                          "<span class = log_er>\g<0></span>",
+                          html,
+                          flags=re.IGNORECASE)
+            html = re.sub(r"[^( |\)|\(|\n)]*(exception)[^( |\)|\(\n)]*",
+                          "<span class = log_er>\g<0></span>",
+                          html,
+                          flags=re.IGNORECASE)
+            html = re.sub(r"[^( |\)|\(|\n|:)]*(failure)[^( |\)|\(|\n|:)]*",
+                          "<span class = log_er>\g<0></span>",
+                          html,
+                          flags=re.IGNORECASE)
 
         return html
 
@@ -83,7 +100,8 @@ class FileHolder(object):
 
     def set_time(self, filename):
         if self.is_valid:
-            self.updated_time = datetime.datetime.fromtimestamp(os.path.getmtime(filename)).strftime('%m/%d/%Y %I:%M:%S')
+            self.updated_time = datetime.datetime.fromtimestamp(
+                os.path.getmtime(filename)).strftime('%m/%d/%Y %I:%M:%S')
 
 
     def check_out_of_date(self, start_run_time, filename):

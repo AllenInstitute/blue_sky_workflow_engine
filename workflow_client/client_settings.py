@@ -23,10 +23,11 @@ def load_settings_yaml():
 
 def config_object(s):
     return _settings_attr_dict({
-        'broker_url': 'pyamqp://%s:%s@%s//' % (
+        'broker_url': 'pyamqp://%s:%s@%s:%s//' % (
             s.MESSAGE_QUEUE_USER,
             s.MESSAGE_QUEUE_PASSWORD,
-            s.MESSAGE_QUEUE_HOST),
+            s.MESSAGE_QUEUE_HOST,
+            s.MESSAGE_QUEUE_PORT),
         'result_backend': 'rpc://',
         'task_serializer': 'json',
         'result_serializer': 'json',

@@ -19,7 +19,7 @@ MESSAGE_QUEUE_NAME = os.environ.get(
 CELERY_MESSAGE_QUEUE_NAME = message_queues['celery']
 MESSAGE_QUEUE_USER = 'blue_sky_user'
 MESSAGE_QUEUE_PASSWORD = 'blue_sky_user'
-MESSAGE_QUEUE_PORT = 5672
+MESSAGE_QUEUE_PORT = os.environ.get('AMQP_PORT', '5672')
 
 _log = get_task_logger('execution_runner')
 _log.info('Connecting to: %s' % (MESSAGE_QUEUE_HOST))
@@ -27,7 +27,8 @@ _log.info('Connecting to: %s' % (MESSAGE_QUEUE_HOST))
 app = Celery('workflow_client.worker_client',
              backend='rpc://',
              broker='pyamqp://' + str(MESSAGE_QUEUE_USER) + ':' + \
-             str(MESSAGE_QUEUE_PASSWORD) + '@' + MESSAGE_QUEUE_HOST + '//')
+             str(MESSAGE_QUEUE_PASSWORD) + '@' + MESSAGE_QUEUE_HOST + ':' + \
+             MESSAGE_QUEUE_PORT + '//')
 app.conf.task_default_queue = CELERY_MESSAGE_QUEUE_NAME
 
 SUCCESS_EXIT_CODE = 0
