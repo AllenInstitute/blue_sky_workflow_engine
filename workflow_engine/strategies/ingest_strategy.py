@@ -51,7 +51,7 @@ class IngestStrategy(ExecutionStrategy):
     def skip_execution(self, enqueued_object):
         return True
 
-    def create_enqueued_object(self, dictionary):
+    def create_enqueued_object(self, dictionary, tags=None):
         return None
 
     def generate_response(self, enqueued_object):

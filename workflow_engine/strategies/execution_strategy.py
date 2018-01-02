@@ -350,7 +350,6 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
                 'Expected output file to be created at: ' + \
                 str(output_file) + ' but it was not')
 
-        result = {}
         with open(output_file) as json_data:  
             results = json.load(json_data)
 
