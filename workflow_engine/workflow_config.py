@@ -1,5 +1,10 @@
 import yaml
 import logging
+from workflow_engine.models.job_queue import JobQueue
+from workflow_engine.models.executable import Executable
+from workflow_engine.models.workflow_node import WorkflowNode
+from workflow_engine.models.workflow import Workflow
+from workflow_engine.models.run_state import RunState
 
 
 class WorkflowConfig:
@@ -100,12 +105,6 @@ class WorkflowConfig:
 
     @classmethod
     def create_workflow(cls, workflows_yml):
-        from workflow_engine.models import \
-            Workflow, Executable, WorkflowNode, JobQueue, RunState
-
-        pbs_queue = 'mindscope'
-        pbs_processor = 'vmem=16g',
-        pbs_walltime = 'walltime=5:00:00'
         workflow_config = cls.from_yaml_file(workflows_yml)
         
         null_executable, created = \
@@ -217,3 +216,10 @@ class WorkflowConfig:
                                            parent_key,
                                            str(nodes[parent_key])))
 
+    @classmethod
+    def delete_all_workflows(cls):
+        JobQueue.objects.all().delete()
+        WorkflowNode.objects.all().delete()
+        Executable.objects.all().delete()
+        Workflow.objects.all().delete()
+        RunState.objects.all().delete()

@@ -53,6 +53,7 @@ class Command(BaseCommand):
         logging.getLogger('workflow_engine').setLevel(logging.INFO)
 
         try:
+            WorkflowConfig.delete_all_workflows()
             WorkflowConfig.create_workflow(file_path)
         except Exception as e:
             Command._log.error('Something went wrong: ' + str(e))
