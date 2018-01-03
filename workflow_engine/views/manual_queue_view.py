@@ -34,7 +34,10 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 from django.http import JsonResponse
-from workflow_engine.models import *
+from workflow_engine.models.task import Task
+from workflow_engine.models.run_state import RunState
+from workflow_engine.models import ONE
+
 
 def check_if_finished(request):
     result = {}
@@ -45,7 +48,9 @@ def check_if_finished(request):
     finished_jobs = 0
 
     try:
-        tasks = Task.objects.filter(run_state=RunState.get_running_state(), archived=False)
+        tasks = Task.objects.filter(
+            run_state=RunState.get_running_state(),
+            archived=False)
         for task in tasks:
             strategy = task.get_strategy()
             if strategy.is_manual_strategy():

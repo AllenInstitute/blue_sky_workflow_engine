@@ -34,9 +34,13 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 from django.http import JsonResponse
-from workflow_engine.models import *
 from workflow_engine.views import shared
 import json
+from workflow_engine.models.executable import Executable
+from workflow_engine.models.job_queue import JobQueue
+from workflow_engine.models.workflow_node import WorkflowNode
+from workflow_engine.models.job import Job
+from workflow_engine.models.run_state import RunState
 
 def update_record(request):
     result = {}

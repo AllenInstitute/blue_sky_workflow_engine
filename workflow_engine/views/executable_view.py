@@ -37,7 +37,8 @@ from django.http import JsonResponse
 from django.http import HttpResponse
 import traceback
 from django.template import loader
-from workflow_engine.models import *
+from workflow_engine.models.executable import Executable
+from workflow_engine.models import ONE
 from workflow_engine.views import shared
 import json
 

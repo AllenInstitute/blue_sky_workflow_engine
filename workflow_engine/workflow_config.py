@@ -1,10 +1,5 @@
 import yaml
 import logging
-from workflow_engine.models.job_queue import JobQueue
-from workflow_engine.models.executable import Executable
-from workflow_engine.models.workflow_node import WorkflowNode
-from workflow_engine.models.workflow import Workflow
-from workflow_engine.models.run_state import RunState
 
 
 class WorkflowConfig:
@@ -105,6 +100,12 @@ class WorkflowConfig:
 
     @classmethod
     def create_workflow(cls, workflows_yml):
+        from workflow_engine.models.job_queue import JobQueue
+        from workflow_engine.models.executable import Executable
+        from workflow_engine.models.workflow_node import WorkflowNode
+        from workflow_engine.models.workflow import Workflow
+        from workflow_engine.models.run_state import RunState
+
         workflow_config = cls.from_yaml_file(workflows_yml)
         
         null_executable, created = \
@@ -218,6 +219,12 @@ class WorkflowConfig:
 
     @classmethod
     def delete_all_workflows(cls):
+        from workflow_engine.models.job_queue import JobQueue
+        from workflow_engine.models.executable import Executable
+        from workflow_engine.models.workflow_node import WorkflowNode
+        from workflow_engine.models.workflow import Workflow
+        from workflow_engine.models.run_state import RunState
+
         JobQueue.objects.all().delete()
         WorkflowNode.objects.all().delete()
         Executable.objects.all().delete()

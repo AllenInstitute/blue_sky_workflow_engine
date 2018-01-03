@@ -35,7 +35,6 @@
 #
 from django.conf import settings
 from django.http import HttpResponse
-from workflow_engine.models import *
 from django.template import loader
 from workflow_engine.views import shared
 import django

@@ -36,7 +36,7 @@
 from django.http import JsonResponse
 from django.core.exceptions import ObjectDoesNotExist
 from workflow_engine.views import shared
-from workflow_engine.models import *
+from workflow_engine.models.executable import Executable
 
 def delete_record(request):
     result = {}

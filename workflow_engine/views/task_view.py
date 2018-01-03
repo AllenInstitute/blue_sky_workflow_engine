@@ -37,9 +37,9 @@ from django.http import JsonResponse
 from django.http import HttpResponse
 import traceback
 from django.template import loader
-from workflow_engine.models import *
+from workflow_engine.models.task import Task
+from workflow_engine.models import ZERO, ONE
 from workflow_engine.views import shared
-import json
 
 pages = ['index', 'jobs', 'workflows', 'workflow_creator', 'job_queues', 'executables']
 context = {

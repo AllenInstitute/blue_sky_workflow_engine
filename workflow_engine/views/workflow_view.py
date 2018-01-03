@@ -38,7 +38,11 @@ from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
 import traceback
 from django.template import loader
-from workflow_engine.models import *
+from workflow_engine.models import ZERO, ONE
+from workflow_engine.models.workflow import Workflow
+from workflow_engine.models.workflow_node import WorkflowNode
+from workflow_engine.models.run_state import RunState
+from workflow_engine.models.job import Job
 from workflow_engine.import_class import import_class
 from workflow_engine.views import shared
 import logging
@@ -353,7 +357,8 @@ def get_enqueued_objects(request):
 
     except ObjectDoesNotExist as e:
         success = False
-        message = 'Could not find a workflow record with id of ' + str(workflow_id) 
+        message = 'Could not find a workflow record with id of ' + \
+            str(workflow_node_id) 
 
     except Exception as e:
             success = False
@@ -399,7 +404,8 @@ def create_job(request):
 
     except ObjectDoesNotExist as e:
         success = False
-        message = 'Could not find a workflow record with id of ' + str(workflow_id) 
+        message = 'Could not find a workflow record with id of ' + \
+            str(workflow_node_id) 
 
     except Exception as e:
             success = False

@@ -1,4 +1,3 @@
-from workflow_engine.models.run_state import RunState
 from workflow_engine.strategies.execution_strategy \
     import ExecutionStrategy
 import traceback

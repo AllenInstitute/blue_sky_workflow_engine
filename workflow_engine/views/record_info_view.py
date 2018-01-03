@@ -34,8 +34,16 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 from django.http import JsonResponse
-from workflow_engine.models import *
+from workflow_engine.models.executable import Executable
+from workflow_engine.models.job import Job
+from workflow_engine.models.job_queue import JobQueue
+from workflow_engine.models.workflow import Workflow
+from workflow_engine.models.run_state import RunState
+from workflow_engine.models import ZERO
 from workflow_engine.views import shared
+from django.core.exceptions import ObjectDoesNotExist
+from workflow_engine.models.task import Task
+
 
 def get_record_info(request):
     result = {}
@@ -55,60 +63,103 @@ def get_record_info(request):
             success = False
             message = 'Missing record_id param'
 
-        elif record_type != 'executable' and record_type != 'job_queue' and record_type != 'job':
+        elif record_type != 'executable' and \
+             record_type != 'job_queue' and record_type != 'job':
             success = False
             message = 'record_type ' + str(record_type) + ' not supported'
         else:
             if record_type == 'executable':
                 if record_id == 'new':
-                    order = shared.set_order(payload, ZERO, 'name', '')
-                    order = shared.set_order(payload, order, 'description', '')
-                    order = shared.set_order(payload, order, 'static_arguments', '')
-                    order = shared.set_order(payload, order, 'executable_path', '')
-                    order = shared.set_order(payload, order, 'pbs_executable_path', '')
-                    order = shared.set_order(payload, order, 'pbs_processor', Executable._meta.get_field('pbs_processor').get_default())
-                    order = shared.set_order(payload, order, 'pbs_queue', Executable._meta.get_field('pbs_queue').get_default())
-                    order = shared.set_order(payload, order, 'pbs_walltime', Executable._meta.get_field('pbs_walltime').get_default())
+                    order = shared.set_order(
+                        payload, ZERO, 'name', '')
+                    order = shared.set_order(
+                        payload, order, 'description', '')
+                    order = shared.set_order(
+                        payload, order, 'static_arguments', '')
+                    order = shared.set_order(
+                        payload, order, 'executable_path', '')
+                    order = shared.set_order(
+                        payload, order, 'pbs_executable_path', '')
+                    order = shared.set_order(
+                        payload, order, 'pbs_processor',
+                        Executable._meta.get_field('pbs_processor').get_default())
+                    order = shared.set_order(
+                        payload, order, 'pbs_queue',
+                        Executable._meta.get_field('pbs_queue').get_default())
+                    order = shared.set_order(
+                        payload, order, 'pbs_walltime',
+                        Executable._meta.get_field('pbs_walltime').get_default())
                 else:
                     executable = Executable.objects.get(id=record_id)
-                    order = shared.set_order(payload, ZERO, 'name', executable.name)
-                    order = shared.set_order(payload, order, 'description', executable.description)
-                    order = shared.set_order(payload, order, 'static_arguments', executable.static_arguments)
-                    order = shared.set_order(payload, order, 'executable_path', executable.executable_path)
-                    order = shared.set_order(payload, order, 'pbs_executable_path', executable.pbs_executable_path)
-                    order = shared.set_order(payload, order, 'pbs_processor', executable.pbs_processor)
-                    order = shared.set_order(payload, order, 'pbs_queue', executable.pbs_queue)
-                    order = shared.set_order(payload, order, 'pbs_walltime', executable.pbs_walltime)
+                    order = shared.set_order(
+                        payload, ZERO, 'name', executable.name)
+                    order = shared.set_order(
+                        payload, order, 'description', executable.description)
+                    order = shared.set_order(
+                        payload, order, 'static_arguments',
+                        executable.static_arguments)
+                    order = shared.set_order(
+                        payload, order, 'executable_path',
+                        executable.executable_path)
+                    order = shared.set_order(
+                        payload, order, 'pbs_executable_path',
+                        executable.pbs_executable_path)
+                    order = shared.set_order(
+                        payload, order, 'pbs_processor',
+                        executable.pbs_processor)
+                    order = shared.set_order(
+                        payload, order, 'pbs_queue', executable.pbs_queue)
+                    order = shared.set_order(
+                        payload, order, 'pbs_walltime',
+                        executable.pbs_walltime)
             elif record_type == 'job_queue':
                 if record_id == 'new':
-                    order = shared.set_order(payload, ZERO, 'name', '')
-                    order = shared.set_order(payload, order, 'description', '')
-                    order = shared.set_order(payload, order, 'job_strategy_class', '')
-                    order = shared.set_order(payload, order, 'enqueued_object_class', '')
-                    order = shared.set_order(payload, order, 'executable', '')
+                    order = shared.set_order(
+                        payload, ZERO, 'name', '')
+                    order = shared.set_order(
+                        payload, order, 'description', '')
+                    order = shared.set_order(
+                        payload, order, 'job_strategy_class', '')
+                    order = shared.set_order(
+                        payload, order, 'enqueued_object_class', '')
+                    order = shared.set_order(
+                        payload, order, 'executable', '')
                 else:
                     job_queue = JobQueue.objects.get(id=record_id)
-                    order = shared.set_order(payload, ZERO, 'name', job_queue.name)
-                    order = shared.set_order(payload, order, 'description', job_queue.description)
-                    order = shared.set_order(payload, order, 'job_strategy_class', job_queue.job_strategy_class)
-                    order = shared.set_order(payload, order, 'enqueued_object_class', job_queue.enqueued_object_class)
+                    order = shared.set_order(
+                        payload, ZERO, 'name', job_queue.name)
+                    order = shared.set_order(
+                        payload, order, 'description', job_queue.description)
+                    order = shared.set_order(
+                        payload, order, 'job_strategy_class',
+                        job_queue.job_strategy_class)
+                    order = shared.set_order(
+                        payload, order, 'enqueued_object_class',
+                        job_queue.enqueued_object_class)
                     if job_queue.executable:
-                        order = shared.set_order(payload, order, 'executable', job_queue.executable.name)
+                        order = shared.set_order(
+                            payload, order, 'executable',
+                            job_queue.executable.name)
                     else:
-                        order = shared.set_order(payload, order, 'executable', None)
-                    
+                        order = shared.set_order(
+                            payload, order, 'executable', None)
+
             elif record_type == 'job':
                 if record_id == 'new':
-                    order = shared.set_order(payload, ZERO, 'workflow_node_id', '')
-                    order = shared.set_order(payload, order, 'enqueued_object_id', '')       
+                    order = shared.set_order(
+                        payload, ZERO, 'workflow_node_id', '')
+                    order = shared.set_order(
+                        payload, order, 'enqueued_object_id', '')
                 else:
                     job = Job.objects.get(id=record_id)
-                    order = shared.set_order(payload, ZERO, 'priority', job.priority)
+                    order = shared.set_order(
+                        payload, ZERO, 'priority', job.priority)
             payload['order_length'] = order
 
     except ObjectDoesNotExist as e:
         success = False
-        message = 'Could not find a ' + str(record_type) + ' record with id of ' + str(record_id) 
+        message = 'Could not find a ' + \
+            str(record_type) + ' record with id of ' + str(record_id)
 
     except Exception as e:
             success = False
@@ -144,7 +195,9 @@ def check_unique(request):
         elif field_name == None:
             success = False
             message = 'Missing field_name param'
-        elif record_type != 'executable' and record_type != 'job_queue' and record_type != 'workflow_show':
+        elif record_type != 'executable' and \
+            record_type != 'job_queue' and \
+            record_type != 'workflow_show':
             success = False
             message = 'record_type ' + str(record_type) + ' not supported'
         else:
@@ -156,7 +209,8 @@ def check_unique(request):
                             payload = False
                 else:
                     success = False
-                    message = 'record_type ' + str(record_type) +  ' field_name ' + field_name + ' not supported'
+                    message = 'record_type ' + str(record_type) + \
+                        ' field_name ' + field_name + ' not supported'
             elif record_type == 'job_queue':
                 if field_name == 'name':
                     job_queues = JobQueue.objects.filter(name=value)
@@ -165,7 +219,8 @@ def check_unique(request):
                             payload = False
                 else:
                     success = False
-                    message = 'record_type ' + str(record_type) +  ' field_name ' + field_name + ' not supported'
+                    message = 'record_type ' + str(record_type) + \
+                        ' field_name ' + field_name + ' not supported'
             elif record_type == 'workflow_show':
                 if field_name == 'name':
                     workflows = Workflow.objects.filter(name=value)
@@ -175,7 +230,8 @@ def check_unique(request):
                             payload = False
                 else:
                     success = False
-                    message = 'record_type ' + str(record_type) +  ' field_name ' + field_name + ' not supported'              
+                    message = 'record_type ' + str(record_type) + \
+                        ' field_name ' + field_name + ' not supported'
 
     except Exception as e:
             success = False
@@ -224,8 +280,10 @@ def get_search_data(request):
             for job_queue in job_queues:
                 ids[job_queue.id] = job_queue.id
                 names[job_queue.name] = job_queue.name
-                job_strategy_classes[job_queue.job_strategy_class] = job_queue.job_strategy_class
-                enqueued_object_classes[job_queue.enqueued_object_class] = job_queue.enqueued_object_class
+                job_strategy_classes[job_queue.job_strategy_class] = \
+                    job_queue.job_strategy_class
+                enqueued_object_classes[job_queue.enqueued_object_class] = \
+                    job_queue.enqueued_object_class
 
             payload['ids'] = ids
             payload['names'] = names
@@ -240,7 +298,8 @@ def get_search_data(request):
             
             for job in jobs:
                 ids[job.id] = job.id
-                enqueued_object_ids[job.enqueued_object_id] = job.enqueued_object_id
+                enqueued_object_ids[job.enqueued_object_id] = \
+                    job.enqueued_object_id
 
             run_states = RunState.objects.all()
             for run_state in run_states:
@@ -257,15 +316,18 @@ def get_search_data(request):
         elif(search_type == 'task'):
             tasks = Task.objects.all()
             ids = {}
-            enqueued_task_object_ids = {}   
-            enqueued_task_object_classes = {}   
+            enqueued_task_object_ids = {}
+            enqueued_task_object_classes = {}
             job_ids = {}
             run_state_ids = {}
 
             for task in tasks:
                 ids[task.id] = task.id
-                enqueued_task_object_ids[task.enqueued_task_object_id] = task.enqueued_task_object_id
-                enqueued_task_object_classes[task.enqueued_task_object_class] = task.enqueued_task_object_class
+                enqueued_task_object_ids[task.enqueued_task_object_id] = \
+                    task.enqueued_task_object_id
+                enqueued_task_object_classes[
+                    task.enqueued_task_object_class] = \
+                        task.enqueued_task_object_class
                 job_ids[task.job.id] = task.job.id
 
             run_states = RunState.objects.all()
@@ -274,15 +336,16 @@ def get_search_data(request):
 
             payload['ids'] = ids
             payload['enqueued_task_object_ids'] = enqueued_task_object_ids
-            payload['enqueued_task_object_classes'] = enqueued_task_object_classes
+            payload['enqueued_task_object_classes'] = \
+                enqueued_task_object_classes
             payload['run_state_ids'] = run_state_ids
             payload['job_ids'] = job_ids
         elif(search_type == 'workflow'):
             workflows = Workflow.objects.all()
             ids = {}
             names = {}
-            disabled = {}   
-            use_pbs = {}   
+            disabled = {}
+            use_pbs = {}
 
             for workflow in workflows:
                 ids[workflow.id] = workflow.id
@@ -294,8 +357,6 @@ def get_search_data(request):
             payload['workflow_names'] = names
             payload['disabled'] = disabled
             payload['use_pbs'] = use_pbs
-
-            # print('payload: ' + str(payload))
 
     result['success'] = success
     result['payload'] = payload

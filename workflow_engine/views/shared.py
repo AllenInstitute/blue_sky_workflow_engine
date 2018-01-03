@@ -34,10 +34,11 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 from django.core.paginator import Paginator
-from workflow_engine.models import *
 from django.conf import settings
+from workflow_engine.models import ONE, TWO
 import workflow_engine
 import re
+
 
 def add_settings_info_to_context(context):
     context['milliseconds_between_refresh'] = settings.MILLISECONDS_BETWEEN_REFRESH
@@ -102,7 +103,11 @@ def get_page_range_end(num_pages, page):
 
 def page_link_helper(url, selected_page, page_number):
     #replace the pagenumber
-    return re.sub(str(selected_page) + '/([0-9]+)/', str(selected_page) + '/' + str(page_number) + '/', url, flags=re.IGNORECASE)
+    return re.sub(
+        str(selected_page) + '/([0-9]+)/',
+        str(selected_page) + '/' + str(page_number) + '/',
+        url,
+        flags=re.IGNORECASE)
 
 def add_context(context, records, page_link, page, selected_page):
     page = int(page)
