@@ -9,10 +9,10 @@ class WaitStrategy(ExecutionStrategy):
     _log = logging.getLogger(
         'development.strategies.wait_strategy')
 
-    def must_wait(self, em_mset):
+    def must_wait(self, enqueued_object):
         return True
 
-    def skip_execution(self, em_mset):
+    def skip_execution(self, enqueued_object):
         WaitStrategy._log.info('Skip Execution')
 
         return True
