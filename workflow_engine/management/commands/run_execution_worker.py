@@ -34,7 +34,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 import pika
-from workflow_engine.models import RunState, Task
+from workflow_engine.models.run_state import RunState
+from workflow_engine.models.task import Task
 from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings

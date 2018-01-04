@@ -22,7 +22,7 @@ MESSAGE_QUEUE_PASSWORD = 'blue_sky_user'
 MESSAGE_QUEUE_PORT = int(os.environ.get('AMQP_PORT', '5672'))
 
 _log = get_task_logger('execution_runner')
-_log.info('Connecting to: %s' % (MESSAGE_QUEUE_HOST))
+_log.info('Connecting to: %s %d' % (MESSAGE_QUEUE_HOST, MESSAGE_QUEUE_PORT))
 
 app = Celery('workflow_client.worker_client',
              backend='rpc://',
@@ -46,14 +46,6 @@ def report_error(msg):
     print(msg)
     _log.error(msg)
 
-
-@app.task
-def check_environment_variables():
-    if "QMASTER_USERNAME" not in os.environ:
-        raise Exception('Please set QMASTER_USERNAME environment variable')
-
-    if "QMASTER_PASSWORD" not in os.environ:
-        raise Exception('Please set QMASTER_PASSWORD environment variable')
 
 @app.task
 def run_server_command(command):

@@ -39,7 +39,6 @@ from django.conf import settings
 from workflow_engine.models import ONE, ZERO, TWO, SECONDS_IN_MIN
 from workflow_engine.import_class import import_class
 from workflow_client.pbs_utils import PbsUtils
-import os
 import logging
 _model_logger = logging.getLogger('workflow_engine.models')
 
