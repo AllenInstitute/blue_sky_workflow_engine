@@ -12,6 +12,9 @@
 # serve to show the default.
 
 import sys, os
+import django
+os.environ['DJANGO_SETTINGS_MODULE'] = 'blue_sky.test_settings'
+django.setup()
 
 
 # If extensions (or modules to document with autodoc) are in another directory,

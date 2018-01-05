@@ -2,7 +2,7 @@
 import sys
 import logging
 from workflow_client.reply_client import ReplyClient
-from workflow_client.client_settings import settings
+from workflow_client.client_settings import load_settings_yaml
 
 _log = logging.getLogger('workflow_client.pbs_execution_finish')
 
@@ -12,6 +12,8 @@ SUCCESS_EXIT_CODE = 0
 ERROR_EXIT_CODE = 1
 
 def set_exit_state(exit_code, task_id):
+    settings = load_settings_yaml()
+    
     host = settings.MESSAGE_QUEUE_HOST
     port = settings.MESSAGE_QUEUE_PORT
     user = settings.MESSAGE_QUEUE_USER
