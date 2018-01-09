@@ -263,6 +263,9 @@ class Task(models.Model):
     def get_job_queue(self):
         return self.job.workflow_node.job_queue
 
+    def get_job(self):
+        return self.job
+
     def get_executable(self):
         return self.get_job_queue().executable
 
@@ -272,7 +275,6 @@ class Task(models.Model):
     def get_umask(self):
         return '077'
 
-    # TODO: replace this with a Jinja template?
     def get_pbs_commands(self):
         executable = self.get_executable()
 
@@ -280,7 +282,6 @@ class Task(models.Model):
             executable, self, settings)
 
         return pbs_file_contents
-
 
     def create_pbs_file(self, pbs_file):
         pbs_file_contents = self.get_pbs_commands()

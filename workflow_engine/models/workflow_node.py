@@ -34,7 +34,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 from django.db import models
-from workflow_engine.models import ONE, ZERO
+from workflow_engine.models import ZERO
 import logging
 import traceback
 _model_logger = logging.getLogger('workflow_engine.models')
@@ -102,17 +102,12 @@ class WorkflowNode(models.Model):
         return len(self.get_queued_and_running_jobs())
 
     def get_queued_and_running_jobs(self):
-        try: 
-            result = Job.objects.filter(
-                run_state_id__in=[
-                    RunState.get_queued_state().id,
-                    RunState.get_running_state().id],
-                workflow_node=self,
-                archived=False)
-        except Exception as e:
-            result = []
-
-        return result
+        return Job.objects.filter(
+            run_state_id__in=[
+                RunState.get_queued_state().id,
+                RunState.get_running_state().id],
+            workflow_node=self,
+            archived=False)
 
     def run_workflow_node_jobs(self):
         try:

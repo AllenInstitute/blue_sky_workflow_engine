@@ -39,7 +39,6 @@ from workflow_engine.import_class import import_class
 from workflow_engine.models import TWO, ONE, ZERO, SECONDS_IN_MIN
 import traceback
 import logging
-from django.core.exceptions import ObjectDoesNotExist
 _model_logger = logging.getLogger('workflow_engine.models')
 
 

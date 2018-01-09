@@ -272,7 +272,7 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
         ExecutionStrategy._log.info("input data")
 
         input_data = self.get_input(enqueued_object, storage_directory, task)
-        
+
         ExecutionStrategy._log.info(json.dumps(input_data))
 
         with open(input_file, 'w') as in_file:

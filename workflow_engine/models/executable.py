@@ -35,6 +35,7 @@
 #
 from django.db import models
 from django.utils import timezone
+from workflow_engine.models.job_queue import JobQueue
 import logging
 _model_logger = logging.getLogger('workflow_engine.models')
 
@@ -64,9 +65,4 @@ class Executable(models.Model):
         return timezone.localtime(self.updated_at).strftime('%m/%d/%Y %I:%M:%S')
 
     def get_job_queues(self):
-        try:
-            results = JobQueue.objects.filter(executable=self)
-        except Exception as e:
-            results = []
-
-        return results
+        return JobQueue.objects.filter(executable=self)

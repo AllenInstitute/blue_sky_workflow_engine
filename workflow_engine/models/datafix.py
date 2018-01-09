@@ -36,6 +36,7 @@
 from django.db import models
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
+from workflow_engine.models import ONE
 import workflow_engine
 import re
 import os
@@ -52,8 +53,8 @@ class Datafix(models.Model):
     def __str__(self):
         return self.name
 
-    @staticmethod
-    def get_extension(filename):
+    @classmethod
+    def get_extension(cls, filename):
         try:
             extension = os.path.splitext(filename)[ONE]
         except:
@@ -61,22 +62,24 @@ class Datafix(models.Model):
 
         return extension
 
-    def get_workflow_path():
+    @classmethod
+    def get_workflow_path(cls):
         return os.path.dirname(workflow_engine.__file__)
 
-    def get_module_path(module):
+    @classmethod
+    def get_module_path(cls, module):
         return os.path.dirname(module.__file__)
 
-    @staticmethod
-    def get_module_strategy_path(module):
+    @classmethod
+    def get_module_strategy_path(cls, module):
         return os.path.join(Datafix.get_module_path(module),'strategies/')
 
-    @staticmethod
-    def get_workflow_datafix_path():
+    @classmethod
+    def get_workflow_datafix_path(cls):
         return os.path.join(Datafix.get_workflow_path(),'datafixes/')
 
-    @staticmethod
-    def get_module_datafix_path(module):
+    @classmethod
+    def get_module_datafix_path(cls, module):
         return os.path.join(Datafix.get_module_path(module),'datafixes/')
 
     @staticmethod
@@ -113,7 +116,7 @@ class Datafix(models.Model):
 
         return datafix
 
-    def run(self):
+    def run(self, module):
         _model_logger.info('running datafix: ' + self.name)
 
         workflow_datafix_dir =  Datafix.get_workflow_datafix_path()

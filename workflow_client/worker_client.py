@@ -83,8 +83,7 @@ def run_pbs(full_executable, task_id):
         stdout_message = run_server_command(full_executable)
         _log.info('PBS STDOUT: ' + str(stdout_message))
 
-        pbs_id = stdout_message[FIRST].strip().replace(
-            ".corp.alleninstitute.org", "")
+        pbs_id = stdout_message[FIRST].strip().split('.')[FIRST]
         # pbs_id = stdout_message[FIRST].strip()
 
         _log.info('pbs task: %s, pbs id: %s' % (str(task_id), str(pbs_id)))

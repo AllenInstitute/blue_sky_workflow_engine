@@ -68,11 +68,6 @@ class JobQueue(models.Model):
         return timezone.localtime(self.updated_at).strftime('%m/%d/%Y %I:%M:%S')
 
     def get_workflow_nodes(self):
-        try:
-            results = WorkflowNode.objects.filter(job_queue=self)
-        except Exception as e:
-            results = []
-
-        return results
+        return WorkflowNode.objects.filter(job_queue=self)
 
 from workflow_engine.models.workflow_node import WorkflowNode

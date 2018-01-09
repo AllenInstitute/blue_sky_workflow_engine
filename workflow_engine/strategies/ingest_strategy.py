@@ -45,11 +45,14 @@ class IngestStrategy(ExecutionStrategy):
     #####everthing bellow this can be overriden#####
 
     def get_workflow_name(self):
-        return None
+        '''used to query the workflow object for start_workflow
 
-        # override if needed
-    def skip_execution(self, enqueued_object):
-        return True
+        Returns
+        -------
+        String
+            machine readable workflow name
+        '''
+        return None
 
     def create_enqueued_object(self, dictionary, tags=None):
         return None
@@ -61,24 +64,21 @@ class IngestStrategy(ExecutionStrategy):
 
     #####everthing bellow this should not be overriden#####
     #Do not override
-    def is_ingest_strategy(self):
+    def skip_execution(self, enqueued_object):
+        '''override executing jobs, only create enqueued objects
+
+        Ingest strategies are derived from executable strategies,
+        but are not used to execute jobs.
+
+        Returns
+        -------
+        boolean
+            always true
+        '''
         return True
 
-
-    # TODO: don't think this is hooked up.
-    # see inline implementation and remove need to read config file.
-    def start_workflow(self, enqueued_object):
-        Workflow.start_workflow(self.get_workflow_name(),
-                                enqueued_object)
-
-    # TODO: check if this is used
-    @classmethod
-    def workflow_ingest_strategy(cls, wf_name):
-        wf = Workflow.objects.get(name=wf_name)
-        ingest_strategy_class_name = wf.ingest_strategy_class
-        
-        return ingest_strategy_class_name
-
+    def is_ingest_strategy(self):
+        return True
 
     @classmethod
     def call_ingest_strategy(cls, wf_name, message):
