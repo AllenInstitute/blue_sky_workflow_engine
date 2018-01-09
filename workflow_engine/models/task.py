@@ -273,7 +273,7 @@ class Task(models.Model):
         return ('task_' + str(self.id))
 
     def get_umask(self):
-        return '077'
+        return '022'
 
     def get_pbs_commands(self):
         executable = self.get_executable()
