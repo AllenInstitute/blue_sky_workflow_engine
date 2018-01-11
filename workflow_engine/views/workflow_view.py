@@ -38,21 +38,20 @@ from django.http import HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
 import traceback
 from django.template import loader
-from workflow_engine.models import ZERO, ONE
+from workflow_engine.models import ZERO
 from workflow_engine.models.workflow import Workflow
 from workflow_engine.models.workflow_node import WorkflowNode
 from workflow_engine.models.run_state import RunState
 from workflow_engine.models.job import Job
 from workflow_engine.import_class import import_class
-from workflow_engine.views import shared
+from workflow_engine.views import shared, HEADER_PAGES
 import logging
 import json
 
 
 _log = logging.getLogger('workflow_engine.views.workflow_view')
-pages = ['index', 'jobs', 'workflows', 'workflow_creator', 'job_queues', 'executables']
 context = {
-    'pages': pages,
+    'pages': HEADER_PAGES,
 }
 
 def workflows(request):

@@ -33,7 +33,6 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-from celery import Celery
 from celery import shared_task
 from kombu import Exchange, Queue, binding
 from workflow_client.client_settings import load_settings_yaml, config_object
@@ -113,22 +112,15 @@ def route_task(name, args, kwargs, options, task=None, **kw):
     else:
         return { 'queue': 'null' }
 
-def ingest_consumer():
+def configure_ingest_consumer_app(app, app_name):
     app_name = 'workflow_client.celery_ingest_consumer'
-    app = Celery(app_name)
     settings = load_settings_yaml()
     app.config_from_object(config_object(settings))
-    workflow_config = load_workflow_config(settings.WORKFLOW_CONFIG_YAML)
-    # TODO: parametrize literal
-    configure_task_queues(app, 'at_em_imaging_workflow', workflow_config)
+    workflow_config = load_workflow_config(
+        settings.WORKFLOW_CONFIG_YAML)
+
+    configure_task_queues(app, app_name, workflow_config)
     app.conf.task_routes = [route_task]
-
-    return app
-
-try:
-    app = ingest_consumer()
-except:
-    pass
 
 
 @shared_task(bind=True)
@@ -142,6 +134,8 @@ def ingest_task(self, workflow, message, tags):
         the key of the workflow in the configuration yaml file
     message : dict
         the body of the ingest message
+    tags : array of Strings
+        additional flags that may be used to modify ingest behavior
 
     Returns
     -------
@@ -154,6 +148,9 @@ def ingest_task(self, workflow, message, tags):
         _log.info('ingest ' + str(workflow) + ' ' + str(message))
 
         settings = load_settings_yaml()
+        
+        _log.info(settings)
+
         ingest_strategies = load_ingest_strategy_names(
             settings.WORKFLOW_CONFIG_YAML)
 
@@ -164,7 +161,7 @@ def ingest_task(self, workflow, message, tags):
         _log.info('workflow strategy class: %s' % (ingest_strategy_class_name))
 
         clz = import_class(ingest_strategy_class_name)
-        ingest_strategy = clz() 
+        ingest_strategy = clz()
 
         # TODO: use Celery router to call directly
         ret = ingest_strategy.ingest_message(message, tags)

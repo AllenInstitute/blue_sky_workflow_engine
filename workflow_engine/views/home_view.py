@@ -36,14 +36,13 @@
 from django.conf import settings
 from django.http import HttpResponse
 from django.template import loader
-from workflow_engine.views import shared
+from workflow_engine.views import shared, HEADER_PAGES
 import django
 import sys
 import workflow_engine
 
-pages = ['index', 'jobs', 'workflows', 'workflow_creator', 'job_queues', 'executables']
 context = {
-    'pages': pages,
+    'pages': HEADER_PAGES,
 }
 
 ZERO = 0

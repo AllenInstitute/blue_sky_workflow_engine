@@ -2,7 +2,7 @@ import os
 import yaml
 
 
-class _settings_attr_dict(dict):
+class settings_attr_dict(dict):
     __getattr__ = dict.get
 
 
@@ -14,20 +14,24 @@ def load_settings_yaml():
             os.getenv('BLUE_SKY_SETTINGS')
 
         with open(blue_sky_settings_json) as f:
-            settings_dict = _settings_attr_dict(yaml.load(f))
+            settings_dict = settings_attr_dict(yaml.load(f))
     except:
-        pass
-        # raise Exception('need to set BLUE_SKY_SETTINGS')
+        raise Exception('need to set BLUE_SKY_SETTINGS')
 
     return settings_dict
 
+
+def get_message_broker_url(celery_settings):
+    return 'pyamqp://%s:%s@%s:%s//' % (
+        celery_settings.MESSAGE_QUEUE_USER,
+        celery_settings.MESSAGE_QUEUE_PASSWORD,
+        celery_settings.MESSAGE_QUEUE_HOST,
+        celery_settings.MESSAGE_QUEUE_PORT)
+
+
 def config_object(s):
-    return _settings_attr_dict({
-        'broker_url': 'pyamqp://%s:%s@%s:%s//' % (
-            s.MESSAGE_QUEUE_USER,
-            s.MESSAGE_QUEUE_PASSWORD,
-            s.MESSAGE_QUEUE_HOST,
-            s.MESSAGE_QUEUE_PORT),
+    return settings_attr_dict({
+        'broker_url': get_message_broker_url(s),
         'result_backend': 'rpc://',
         'task_serializer': 'json',
         'result_serializer': 'json',

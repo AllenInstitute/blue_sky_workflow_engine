@@ -33,12 +33,11 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-from workflow_engine.import_class import import_class
-from django.core.management.base import BaseCommand, CommandError
-#from django.core.exceptions import ObjectDoesNotExist
-#from django.conf import settings
+from django.core.management.base import BaseCommand
+from django.conf import settings
+from workflow_client.celery_ingest_consumer import configure_ingest_consumer_app
+from celery import Celery
 import logging
-import traceback
 
 
 class Command(BaseCommand):
@@ -50,9 +49,13 @@ class Command(BaseCommand):
         logging.basicConfig(level=logging.INFO)
         logging.getLogger('workflow_engine').setLevel(logging.INFO)
         logging.getLogger('workflow_client').setLevel(logging.INFO)
+        
+        app_name = settings.MESSAGE_QUEUE_NAME
 
-        from workflow_client.celery_ingest_consumer import app
-        app.start(argv=[
+        ingest_consumer_app = Celery()
+        configure_ingest_consumer_app(ingest_consumer_app,
+                                      app_name)
+        ingest_consumer_app.start(argv=[
             'celery', 
             '-A', 'workflow_client.celery_ingest_consumer',
             'worker',
@@ -60,4 +63,4 @@ class Command(BaseCommand):
             '--logfile=logs/server_worker.log',
             '--concurrency=2',
             '-Q', 'ingest,result,null',
-            '-n', 'ingest@at_em_imaging_workflow'])
+            '-n', 'ingest@' + app_name])

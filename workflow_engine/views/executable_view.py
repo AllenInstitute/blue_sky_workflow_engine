@@ -35,16 +35,14 @@
 #
 from django.http import JsonResponse
 from django.http import HttpResponse
-import traceback
 from django.template import loader
 from workflow_engine.models.executable import Executable
 from workflow_engine.models import ONE
-from workflow_engine.views import shared
-import json
+from workflow_engine.views import shared, HEADER_PAGES
 
-pages = ['index', 'jobs', 'workflows', 'workflow_creator', 'job_queues', 'executables']
+
 context = {
-    'pages': pages,
+    'pages': HEADER_PAGES,
 }
 
 def executables_page(request, page, url=None):

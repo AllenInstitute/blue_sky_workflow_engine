@@ -40,12 +40,11 @@ from django.template import loader
 from django.apps import apps
 from workflow_engine.models.job_queue import JobQueue
 from workflow_engine.models import ZERO, ONE
-from workflow_engine.views import shared
+from workflow_engine.views import shared, HEADER_PAGES
 
 
-pages = ['index', 'jobs', 'workflows', 'workflow_creator', 'job_queues', 'executables']
 context = {
-    'pages': pages,
+    'pages': HEADER_PAGES,
 }
 
 def get_job_queues_show_data(request):

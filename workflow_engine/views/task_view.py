@@ -39,11 +39,10 @@ import traceback
 from django.template import loader
 from workflow_engine.models.task import Task
 from workflow_engine.models import ZERO, ONE
-from workflow_engine.views import shared
+from workflow_engine.views import shared, HEADER_PAGES
 
-pages = ['index', 'jobs', 'workflows', 'workflow_creator', 'job_queues', 'executables']
 context = {
-    'pages': pages,
+    'pages': HEADER_PAGES,
 }
 
 def tasks_page(request, page, url = None):
