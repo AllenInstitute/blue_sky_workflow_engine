@@ -82,6 +82,11 @@ class WorkflowConfig:
                 else:
                     state['executable'] = 'None'
 
+                if 'batch_size' in s:
+                    state['batch_size'] = s['batch_size']
+                else:
+                    state['batch_size'] = 1
+
                 states[s['key']] = state
                 state_list.append(s['key'])
 
@@ -163,7 +168,7 @@ class WorkflowConfig:
 
             for k in workflow_spec.state_list:
                 node = workflow_spec.states[k]
-                
+
                 queue_name = node['label'] # TODO: check for uniqueness
 
                 WorkflowConfig._log.info(
@@ -181,7 +186,7 @@ class WorkflowConfig:
                             'enqueued_object_class': node['enqueued_class'],
                             'executable': executables[node['executable']]})
     
-                batch_size = 1
+                batch_size = node['batch_size']
                 max_retries = 1
 
                 nodes[node['key']], _ = \
