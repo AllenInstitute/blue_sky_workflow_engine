@@ -41,6 +41,7 @@ from workflow_engine.models.job import Job
 from workflow_engine.models.workflow_node import WorkflowNode
 from workflow_engine.models import ZERO, ONE
 from workflow_engine.views import shared, HEADER_PAGES
+from workflow_engine.workflow_controller import WorkflowController
 
 
 context = {
@@ -123,7 +124,7 @@ def queue_job(request):
         
         if job_id != None:
             job = Job.objects.get(id=job_id)
-            job.set_for_run()
+            WorkflowController.set_job_for_run(job)
         else:
             success = False
             message = 'Missing job_id'
@@ -247,7 +248,7 @@ def run_all_jobs(request):
             records = Job.objects.filter(id__in=job_ids.split(','))
 
             for record in records:
-                record.set_for_run_if_valid()
+                WorkflowController.set_job_for_run_if_valid(record)
         else:
             success = False
             message = 'Missing job_ids'

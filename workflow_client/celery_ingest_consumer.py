@@ -33,7 +33,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-from celery import shared_task
+import celery
 from kombu import Exchange, Queue, binding
 from workflow_client.client_settings import load_settings_yaml, config_object
 from workflow_engine.workflow_config import WorkflowConfig
@@ -113,7 +113,6 @@ def route_task(name, args, kwargs, options, task=None, **kw):
         return { 'queue': 'null' }
 
 def configure_ingest_consumer_app(app, app_name):
-    app_name = 'workflow_client.celery_ingest_consumer'
     settings = load_settings_yaml()
     app.config_from_object(config_object(settings))
     workflow_config = load_workflow_config(
@@ -123,7 +122,14 @@ def configure_ingest_consumer_app(app, app_name):
     app.conf.task_routes = [route_task]
 
 
-@shared_task(bind=True)
+try:
+    app = celery.Celery('workflow_client.celery_ingest_consumer')
+    configure_ingest_consumer_app(app, 'at_em_imaging_workflow')
+except:
+    pass
+
+
+@celery.shared_task(bind=True)
 def ingest_task(self, workflow, message, tags):
     '''Receive the ingest message, look up the strategy class and
     call its ingest_message method.
@@ -175,7 +181,7 @@ def ingest_task(self, workflow, message, tags):
 
 
 # TODO: migrate this from the other worker
-@shared_task(bind=True)
+@celery.shared_task(bind=True)
 def run_task(self, name, args):
     ret = None
 
@@ -188,11 +194,11 @@ def run_task(self, name, args):
 
     return ret
 
-@shared_task
+@celery.shared_task
 def success(msg):
     print(msg)
 
-@shared_task
+@celery.shared_task
 def fail(uuid):
     # e = result.get(propagate=False)
     # print('Error: %s %s %s' % (uuid, e, e.traceback))

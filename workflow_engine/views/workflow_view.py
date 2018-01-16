@@ -47,6 +47,7 @@ from workflow_engine.import_class import import_class
 from workflow_engine.views import shared, HEADER_PAGES
 import logging
 import json
+from workflow_engine.workflow_controller import WorkflowController
 
 
 _log = logging.getLogger('workflow_engine.views.workflow_view')
@@ -399,7 +400,7 @@ def create_job(request):
             job.run_state=RunState.get_pending_state()
             job.priority = priority
             job.save()
-            job.run_jobs()
+            WorkflowController.run_workflow_node_jobs(job.workflow_node)
 
     except ObjectDoesNotExist as e:
         success = False
@@ -544,11 +545,11 @@ def update_workflow_node(request):
 
             workflow_node.save()
 
-            workflow_node.run_workflow_node_jobs()
+            WorkflowController.run_workflow_node_jobs(workflow_node)
 
             #run jobs if this workflow was enabled
             if not workflow_node.workflow.disabled and prev_disabled and not current_disabled:
-                workflow_node.run_workflow_node_jobs()
+                WorkflowController.run_workflow_node_jobs(workflow_node)
 
     except ObjectDoesNotExist as e:
         success = False
@@ -635,7 +636,7 @@ def update_workflow(request):
             if prev_disabled and not current_disabled:
                 for workflow_node in WorkflowNode.objects.filter(workflow=workflow):
                     if not workflow_node.disabled:
-                        workflow_node.run_workflow_node_jobs()
+                        WorkflowController.run_workflow_node_jobs(workflow_node)
 
     except ObjectDoesNotExist as e:
         success = False

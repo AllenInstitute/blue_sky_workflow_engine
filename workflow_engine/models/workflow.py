@@ -34,7 +34,6 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 from django.db import models
-from workflow_engine.models import ONE, ZERO
 import logging
 _model_logger = logging.getLogger('workflow_engine.models')
 
@@ -54,43 +53,6 @@ class Workflow(models.Model):
     def get_head_workfow_nodes(self):
         return WorkflowNode.objects.filter(is_head=True, workflow=self.id)
 
-    @classmethod
-    def start_workflow(cls,
-                       workflow_name,
-                       enqueued_object,
-                       start_node_name=None):
-        workflow = Workflow.objects.get(name=workflow_name)
-        _model_logger.info(
-            "starting %s at %s" % (
-                workflow_name, str(start_node_name)))
-
-        if start_node_name is not None:
-            workflow_nodes = WorkflowNode.objects.filter(
-                job_queue__name=start_node_name)
-        else:
-            workflow_nodes = WorkflowNode.objects.filter(
-                workflow=workflow, parent=None)
-
-        if len(workflow_nodes) != ONE:
-            raise Exception(
-                'Expected to find a single head workflow node but found: ' + \
-                str(len(workflow_nodes)) + ': ' + \
-                    ', '.join(str(wn) for wn in workflow_nodes))
-
-        workflow_node = workflow_nodes[ZERO]
-
-        job = Job()
-        job.enqueued_object_id=enqueued_object.id
-        job.workflow_node=workflow_node
-        job.run_state=RunState.get_pending_state()
-        job.priority = workflow_node.priority
-        job.save()
-        
-        _model_logger.info("Start workflow job state: %s" % (str(job.run_state)))
-        
-        job.run_jobs()
 
 # circular imports
 from workflow_engine.models.workflow_node import WorkflowNode
-from workflow_engine.models.job import Job
-from workflow_engine.models.run_state import RunState

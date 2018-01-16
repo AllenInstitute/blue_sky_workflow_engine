@@ -36,8 +36,7 @@
 from django.db import models
 from django.utils import timezone
 from workflow_engine.import_class import import_class
-from workflow_engine.models import TWO, ONE, ZERO, SECONDS_IN_MIN
-import traceback
+from workflow_engine.models import TWO, SECONDS_IN_MIN
 import logging
 _model_logger = logging.getLogger('workflow_engine.models')
 
@@ -63,10 +62,12 @@ class Job(models.Model):
         self.save()
 
     def get_created_at(self):
-        return timezone.localtime(self.created_at).strftime('%m/%d/%Y %I:%M:%S')
+        return timezone.localtime(self.created_at).strftime(
+            '%m/%d/%Y %I:%M:%S')
 
     def get_updated_at(self):
-        return timezone.localtime(self.updated_at).strftime('%m/%d/%Y %I:%M:%S')
+        return timezone.localtime(self.updated_at).strftime(
+            '%m/%d/%Y %I:%M:%S')
 
     def get_color_class(self):
         color = 'color_' + self.run_state.name.lower()
@@ -91,7 +92,6 @@ class Job(models.Model):
         return self.workflow_node.job_queue.enqueued_object_class
 
     def set_error_message(self, error_message, task):
-
         if not task:
             self.error_message = 'job failed: ' + error_message
         elif error_message != None:
@@ -135,13 +135,13 @@ class Job(models.Model):
         _model_logger.info('set failed')
         self.run_state = RunState.get_failed_state()
         self.save()
-        self.run_jobs()
+        WorkflowController.run_workflow_node_jobs(self.workflow_node)
 
     def set_failed_execution_state(self):
         _model_logger.info('set failed execution')
         self.run_state = RunState.get_failed_execution_state()
         self.save()
-        self.run_jobs()
+        WorkflowController.run_workflow_node_jobs(self.workflow_node)
 
     def set_running_state_from_queued_or_pending(self):
         if(self.run_state.name == 'QUEUED' or self.run_state.name == 'PENDING'):
@@ -156,21 +156,23 @@ class Job(models.Model):
         _model_logger.info('set success')
         self.run_state = RunState.get_success_state()
         self.save()
-        self.run_jobs()
+        WorkflowController.run_workflow_node_jobs(self.workflow_node)
 
     def set_process_killed_state(self):
         _model_logger.info('set process_killed')
         self.run_state = RunState.get_process_killed_state()
         self.save()
-        self.run_jobs()
+        WorkflowController.run_workflow_node_jobs(self.workflow_node)
 
     def get_enqueued_object(self):
         _model_logger.info(
             "importing %s" % (
                 self.workflow_node.job_queue.enqueued_object_class)) 
 
-        claz = import_class(self.workflow_node.job_queue.enqueued_object_class)
-        enqueued_object = claz.objects.get(id=self.enqueued_object_id)
+        claz = import_class(
+            self.workflow_node.job_queue.enqueued_object_class)
+        enqueued_object = claz.objects.get(
+            id=self.enqueued_object_id)
         return enqueued_object
 
     def get_strategy(self):
@@ -183,102 +185,16 @@ class Job(models.Model):
                 task.archived = False
                 task.save()
 
-    def create_tasks(self):
-        reused_tasks = {}
-        strategy = self.get_strategy()
-        pending_state = RunState.get_pending_state()
-
-        task_objects = \
-            strategy.get_task_objects_for_queue(
-                self.get_enqueued_object())
-
-        for task_object in task_objects:
-            enqueued_object_full_class = \
-                type(task_object).__module__ + '.' + type(task_object).__name__
-        
-            if self.workflow_node.overwrite_previous_job:
-                try:
-                    _model_logger.info(
-                        'overwriting task with enqueued class: %s' %
-                        (enqueued_object_full_class))
-                    task = Task.objects.get(
-                        enqueued_task_object_id=task_object.id,
-                        enqueued_task_object_class=enqueued_object_full_class,
-                        job=self)
-                    task.run_state = pending_state
-                    task.archived = False
-                    task.retry_count = ZERO
-                    task.save()
-                except:
-                    _model_logger.info(
-                        'creating task with enqueued class: %s' %
-                        (enqueued_object_full_class))
-                    task = Task(
-                        enqueued_task_object_id=task_object.id,
-                        enqueued_task_object_class=enqueued_object_full_class,
-                        run_state=pending_state,
-                        job=self)
-                    task.save()
-            else:
-                _model_logger.info(
-                    'creating task with enqueued class: %s' %
-                    (enqueued_object_full_class))
-                task = Task(
-                    enqueued_task_object_id=task_object.id,
-                    enqueued_task_object_class=enqueued_object_full_class,
-                    run_state=pending_state, job=self)
-                task.save()
-
-            reused_tasks[task.id] = True
-
-        return reused_tasks
-
     def get_tasks(self):
         return Task.objects.filter(job_id=self.id, archived=False)
 
     def number_of_tasks(self):
         return len(self.get_tasks())
 
-    def set_for_run_if_valid(self):
-        if self.can_rerun():
-            self.set_for_run()
-
-    def set_for_run(self):
-        _model_logger.info('set for run')
-        self.set_pending_state()
-        self.run_jobs()
-
     def prep_job(self):
         strategy = self.get_strategy()
         _model_logger.info("got strategy: " + str(strategy))
         strategy.prep_job(self)
-
-    def run(self):
-        _model_logger.info('run')
-        try:
-            self.set_queued_state()
-
-            self.set_start_run_time()
-            self.clear_error_message()
-
-            self.prep_job()
-
-            reused_tasks = self.create_tasks()
-
-            self.remove_tasks(reused_tasks)
-
-            for task in self.get_tasks():
-                task.run_task()
-
-        except Exception as e:
-            self.set_error_message(
-                str(e) + ' - ' + str(traceback.format_exc()), None)
-            _model_logger.info("Job exception: %s" % (self.error_message))
-            self.set_failed_state()
-
-    def run_jobs(self):
-        _model_logger.info('run jobs')
-        self.workflow_node.run_workflow_node_jobs()
 
     def get_start_run_time(self):
         result = None
@@ -317,48 +233,6 @@ class Job(models.Model):
         self.duration = str(self.end_run_time - self.start_run_time)
         self.save()
 
-    def enqueue_next_queue(self):
-        _model_logger.info('enqueue_next_queue')
-        children = self.workflow_node.get_children()
-        for child in children:
-            strategy = child.get_strategy()
-            enqueued_objects = strategy.get_objects_for_queue(self)
-
-            for enqueued_object in enqueued_objects:
-                if strategy.can_transition(enqueued_object):
-                    #try to get the job
-                    jobs = Job.objects.filter(
-                        enqueued_object_id=enqueued_object.id,
-                        workflow_node_id=child.id,
-                        archived=False)
-
-                    if len(jobs) > ZERO:
-                        index = ZERO
-                        for job in jobs:
-                            #reset job if needed
-                            if index == ZERO:
-                                job.run_state = RunState.get_pending_state()
-                                job.priority = child.priority
-                                job.archived = False
-                                job.save()
-                                job.set_for_run()
-                                
-                            #should not have more than one job but just in case
-                            else:
-                                job.archived = True
-                                job.save()
-
-                            index += ONE
-                    else:
-                        # create the job if needed
-                        job = Job(enqueued_object_id=enqueued_object.id,
-                                  workflow_node=child,
-                                  run_state=RunState.get_pending_state(),
-                                  priority=child.priority)
-                        job.save()
-                        job.set_for_run()
-
-
     # check if all tasks have finished
     def all_tasks_finished(self):
         _model_logger.info('check all tasks finished')
@@ -377,4 +251,4 @@ class Job(models.Model):
 # circular imports
 from workflow_engine.models.task import Task
 from workflow_engine.models.run_state import RunState
-
+from workflow_engine.workflow_controller import WorkflowController

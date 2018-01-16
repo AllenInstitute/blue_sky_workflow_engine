@@ -18,7 +18,7 @@ class WaitStrategy(ExecutionStrategy):
 
     def run_task(self, task):
         try:
-            enqueued_object = task.get_enqueued_object()
+            enqueued_object = WorkflowController.get_enqueued_object(task)
 
             if self.must_wait(enqueued_object):
                 task.set_queued_state()
@@ -41,7 +41,7 @@ class WaitStrategy(ExecutionStrategy):
 
             task.job.set_success_state()
             task.job.set_end_run_time()
-            task.job.enqueue_next_queue()
+            WorkflowController.enqueue_next_queue(task.job)
         except Exception as e:
             WaitStrategy._log.error(
                 str(e) + ' - ' + str(traceback.format_exc()))
@@ -50,3 +50,5 @@ class WaitStrategy(ExecutionStrategy):
                 str(e) + ' - ' + str(traceback.format_exc()))
             self.fail_task(task)
 
+
+from workflow_engine.workflow_controller import WorkflowController

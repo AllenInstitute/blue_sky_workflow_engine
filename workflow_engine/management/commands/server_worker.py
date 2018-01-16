@@ -35,8 +35,7 @@
 #
 from django.core.management.base import BaseCommand
 from django.conf import settings
-from workflow_client.celery_ingest_consumer import configure_ingest_consumer_app
-from celery import Celery
+from workflow_client.celery_ingest_consumer import app
 import logging
 
 
@@ -52,10 +51,7 @@ class Command(BaseCommand):
         
         app_name = settings.MESSAGE_QUEUE_NAME
 
-        ingest_consumer_app = Celery()
-        configure_ingest_consumer_app(ingest_consumer_app,
-                                      app_name)
-        ingest_consumer_app.start(argv=[
+        app.start(argv=[
             'celery', 
             '-A', 'workflow_client.celery_ingest_consumer',
             'worker',

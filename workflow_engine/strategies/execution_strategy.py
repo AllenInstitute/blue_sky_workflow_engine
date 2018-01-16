@@ -36,12 +36,12 @@
 from workflow_client.worker_client import run_celery_task, cancel_task
 from workflow_engine.strategies import base_strategy
 from django.conf import settings
-
 import os
 import subprocess
 import traceback
 import logging
 import simplejson as json
+
 
 class ExecutionStrategy(base_strategy.BaseStrategy):
     _log = logging.getLogger('workflow_engine.strategies.execution_strategy')
@@ -82,8 +82,8 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
         # populate the input file
         storage_dir = self.get_task_storage_directory(task)
         ExecutionStrategy._log.info('task storage dir %s' % (storage_dir))
-        enqueued_object = task.get_enqueued_object()
-        ExecutionStrategy._log.info('enqueued_object')        
+        enqueued_object = WorkflowController.get_enqueued_object(task)
+        ExecutionStrategy._log.info('enqueued_object')
         self.create_input_file(input_file,
                                enqueued_object,
                                storage_dir,
@@ -186,7 +186,7 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
             if task.job.all_tasks_finished():
                 task.job.set_success_state()
                 task.job.set_end_run_time()
-                task.job.enqueue_next_queue()
+                WorkflowController.enqueue_next_queue(task.job)
 
         except Exception as e:
             ExecutionStrategy._log.error(
@@ -225,7 +225,9 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
     def run_asynchronous_task(self, task):
         task.clear_error_message()
 
-        if self.skip_execution(task.get_enqueued_object()):
+        enqueued_object = WorkflowController.get_enqueued_object(task)
+
+        if self.skip_execution(enqueued_object):
             # TODO: make this a "skip" remote queue
             ExecutionStrategy._log.info('skipping execution')
             self.running_task(task)
@@ -353,4 +355,9 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
         with open(output_file) as json_data:  
             results = json.load(json_data)
 
-        self.on_finishing(task.get_enqueued_object(), results, task)
+        enqueued_object = WorkflowController.get_enqueued_object(task)
+
+        self.on_finishing(enqueued_object, results, task)
+
+
+from workflow_engine.workflow_controller import WorkflowController

@@ -8,3 +8,4 @@
 doc/
 htmlcov/
 test-reports/
+build/

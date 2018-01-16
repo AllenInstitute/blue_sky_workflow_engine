@@ -37,7 +37,6 @@ from django.db import models
 from django.utils import timezone
 from django.conf import settings
 from workflow_engine.models import ONE, ZERO, TWO, SECONDS_IN_MIN
-from workflow_engine.import_class import import_class
 from workflow_client.pbs_utils import PbsUtils
 import logging
 _model_logger = logging.getLogger('workflow_engine.models')
@@ -76,7 +75,6 @@ class Task(models.Model):
         return timezone.localtime(self.updated_at).strftime('%m/%d/%Y %I:%M:%S')
 
     def set_error_message(self, error_message):
-
         self.error_message = str(error_message)
         self.save()
         self.job.set_error_message(self.error_message, self)
@@ -97,7 +95,6 @@ class Task(models.Model):
         _model_logger.info("pbs_task: %s" % (is_pbs))
 
         return is_pbs
-
 
     def kill_task(self):
         from celery.task.control import revoke
@@ -128,7 +125,7 @@ class Task(models.Model):
     def get_enqueued_object_display(self):
         result = None
         try:
-            enqueued_object = self.get_enqueued_object()
+            enqueued_object = WorkflowController.get_enqueued_object(self)
             result = str(enqueued_object)
         except:
             result = None
@@ -292,34 +289,6 @@ class Task(models.Model):
         self.pbs_file = pbs_file
         self.save()
 
-    def get_enqueued_object(self):
-        _model_logger.info('Task.get_enqueued_object')
-        if self.enqueued_task_object_class == None:
-            _model_logger.info('enqueued_task_object_class is nil for task')
-            raise Exception('enqueued_task_object_class is nil for task: ' + str(self.id))
-
-        if self.enqueued_task_object_id == None:
-            _model_logger.info('enqueued_task_object_id is nil for task')
-            raise Exception('enqueued_task_object_id is nil for task: ' + str(self.id))
-
-        _model_logger.info('task enqueued object class: %s' % (self.enqueued_task_object_class))
-        enqueued_object_class = import_class(self.enqueued_task_object_class)
-        enqueued_object = enqueued_object_class.objects.get(id=self.enqueued_task_object_id)
-
-        if enqueued_object == None:
-            _model_logger.info('enqueued_object is None')
-            msg = \
-                'enqueued_object does not exist for enqueued_object_class of ' + \
-                str(self.enqueued_task_object_class) + \
-                ' and id of ' + \
-                str(self.enqueued_task_object_id)
-            _model_logger.info(msg)   
-            raise Exception(msg)  
-        
-        _model_logger.info('task enqueued object: %s' % (enqueued_object))
-
-        return enqueued_object
-
     def get_file_records(self):
         results = []
         file_records = FileRecord.objects.filter(task=self)
@@ -331,3 +300,4 @@ class Task(models.Model):
 # circular imports
 from workflow_engine.models.run_state import RunState
 from workflow_engine.models.file_record import FileRecord
+from workflow_engine.workflow_controller import WorkflowController

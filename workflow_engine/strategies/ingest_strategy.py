@@ -109,7 +109,7 @@ class IngestStrategy(ExecutionStrategy):
         ret = self.generate_response(enqueued_object)
         
         workflow_name = self.get_workflow_name()
-        Workflow.start_workflow(
+        WorkflowController.start_workflow(
             workflow_name,
             enqueued_object,
             start_node_name=start_node)
@@ -138,7 +138,7 @@ class IngestStrategy(ExecutionStrategy):
 
             task.job.set_success_state()
             task.job.set_end_run_time()
-            task.job.enqueue_next_queue()
+            WorkflowController.enqueue_next_queue(task.job)
 
         except Exception as e:
             IngestStrategy._log.error(
@@ -147,3 +147,6 @@ class IngestStrategy(ExecutionStrategy):
             task.set_error_message(
                 str(e) + ' - ' + str(traceback.format_exc()))
             self.fail_task(task)
+
+
+from workflow_engine.workflow_controller import WorkflowController

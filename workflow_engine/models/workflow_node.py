@@ -34,9 +34,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 from django.db import models
-from workflow_engine.models import ZERO
 import logging
-import traceback
 _model_logger = logging.getLogger('workflow_engine.models')
 
 
@@ -73,26 +71,6 @@ class WorkflowNode(models.Model):
     def get_children(self):
         return WorkflowNode.objects.filter(parent=self)
 
-    @classmethod
-    def set_jobs_for_run(self, wait_queue_name):
-        '''Use workflow node or job queue name to run jobs.
-        Useful for triggering wait strategy job queues.
-
-        Parameters
-        ----------
-        wait_queue_name : String
-            human readable name to look up the associated jobs
-        '''
-        jobs = Job.objects.filter(
-            workflow_node__job_queue__name=wait_queue_name,
-            run_state__in=[
-                RunState.get_pending_state(),
-                RunState.get_queued_state()],
-            archived=False)
-
-        for job in jobs:
-            job.set_for_run()
-
     def get_total_number_of_jobs(self):
         return Job.objects.filter(
             workflow_node=self,
@@ -109,62 +87,6 @@ class WorkflowNode(models.Model):
             workflow_node=self,
             archived=False)
 
-    def run_workflow_node_jobs(self):
-        try:
-            if not self.workflow.disabled and not self.disabled:
-                _model_logger.info(
-                    "running job in workflow %s:%s" % (
-                        str(self.workflow),
-                        str(self.job_queue.name)))
-                #check if more jobs can be run
-                batch_size = self.batch_size
-
-                try:
-                    number_of_queued_and_running_jobs = \
-                        self.get_number_of_queued_and_running_jobs()
-                except Exception as e:
-                    number_of_queued_and_running_jobs = ZERO
-
-                number_jobs_to_run = \
-                    batch_size - number_of_queued_and_running_jobs
-
-                _model_logger.info(
-                    ("%d jobs to be run. %d queued and running, "
-                     "batch size %d in workflow %s:%s") % (
-                        number_jobs_to_run,
-                        number_of_queued_and_running_jobs,
-                        batch_size,
-                        str(self.workflow),
-                        str(self.job_queue.name)))
-
-                #run more jobs
-                if number_jobs_to_run > ZERO:
-                    try:
-                        pending_jobs = \
-                            Job.objects.filter(
-                                run_state_id=RunState.get_pending_state().id,
-                                workflow_node=self,
-                                archived=False).order_by('priority',
-                                                         '-updated_at')
-                        _model_logger.info(
-                            'pending jobs: %d' % (len(pending_jobs)))
-                    except Exception as e:
-                        _model_logger.info(
-                            'pending jobs exception: %s' % (str(e)))
-                        pending_jobs = []
-
-                    for i in range(number_jobs_to_run):
-                        if i < len(pending_jobs):
-                            job = pending_jobs[i]
-                            job.run()
-            else:
-                _model_logger.info(
-                    "not running jobs in disabled workflow %s" % (
-                        str(self.workflow)))
-
-        except Exception as e:
-            _model_logger.error(
-                'Something went wrong running jobs: ' + str(e) + "\n" + traceback.format_exc())
 
 # circular imports
 from workflow_engine.models.job import Job

@@ -41,7 +41,6 @@ class ManualStrategy(base_strategy.BaseStrategy):
 
     #override if needed
     def task_finished(self, task):
-        # enqueued_object = task.get_enqueued_object()
         return True
     
     #####everthing bellow this should not be overriden#####
@@ -58,12 +57,14 @@ class ManualStrategy(base_strategy.BaseStrategy):
             task.set_success_state()
             task.set_end_run_time()
 
-            self.on_finishing(task.get_enqueued_object(), {}, task)
+            enqueued_object = WorkflowController.get_enqueued_object(task)
+
+            self.on_finishing(enqueued_object, {}, task)
 
             if task.job.all_tasks_finished():
                 task.job.set_success_state()
                 task.job.set_end_run_time()
-                task.job.enqueue_next_queue()
+                WorkflowController.enqueue_next_queue(task.job)
 
         return finished
 
@@ -84,4 +85,5 @@ class ManualStrategy(base_strategy.BaseStrategy):
             task.set_error_message(str(e) + ' - ' + str(traceback.format_exc()))
             self.fail_task(task)
 
-            
+
+from workflow_engine.workflow_controller import WorkflowController

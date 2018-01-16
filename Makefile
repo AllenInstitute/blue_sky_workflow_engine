@@ -24,7 +24,7 @@ pypi_deploy:
 	python setup.py sdist upload --repository local
 
 pytest_lax:
-	python -m pytest -s --boxed --cov=workflow_engine --cov-report html --junitxml=test-reports/test.xml
+	python setup.py test
 
 pytest: pytest_lax
 
