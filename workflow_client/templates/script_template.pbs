@@ -3,7 +3,6 @@
 #PBS -l {{ executable.pbs_processor }}
 #PBS -l {{ executable.pbs_walltime }}
 #PBS -N {{ task.get_task_name() }}
-#PBS -V
 #PBS -r n
 #PBS -j oe
 #PBS -o {{ task.log_file }}

@@ -34,9 +34,9 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 import simplejson as json
+import subprocess
 import argparse
 import sys
-import os
 
 
 if __name__ == "__main__" and __package__ is None:
@@ -52,7 +52,9 @@ class MoveDirectory(object):
         self.cmd = cmd
 
     def move(self, frm, to):
-        os.system('%s %s %s' % (self.cmd, frm, to))
+        return subprocess.check_output('%s %s %s' % (self.cmd, frm, to),
+                                       stderr=subprocess.STDOUT,
+                                       shell=True)
 
     def parse_json(self, json_string):
         return json.loads(json_string)
@@ -71,9 +73,9 @@ class MoveDirectory(object):
     
     @classmethod
     def main(cls, args):
-        cmd = '/bin/rsync -rRavL'
+        cmd = '/bin/rsync -rRavL --remove-source-directories'
         mts = MoveDirectory(cmd)
-        parsed_args = mts.parse_args(args)
+        parsed_args = mts.parse_args(args[1:])
         
         inp = mts.parse_json_file(parsed_args['input_json'])
 
