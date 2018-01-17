@@ -34,9 +34,12 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 import simplejson as json
+
 import subprocess
 import argparse
 import sys
+import logging
+from matplotlib.compat.subprocess import CalledProcessError
 
 
 if __name__ == "__main__" and __package__ is None:
@@ -48,22 +51,44 @@ example = {
 }
 
 class MoveDirectory(object):
+    log = logging.getLogger('workflow_client.modules.move_directory')
+
     def __init__(self, cmd):
         self.cmd = cmd
 
-    def move(self, frm, to):
-        return subprocess.check_output('%s %s %s' % (self.cmd, frm, to),
-                                       stderr=subprocess.STDOUT,
-                                       shell=True)
+    def move(self, frm, to, extra_flags=None):
+        executable_command = []
+        executable_command.extend(self.cmd.split(' '))
 
-    def parse_json(self, json_string):
+        if extra_flags is not None:
+            executable_command.extend(extra_flags.split(' '))
+
+        executable_command.extend([frm, to])
+
+        print("RUNNING: " + ' '.join(executable_command)) 
+
+        try: 
+            console_txt = subprocess.check_output(
+                executable_command,
+                stderr=subprocess.STDOUT)
+            print(console_txt)
+        except CalledProcessError as e:
+            print(e.output)
+            return e.returncode
+
+        return 0
+
+    @classmethod
+    def parse_json(cls, json_string):
         return json.loads(json_string)
 
-    def parse_json_file(self, json_file):
+    @classmethod
+    def parse_json_file(cls, json_file):
         with open(json_file, 'r') as f:
-            return self.parse_json(f.read())
+            return MoveDirectory.parse_json(f.read())
 
-    def parse_args(self, args):
+    @classmethod
+    def parse_args(cls, args):
         parser = argparse.ArgumentParser(
             description='move tile set files to long term storage')
         parser.add_argument('--input_json', help='input arguments')
@@ -73,17 +98,21 @@ class MoveDirectory(object):
     
     @classmethod
     def main(cls, args):
-        cmd = '/bin/rsync -rRavL --remove-source-directories'
-        mts = MoveDirectory(cmd)
-        parsed_args = mts.parse_args(args[1:])
-        
-        inp = mts.parse_json_file(parsed_args['input_json'])
+        parsed_args = MoveDirectory.parse_args(args[1:])
+        inp = MoveDirectory.parse_json_file(parsed_args['input_json'])
 
-        mts.move(inp['from'], inp['to'])
+        extra_args = inp.get('extra', '')
+
+        cmd = '/bin/rsync -ravL'
+
+        mts = MoveDirectory(cmd)
+        result = mts.move(inp['from'], inp['to'], extra_args)
 
         with open(parsed_args['output_json'], 'w') as f:
             f.write(json.dumps(inp))
+        
+        return result
 
 
 if '__main__' == __name__:
-    MoveDirectory.main(sys.argv)
+    sys.exit(MoveDirectory.main(sys.argv))
