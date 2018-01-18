@@ -1,6 +1,7 @@
 import os
 import paramiko
 import logging
+import codecs
 _log = logging.getLogger('workflow_client.server_command')
 
 def check_environment_variables():
@@ -11,31 +12,27 @@ def check_environment_variables():
         raise Exception('Please set QMASTER_PASSWORD environment variable')
 
 def server_command(host, port,
-                   username, password,
+                   username,
+                   crd,
                    command):
     check_environment_variables()
 
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+    enc = codecs.getencoder('rot-13')
+    with open(crd) as f:
+        pswd = enc(f.read())[0]
+
     _log.info('qmaster cred: %s %s %s %d' % (
         host, username, '*', port))
-       
+
     client.connect(host,
                    username=username,
-                   password=password,
+                   password=pswd,
                    port=port)
     stdin, stdout, stderr = client.exec_command(command)
     stdout_message = stdout.readlines()
     stderr_message = stderr.readlines()
 
     return stdout_message, stderr_message
-
-if __name__ == '__main__':
-    host = os.environ.get('QMASTER_HOST', 'qmaster')
-    username = os.environ['QMASTER_USERNAME']
-    password = os.environ['QMASTER_PASSWORD']
-    port = int(os.environ.get('QMASTER_PORT', '22'))
-
-    command = 'echo hi'
-
-    server_command(host, port, username, password, command)
