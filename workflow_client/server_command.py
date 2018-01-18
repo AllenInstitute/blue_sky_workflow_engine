@@ -15,14 +15,12 @@ def server_command(host, port,
                    username,
                    crd,
                    command):
-    check_environment_variables()
-
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
     enc = codecs.getencoder('rot-13')
     with open(crd) as f:
-        pswd = enc(f.read())[0]
+        pswd = enc(f.readline().strip())[0]
 
     _log.info('qmaster cred: %s %s %s %d' % (
         host, username, '*', port))
