@@ -74,6 +74,7 @@ urlpatterns = [
     url(r'^workflows/update_pbs$', workflow_view.update_pbs, name='workflows'),
     url(r'^workflows/get_head_workflow_node_id$', workflow_view.get_head_workflow_node_id, name='workflows'),
     url(r'^workflows/get_enqueued_objects$', workflow_view.get_enqueued_objects, name='workflows'),
+    url(r'^workflows/run_jobs$', workflow_view.run_jobs, name='workflows'),
     url(r'^workflows/create_job$', workflow_view.create_job, name='workflows'),
     url(r'^workflows/get_node_info$', workflow_view.get_node_info, name='workflows'),
     url(r'^workflows/update_workflow_node$', workflow_view.update_workflow_node, name='workflows'),

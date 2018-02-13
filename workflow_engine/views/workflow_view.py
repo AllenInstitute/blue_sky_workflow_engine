@@ -373,6 +373,30 @@ def get_enqueued_objects(request):
 
     return JsonResponse(result)
 
+
+def run_jobs(request):
+    result = {}
+    success = True
+    message = ''
+
+    try:
+        workflow_node_id = request.GET.get('workflow_node_id')
+        workflow_node = WorkflowNode.objects.get(id=workflow_node_id)
+        WorkflowController.run_workflow_node_jobs(workflow_node)
+    except ObjectDoesNotExist as e:
+        success = False
+        message = 'Could not find a workflow node with id of ' + \
+            str(workflow_node_id)
+    except Exception as e:
+            success = False
+            message = str(e) + ' - ' + str(traceback.format_exc())
+
+    result['success'] = success
+    result['message'] = message
+
+    return JsonResponse(result)
+
+
 def create_job(request):
     result = {}
     success = True
