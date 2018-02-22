@@ -4,10 +4,17 @@
 <p><span class="bold">Blue Sky Workflow Engine Version:</span> {{workflow_version}}</p>
 <p><span class="bold">Python Version:</span> {{python_version}}</p>
 <p><span class="bold">Django Version:</span> {{ django_version }}</p>
+<br />
 <p><span class="bold">Writeable folder:</span> {{ base_path }}</p>
+<br />
 <p><span class="bold">Database host:</span> {{ database_host }}</p>
 <p><span class="bold">Database name:</span> {{ database_name }}</p>
 <p><span class="bold">Database port:</span> {{ database_port }}</p>
+<br />
+<p><span class="bold"><a href="{{ flower_monitor_url }}">Flower Monitor</a></span></p>
+<p><span class="bold"><a href="{{ rabbit_monitor_url }}">Rabbit Monitor</a></span></p>
+<p><span class="bold"><a href="{{ admin_url }}">Admin Console</a></span></p>
+<br />
 <p><span class="bold">Results per page:</span> {{ results_per_page }}</p>
 <p><span class="bold">Message Queue Host:</span> {{ message_queue_host }}</p>
 <p><span class="bold">Seconds between auto refresh:</span> {{ seconds_between_refresh }}</p>

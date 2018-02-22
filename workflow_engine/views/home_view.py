@@ -64,7 +64,12 @@ def index(request):
     context['database_name'] = settings.DATABASES['default']['NAME']
     context['database_port'] = settings.DATABASES['default']['PORT']
     context['results_per_page']  = settings.RESULTS_PER_PAGE
+
+    context['flower_monitor_url'] = settings.FLOWER_MONITOR_URL
+    context['rabbit_monitor_url'] = settings.RABBIT_MONITOR_URL
     context['message_queue_host']  = settings.MESSAGE_QUEUE_HOST
+    context['admin_url'] = 'http://' + settings.ADMIN_URL
+
     context['seconds_between_refresh'] = settings.MILLISECONDS_BETWEEN_REFRESH / MILLISECONDS_IN_SECOND
     shared.add_settings_info_to_context(context)
     

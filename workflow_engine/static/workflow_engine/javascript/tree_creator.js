@@ -3,6 +3,7 @@ function TreeCreator(workflows, milliseconds_between_refresh){
     GET_ENQUEUED_OBJECTS_URL = '/workflow_engine/workflows/get_enqueued_objects';
     GET_HEAD_WORKFLOW_NODE_URL = '/workflow_engine/workflows/get_head_workflow_node_id';
     CREATE_JOB_URL = '/workflow_engine/workflows/create_job';
+    RUN_JOBS_URL = '/workflow_engine/workflows/run_jobs';
     GET_WORKFLOW_NODE_INFO_URL = '/workflow_engine/workflows/get_node_info';
     GET_WORKFLOW_INFO_URL = '/workflow_engine/workflows/get_workflow_info';
     UPDATE_WORKFLOW_NODE_URL = '/workflow_engine/workflows/update_workflow_node';
@@ -49,8 +50,32 @@ function TreeCreator(workflows, milliseconds_between_refresh){
         create_job(workflow_node_id, workflow_id)
     }
 
-    this.create_job_helper = function(workflow_node_id, workflow_id){
-        create_job(workflow_node_id, workflow_id)
+    this.create_job_helper = function(workflow_node_id){
+        create_job(workflow_node_id)
+    }
+
+    this.run_jobs_helper = function(workflow_node_id){
+        run_jobs(workflow_node_id)
+    }
+
+    function run_jobs(workflow_node_id){
+        var url = RUN_JOBS_URL + '?workflow_node_id=' + workflow_node_id;
+
+        var request = $.ajax({
+            method: "GET",
+            url: url,
+            dataType: "JSON",
+            async: false
+        });
+
+        //on success
+        request.done(function (data) {
+            if(!data.success){
+                alert('someting went wrong running jobs');
+            }
+        });
+
+        return true;
     }
 
     function update_workflow(workflow_id, type){
@@ -267,7 +292,8 @@ function TreeCreator(workflows, milliseconds_between_refresh){
                 }
 
                 html+= '<table id="w_table">';
-                html+='<tr><th class="show_link w_th" colspan="2" onclick="base_workflow.create_job_helper(' + workflow_node_id + ',' + workflow_id + ')">Create Job</th></tr>';
+                html+='<tr><th /><th><span class="show_link w_th" onclick="base_workflow.create_job_helper(' + workflow_node_id + ',' + workflow_id + ')">Create Job</span>';
+                html+= '<span class="show_link w_th" onclick="base_workflow.run_jobs_helper(' + workflow_node_id + ')">Run Jobs</span></th></tr>';
                 html+='<tr><th class="w_th">ID</th><th class="w_th">' + workflow_node_id + '</th></tr>';
                 html+='<tr><th class="w_th">Job Queue</th><th class="w_th"><a class="link_to_page show_link" href="' + payload['job_queue_link'] + '">' + payload['job_queue'] + '</a></th></tr>';
                 html+='<tr><th class="w_th">Executable</th><th class="w_th"><a class="link_to_page show_link" href="' + payload['executable_link'] + '">' + payload['executable'] + '</a></th></tr>';
@@ -844,7 +870,7 @@ function TreeCreator(workflows, milliseconds_between_refresh){
                           }
                         }
                     });
-                } );       
+                } );
             }
         }
     }

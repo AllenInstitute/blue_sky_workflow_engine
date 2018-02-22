@@ -57,6 +57,6 @@ class Command(BaseCommand):
             'worker',
             '--loglevel=debug',
             '--logfile=logs/server_worker.log',
-            '--concurrency=2',
+            '--concurrency=10',
             '-Q', 'ingest,result,null',
             '-n', 'ingest@' + app_name])
