@@ -9,6 +9,7 @@ from workflow_engine.models.workflow import  Workflow
 from workflow_engine.models.task import Task
 from workflow_engine.models.workflow_node import WorkflowNode
 from workflow_engine.models.job import Job
+from workflow_engine.models.configuration import Configuration
 
 
 # Register your models here.
@@ -22,3 +23,4 @@ admin.site.register(Task)
 admin.site.register(WellKnownFile)
 admin.site.register(Workflow)
 admin.site.register(WorkflowNode)
+admin.site.register(Configuration)
