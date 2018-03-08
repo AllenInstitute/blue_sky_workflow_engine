@@ -382,7 +382,9 @@ def run_jobs(request):
     try:
         workflow_node_id = request.GET.get('workflow_node_id')
         workflow_node = WorkflowNode.objects.get(id=workflow_node_id)
-        WorkflowController.run_workflow_node_jobs(workflow_node)
+        n = workflow_node.job_queue.name
+        message = n
+        WorkflowController.set_jobs_for_run(n)
     except ObjectDoesNotExist as e:
         success = False
         message = 'Could not find a workflow node with id of ' + \
