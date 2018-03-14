@@ -14,9 +14,9 @@ Welcome to the Blue Sky Workflow Engine
    :hidden:
 
    install
-   data_resources
-   models
-   examples
+   configuration
+   customizing
+   develop
    authors
    Source Documentation <workflow_engine>
    Client Documentation <workflow_client>
