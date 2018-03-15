@@ -2,7 +2,7 @@
 # license plus a third clause that prohibits redistribution for commercial
 # purposes without further permission.
 #
-# Copyright 2017. Allen Institute. All rights reserved.
+# Copyright 2017-2018. Allen Institute. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -43,6 +43,8 @@ from workflow_engine.views import shared
 from workflow_engine.models.task import Task
 import simplejson as json
 import traceback
+from workflow_engine.models.workflow_node import WorkflowNode
+from workflow_client.worker_client import ZERO
 
 
 def record_json_response(fn):
@@ -107,7 +109,7 @@ def record_json_response(fn):
 
 
 @record_json_response
-def get_record_info(record, result, record_type):
+def get_record_info(record, result, record_type, data):
     if record_type == 'executable' and record is None:
         result['payload'] = shared.order_payload([
             ('name', ''),
@@ -149,6 +151,102 @@ def get_record_info(record, result, record_type):
     elif record_type == 'job':
         result['payload'] = shared.order_payload([
             ('priority', record.priority)])
+
+
+@record_json_response
+def update_record(record, result, record_type, data):
+    if record_type == 'executable' and record is None:
+        record = Executable()
+    elif record_type == 'executable':
+        # TODO: replace w/ workflow config
+        record.name = data['name']
+        record.description = data['description']
+        record.static_arguments = shared.to_none(data['static_arguments'])
+        record.executable_path = data['executable_path']
+        record.pbs_executable_path = data['pbs_executable_path']
+        record.pbs_processor = data['pbs_processor']
+        record.pbs_queue = data['pbs_queue']
+        record.pbs_walltime = data['pbs_walltime']
+    elif record_type == 'job_queue' and record is None:
+        record = JobQueue()
+    elif record_type == 'job_queue':
+        record.name = data['name']
+        record.description = shared.to_none(data['description'])
+        record.job_strategy_class = data['job_strategy_class']
+        record.enqueued_object_class = data['enqueued_object_class']
+
+        if(data['executable']):
+            record.executable = Executable.objects.get(name=data['executable'])
+        else:
+            record.executable = None
+    elif record_type == 'job' and record is None:
+        workflow_node = WorkflowNode.objects.get(id=data['workflow_node_id'])
+
+        record = Job()
+        record.workflow_node = workflow_node
+        record.enqueued_object_id = data['enqueued_object_id']
+        record.run_state = RunState.get_pending_state()
+        record.priority = workflow_node.priority
+        record.archived = False
+    else:
+        priority = data['priority']
+        record.priority = priority
+
+    record.save()
+
+
+@record_json_response
+def delete_record(record, result, record_type, data):
+    result['link_content'] = ''
+    result['link'] = ''
+
+    if record_type == 'executable':
+        executable = record
+        job_queues = executable.get_job_queues()
+
+        if len(job_queues) > ZERO:
+            result['success'] = False
+
+            job_queue_message = []
+            ids = []
+            for job_queue in job_queues:
+                job_queue_message.append(str(job_queue.name))
+                ids.append(str(job_queue.id))
+
+            result['message'] = 'At least one job queue is using this executable. Please delete for following job queue(s) before delete: '
+            result['link_content'] = ','.join(job_queue_message)
+            result['link'] = '/workflow_engine/job_queues?job_queue_ids=' + ','.join(ids)
+        else:
+            executable.delete()
+    elif record_type == 'job_queue':
+        job_queue = record
+    
+        workflow_nodes = job_queue.get_workflow_nodes()
+
+        # TODO: make this a workflow_controller method
+        workflows = {}
+        for workflow_node in workflow_nodes:
+            workflow = workflow_node.workflow
+            workflows[workflow.id] = workflow
+
+        if len(workflows) > ZERO:
+            result['success'] = False
+
+            workflow_message = []
+            ids = []
+            for workflow_id in workflows.keys():
+                workflow_message.append(
+                    str(workflows[workflow_id].name))
+                ids.append(str(workflow_id))
+
+            result['message'] = 'At least one workflow is using this job_queue. Please delete for following workflow(s) before delete: '
+            result['link_content'] = ','.join(workflow_message)
+            result['link'] = '/workflow_engine/workflows?workflow_ids=' + ','.join(ids)
+        else:
+            job_queue.delete()
+    elif record_type == 'job':
+        job = record
+        job.archive_record()
 
 
 def check_unique(request):
@@ -222,6 +320,7 @@ def check_unique(request):
     result['payload'] = payload
 
     return JsonResponse(result)
+
 
 def get_search_data(request):
     result = {}
