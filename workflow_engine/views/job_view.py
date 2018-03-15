@@ -2,7 +2,7 @@
 # license plus a third clause that prohibits redistribution for commercial
 # purposes without further permission.
 #
-# Copyright 2017. Allen Institute. All rights reserved.
+# Copyright 2017-2018. Allen Institute. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -39,7 +39,7 @@ import traceback
 from django.template import loader
 from workflow_engine.models.job import Job
 from workflow_engine.models.workflow_node import WorkflowNode
-from workflow_engine.models import ZERO, ONE
+from workflow_engine.models import ONE
 from workflow_engine.views import shared, HEADER_PAGES
 from workflow_engine.workflow_controller import WorkflowController
 
@@ -114,149 +114,81 @@ def add_sort_jobs(context, sort, url, set_params):
     context['duration_sort'] = shared.sort_helper('duration', sort, url, set_params)
     context['run_state_id_sort'] = shared.sort_helper('run_state_id', sort, url, set_params)
 
-def queue_job(request):
-    result = {}
-    success = True
-    message = ''
 
-    try:
-        job_id = request.GET.get('job_id')
-        
-        if job_id != None:
-            job = Job.objects.get(id=job_id)
-            WorkflowController.set_job_for_run(job)
-        else:
-            success = False
-            message = 'Missing job_id'
-    except Exception as e:
-            success = False
-            message = str(e) + ' - ' + str(traceback.format_exc())
-        
-    result['success'] = success
-    result['message'] = message
+# TODO: generalize for any model
+def job_json_response(fn):
+    def wrapper(request):
+        result = {
+            'success': True,
+            'message': '',
+            'payload': {} 
+            }
 
-    return JsonResponse(result)
+        try:
+            if 'job_id'in request.GET:
+                job_ids = [ request.GET.get('job_id') ]
+            elif 'job_ids' in request.GET:
+                job_ids = request.GET.get('job_ids').split(',')
 
-def kill_job(request):
-    result = {}
-    success = True
-    message = ''
+            if job_ids is not None:
+                records = Job.objects.filter(id__in=job_ids)
+                for job_object in records:
+                    fn(job_object, result)
+            else:
+                result['success'] = False
+                result['message'] = 'Missing job_ids'
+        except Exception as e:
+                result['success'] = False
+                result['message'] = str(e) + ' - ' + str(traceback.format_exc())
+        except Exception as e:
+                result['success'] = False
+                result['message'] = str(e) + ' - ' + str(traceback.format_exc())
 
-    try:
-        job_id = request.GET.get('job_id')
-        
-        if job_id != None:
-            job = Job.objects.get(id=job_id)
-            job.set_process_killed_state()
-            job.kill_tasks()
-            job.set_end_run_time()
-        else:
-            success = False
-            message = 'Missing job_id'
-    except Exception as e:
-            success = False
-            message = str(e) + ' - ' + str(traceback.format_exc())
-        
-    result['success'] = success
-    result['message'] = message
+        return JsonResponse(result)
 
-    return JsonResponse(result)
+    return wrapper
 
-def get_job_status(request):
-    result = {}
-    success = True
-    message = ''
-    payload = {}
 
-    try:
-        job_ids = request.GET.get('job_ids')
-    
-        if job_ids != None:
-            records = Job.objects.filter(id__in=job_ids.split(','))
+@job_json_response
+def queue_job(job_object, result):
+    WorkflowController.set_job_for_run(job_object)
 
-            for record in records:
-                job_data = {}
-                job_data['run_state_name'] = record.run_state.name
-                job_data['start_run_time'] = record.get_start_run_time()
-                job_data['end_run_time'] = record.get_end_run_time()
-                job_data['duration'] = record.get_duration()
 
-                payload[record.id] = job_data
-        else:
-            success = False
-            message = 'Missing job_ids'
-    except Exception as e:
-            success = False
-            message = str(e) + ' - ' + str(traceback.format_exc())
-        
-    result['success'] = success
-    result['message'] = message
-    result['payload'] = payload
+@job_json_response
+def kill_job(job_object, result):
+    job_object.kill()
 
-    return JsonResponse(result)
 
-def get_job_show_data(request):
-    result = {}
-    success = True
-    payload = {}
-    message = ''
+@job_json_response
+def run_all_jobs(job_object, response):
+    WorkflowController.set_job_for_run_if_valid(job_object)
 
-    try:
-        job_id = request.GET.get('job_id')
-        
-        if job_id != None:
-            job = Job.objects.get(id=job_id)
 
-            order = shared.set_order(payload, ZERO, 'id', job.id)
-            order = shared.set_order(payload, order, 'enqueued_object_id', job.enqueued_object_id)
-            order = shared.set_order(payload, order, 'enqueued_object_class', job.get_enqueued_object_class_type())
-            order = shared.set_order(payload, order, 'enqueued_object', job.get_enqueued_object_display())
-            order = shared.set_order(payload, order, 'run state', job.run_state.name)
-            order = shared.set_order(payload, order, 'workflow', job.workflow_node.workflow.name)
-            order = shared.set_order(payload, order, 'job queue', job.workflow_node.job_queue.name)
-            order = shared.set_order(payload, order, 'start', job.get_start_run_time())
-            order = shared.set_order(payload, order, 'end', job.get_end_run_time())
-            order = shared.set_order(payload, order, 'created at', job.get_created_at())
-            order = shared.set_order(payload, order, 'updated at', job.get_updated_at())
-            order = shared.set_order(payload, order, 'duration', job.get_duration())
-            order = shared.set_order(payload, order, 'priority', job.priority)
-            order = shared.set_order(payload, order, 'error message', job.error_message)
+@job_json_response
+def get_job_status(job_object, result):
+    job_data = {}
+    job_data['run_state_name'] = job_object.run_state.name
+    job_data['start_run_time'] = job_object.get_start_run_time()
+    job_data['end_run_time'] = job_object.get_end_run_time()
+    job_data['duration'] = job_object.get_duration()
 
-            payload['order_length'] = order
-        else:
-            success = False
-            message = 'Missing job_id'
-    except Exception as e:
-            success = False
-            message = str(e)
-        
-    result['success'] = success
-    result['message'] = message
-    result['payload'] = payload
+    result['payload'][job_object.id] = job_data
 
-    return JsonResponse(result)
 
-def run_all_jobs(request):
-    result = {}
-    success = True
-    message = ''
-
-    try:
-        job_ids = request.GET.get('job_ids')
-    
-        if job_ids != None:
-            records = Job.objects.filter(id__in=job_ids.split(','))
-
-            for record in records:
-                WorkflowController.set_job_for_run_if_valid(record)
-        else:
-            success = False
-            message = 'Missing job_ids'
-    except Exception as e:
-            success = False
-            message = str(e) + ' - ' + str(traceback.format_exc())
-        
-    result['success'] = success
-    result['message'] = message
-
-    return JsonResponse(result)
+@job_json_response
+def get_job_show_data(job_object, result):
+    result['payload'] = shared.order_payload([
+        ('id', job_object.id),
+        ('enqueued_object_id', job_object.enqueued_object_id),
+        ('enqueued_object_class', job_object.get_enqueued_object_class_type()),
+        ('enqueued_object', job_object.get_enqueued_object_display()),
+        ('run state', job_object.run_state.name),
+        ('workflow', job_object.workflow_node.workflow.name),
+        ('job queue', job_object.workflow_node.job_queue.name),
+        ('start', job_object.get_start_run_time()),
+        ('end', job_object.get_end_run_time()),
+        ('created at', job_object.get_created_at()),
+        ('updated at', job_object.get_updated_at()),
+        ('duration', job_object.get_duration()),
+        ('priority', job_object.priority),
+        ('error message', job_object.error_message)])

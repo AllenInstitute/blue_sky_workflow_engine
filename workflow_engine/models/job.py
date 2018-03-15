@@ -38,6 +38,7 @@ from django.utils import timezone
 from workflow_engine.import_class import import_class
 from workflow_engine.models import TWO, SECONDS_IN_MIN
 import logging
+from django.core.exceptions import ObjectDoesNotExist
 _model_logger = logging.getLogger('workflow_engine.models')
 
 
@@ -186,7 +187,13 @@ class Job(models.Model):
                 task.save()
 
     def get_tasks(self):
-        return Task.objects.filter(job_id=self.id, archived=False)
+        return self.task_set.filter(archived=False)
+
+    def tasks(self):
+        return self.task_set.filter(archived=False)
+
+    def task_ids(self):
+        return [t.id for t in self.tasks()]
 
     def number_of_tasks(self):
         return len(self.get_tasks())
@@ -244,9 +251,28 @@ class Job(models.Model):
 
         return all_finished
 
+    @classmethod
+    def kill_job(cls, job_id):
+        try:
+            job = Job.objects.get(id=job_id)
+            job.kill()
+        except ObjectDoesNotExist:
+            _model_logger.warning(
+                'Tried to kill job %d which does not exist',
+                job_id)
+
+    def kill(self):
+        self.set_process_killed_state()
+        self.kill_tasks()
+        self.set_end_run_time()
+
+
     def kill_tasks(self):
         for task in self.get_tasks():
             task.kill_task()
+
+    def workflow(self):
+        return self.workflow_node.workflow.name
 
 # circular imports
 from workflow_engine.models.task import Task

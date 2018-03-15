@@ -38,7 +38,7 @@ from django.http import HttpResponse
 import traceback
 from django.template import loader
 from workflow_engine.models.task import Task
-from workflow_engine.models import ZERO, ONE
+from workflow_engine.models import ONE
 from workflow_engine.views import shared, HEADER_PAGES
 
 context = {
@@ -112,52 +112,64 @@ def add_sort_tasks(context, sort, url, set_params):
     context['end_run_time_sort'] = shared.sort_helper('end_run_time', sort, url, set_params)
     context['run_state_sort'] = shared.sort_helper('run_state', sort, url, set_params)
 
-def get_tasks_show_data(request):
-    result = {}
-    success = True
-    payload = {}
-    message = ''
+# TODO: generalize for any model
+def task_json_response(fn):
+    def wrapper(request):
+        result = {
+            'success': True,
+            'message': '',
+            'payload': {} 
+            }
 
-    try:
-        task_id = request.GET.get('task_id')
-        
-        if task_id != None:
-            task = Task.objects.get(id=task_id)
+        try:
+            if 'task_id'in request.GET:
+                task_ids = [ request.GET.get('task_id') ]
+            elif 'task_ids' in request.GET:
+                task_ids = request.GET.get('task_ids').split(',')
 
-            order = shared.set_order(payload, ZERO, 'id', task.id)
-            order = shared.set_order(payload, order, 'job_id', task.job_id)
-            order = shared.set_order(payload, order, 'enqueued_object_id', task.enqueued_task_object_id)
-            order = shared.set_order(payload, order, 'enqueued_object_class', task.enqueued_task_object_class)
-            order = shared.set_order(payload, order, 'enqueued_object', task.get_enqueued_object_display())
-            order = shared.set_order(payload, order, 'run state', task.run_state.name)
-            order = shared.set_order(payload, order, 'retry count', str(task.retry_count) + '/' + str(task.get_max_retries()))
-            order = shared.set_order(payload, order, 'start', task.get_start_run_time())
-            order = shared.set_order(payload, order, 'end', task.get_end_run_time())
-            order = shared.set_order(payload, order, 'file records', ', '.join(task.get_file_records()))
-            order = shared.set_order(payload, order, 'created at', task.get_created_at())
-            order = shared.set_order(payload, order, 'updated at', task.get_updated_at())
-            order = shared.set_order(payload, order, 'duration', task.get_duration())
-            order = shared.set_order(payload, order, 'error message', task.error_message)
-            order = shared.set_order(payload, order, 'full executable', task.full_executable)
-            order = shared.set_order(payload, order, 'log file', task.log_file)
-            order = shared.set_order(payload, order, 'input file', task.input_file)
-            order = shared.set_order(payload, order, 'output file', task.output_file)
-            order = shared.set_order(payload, order, 'pbs id', task.pbs_id)
-            order = shared.set_order(payload, order, 'pbs file', task.pbs_file)
+            if task_ids is not None:
+                records = Task.objects.filter(id__in=task_ids)
+                for task_object in records:
+                    fn(task_object, result)
+            else:
+                result['success'] = False
+                result['message'] = 'Missing task_ids'
+        except Exception as e:
+                result['success'] = False
+                result['message'] = str(e) + ' - ' + str(traceback.format_exc())
+        except Exception as e:
+                result['success'] = False
+                result['message'] = str(e) + ' - ' + str(traceback.format_exc())
 
-            payload['order_length'] = order
-        else:
-            success = False
-            message = 'Missing task_id'
-    except Exception as e:
-            success = False
-            message = str(e)
-        
-    result['success'] = success
-    result['message'] = message
-    result['payload'] = payload
+        return JsonResponse(result)
 
-    return JsonResponse(result)
+    return wrapper
+
+
+@task_json_response
+def get_tasks_show_data(task_object, result):
+    result['payload'] = shared.order_payload([
+        ('id', task_object.id),
+        ('job_id', task_object.job_id),
+        ('enqueued_object_id', task_object.enqueued_task_object_id),
+        ('enqueued_object_class', task_object.enqueued_task_object_class),
+        ('enqueued_object', task_object.get_enqueued_object_display()),
+        ('run state', task_object.run_state.name),
+        ('retry count', str(task_object.retry_count) + '/' + str(task_object.get_max_retries())),
+        ('start', task_object.get_start_run_time()),
+        ('end', task_object.get_end_run_time()),
+        ('file records', ', '.join(task_object.get_file_records())),
+        ('created at', task_object.get_created_at()),
+        ('updated at', task_object.get_updated_at()),
+        ('duration', task_object.get_duration()),
+        ('error message', task_object.error_message),
+        ('full executable', task_object.full_executable),
+        ('log file', task_object.log_file),
+        ('input file', task_object.input_file),
+        ('output file', task_object.output_file),
+        ('pbs id', task_object.pbs_id),
+        ('pbs file', task_object.pbs_file)])
+
 
 def queue_task(request):
     result = {}

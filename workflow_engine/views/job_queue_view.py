@@ -47,51 +47,54 @@ context = {
     'pages': HEADER_PAGES,
 }
 
-def get_job_queues_show_data(request):
-    result = {}
-    success = True
-    payload = {}
-    message = ''
 
-    try:
-        job_queue_id = request.GET.get('job_queue_id')
-        
-        if job_queue_id != None:
-            job_queue = JobQueue.objects.get(id=job_queue_id)
+# TODO: generalize for any model
+def job_queue_json_response(fn):
+    def wrapper(request):
+        result = {
+            'success': True,
+            'message': '',
+            'payload': {} 
+            }
 
-            order = shared.set_order(payload, ZERO, 'id', job_queue.id)
-            order = shared.set_order(payload, order, 'name', job_queue.name)
-            order = shared.set_order(payload, order, 'description', job_queue.description)
-            order = shared.set_order(payload, order, 'job strategy class', job_queue.job_strategy_class)
-            order = shared.set_order(payload, order, 'enqueued object class', job_queue.enqueued_object_class)
+        try:
+            if 'job_queue_id'in request.GET:
+                job_queue_ids = [ request.GET.get('job_queue_id') ]
+            elif 'job_queue_ids' in request.GET:
+                job_queue_ids = request.GET.get('job_queue_ids').split(',')
 
-            try:
-                order = shared.set_order(payload, order, 'executable name', job_queue.executable.name)
-            except:
-                order = shared.set_order(payload, order, 'executable name', '')
+            if job_queue_ids is not None:
+                records = JobQueue.objects.filter(id__in=job_queue_ids)
+                for job_queue_object in records:
+                    fn(job_queue_object, result)
+            else:
+                result['success'] = False
+                result['message'] = 'Missing job_queue_ids'
+        except Exception as e:
+                result['success'] = False
+                result['message'] = str(e) + ' - ' + str(traceback.format_exc())
+        except Exception as e:
+                result['success'] = False
+                result['message'] = str(e) + ' - ' + str(traceback.format_exc())
 
-            try:
-                order = shared.set_order(payload, order, 'executable path', job_queue.executable.executable_path)
-            except:
-                order = shared.set_order(payload, order, 'executable path', '')
+        return JsonResponse(result)
 
-            order = shared.set_order(payload, order, 'created at', job_queue.get_created_at())
-            order = shared.set_order(payload, order, 'cpdated at', job_queue.get_updated_at())
+    return wrapper
 
-            payload['order_length'] = order
 
-        else:
-            success = False
-            message = 'Missing job_queue_id'
-    except Exception as e:
-            success = False
-            message = str(e) + ' - ' + str(traceback.format_exc())
-        
-    result['success'] = success
-    result['message'] = message
-    result['payload'] = payload
+@job_queue_json_response
+def get_job_queues_show_data(job_queue_object, result):
+    result['payload'] = shared.order_payload([
+        ('id', job_queue_object.id),
+        ('name', job_queue_object.name),
+        ('description', job_queue_object.description),
+        ('job strategy class', job_queue_object.job_strategy_class),
+        ('enqueued object class', job_queue_object.enqueued_object_class),
+        ('executable name', job_queue_object.executable.name),  # except ''
+        ('executable path', job_queue_object.executable.executable_path),  # except ''
+        ('created at', job_queue_object.get_created_at()),
+        ('updated at', job_queue_object.get_updated_at())])
 
-    return JsonResponse(result)
 
 def job_queues(request):
     url = request.get_full_path() + '/1/'

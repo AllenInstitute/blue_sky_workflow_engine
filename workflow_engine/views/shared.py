@@ -52,10 +52,11 @@ def to_none(value):
         result = None
     return result
 
-def set_order(payload, order, key, value):
-    payload[order] = {key: value}
-    order+=ONE
-    return order
+def order_payload(spec):
+    payload = { i: {k: v} for i, (k, v) in enumerate(spec) }
+    payload['order_length'] = len(spec)
+
+    return payload
 
 def string_to_bool(input):
     return input.lower() == 'true'

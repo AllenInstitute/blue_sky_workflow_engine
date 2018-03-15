@@ -191,7 +191,7 @@ class WorkflowController(object):
         for task_object in task_objects:
             enqueued_object_full_class = \
                 type(task_object).__module__ + '.' + type(task_object).__name__
-        
+
             if job.workflow_node.overwrite_previous_job:
                 try:
                     WorkflowController._logger.info(
@@ -230,23 +230,32 @@ class WorkflowController(object):
         return reused_tasks
 
     @classmethod
+    def enqueue_object(cls, workflow_node, enqueued_object):
+        job = Job()
+        job.workflow_node = workflow_node
+        job.enqueued_object_id = enqueued_object.id
+        job.run_state = RunState.get_pending_state()
+        job.priority = job.workflow_node.priority
+        job.save()
+
+    @classmethod
     def job_run(cls, job):
         WorkflowController._logger.info('run')
         try:
             job.set_queued_state()
- 
+
             job.set_start_run_time()
             job.clear_error_message()
- 
+
             job.prep_job()
- 
+
             reused_tasks = WorkflowController.create_tasks(job)
- 
+
             job.remove_tasks(reused_tasks)
- 
+
             for task in job.get_tasks():
                 task.run_task()
- 
+
         except Exception as e:
             job.set_error_message(
                 str(e) + ' - ' + str(traceback.format_exc()), None)
