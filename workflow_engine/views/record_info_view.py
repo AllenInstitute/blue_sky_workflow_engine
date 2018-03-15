@@ -39,14 +39,13 @@ from workflow_engine.models.job import Job
 from workflow_engine.models.job_queue import JobQueue
 from workflow_engine.models.workflow import Workflow
 from workflow_engine.models.run_state import RunState
-from workflow_engine.models import ZERO
 from workflow_engine.views import shared
-from django.core.exceptions import ObjectDoesNotExist
 from workflow_engine.models.task import Task
+import simplejson as json
 import traceback
 
-# TODO: generalize for any model
-def record_info_json_response(fn):
+
+def record_json_response(fn):
     def wrapper(request):
         result = {
             'success': True,
@@ -85,8 +84,13 @@ def record_info_json_response(fn):
                     records = record_types[record_type].objects.filter(
                         id__in=record_ids)
 
+                try:
+                    data = json.loads(request.body.decode('utf-8'))
+                except:
+                    data = {}
+
                 for record_object in records:
-                    fn(record_object, result, record_type)
+                    fn(record_object, result, record_type, data)
             else:
                 result['success'] = False
                 result['message'] = 'Missing record_ids'
@@ -102,7 +106,7 @@ def record_info_json_response(fn):
     return wrapper
 
 
-@record_info_json_response
+@record_json_response
 def get_record_info(record, result, record_type):
     if record_type == 'executable' and record is None:
         result['payload'] = shared.order_payload([

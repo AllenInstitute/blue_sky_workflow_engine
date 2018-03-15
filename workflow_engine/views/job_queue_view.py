@@ -39,7 +39,7 @@ import traceback
 from django.template import loader
 from django.apps import apps
 from workflow_engine.models.job_queue import JobQueue
-from workflow_engine.models import ZERO, ONE
+from workflow_engine.models import ONE
 from workflow_engine.views import shared, HEADER_PAGES
 
 

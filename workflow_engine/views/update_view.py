@@ -33,88 +33,53 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-from django.http import JsonResponse
 from workflow_engine.views import shared
-import json
 from workflow_engine.models.executable import Executable
 from workflow_engine.models.job_queue import JobQueue
 from workflow_engine.models.workflow_node import WorkflowNode
 from workflow_engine.models.job import Job
 from workflow_engine.models.run_state import RunState
+from workflow_engine.views.record_info_view \
+    import record_json_response
 
-def update_record(request):
-    result = {}
-    success = True
-    message = ''
 
-    try:
-        record_type = request.GET.get('record_type')
-        record_id = request.GET.get('record_id')
+@record_json_response
+def update_record(record, result, record_type, data):
+    if record_type == 'executable' and record is None:
+        record = Executable()
+    elif record_type == 'executable':
+        # TODO: replace w/ workflow config
+        record.name = data['name']
+        record.description = data['description']
+        record.static_arguments = shared.to_none(data['static_arguments'])
+        record.executable_path = data['executable_path']
+        record.pbs_executable_path = data['pbs_executable_path']
+        record.pbs_processor = data['pbs_processor']
+        record.pbs_queue = data['pbs_queue']
+        record.pbs_walltime = data['pbs_walltime']
+    elif record_type == 'job_queue' and record is None:
+        record = JobQueue()
+    elif record_type == 'job_queue':
+        record.name = data['name']
+        record.description = shared.to_none(data['description'])
+        record.job_strategy_class = data['job_strategy_class']
+        record.enqueued_object_class = data['enqueued_object_class']
 
-        if record_type == None:
-            success = False
-            message = 'Missing record_type param'
-        elif record_type != 'executable' and record_type != 'job_queue' and record_type != 'job':
-            success = False
-            message = 'record_type ' + str(record_type) + ' not supported'
+        if(data['executable']):
+            record.executable = Executable.objects.get(name=data['executable'])
         else:
-            data = json.loads(request.body.decode('utf-8'))
+            record.executable = None
+    elif record_type == 'job' and record is None:
+        workflow_node = WorkflowNode.objects.get(id=data['workflow_node_id'])
 
-            if record_type == 'executable':
+        record = Job()
+        record.workflow_node = workflow_node
+        record.enqueued_object_id = data['enqueued_object_id']
+        record.run_state = RunState.get_pending_state()
+        record.priority = workflow_node.priority
+        record.archived = False
+    else:
+        priority = data['priority']
+        record.priority = priority
 
-                if record_id == 'new':
-                    executable = Executable()
-                else:
-                    executable = Executable.objects.get(id=record_id)
-
-                executable.name = data['name']
-                executable.description = data['description']
-                executable.static_arguments = shared.to_none(data['static_arguments'])
-                executable.executable_path = data['executable_path']
-                executable.pbs_executable_path = data['pbs_executable_path']
-                executable.pbs_processor = data['pbs_processor']
-                executable.pbs_queue = data['pbs_queue']
-                executable.pbs_walltime = data['pbs_walltime']
-                executable.save()
-            elif record_type == 'job_queue':
-                if record_id == 'new':
-                    job_queue = JobQueue()
-                else:
-                    job_queue = JobQueue.objects.get(id=record_id)
-
-                job_queue.name = data['name']
-                job_queue.description = shared.to_none(data['description'])
-                job_queue.job_strategy_class = data['job_strategy_class']
-                job_queue.enqueued_object_class = data['enqueued_object_class']
-
-                if(data['executable']):
-                    job_queue.executable = Executable.objects.get(name=data['executable'])
-                else:
-                    job_queue.executable = None
-
-                job_queue.save()
-            elif record_type == 'job':
-                if record_id == 'new':
-                    workflow_node = WorkflowNode.objects.get(id=data['workflow_node_id'])
-
-                    job = Job()
-                    job.workflow_node = workflow_node
-                    job.enqueued_object_id = data['enqueued_object_id']
-                    job.run_state = RunState.get_pending_state()
-                    job.priority = workflow_node.priority
-                    job.archived = False
-                    job.save()
-                else:
-                    priority = data['priority']
-                    job = Job.objects.get(id=record_id)
-                    job.priority = priority
-                    job.save()
-                
-    except Exception as e:
-            success = False
-            message = str(e)  
-        
-    result['success'] = success
-    result['message'] = message
-
-    return JsonResponse(result)
+    record.save()

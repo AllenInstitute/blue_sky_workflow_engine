@@ -93,6 +93,7 @@ def executables_page(request, page, url=None):
     shared.add_settings_info_to_context(context)
     return HttpResponse(template.render(context, request))
 
+
 def executables(request):
     url = request.get_full_path() + '/1/'
 
