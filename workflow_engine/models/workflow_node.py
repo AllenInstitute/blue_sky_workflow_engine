@@ -35,6 +35,8 @@
 #
 from django.db import models
 import logging
+from django.contrib.contenttypes.fields import GenericRelation
+from workflow_engine.models.configuration import Configuration
 _model_logger = logging.getLogger('workflow_engine.models')
 
 
@@ -52,6 +54,7 @@ class WorkflowNode(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     overwrite_previous_job = models.BooleanField(default=True)
     max_retries = models.IntegerField(default=3)
+    configurations = GenericRelation(Configuration)
 
     def __str__(self):
         return self.get_node_short_name()

@@ -44,6 +44,7 @@ from workflow_engine.views import record_view
 from workflow_engine.views import task_view
 from workflow_engine.views import workflow_view
 from workflow_engine.views import home_view
+from workflow_engine.views.monitor_view import MonitorView
 
 urlpatterns = [
     url(r'^$', home_view.index, name='index'),
@@ -103,4 +104,6 @@ urlpatterns = [
 
     #manual queues
     url(r'^manual_queues/check_if_finished/$', manual_queue_view.check_if_finished, name='manual_queues'),
+
+   url(r'^data', MonitorView.as_view())
 ]
