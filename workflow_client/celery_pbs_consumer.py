@@ -47,6 +47,8 @@ from workflow_engine.models.task import Task
 from django.core.exceptions import ObjectDoesNotExist
 from workflow_engine.models.run_state import RunState
 from builtins import Exception
+import time
+from celery.canvas import group
 from workflow_client.celery_ingest_consumer \
     import load_workflow_config
 import os
@@ -59,7 +61,74 @@ _log = logging.getLogger('workflow_client.celery_pbs_consumer')
 def run_pbs(self):
     ret = 'OK'
 
+    try: 
+        ret = 'OK'
+        time.sleep(1)
+        self.update_state(state="QUEUED",
+                          meta=ret)
+        time.sleep(1)
+        self.update_state(state="RUNNING",
+                          meta=ret)
+        time.sleep(1)
+        self.update_state(state="EXECUTION_FINISHED   ",
+                          meta=ret)
+    except:
+        ret = 'FAIL'
+        self.update_state(state="FAIL",
+                          meta=ret)
+
     return ret
+
+
+@celery.shared_task(bind=True, trail=True)
+def check_pbs_status(self):
+    self.update_state(state="PBS_STATUS")
+
+    # see: http://docs.celeryproject.org/en/latest/reference/celery.result.html
+    return group(
+        running.s("TASK ID: %d" % (t)) for t in range(0,10))()
+
+def on_pbs_queued(msg):
+    print('PBS QUEUED')
+
+
+@celery.shared_task(bind=True)
+def queued(self, msg):
+    on_pbs_queued(msg)
+
+
+def on_pbs_running(msg):
+    print('PBS RUNNING')
+
+
+@celery.shared_task(bind=True)
+def running(self, msg):
+    on_pbs_running(msg)
+
+    return 'OK RUNNING'
+
+
+def on_pbs_fail(msg):
+    print('PBS FAIL')
+
+
+@celery.shared_task(bind=True, trail=True)
+def fail(self, msg):
+    on_pbs_fail(msg)
+
+    self.update_state('FAIL', meta=msg)
+
+
+def on_pbs_success(msg):
+    print('PBS SUCCESS')
+
+@celery.shared_task(bind=True)
+def success(self, msg):
+    on_pbs_success(msg)
+
+
+def on_raw_message(body):
+    print(body)
 
 
 def configure_task_queues(app, name):
@@ -81,10 +150,10 @@ def configure_task_queues(app, name):
 def route_task(name, args, kwargs, options, task=None, **kw):
     task_name = '.'.split(name)[-1]
 
-    if task_name == 'run_pbs':
+    if task_name in { 'run_pbs', 'success', 'fail', 'running'}:
         return { 'queue': 'pbs' }
-    elif task_name in set(['success', 'fail']):
-        return { 'queue': 'result' }
+#    elif task_name in { 'success', 'fail' }:
+#        return { 'queue': 'result' }
     else:
         return { 'queue': 'null' }
 
