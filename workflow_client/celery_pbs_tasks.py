@@ -51,8 +51,8 @@ import time
 from celery.canvas import group
 from workflow_client.celery_ingest_consumer \
     import load_workflow_config
-import os
-
+import workflow_client.nb_utils.moab_api as moab_api
+from workflow_client.nb_utils.task_monitor import read_task_dataframe
 
 _log = logging.getLogger('workflow_client.celery_pbs_consumer')
 
@@ -84,9 +84,27 @@ def run_pbs(self):
 def check_pbs_status(self):
     self.update_state(state="PBS_STATUS")
 
+    task_url = 'http://ibs-timf-ux1:9002/workflow_engine/data'
+    task_df = read_task_dataframe(task_url)
+    running_task_ids = list(task_df.loc[lambda df: df.run_state == 11].id)
+
+    result = moab_api.moab_query(
+        moab_api.moab_url(
+            table='jobs',
+            jobs=running_task_ids))
+
+    log_info = [(
+        job['name'],
+        job['customName'],
+        job['states']['state'],
+        job['credentials']['user']) for job in result]
+
+    _log.info(log_info)
+    
+
     # see: http://docs.celeryproject.org/en/latest/reference/celery.result.html
     return group(
-        running.s("TASK ID: %d" % (t)) for t in range(0,10))()
+        running.s(t) for t in range(0,10))()
 
 def on_pbs_queued(msg):
     print('PBS QUEUED')
@@ -131,7 +149,14 @@ def on_raw_message(body):
     print(body)
 
 
-def configure_task_queues(app, name):
+def configure_pbs_app(app, app_name):
+    settings = load_settings_yaml()
+    app.config_from_object(config_object(settings))
+
+    configure_queues(app, app_name)
+    app.conf.task_routes = [route_task]
+
+def configure_queues(app, name):
     pbs_routes = []
 
     pbs_exchange = Exchange('pbs_' + name, type='direct')
@@ -150,7 +175,11 @@ def configure_task_queues(app, name):
 def route_task(name, args, kwargs, options, task=None, **kw):
     task_name = '.'.split(name)[-1]
 
-    if task_name in { 'run_pbs', 'success', 'fail', 'running'}:
+    if task_name in [ 'run_pbs',
+                     'check_pbs_status',
+                     'success',
+                     'fail',
+                     'running' ]:
         return { 'queue': 'pbs' }
 #    elif task_name in { 'success', 'fail' }:
 #        return { 'queue': 'result' }

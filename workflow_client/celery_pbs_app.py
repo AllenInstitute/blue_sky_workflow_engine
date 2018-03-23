@@ -33,6 +33,24 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-imports = (
-    'workflow_engine.worker_client'
-)
+import celery
+import workflow_client
+from workflow_client.celery_pbs_tasks \
+    import configure_pbs_app
+
+
+app = celery.Celery('workflow_client.celery_pbs_app')
+configure_pbs_app(app, 'at_em_imaging_workflow')
+
+
+# see: https://github.com/celery/celery/issues/3589
+@app.on_after_configure.connect
+def setup_periodic_tasks(sender, **kwargs):
+    sender.add_periodic_task(
+        30.0,
+        workflow_client.celery_pbs_tasks.check_pbs_status.s(),
+        name='Check PBS Status',
+        exchange='pbs_at_em_imaging_workflow',
+        routing_key='pbs',
+        queue='pbs',
+        delivery_mode='transient')  # see celery issue 3620

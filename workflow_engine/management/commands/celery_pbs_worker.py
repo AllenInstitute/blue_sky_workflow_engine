@@ -2,7 +2,7 @@
 # license plus a third clause that prohibits redistribution for commercial
 # purposes without further permission.
 #
-# Copyright 2017. Allen Institute. All rights reserved.
+# Copyright 2018. Allen Institute. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -33,6 +33,32 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-imports = (
-    'workflow_engine.worker_client'
-)
+from django.core.management.base import BaseCommand
+from django.conf import settings
+from workflow_client.celery_pbs_app import app
+import logging
+import os
+
+
+class Command(BaseCommand):
+    help = 'ingest handler for the message queues'
+    _log = logging.getLogger(
+        'workflow_engine.management.commands.server_worker')
+
+    def handle(self, *args, **options):
+        logging.basicConfig(level=logging.INFO)
+        logging.getLogger('workflow_engine').setLevel(logging.INFO)
+        logging.getLogger('workflow_client').setLevel(logging.INFO)
+        
+        app_name = settings.MESSAGE_QUEUE_NAME
+
+        app.start(argv=[
+            'celery', 
+            '-A', 'workflow_client.celery_pbs_app',
+            'worker',
+            '--loglevel=debug',
+            '--logfile=' + os.environ.get("DEBUG_LOG",
+                                          'logs/celery_pbs_worker.log'),
+            '--concurrency=2',
+            '-Q', 'pbs',
+            '-n', 'celery_pbs@' + app_name])
