@@ -37,6 +37,7 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 from workflow_client.celery_ingest_consumer import app
 import logging
+import os
 
 
 class Command(BaseCommand):
@@ -56,7 +57,8 @@ class Command(BaseCommand):
             '-A', 'workflow_client.celery_ingest_consumer',
             'worker',
             '--loglevel=debug',
-            '--logfile=logs/server_worker.log',
+            '--logfile=' + os.environ.get("DEBUG_LOG",
+                                          'logs/server_worker.log'),
             '--concurrency=2',
-            '-Q', 'ingest,result,null',
+            '-Q', 'ingest,workflow,result,null',
             '-n', 'ingest@' + app_name])

@@ -219,7 +219,9 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 
     def kill_pbs_task(self, task):
         if task.pbs_id != None:
-            cancel_task.delay(True, task.pbs_id)
+            cancel_task.apply_async(
+                (True, task.pbs_id),
+                queue='workflow')
 
     # Do not override
     def run_asynchronous_task(self, task):

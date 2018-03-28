@@ -38,9 +38,12 @@ from kombu import Exchange, Queue, binding
 from workflow_client.client_settings import load_settings_yaml, config_object
 from workflow_engine.workflow_config import WorkflowConfig
 from workflow_engine.import_class import import_class
+from django.conf import settings
 import logging
 
+
 _log = logging.getLogger('workflow_client.celery_ingest_consumer')
+
 
 def load_workflow_config(yaml_file):
     workflow_config = WorkflowConfig.from_yaml_file(yaml_file)
@@ -95,7 +98,9 @@ def configure_task_queues(app, name, workflows):
 
     app.conf.task_queues = (
         Queue('ingest', ingest_routes),
-        Queue('pbs', pbs_routes),
+        Queue('workflow', [binding(strategy_exchange,
+                                   routing_key='workflow')]),
+        Queue('old_pbs', pbs_routes),
         Queue('result', [binding(result_exchange, routing_key='result')]),
         Queue('null', [binding(result_exchange, routing_key='null')]))
 
@@ -105,12 +110,22 @@ def route_task(name, args, kwargs, options, task=None, **kw):
 
     if task_name == 'ingest_task':
         return { 'queue': 'ingest' }
-    elif task_name == 'run_task':
-        return { 'queue': 'pbs' }
-    elif task_name in set(['success', 'fail']):
+    # from worker_client
+    elif task_name in { 'create_job', 'queue_job' }:
+        return { 'queue': 'workflow' }
+    # elif task_name == 'run_task':
+    #    return { 'queue': 'old_pbs' }
+    elif task_name in {
+        'set_pbs_id',
+        'set_running',
+        'set_finished_execution',
+        'set_failed_execution',
+        'success',
+        'fail' }:
         return { 'queue': 'result' }
     else:
         return { 'queue': 'null' }
+
 
 def configure_ingest_consumer_app(app, app_name):
     settings = load_settings_yaml()
@@ -124,7 +139,7 @@ def configure_ingest_consumer_app(app, app_name):
 
 try:
     app = celery.Celery('workflow_client.celery_ingest_consumer')
-    configure_ingest_consumer_app(app, 'at_em_imaging_workflow')
+    configure_ingest_consumer_app(app, settings.APP_PACKAGE)
 except:
     pass
 

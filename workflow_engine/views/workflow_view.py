@@ -45,9 +45,10 @@ from workflow_engine.models.run_state import RunState
 from workflow_engine.models.job import Job
 from workflow_engine.import_class import import_class
 from workflow_engine.views import shared, HEADER_PAGES
+from workflow_engine.workflow_controller import WorkflowController
+import workflow_client.worker_client as worker_client
 import logging
 import json
-from workflow_engine.workflow_controller import WorkflowController
 
 
 _log = logging.getLogger('workflow_engine.views.workflow_view')
@@ -419,20 +420,26 @@ def create_job(request):
             success = False
             message = 'missing workflow_node_id param'
         else:
-            workflow_node = WorkflowNode.objects.get(id=workflow_node_id)
-            job = Job()
-            job.enqueued_object_id=enqueued_object_id
-            job.workflow_node=workflow_node
-            job.run_state=RunState.get_pending_state()
-            job.priority = priority
-            job.save()
-            WorkflowController.run_workflow_node_jobs(job.workflow_node)
-
-    except ObjectDoesNotExist as e:
-        success = False
-        message = 'Could not find a workflow record with id of ' + \
-            str(workflow_node_id) 
-
+            # TODO: get some kind of resonse here
+            worker_client.create_job.apply_async((
+                workflow_node_id,
+                enqueued_object_id,
+                priority),
+                queue='workflow')
+#             workflow_node = WorkflowNode.objects.get(
+#                 id=workflow_node_id)
+#             job = Job()
+#             job.enqueued_object_id=enqueued_object_id
+#             job.workflow_node=workflow_node
+#             job.run_state=RunState.get_pending_state()
+#             job.priority = priority
+#             job.save()
+#             WorkflowController.run_workflow_node_jobs(job.workflow_node)
+# 
+#     except ObjectDoesNotExist as e:
+#         success = False
+#         message = 'Could not find a workflow record with id of ' + \
+#             str(workflow_node_id) 
     except Exception as e:
             success = False
             message = str(e) + ' - ' + str(traceback.format_exc())

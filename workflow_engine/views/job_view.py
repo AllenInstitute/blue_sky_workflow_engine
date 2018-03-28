@@ -42,6 +42,7 @@ from workflow_engine.models.workflow_node import WorkflowNode
 from workflow_engine.models import ONE
 from workflow_engine.views import shared, HEADER_PAGES
 from workflow_engine.workflow_controller import WorkflowController
+import workflow_client.worker_client as worker_client
 
 
 context = {
@@ -114,8 +115,6 @@ def add_sort_jobs(context, sort, url, set_params):
     context['duration_sort'] = shared.sort_helper('duration', sort, url, set_params)
     context['run_state_id_sort'] = shared.sort_helper('run_state_id', sort, url, set_params)
 
-
-# TODO: generalize for any model
 def job_json_response(fn):
     def wrapper(request):
         result = {
@@ -148,20 +147,61 @@ def job_json_response(fn):
 
     return wrapper
 
+# TODO: generalize for any model
+def job_json_response2(fn):
+    def wrapper(request):
+        result = {
+            'success': True,
+            'message': '',
+            'payload': {} 
+            }
 
-@job_json_response
-def queue_job(job_object, result):
-    WorkflowController.set_job_for_run(job_object)
+        try:
+            if 'job_id'in request.GET:
+                job_ids = [ request.GET.get('job_id') ]
+            elif 'job_ids' in request.GET:
+                job_ids = request.GET.get('job_ids').split(',')
+
+            if job_ids is not None:
+                fn(job_ids, result)
+            else:
+                result['success'] = False
+                result['message'] = 'Missing job_ids'
+        except Exception as e:
+                result['success'] = False
+                result['message'] = str(e) + ' - ' + str(traceback.format_exc())
+        except Exception as e:
+                result['success'] = False
+                result['message'] = str(e) + ' - ' + str(traceback.format_exc())
+
+        return JsonResponse(result)
+
+    return wrapper
 
 
-@job_json_response
-def kill_job(job_object, result):
-    job_object.kill()
+@job_json_response2
+def queue_job(job_id, result):
+    worker_client.queue_job.apply_async(
+        (job_id),
+        queue='workflow')
+    #WorkflowController.set_job_for_run(job_object)
 
 
-@job_json_response
-def run_all_jobs(job_object, response):
-    WorkflowController.set_job_for_run_if_valid(job_object)
+@job_json_response2
+def kill_job(job_id, result):
+    worker_client.kill_job.apply_async(
+        (job_id),
+        queue='workflow')
+    #Job.kill_job(job_id)
+    # job_object.kill()
+
+
+@job_json_response2
+def run_all_jobs(job_id, response):
+    worker_client.queue_job.apply_async(
+        (job_id),
+        queue='workflow')
+    #WorkflowController.set_job_for_run_if_valid(job_id)
 
 
 @job_json_response

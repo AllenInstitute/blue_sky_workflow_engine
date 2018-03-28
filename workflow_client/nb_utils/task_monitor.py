@@ -2,11 +2,28 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import requests
 import io
+from django.conf import settings
 
 
-def read_task_dataframe(url="http://ibs-timf-ux1:9002/workflow_engine/data"):
-    s = requests.get(url).content
-    df = pd.read_csv(io.BytesIO(s),
+def request_task_json(url=None):
+    connect_timeout = 5
+    read_timeout = 5
+
+    if url is None:
+        url = "http://{}:{}/workflow_engine/data".format(
+            settings.UI_HOST, settings.UI_PORT)
+
+    return requests.get(
+        url,
+        timeout=(
+            connect_timeout,
+            read_timeout)).content
+
+
+def read_task_dataframe(url=None):
+    task_json_bytes = request_task_json(url)
+
+    df = pd.read_csv(io.BytesIO(task_json_bytes),
         parse_dates=['start_run_time', 'end_run_time', 'duration'])
 
     return df

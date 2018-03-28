@@ -42,6 +42,24 @@ from workflow_engine.import_class import import_class
 class WorkflowController(object):
     _logger = logging.getLogger('workflow_engine.models')
 
+
+    @classmethod
+    def create_job(cls, workflow_node_id, enqueued_object_id, priority):
+        try:
+            workflow_node = WorkflowNode.objects.get(id=workflow_node_id)
+            job = Job()
+            job.enqueued_object_id=enqueued_object_id
+            job.workflow_node=workflow_node
+            job.run_state=RunState.get_pending_state()
+            job.priority = priority
+            job.save()
+            WorkflowController.run_workflow_node_jobs(job.workflow_node)
+        except Exception as e:
+            WorkflowController._logger.error(
+                'Something went wrong running jobs: ' + str(e) + "\n" + \
+                traceback.format_exc())
+
+
     @classmethod
     def run_workflow_node_jobs(cls, workflow_node):
         try:
@@ -177,6 +195,13 @@ class WorkflowController(object):
         WorkflowController._logger.info('set for run')
         job.set_pending_state()
         WorkflowController.run_workflow_node_jobs(job.workflow_node)
+
+    @classmethod
+    def set_jobs_for_run_by_id(cls, job_ids):
+        records = Job.objects.filter(id__in=job_ids)
+
+        for job_object in records:
+            WorkflowController.set_job_for_run_if_valid(job_object)
 
     @classmethod
     def create_tasks(cls, job):

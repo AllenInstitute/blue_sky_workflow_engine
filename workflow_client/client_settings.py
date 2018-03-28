@@ -38,7 +38,7 @@ def config_object(s):
         'accept_content': ['json'],
         'timezone': 'US/Pacific',
         'enable_utc': True,
-        'task_queues': [ 'ingest' ],
+        #'task_queues': [ 'ingest' ],
         'task_default_queue': s.DEFAULT_MESSAGE_QUEUE_NAME
     })
 

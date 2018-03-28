@@ -2,7 +2,7 @@
 # license plus a third clause that prohibits redistribution for commercial
 # purposes without further permission.
 #
-# Copyright 2017. Allen Institute. All rights reserved.
+# Copyright 2018. Allen Institute. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -33,25 +33,13 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-import celery
-import workflow_client
-from workflow_client.celery_pbs_tasks \
-    import configure_pbs_app
+from celery import Celery
+from workflow_client.celery_run_consumer import *
 from django.conf import settings
 
-
-app = celery.Celery('workflow_client.celery_pbs_app')
-configure_pbs_app(app, settings.APP_PACKAGE)
-
-
-# see: https://github.com/celery/celery/issues/3589
-@app.on_after_configure.connect
-def setup_periodic_tasks(sender, **kwargs):
-    sender.add_periodic_task(
-        30.0,
-        workflow_client.celery_pbs_tasks.check_pbs_status.s(),
-        name='Check PBS Status',
-        exchange=settings.APP_PACKAGE,
-        routing_key='pbs',
-        # queue='pbs',
-        delivery_mode='transient')  # see celery issue 3620
+app = Celery('workflow_client.celery_run_app',
+             backend='rpc://',
+             broker='pyamqp://' + str(settings.MESSAGE_QUEUE_USER) + ':' + \
+             str(settings.MESSAGE_QUEUE_PASSWORD) + '@' + settings.MESSAGE_QUEUE_HOST + ':' + \
+             str(settings.MESSAGE_QUEUE_PORT) + '//')
+configure_run_consumer_app(app, settings.APP_PACKAGE)

@@ -34,7 +34,6 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 import celery
-import logging
 from kombu import Exchange, Queue, binding
 from workflow_client.client_settings import load_settings_yaml, config_object
 from workflow_engine.workflow_config import WorkflowConfig
@@ -49,10 +48,13 @@ from workflow_engine.models.run_state import RunState
 from builtins import Exception
 import time
 from celery.canvas import group
-from workflow_client.celery_ingest_consumer \
-    import load_workflow_config
+# from workflow_client.celery_ingest_consumer \
+#     import load_workflow_config
 import workflow_client.nb_utils.moab_api as moab_api
 from workflow_client.nb_utils.task_monitor import read_task_dataframe
+from workflow_client.worker_client import set_running, set_failed_execution
+import re
+from celery.states import SUCCESS
 
 _log = logging.getLogger('workflow_client.celery_pbs_consumer')
 
@@ -70,7 +72,7 @@ def run_pbs(self):
         self.update_state(state="RUNNING",
                           meta=ret)
         time.sleep(1)
-        self.update_state(state="EXECUTION_FINISHED   ",
+        self.update_state(state="EXECUTION_FINISHED",
                           meta=ret)
     except:
         ret = 'FAIL'
@@ -80,31 +82,91 @@ def run_pbs(self):
     return ret
 
 
-@celery.shared_task(bind=True, trail=True)
-def check_pbs_status(self):
-    self.update_state(state="PBS_STATUS")
+def moab_record_response(moab_state):
+    if moab_state == 'Running':
+        return running
+    elif moab_state == 'Queued':
+        return running
+    elif moab_state == 'Completed':
+        # need to check success/fail here
+        return running
+    else:
+        return running
 
-    task_url = 'http://ibs-timf-ux1:9002/workflow_engine/data'
+
+def get_running_task_df():
+    # TODO: this is too heavy a query for long-term use
+    task_url = \
+        'http://{}:{}/workflow_engine/data'.format(
+            settings.UI_HOST, settings.UI_PORT)
     task_df = read_task_dataframe(task_url)
-    running_task_ids = list(task_df.loc[lambda df: df.run_state == 11].id)
 
-    result = moab_api.moab_query(
+    RUNNING_STATE_ID = 11  # TODO: from RunState
+
+    return task_df.loc[lambda df: df.run_state == RUNNING_STATE_ID]
+
+
+def get_moab_query_result(pbs_ids):
+    return moab_api.moab_query(
         moab_api.moab_url(
             table='jobs',
-            jobs=running_task_ids))
+            jobs=pbs_ids))
 
-    log_info = [(
-        job['name'],
-        job['customName'],
-        job['states']['state'],
-        job['credentials']['user']) for job in result]
 
-    _log.info(log_info)
-    
+def custom_name_task_id(custom_name_string):
+    return int(re.sub(r'^task_',
+                      '',
+                      custom_name_string,
+                      count=1))
 
+@celery.shared_task(bind=True, trail=True)
+def check_pbs_status(self):
+    running_task_df = get_running_task_df()
+
+    moab_query_result = get_moab_query_result(
+        list(running_task_df.pbs_id))
+
+    _log.info([(
+        r['name'],  # "<pbs_id>"
+        r['customName'],  # "task_<workflow engine task id>"
+        r['states']['state'],
+        r['credentials']['user'])
+        for r in moab_query_result])
+
+    # TODO: do this in pandas
+    workflow_task_moab_record = {
+        custom_name_task_id(r['customName']): {  # task_id
+            'pbs_id': int(r['name']),
+            'pbs_run_state': r['states']['state']
+        }
+        for r in moab_query_result
+    }
+    _log.info(workflow_task_moab_record)
+
+    self.update_state(state=SUCCESS)
     # see: http://docs.celeryproject.org/en/latest/reference/celery.result.html
+    # and: https://github.com/celery/celery/issues/1171
     return group(
-        running.s(t) for t in range(0,10))()
+        moab_record_response(
+            workflow_task_moab_record[task_id]['pbs_run_state']).s(
+                workflow_task_moab_record[task_id]['pbs_id']).set(queue='result')
+        for task_id in list(running_task_df.pbs_id)
+        if task_id in workflow_task_moab_record.keys()
+    )()
+
+
+    #_log.info('sigs: ' + str(list(status_signatures)))
+
+#     status_celery_tasks = group(
+#         status_signature(task_id)
+#         for (status_signature,task_id)
+#         in status_signatures)
+#     
+#     _log.info(status_celery_tasks)
+# 
+#     return group(status_celery_tasks)
+#     return group(
+#         running.s(t).set(queue='result') for t in range(0,10))()
 
 def on_pbs_queued(msg):
     print('PBS QUEUED')
@@ -157,42 +219,42 @@ def configure_pbs_app(app, app_name):
     app.conf.task_routes = [route_task]
 
 def configure_queues(app, name):
-    pbs_routes = []
+    workflow_engine_exchange = Exchange(name, type='direct')
 
-    pbs_exchange = Exchange('pbs_' + name, type='direct')
-    result_exchange = Exchange('celery_' + name, type='direct')
+    pbs_routes = [
+        binding(workflow_engine_exchange, routing_key='pbs')
+    ]
 
-    pbs_routes.append(
-        binding(pbs_exchange,
-                routing_key='pbs'))
+    result_routes = [
+        binding(workflow_engine_exchange, routing_key='result')
+    ]
+    null_routes = [binding(workflow_engine_exchange,
+                               routing_key='null')]
 
     app.conf.task_queues = (
-        Queue('pbs', pbs_routes),
-        Queue('result', [binding(result_exchange, routing_key='result')]),
-        Queue('null', [binding(result_exchange, routing_key='null')]))
+        Queue(settings.PBS_MESSAGE_QUEUE_NAME, pbs_routes),
+        Queue('result', result_routes),
+        Queue('null', null_routes))
 
 
 def route_task(name, args, kwargs, options, task=None, **kw):
     task_name = '.'.split(name)[-1]
 
-    if task_name in [ 'run_pbs',
-                     'check_pbs_status',
-                     'success',
-                     'fail',
-                     'running' ]:
-        return { 'queue': 'pbs' }
-#    elif task_name in { 'success', 'fail' }:
-#        return { 'queue': 'result' }
+    if task_name in [ 'check_pbs_status' ]:
+        return { 'queue': settings.PBS_MESSAGE_QUEUE_NAME }
+    elif task_name in { 
+        'running', 'set_running', 'set_queued', 'set_failed_execution' }:
+        return { 'queue': 'result' }
     else:
         return { 'queue': 'null' }
 
 
 def configure_pbs_consumer_app(app, app_name):
-    configure_task_queues(app, app_name)
+    configure_queues(app, app_name)
     app.conf.task_routes = [route_task]
 
-try:
-    app = celery.Celery('workflow_client.celery_pbs_consumer')
-    configure_pbs_consumer_app(app, 'at_em_imaging_workflow')
-except:
-    pass
+# try:
+#     app = celery.Celery('workflow_client.celery_pbs_consumer')
+#     configure_pbs_consumer_app(app, settings.APP_PACKAGE)
+# except:
+#     pass
