@@ -33,32 +33,48 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
+import celery
 from django.core.management.base import BaseCommand
 from django.conf import settings
-from workflow_client.celery_pbs_app import app
-import logging
-import os
+import workflow_client.celery_moab_tasks
+from workflow_client.celery_pbs_tasks \
+    import configure_pbs_app
+import logging.config
+
+
+app = celery.Celery('workflow_client.celery_pbs_app')
+configure_pbs_app(app, settings.APP_PACKAGE)
+
+
+# see: https://github.com/celery/celery/issues/3589
+@app.on_after_configure.connect
+def setup_periodic_tasks(sender, **kwargs):
+    sender.add_periodic_task(
+        30.0,
+        workflow_client.celery_moab_tasks.check_pbs_status.s(),
+        name='Check PBS Status',
+        exchange=settings.APP_PACKAGE,
+        routing_key='pbs',
+        # queue='pbs',
+        delivery_mode='transient')  # see celery issue 3620
+
+
+@celery.signals.after_setup_task_logger.connect
+def after_setup_celery_task_logger(logger, **kwargs):
+    logging.config.dictConfig(settings.LOGGING)
 
 
 class Command(BaseCommand):
     help = 'ingest handler for the message queues'
-    _log = logging.getLogger(
-        'workflow_engine.management.commands.server_worker')
 
     def handle(self, *args, **options):
-        logging.basicConfig(level=logging.INFO)
-        logging.getLogger('workflow_engine').setLevel(logging.INFO)
-        logging.getLogger('workflow_client').setLevel(logging.INFO)
-        
-        app_name = settings.MESSAGE_QUEUE_NAME
+        app_name = settings.APP_PACKAGE
 
         app.start(argv=[
             'celery', 
-            '-A', 'workflow_client.celery_pbs_app',
+            '-A',
+            'workflow_engine.management.commands.celery_pbs_worker',
             'worker',
-            '--loglevel=debug',
-            '--logfile=' + os.environ.get("DEBUG_LOG",
-                                          'logs/celery_pbs_worker.log'),
             '--concurrency=2',
             '-Q', 'pbs',
             '-n', 'celery_pbs@' + app_name])

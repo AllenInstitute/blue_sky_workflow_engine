@@ -75,11 +75,8 @@ def load_ingest_strategy_names(yaml_file):
 
 
 def configure_task_queues(app, name, workflows):
-    task_queues = []
     ingest_routes = []
     pbs_routes = []
-    local_routes = []
-    manual_routes = []
 
     ingest_exchange = Exchange(name + '_ingest', type='direct')
     strategy_exchange = Exchange(name + '_workflow', type='direct')
@@ -135,13 +132,6 @@ def configure_ingest_consumer_app(app, app_name):
 
     configure_task_queues(app, app_name, workflow_config)
     app.conf.task_routes = [route_task]
-
-
-try:
-    app = celery.Celery('workflow_client.celery_ingest_consumer')
-    configure_ingest_consumer_app(app, settings.APP_PACKAGE)
-except:
-    pass
 
 
 @celery.shared_task(bind=True)
@@ -221,4 +211,3 @@ def fail(uuid):
 
 def on_raw_message(body):
     print(body)
-

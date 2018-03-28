@@ -2,7 +2,7 @@
 # license plus a third clause that prohibits redistribution for commercial
 # purposes without further permission.
 #
-# Copyright 2018. Allen Institute. All rights reserved.
+# Copyright 2017. Allen Institute. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -33,13 +33,34 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-from celery import Celery
-from workflow_client.celery_run_consumer import *
+import celery
+from django.core.management.base import BaseCommand
+from workflow_client.celery_run_consumer \
+    import configure_run_consumer_app
 from django.conf import settings
+import logging.config
 
-app = Celery('workflow_client.celery_run_app',
-             backend='rpc://',
-             broker='pyamqp://' + str(settings.MESSAGE_QUEUE_USER) + ':' + \
-             str(settings.MESSAGE_QUEUE_PASSWORD) + '@' + settings.MESSAGE_QUEUE_HOST + ':' + \
-             str(settings.MESSAGE_QUEUE_PORT) + '//')
+
+app = celery.Celery('workflow_client.celery_run_consumer')
 configure_run_consumer_app(app, settings.APP_PACKAGE)
+
+
+@celery.signals.after_setup_task_logger.connect
+def after_setup_celery_task_logger(logger, **kwargs):
+    logging.config.dictConfig(settings.LOGGING)
+
+
+class Command(BaseCommand):
+    help = 'ingest handler for the message queues'
+
+    def handle(self, *args, **options):
+        app_name = settings.APP_PACKAGE
+
+        app.start(argv=[
+            'celery', 
+            '-A',
+            'workflow_engine.management.commands.workflow_worker',
+            'worker',
+            '--concurrency=2',
+            '-Q', 'workflow,null',
+            '-n', 'workflow@' + app_name])

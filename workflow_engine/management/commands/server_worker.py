@@ -33,32 +33,35 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
+import celery
 from django.core.management.base import BaseCommand
 from django.conf import settings
-from workflow_client.celery_ingest_consumer import app
-import logging
-import os
+from workflow_client.celery_ingest_consumer \
+    import configure_ingest_consumer_app
+import logging.config
+
+
+app = celery.Celery('workflow_client.celery_ingest_consumer')
+configure_ingest_consumer_app(app, settings.APP_PACKAGE)
+
+
+@celery.signals.after_setup_task_logger.connect
+def after_setup_celery_task_logger(logger, **kwargs):
+    """ This function sets the 'celery.task' logger handler and formatter """
+    logging.config.dictConfig(settings.LOGGING)
 
 
 class Command(BaseCommand):
     help = 'ingest handler for the message queues'
-    _log = logging.getLogger(
-        'workflow_engine.management.commands.server_worker')
 
     def handle(self, *args, **options):
-        logging.basicConfig(level=logging.INFO)
-        logging.getLogger('workflow_engine').setLevel(logging.INFO)
-        logging.getLogger('workflow_client').setLevel(logging.INFO)
-        
-        app_name = settings.MESSAGE_QUEUE_NAME
+        app_name = settings.APP_PACKAGE
 
         app.start(argv=[
             'celery', 
-            '-A', 'workflow_client.celery_ingest_consumer',
+            '-A',
+            'workflow_engine.management.commands.server_worker',
             'worker',
-            '--loglevel=debug',
-            '--logfile=' + os.environ.get("DEBUG_LOG",
-                                          'logs/server_worker.log'),
             '--concurrency=2',
-            '-Q', 'ingest,workflow,result,null',
+            '-Q', 'ingest,result,null',
             '-n', 'ingest@' + app_name])

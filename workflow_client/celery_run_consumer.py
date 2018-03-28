@@ -39,6 +39,8 @@ import logging
 import django; django.setup()
 from workflow_engine.models.task import Task
 from django.core.exceptions import ObjectDoesNotExist
+from workflow_client.client_settings import load_settings_yaml, config_object
+from django.conf import settings
 
 
 _log = logging.getLogger('workflow_client.celery_run_consumer')
@@ -137,40 +139,6 @@ def success(self, msg):
     print('Success! '  + msg)
 
 
-def configure_queues(app, name):
-    workflow_engine_exchange = Exchange(name, type='direct')
-
-    app.conf.task_queues = (
-        Queue('run', [binding(workflow_engine_exchange,
-                              routing_key='run')]),
-        Queue('result', [binding(workflow_engine_exchange,
-                                 routing_key='result')]),
-        Queue('null', [binding(workflow_engine_exchange,
-                               routing_key='null')]))
-
-
-def route_task(name, args, kwargs, options, task=None, **kw):
-    task_name = '.'.split(name)[-1]
-
-    if task_name == 'run_task':
-        return { 'queue': 'run' }
-    elif task_name in {
-        'set_pbs_id',
-        'set_running',
-        'set_finished_execution',
-        'set_failed_execution',
-        'success',
-        'fail' }:
-        return { 'queue': 'result' }
-    else:
-        return { 'queue': 'null' }
-
-
-def configure_run_consumer_app(app, app_name):
-    configure_queues(app, app_name)
-    app.conf.task_routes = [route_task]
-
-
 @celery.shared_task(bind=True)
 def fail(self, msg):
     # e = result.get(propagate=False)
@@ -188,3 +156,48 @@ def timeout(uuid):
 
 def on_raw_message(body):
     print(body)
+
+
+def configure_queues(app, name):
+    workflow_engine_exchange = Exchange(name, type='direct')
+
+    run_routes = [
+        binding(workflow_engine_exchange, routing_key='run')
+    ]
+
+    result_routes = [
+        binding(workflow_engine_exchange, routing_key='result')
+    ]
+
+    null_routes = [binding(workflow_engine_exchange,
+                               routing_key='null')]
+
+    app.conf.task_queues = (
+        Queue('run', run_routes),
+        Queue('result', result_routes),
+        Queue('null', null_routes))
+
+
+def route_task(name, args, kwargs, options, task=None, **kw):
+    task_name = '.'.split(name)[-1]
+
+    if task_name in [ 'run_task' ]:
+        return { 'queue': 'run' }
+    elif task_name in { 
+        'running',
+        'set_running',
+        'set_queued',
+        'set_failed_execution',
+        'success',
+        'fail' }:
+        return { 'queue': 'result' }
+    else:
+        return { 'queue': 'null' }
+
+
+def configure_run_app(app, app_name):
+    #settings = load_settings_yaml()
+    #app.config_from_object(config_object(settings))
+
+    configure_queues(app, app_name)
+    app.conf.task_routes = [route_task]

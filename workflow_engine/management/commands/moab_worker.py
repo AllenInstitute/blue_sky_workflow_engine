@@ -2,7 +2,7 @@
 # license plus a third clause that prohibits redistribution for commercial
 # purposes without further permission.
 #
-# Copyright 2017. Allen Institute. All rights reserved.
+# Copyright 2018. Allen Institute. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -34,24 +34,33 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 import celery
-import workflow_client
-from workflow_client.celery_pbs_tasks \
-    import configure_pbs_app
+from django.core.management.base import BaseCommand
+from workflow_client.celery_moab_tasks \
+    import configure_moab_consumer_app
 from django.conf import settings
+import logging.config
 
 
-app = celery.Celery('workflow_client.celery_pbs_app')
-configure_pbs_app(app, settings.APP_PACKAGE)
+app = celery.Celery('workflow_client.celery_run_consumer')
+configure_moab_consumer_app(app, settings.APP_PACKAGE)
 
 
-# see: https://github.com/celery/celery/issues/3589
-@app.on_after_configure.connect
-def setup_periodic_tasks(sender, **kwargs):
-    sender.add_periodic_task(
-        30.0,
-        workflow_client.celery_pbs_tasks.check_pbs_status.s(),
-        name='Check PBS Status',
-        exchange=settings.APP_PACKAGE,
-        routing_key='pbs',
-        # queue='pbs',
-        delivery_mode='transient')  # see celery issue 3620
+@celery.signals.after_setup_task_logger.connect
+def after_setup_celery_task_logger(logger, **kwargs):
+    logging.config.dictConfig(settings.LOGGING)
+
+
+class Command(BaseCommand):
+    help = 'ingest handler for the message queues'
+
+    def handle(self, *args, **options):
+        app_name = settings.APP_PACKAGE
+
+        app.start(argv=[
+            'celery', 
+            '-A',
+            'workflow_engine.management.commands.moab_worker',
+            'worker',
+            '--concurrency=2',
+            '-Q', 'moab,null',
+            '-n', 'moab@' + app_name])
