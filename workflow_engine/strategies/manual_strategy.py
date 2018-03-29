@@ -35,6 +35,7 @@
 #
 from workflow_engine.strategies import base_strategy
 import traceback
+from workflow_client.celery_run_consumer import run_workflow_node_jobs_by_id
 
 class ManualStrategy(base_strategy.BaseStrategy):
     #####everthing bellow this can be overriden#####
@@ -64,6 +65,9 @@ class ManualStrategy(base_strategy.BaseStrategy):
             if task.job.all_tasks_finished():
                 task.job.set_success_state()
                 task.job.set_end_run_time()
+                run_workflow_node_jobs_by_id.apply_async(
+                    (task.job.workflow_node.id,),
+                    queue='workflow')
                 WorkflowController.enqueue_next_queue(task.job)
 
         return finished

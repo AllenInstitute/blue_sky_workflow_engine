@@ -63,5 +63,6 @@ class Command(BaseCommand):
             'workflow_engine.management.commands.server_worker',
             'worker',
             '--concurrency=2',
+            '--heartbeat-interval=30',
             '-Q', 'ingest,result,null',
             '-n', 'ingest@' + app_name])

@@ -33,57 +33,20 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-import pika
-from workflow_engine.models.run_state import RunState
-from workflow_engine.models.task import Task
-from django.core.management.base import BaseCommand, CommandError
+import celery
+from kombu import Exchange, Queue, binding
+import django; django.setup()
 from django.core.exceptions import ObjectDoesNotExist
-from django.conf import settings
+from workflow_client.celery_run_consumer \
+    import run_workflow_node_jobs_by_id
+from workflow_client.client_settings \
+    import load_settings_yaml, config_object
 import logging
 import traceback
-import celery
 
-# def callback(ch, method, properties, body):
-#     Command.cb(ch, method, properties, body)
-# 
-# 
-# class Command(BaseCommand):
-#     _log = logging.getLogger(
-#         'workflow_engine.mananagement.commands.run_execution_worker')
-#     help = 'response handler for the message queue'
-#     STATE = 0
-#     TASK_ID = 1
-#     PBS_ID = 2
-# 
-# 
-#     # TODO: change this to use workflow_client.ingest_client
-#     def handle(self, *args, **options):
-#         logging.basicConfig(level=logging.INFO)
-#         logging.getLogger('run_execution_worker').setLevel(logging.INFO)
-# 
-#         credentials = pika.PlainCredentials(settings.MESSAGE_QUEUE_USER,
-#                                             settings.MESSAGE_QUEUE_PASSWORD)
-#         connection = pika.BlockingConnection(
-#             pika.ConnectionParameters(
-#                 settings.MESSAGE_QUEUE_HOST,
-#                 settings.MESSAGE_QUEUE_PORT,
-#                 '/',
-#                 credentials))
-# 
-#         MQ = settings.CELERY_MESSAGE_QUEUE_NAME
-#         Command._log.info("listening to queue: %s" % (MQ))
-#         channel = connection.channel()
-#         channel.queue_declare(queue=MQ,
-#                               durable=True)
-#         channel.basic_consume(callback,
-#                               queue=MQ,
-#                               no_ack=True)
-#         Command._log.info(
-#             ' [*] Waiting for messages. To exit press CTRL+C')
-# 
-#         channel.start_consuming()
 
 _log = logging.getLogger('workflow_engine.celery.workflow_tasks')
+
 
 def get_task_strategy_by_task_id(task_id):
     try:
@@ -99,53 +62,85 @@ def get_task_strategy_by_task_id(task_id):
 @celery.shared_task(bind=True)
 def process_running(self, task_id):
     (task, strategy) = get_task_strategy_by_task_id(task_id)
-    strategy.running_task(task)
-
+    # strategy.running_task(task)
 
 @celery.shared_task(bind=True)
-def process_finished_execution(self, task_id, strategy):
+def process_finished_execution(self, task_id):
     (task, strategy) = get_task_strategy_by_task_id(task_id)
     strategy.finish_task(task)
+    run_workflow_node_jobs_by_id.apply_async(
+        (task.job.workflow_node.id,),
+        queue='workflow')
 
 
 @celery.shared_task(bind=True)
-def process_failed_execution(self, task_id, strategy):
+def process_failed_execution(self, task_id):
     (task, strategy) = get_task_strategy_by_task_id(task_id)
     strategy.fail_execution_task(task)
+    run_workflow_node_jobs_by_id.apply_async(
+        (task.job.workflow_node.id,),
+        queue='workflow')
 
 
 @celery.shared_task(bind=True)
 def process_pbs_id(self, task_id, pbs_id):
     # TODO: move to task as set_pbs_id
-    (task, _) = get_task_strategy_by_task_id(task_id)
-    task.pbs_id = pbs_id # str(body_data[Command.PBS_ID])
-    task.save()
-
-#     @classmethod
-#     def cb(cls, ch, method, properties, body):
-#         body = body.decode("utf-8") 
-#         Command._log.info(" [x] Received " + str(body))
-# 
-#         try:
-#             body_data = body.split(',')
-#             state = body_data[Command.STATE]
-#             task_id = body_data[Command.TASK_ID]
-# 
-#             task = Task.objects.get(id=task_id)
-# 
-#             strategy = task.get_strategy()
-#             if state == RunState.get_running_state().name:
-#                 Command.process_running(task, strategy)
-#             elif state == RunState.get_finished_execution_state().name:
-#                 Command.process_finished_execution(task, strategy)
-#             elif state == RunState.get_failed_execution_state().name:
-#                 Command.process_failed_execution(task, strategy)
-#             elif state == 'PBS_ID':
-#                 task.pbs_id = str(body_data[Command.PBS_ID])
-#                 task.save()
-# 
-#         except Exception as e:
-#             Command._log.error(
-#                 'Something went wrong: ' + (traceback.print_exc(e)))
+    try:
+        (task, _) = get_task_strategy_by_task_id(task_id)
+        task.set_pbs_id(pbs_id)
+    except ObjectDoesNotExist:
+        _log.warn(
+            "Task {} for PBS id {} does not exist",
+            task_id,
+            pbs_id)
 
 
+def configure_queues(app, name):
+    workflow_engine_exchange = Exchange(name, type='direct')
+
+    run_routes = [
+        binding(workflow_engine_exchange, routing_key='run')
+    ]
+
+    result_routes = [
+        binding(workflow_engine_exchange, routing_key='result')
+    ]
+
+    null_routes = [binding(workflow_engine_exchange,
+                               routing_key='null')]
+
+    app.conf.task_queues = (
+        Queue('run', run_routes),
+        Queue('result', result_routes),
+        Queue('null', null_routes))
+
+
+def route_task(name, args, kwargs, options, task=None, **kw):
+    task_name = '.'.split(name)[-1]
+
+    if task_name in [ 
+        'run_task',
+        'run_workflow_node_jobs_by_id' ]:
+        return { 'queue': 'workflow' }
+    elif task_name in { 
+        'process_running',
+        'process_finished_execution',
+        'process_failed_execution',
+        'process_pbs_id',
+        'success',
+        'fail' }:
+        return { 'queue': 'result' }
+    else:
+        return { 'queue': 'null' }
+
+
+def configure_result_app(app, app_name):
+    settings = load_settings_yaml()
+    app.config_from_object(config_object(settings))
+
+    configure_queues(app, app_name)
+    app.conf.task_routes = [route_task]
+
+
+# circular imports
+from workflow_engine.models.task import Task

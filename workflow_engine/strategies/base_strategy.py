@@ -42,6 +42,7 @@ import logging
 import traceback
 import os
 
+
 class BaseStrategy(object):
     _log = logging.getLogger('workflow_engine.strategies.base_strategy')
     # 

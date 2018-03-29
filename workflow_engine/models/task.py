@@ -39,7 +39,10 @@ from django.conf import settings
 from workflow_engine.models import ONE, ZERO, TWO, SECONDS_IN_MIN
 from workflow_client.pbs_utils import PbsUtils
 import logging
-_model_logger = logging.getLogger('workflow_engine.models')
+import traceback
+
+
+_logger = logging.getLogger('workflow_engine.models.task')
 
 
 class Task(models.Model):
@@ -79,6 +82,9 @@ class Task(models.Model):
         self.save()
         self.job.set_error_message(self.error_message, self)
 
+    def set_pbs_id(self, pbs_id):
+        self.pbs_id = pbs_id
+        self.save()
 
     def environment_vars(self):
         '''
@@ -92,7 +98,7 @@ class Task(models.Model):
         pbs_executable = self.get_job_queue().executable.remote_queue == 'pbs'
 
         is_pbs = pbs_executable or pbs_workflow 
-        _model_logger.info("pbs_task: %s" % (is_pbs))
+        _logger.info("pbs_task: %s" % (is_pbs))
 
         return is_pbs
 
@@ -150,7 +156,7 @@ class Task(models.Model):
 
     def set_end_run_time(self):
         self.end_run_time = timezone.now()
-        self.duration = str(self.end_run_time - self.start_run_time)
+        self.duration = self.end_run_time - self.start_run_time
         self.save()
 
     def in_failed_state(self):
@@ -184,8 +190,19 @@ class Task(models.Model):
         strategy.fail_task(self)
 
     def finish_task(self):
-        strategy = self.get_strategy()
-        strategy.finish_task(self)
+        try:
+            self.set_finished_execution_state()
+            self.set_success_state()
+            self.set_end_run_time()
+            self.job.set_success_state()
+            self.job.set_end_run_time()
+            WorkflowController.enqueue_next_queue(self.job)
+        except Exception as e:
+            mess = str(e) + ' - ' + str(traceback.format_exc())
+            _logger.error(mess)
+            self.set_error_message(mess)
+            self.fail_task()
+
 
     def get_max_retries(self):
         return self.job.workflow_node.max_retries
@@ -206,48 +223,48 @@ class Task(models.Model):
         self.increment_retry_count()
         self.set_start_run_time()
         strategy = self.get_strategy()
-        _model_logger.info("Running task with strategy %s" % (str(strategy)))
+        _logger.info("Running task with strategy %s" % (str(strategy)))
         strategy.run_task(self)
 
     def set_pending_state(self):
-        _model_logger.info("set pending state")
+        _logger.info("set pending state")
         strategy = self.get_strategy()
         strategy.run_task(self)
         self.run_state = RunState.get_pending_state()
         self.save()
 
     def set_process_killed_state(self):
-        _model_logger.info("set process killed state")
+        _logger.info("set process killed state")
         self.run_state = RunState.get_process_killed_state()
         self.save()
 
     def set_running_state(self):
-        _model_logger.info("set running state")
+        _logger.info("set running state")
         self.run_state = RunState.get_running_state()
         self.save()
 
     def set_finished_execution_state(self):
-        _model_logger.info("finished execution state")
+        _logger.info("finished execution state")
         self.run_state = RunState.get_finished_execution_state()
         self.save()
 
     def set_failed_state(self):
-        _model_logger.info("set failed state")
+        _logger.info("set failed state")
         self.run_state = RunState.get_failed_state()
         self.save()
 
     def set_failed_execution_state(self):
-        _model_logger.info("set failed execution state")
+        _logger.info("set failed execution state")
         self.run_state = RunState.get_failed_execution_state()
         self.save()
 
     def set_success_state(self):
-        _model_logger.info("set success state")
+        _logger.info("set success state")
         self.run_state = RunState.get_success_state()
         self.save()
 
     def set_queued_state(self):
-        _model_logger.info("set queued state")
+        _logger.info("set queued state")
         self.run_state = RunState.get_queued_state()
         self.save()
 

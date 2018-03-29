@@ -76,5 +76,6 @@ class Command(BaseCommand):
             'workflow_engine.management.commands.celery_pbs_worker',
             'worker',
             '--concurrency=2',
+            '--heartbeat-interval=30',
             '-Q', 'pbs',
             '-n', 'celery_pbs@' + app_name])

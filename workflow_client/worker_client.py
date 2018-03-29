@@ -1,17 +1,16 @@
 #from workflow_client.reply_client import ReplyClient
 from workflow_client.server_command import server_command
 from django.conf import settings
-from celery.utils.log import get_task_logger
 import django; django.setup()
 import os
 import celery
 from workflow_engine.models.task import Task
 import traceback
 from workflow_engine.workflow_controller import WorkflowController
-from workflow_engine.models.job import Job
+import logging
 
 
-_log = get_task_logger('worker_client')
+_log = logging.getLogger('workflow_client.worker_client')
 
 
 SUCCESS_EXIT_CODE = 0
@@ -156,24 +155,10 @@ def run_normal(self, full_executable, task_id, logfile):
 
     return exit_code
 
-# @celery.shared_task(bind=True)
-# def publish_message(self, body, task_id, optional_body=None):
-#     with ReplyClient(
-#         settings.MESSAGE_QUEUE_HOST,
-#         int(settings.MESSAGE_QUEUE_PORT),
-#         settings.MESSAGE_QUEUE_USER,
-#         settings.MESSAGE_QUEUE_PASSWORD,
-#         '',
-#         settings.CELERY_MESSAGE_QUEUE_NAME) as ic:
-#         if optional_body is not None:
-#             ic.send(body + ',' + str(task_id) + ',' + str(optional_body))
-#         else:
-#             ic.send(body + ',' + str(task_id))
-
 
 @celery.shared_task(bind=True)
 def kill_job(self, job_id):
-    Job.kill_job(job_id)
+    WorkflowController.kill_job(job_id)
 
 
 @celery.shared_task(bind=True)

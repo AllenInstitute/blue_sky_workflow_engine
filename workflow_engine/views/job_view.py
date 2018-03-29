@@ -41,9 +41,10 @@ from workflow_engine.models.job import Job
 from workflow_engine.models.workflow_node import WorkflowNode
 from workflow_engine.models import ONE
 from workflow_engine.views import shared, HEADER_PAGES
-from workflow_engine.workflow_controller import WorkflowController
 import workflow_client.worker_client as worker_client
+import logging
 
+_log = logging.getLogger('workflow_engine.views.job_view')
 
 context = {
     'pages': HEADER_PAGES,
@@ -161,18 +162,26 @@ def job_json_response2(fn):
                 job_ids = [ request.GET.get('job_id') ]
             elif 'job_ids' in request.GET:
                 job_ids = request.GET.get('job_ids').split(',')
+            else:
+                job_ids = None
 
             if job_ids is not None:
                 fn(job_ids, result)
             else:
                 result['success'] = False
                 result['message'] = 'Missing job_ids'
+
+            _log.info(result)
         except Exception as e:
                 result['success'] = False
-                result['message'] = str(e) + ' - ' + str(traceback.format_exc())
+                mess = str(e) + ' - ' + str(traceback.format_exc())
+                _log.error(mess)
+                result['message'] = mess
         except Exception as e:
                 result['success'] = False
-                result['message'] = str(e) + ' - ' + str(traceback.format_exc())
+                mess = str(e) + ' - ' + str(traceback.format_exc())
+                _log.error(mess)
+                result['message'] = mess
 
         return JsonResponse(result)
 
@@ -181,17 +190,21 @@ def job_json_response2(fn):
 
 @job_json_response2
 def queue_job(job_id, result):
-    worker_client.queue_job.apply_async(
+    r = worker_client.queue_job.apply_async(
         (job_id),
         queue='workflow')
+    outp = r.get()
+    _log.info('QUEUE_JOB ' + str(outp))
     #WorkflowController.set_job_for_run(job_object)
 
 
 @job_json_response2
 def kill_job(job_id, result):
-    worker_client.kill_job.apply_async(
+    r = worker_client.kill_job.apply_async(
         (job_id),
         queue='workflow')
+    outp = r.get()
+    _log.info('QUEUE_JOB ' + str(outp))
     #Job.kill_job(job_id)
     # job_object.kill()
 

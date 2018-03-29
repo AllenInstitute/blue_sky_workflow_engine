@@ -36,11 +36,9 @@
 import celery
 from kombu import Exchange, Queue, binding
 import logging
-import django; django.setup()
-from workflow_engine.models.task import Task
 from django.core.exceptions import ObjectDoesNotExist
 from workflow_client.client_settings import load_settings_yaml, config_object
-from django.conf import settings
+import traceback
 
 
 _log = logging.getLogger('workflow_client.celery_run_consumer')
@@ -79,6 +77,14 @@ def get_current_task_by_id(tid):
 
     return task
 
+
+@celery.shared_task(bind=True)
+def run_workflow_node_jobs_by_id(self, workflow_node_id):
+    try:
+        workflow_node = WorkflowNode.objects.get(id=workflow_node_id)
+        WorkflowController.run_workflow_node_jobs(workflow_node)
+    except ObjectDoesNotExist as e:
+        _log.error(str(e) + ' - ' + str(traceback.format_exc()))
 
 
 # TODO: change name to something like process task state
@@ -181,7 +187,10 @@ def configure_queues(app, name):
 def route_task(name, args, kwargs, options, task=None, **kw):
     task_name = '.'.split(name)[-1]
 
-    if task_name in [ 'run_task' ]:
+    if task_name in [
+        'run_task',
+        # 'run_workflow_node_jobs_by_id'
+        ]:
         return { 'queue': 'run' }
     elif task_name in { 
         'running',
@@ -201,3 +210,8 @@ def configure_run_app(app, app_name):
 
     configure_queues(app, app_name)
     app.conf.task_routes = [route_task]
+
+# circular imports
+from workflow_engine.models.task import Task
+from workflow_engine.models.workflow_node import WorkflowNode
+from workflow_engine.workflow_controller import WorkflowController

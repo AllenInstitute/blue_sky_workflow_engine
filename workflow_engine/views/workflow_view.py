@@ -49,6 +49,7 @@ from workflow_engine.workflow_controller import WorkflowController
 import workflow_client.worker_client as worker_client
 import logging
 import json
+from workflow_client.celery_run_consumer import run_workflow_node_jobs_by_id
 
 
 _log = logging.getLogger('workflow_engine.views.workflow_view')
@@ -426,20 +427,6 @@ def create_job(request):
                 enqueued_object_id,
                 priority),
                 queue='workflow')
-#             workflow_node = WorkflowNode.objects.get(
-#                 id=workflow_node_id)
-#             job = Job()
-#             job.enqueued_object_id=enqueued_object_id
-#             job.workflow_node=workflow_node
-#             job.run_state=RunState.get_pending_state()
-#             job.priority = priority
-#             job.save()
-#             WorkflowController.run_workflow_node_jobs(job.workflow_node)
-# 
-#     except ObjectDoesNotExist as e:
-#         success = False
-#         message = 'Could not find a workflow record with id of ' + \
-#             str(workflow_node_id) 
     except Exception as e:
             success = False
             message = str(e) + ' - ' + str(traceback.format_exc())
@@ -575,14 +562,17 @@ def update_workflow_node(request):
             workflow_node.max_retries = int(max_retries)
             workflow_node.batch_size = int(batch_size)
             workflow_node.priority = int(priority)
-
             workflow_node.save()
 
-            WorkflowController.run_workflow_node_jobs(workflow_node)
+            run_workflow_node_jobs_by_id.apply_async(
+                (workflow_node.id,),
+                queue='workflow')
 
             #run jobs if this workflow was enabled
             if not workflow_node.workflow.disabled and prev_disabled and not current_disabled:
-                WorkflowController.run_workflow_node_jobs(workflow_node)
+                run_workflow_node_jobs_by_id.apply_async(
+                    (workflow_node.id,),
+                    queue='workflow')
 
     except ObjectDoesNotExist as e:
         success = False
@@ -669,7 +659,9 @@ def update_workflow(request):
             if prev_disabled and not current_disabled:
                 for workflow_node in WorkflowNode.objects.filter(workflow=workflow):
                     if not workflow_node.disabled:
-                        WorkflowController.run_workflow_node_jobs(workflow_node)
+                        run_workflow_node_jobs_by_id.apply_async(
+                            (workflow_node.id,),
+                            queue='workflow')
 
     except ObjectDoesNotExist as e:
         success = False

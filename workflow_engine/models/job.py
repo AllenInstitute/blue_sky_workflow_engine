@@ -38,8 +38,9 @@ from django.utils import timezone
 from workflow_engine.import_class import import_class
 from workflow_engine.models import TWO, SECONDS_IN_MIN
 import logging
-from django.core.exceptions import ObjectDoesNotExist
-_model_logger = logging.getLogger('workflow_engine.models')
+
+
+_logger = logging.getLogger('workflow_engine.models.job')
 
 
 class Job(models.Model):
@@ -109,7 +110,7 @@ class Job(models.Model):
         self.save()
 
     def has_failed_tasks(self):
-        _model_logger.info('has failed tasks')
+        _logger.info('has failed tasks')
         has_failed = False
         tasks = self.get_tasks()
         for task in tasks:
@@ -119,7 +120,7 @@ class Job(models.Model):
         return has_failed
 
     def can_rerun(self):
-        _model_logger.info('can rerun')
+        _logger.info('can rerun')
         run_state_name = self.run_state.name
         return (run_state_name == 'PENDING' or
                 run_state_name == 'FAILED' or
@@ -128,45 +129,53 @@ class Job(models.Model):
                 run_state_name == 'FAILED_EXECUTION')
 
     def set_pending_state(self):
-        _model_logger.info('set pending')
+        _logger.info('set pending')
         self.run_state = RunState.get_pending_state()
         self.save()
 
     def set_failed_state(self):
-        _model_logger.info('set failed')
+        _logger.info('set failed')
         self.run_state = RunState.get_failed_state()
         self.save()
-        WorkflowController.run_workflow_node_jobs(self.workflow_node)
+
 
     def set_failed_execution_state(self):
-        _model_logger.info('set failed execution')
+        _logger.info('set failed execution')
         self.run_state = RunState.get_failed_execution_state()
         self.save()
-        WorkflowController.run_workflow_node_jobs(self.workflow_node)
+
 
     def set_running_state_from_queued_or_pending(self):
         if(self.run_state.name == 'QUEUED' or self.run_state.name == 'PENDING'):
             self.set_running_state()
 
     def set_running_state(self):
-        _model_logger.info('set running')
+        _logger.info('set running')
         self.run_state = RunState.get_running_state()
         self.save()
 
     def set_success_state(self):
-        _model_logger.info('set success')
+        _logger.info('set success')
         self.run_state = RunState.get_success_state()
         self.save()
-        WorkflowController.run_workflow_node_jobs(self.workflow_node)
+
 
     def set_process_killed_state(self):
-        _model_logger.info('set process_killed')
+        _logger.info('set process_killed')
         self.run_state = RunState.get_process_killed_state()
         self.save()
-        WorkflowController.run_workflow_node_jobs(self.workflow_node)
+
+    @classmethod
+    def enqueue_object(cls, workflow_node, enqueued_object_id, priority):
+        job = Job()
+        job.enqueued_object_id=enqueued_object_id
+        job.workflow_node=workflow_node
+        job.run_state=RunState.get_pending_state()
+        job.priority = priority
+        job.save()
 
     def get_enqueued_object(self):
-        _model_logger.info(
+        _logger.info(
             "importing %s" % (
                 self.workflow_node.job_queue.enqueued_object_class)) 
 
@@ -200,7 +209,7 @@ class Job(models.Model):
 
     def prep_job(self):
         strategy = self.get_strategy()
-        _model_logger.info("got strategy: " + str(strategy))
+        _logger.info("got strategy: " + str(strategy))
         strategy.prep_job(self)
 
     def get_start_run_time(self):
@@ -237,12 +246,12 @@ class Job(models.Model):
 
     def set_end_run_time(self):
         self.end_run_time = timezone.now()
-        self.duration = str(self.end_run_time - self.start_run_time)
+        self.duration = self.end_run_time - self.start_run_time
         self.save()
 
     # check if all tasks have finished
     def all_tasks_finished(self):
-        _model_logger.info('check all tasks finished')
+        _logger.info('check all tasks finished')
         all_finished = True
 
         for task in self.get_tasks():
@@ -251,15 +260,6 @@ class Job(models.Model):
 
         return all_finished
 
-    @classmethod
-    def kill_job(cls, job_id):
-        try:
-            job = Job.objects.get(id=job_id)
-            job.kill()
-        except ObjectDoesNotExist:
-            _model_logger.warning(
-                'Tried to kill job %d which does not exist',
-                job_id)
 
     def kill(self):
         self.set_process_killed_state()
@@ -275,6 +275,4 @@ class Job(models.Model):
         return self.workflow_node.workflow.name
 
 # circular imports
-from workflow_engine.models.task import Task
 from workflow_engine.models.run_state import RunState
-from workflow_engine.workflow_controller import WorkflowController

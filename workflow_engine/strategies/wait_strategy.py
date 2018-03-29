@@ -31,24 +31,9 @@ class WaitStrategy(ExecutionStrategy):
                 str(e) + ' - ' + str(traceback.format_exc()))
             self.fail_task(task)
 
+    # deprected
     def finish_task(self, task):
-        WaitStrategy._log.info('finish task')
-        try:
-            task.set_finished_execution_state()
-
-            task.set_success_state()
-            task.set_end_run_time()
-
-            task.job.set_success_state()
-            task.job.set_end_run_time()
-            WorkflowController.enqueue_next_queue(task.job)
-        except Exception as e:
-            WaitStrategy._log.error(
-                str(e) + ' - ' + str(traceback.format_exc()))
- 
-            task.set_error_message(
-                str(e) + ' - ' + str(traceback.format_exc()))
-            self.fail_task(task)
+        task.finish_task()
 
 
 from workflow_engine.workflow_controller import WorkflowController

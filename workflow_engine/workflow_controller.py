@@ -34,26 +34,23 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 import traceback
-from workflow_engine.models import ZERO, ONE
-import logging
 from workflow_engine.import_class import import_class
+from django.core.exceptions import ObjectDoesNotExist
+import logging
 
 
 class WorkflowController(object):
     _logger = logging.getLogger('workflow_engine.models')
 
-
     @classmethod
     def create_job(cls, workflow_node_id, enqueued_object_id, priority):
         try:
             workflow_node = WorkflowNode.objects.get(id=workflow_node_id)
-            job = Job()
-            job.enqueued_object_id=enqueued_object_id
-            job.workflow_node=workflow_node
-            job.run_state=RunState.get_pending_state()
-            job.priority = priority
-            job.save()
-            WorkflowController.run_workflow_node_jobs(job.workflow_node)
+            job = Job.enqueue_object(
+                workflow_node, enqueued_object_id, priority)
+            run_workflow_node_jobs_by_id.apply_async(
+                (job.workflow_node.id,),
+                queue='workflow')
         except Exception as e:
             WorkflowController._logger.error(
                 'Something went wrong running jobs: ' + str(e) + "\n" + \
@@ -140,7 +137,9 @@ class WorkflowController(object):
 
         for job in jobs:
             job.set_pending_state()
-            WorkflowController.run_workflow_node_jobs(job.workflow_node)
+            run_workflow_node_jobs_by_id.apply_async(
+                (job.workflow_node.id,),
+                queue='workflow')
 
     @classmethod
     def enqueue_next_queue(cls, job):
@@ -194,7 +193,9 @@ class WorkflowController(object):
     def set_job_for_run(cls, job):
         WorkflowController._logger.info('set for run')
         job.set_pending_state()
-        WorkflowController.run_workflow_node_jobs(job.workflow_node)
+        run_workflow_node_jobs_by_id.apply_async(
+            (job.workflow_node.id,),
+            queue='workflow')
 
     @classmethod
     def set_jobs_for_run_by_id(cls, job_ids):
@@ -202,6 +203,20 @@ class WorkflowController(object):
 
         for job_object in records:
             WorkflowController.set_job_for_run_if_valid(job_object)
+
+    @classmethod
+    def kill_job(cls, job_id):
+        try:
+            job = Job.objects.get(id=job_id)
+            job.kill()
+            run_workflow_node_jobs_by_id.apply_async(
+                (job.workflow_node.id,),
+                queue='workflow')
+        except ObjectDoesNotExist:
+            WorkflowController._logger.warning(
+                'Tried to kill job %d which does not exist',
+                job_id)
+
 
     @classmethod
     def create_tasks(cls, job):
@@ -287,6 +302,9 @@ class WorkflowController(object):
             WorkflowController._logger.info(
                 "Job exception: %s" % (job.error_message))
             job.set_failed_state()
+            run_workflow_node_jobs_by_id.apply_async(
+                (job.workflow_node.id,),
+                queue='workflow')
 
     @classmethod
     def start_workflow(cls,
@@ -322,7 +340,9 @@ class WorkflowController(object):
 
         WorkflowController._logger.info("Start workflow job state: %s" % (str(job.run_state)))
 
-        WorkflowController.run_workflow_node_jobs(job.workflow_node)
+        run_workflow_node_jobs_by_id.apply_async(
+            (job.workflow_node.id,),
+            queue='workflow')
 
     @classmethod
     def get_enqueued_object(cls, task):
@@ -354,7 +374,7 @@ class WorkflowController(object):
                 str(task.enqueued_task_object_class) + \
                 ' and id of ' + \
                 str(task.enqueued_task_object_id)
-            WorkflowController._logger.info(msg)   
+            WorkflowController._logger.info(msg)
             raise Exception(msg)  
         
         WorkflowController._logger.info(
@@ -364,8 +384,11 @@ class WorkflowController(object):
 
 
 # circular imports
+from workflow_engine.models import ZERO, ONE
 from workflow_engine.models.job import Job
 from workflow_engine.models.task import Task
 from workflow_engine.models.run_state import RunState
 from workflow_engine.models.workflow_node import WorkflowNode
 from workflow_engine.models.workflow import Workflow
+from workflow_client.celery_run_consumer \
+    import run_workflow_node_jobs_by_id

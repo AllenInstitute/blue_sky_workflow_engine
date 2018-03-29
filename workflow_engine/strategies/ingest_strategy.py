@@ -128,25 +128,9 @@ class IngestStrategy(ExecutionStrategy):
                 str(e) + ' - ' + str(traceback.format_exc()))
             self.fail_task(task)
 
+    # deprecated
     def finish_task(self, task):
-        IngestStrategy._log.info('finish task')
-        try:
-            task.set_finished_execution_state()
-
-            task.set_success_state()
-            task.set_end_run_time()
-
-            task.job.set_success_state()
-            task.job.set_end_run_time()
-            WorkflowController.enqueue_next_queue(task.job)
-
-        except Exception as e:
-            IngestStrategy._log.error(
-                str(e) + ' - ' + str(traceback.format_exc()))
-
-            task.set_error_message(
-                str(e) + ' - ' + str(traceback.format_exc()))
-            self.fail_task(task)
+        task.finish_task()
 
 
 from workflow_engine.workflow_controller import WorkflowController
