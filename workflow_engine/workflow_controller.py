@@ -43,9 +43,11 @@ class WorkflowController(object):
     _logger = logging.getLogger('workflow_engine.models')
 
     @classmethod
-    def create_job(cls, workflow_node_id, enqueued_object_id, priority):
+    def create_job(cls, workflow_node_id,
+                   enqueued_object_id, priority):
         try:
-            workflow_node = WorkflowNode.objects.get(id=workflow_node_id)
+            workflow_node = WorkflowNode.objects.get(
+                id=workflow_node_id)
             job = Job.enqueue_object(
                 workflow_node, enqueued_object_id, priority)
             run_workflow_node_jobs_by_id.apply_async(
@@ -55,6 +57,8 @@ class WorkflowController(object):
             WorkflowController._logger.error(
                 'Something went wrong running jobs: ' + str(e) + "\n" + \
                 traceback.format_exc())
+
+        return job
 
 
     @classmethod

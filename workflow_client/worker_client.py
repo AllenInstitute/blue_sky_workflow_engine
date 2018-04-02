@@ -1,4 +1,3 @@
-#from workflow_client.reply_client import ReplyClient
 from workflow_client.server_command import server_command
 from django.conf import settings
 import django; django.setup()
@@ -8,6 +7,8 @@ from workflow_engine.models.task import Task
 import traceback
 from workflow_engine.workflow_controller import WorkflowController
 import logging
+from workflow_engine.celery.workflow_tasks import process_running,\
+    process_failed_execution
 
 
 _log = logging.getLogger('workflow_client.worker_client')
@@ -20,9 +21,9 @@ FIRST = 0
 
 
 def report_exception(msg, e):
-    msg_string = '%s: %s' % (msg, str(e))
-    print(msg_string)
-    _log.error(msg_string)
+    #msg_string = '%s: %s' % (msg, str(e))
+    mess = str(e) + ' - ' + str(traceback.format_exc())
+    _log.error(mess)
 
 
 def report_error(msg):
@@ -35,8 +36,10 @@ def report_error(msg):
 
 @celery.shared_task(bind=True)
 def create_job(self, workflow_node_id, enqueued_object_id, priority):
-    WorkflowController.create_job(
+    job = WorkflowController.create_job(
         workflow_node_id, enqueued_object_id, priority)
+
+    return job.id
 
 
 @celery.shared_task(bind=True)
@@ -56,32 +59,6 @@ def get_task_strategy_by_task_id(task_id):
             'Something went wrong: ' + (traceback.print_exc(e)))
     
     return (task, strategy)
-
-
-@celery.shared_task(bind=True)
-def set_running(self, task_id):
-    (task, strategy) = get_task_strategy_by_task_id(task_id)
-    strategy.running_task(task)
-
-
-@celery.shared_task(bind=True)
-def set_finished_execution(self, task_id):
-    (task, strategy) = get_task_strategy_by_task_id(task_id)
-    strategy.finish_task(task)
-
-
-@celery.shared_task(bind=True)
-def set_failed_execution(self, task_id):
-    (task, strategy) = get_task_strategy_by_task_id(task_id)
-    strategy.fail_execution_task(task)
-
-
-@celery.shared_task(bind=True)
-def set_pbs_id(self, task_id, pbs_id):
-    (task, _) = get_task_strategy_by_task_id(task_id)
-    task.pbs_id = pbs_id # str(body_data[Command.PBS_ID])
-    task.save()
-
 
 #
 # REQUESTS
@@ -120,17 +97,19 @@ def run_pbs(self, full_executable, task_id):
         _log.info('PBS STDOUT: ' + str(stdout_message))
 
         pbs_id = stdout_message[FIRST].strip().split('.')[FIRST]
-        # pbs_id = stdout_message[FIRST].strip()
 
         _log.info('pbs task: %s, pbs id: %s' % (str(task_id), str(pbs_id)))
-        #publish_message('PBS_ID', task_id, pbs_id)
-        set_pbs_id.apply_async((task_id, pbs_id))
+        set_pbs_id.apply_async(
+            (task_id, pbs_id),
+            queue='result')
 
     except Exception as e:
         report_exception('FAILED_EXECUTION', e)
         exit_code = ERROR_EXIT_CODE
         #publish_message('FAILED_EXECUTION', task_id)
-        set_failed_execution.apply_async((task_id))
+        process_failed_execution.apply_async(
+            (task_id,),
+            queue='result')
 
     return exit_code # TODO, this doesn't make sense as a return code
 
@@ -179,7 +158,9 @@ def run_celery_task(self, full_executable, task_id, logfile, use_pbs):
 
     try:
         #publish_message('RUNNING', task_id)
-        set_running.apply_async((task_id))
+        process_running.apply_async(
+            (task_id,),
+            queue='result')
 
         if(use_pbs):
             _log.info('PBS: %s', full_executable)
@@ -191,8 +172,9 @@ def run_celery_task(self, full_executable, task_id, logfile, use_pbs):
     except Exception as e:
         exit_code = ERROR_EXIT_CODE
         report_exception('run_celery_task error %s' % (task_id), e)
-        #publish_message('FAILED_EXECUTION', task_id)
-        set_failed_execution.apply_async((task_id))
+        process_failed_execution.apply_async(
+            (task_id,),
+            queue='result')
 
     _log.info('run_celery_task exit code %s', str(exit_code))
 

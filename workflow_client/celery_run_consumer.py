@@ -193,10 +193,9 @@ def route_task(name, args, kwargs, options, task=None, **kw):
         ]:
         return { 'queue': 'run' }
     elif task_name in { 
-        'running',
-        'set_running',
-        'set_queued',
-        'set_failed_execution',
+        'process_pbs_id',
+        'process_running',
+        'process_failed_execution',
         'success',
         'fail' }:
         return { 'queue': 'result' }

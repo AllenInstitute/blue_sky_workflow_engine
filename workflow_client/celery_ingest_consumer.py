@@ -112,13 +112,13 @@ def route_task(name, args, kwargs, options, task=None, **kw):
         return { 'queue': 'workflow' }
     # elif task_name == 'run_task':
     #    return { 'queue': 'old_pbs' }
-    elif task_name in {
-        'set_pbs_id',
-        'set_running',
-        'set_finished_execution',
-        'set_failed_execution',
-        'success',
-        'fail' }:
+    elif task_name in [
+        'running',
+        'process_pbs_id',
+        'process_running',
+        'process_failed_execution',
+        'process_finished_execution'
+        ]:
         return { 'queue': 'result' }
     else:
         return { 'queue': 'null' }

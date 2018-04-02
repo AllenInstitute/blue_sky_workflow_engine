@@ -62,7 +62,8 @@ def get_task_strategy_by_task_id(task_id):
 @celery.shared_task(bind=True)
 def process_running(self, task_id):
     (task, strategy) = get_task_strategy_by_task_id(task_id)
-    # strategy.running_task(task)
+    strategy.running_task(task)
+
 
 @celery.shared_task(bind=True)
 def process_finished_execution(self, task_id):
@@ -84,9 +85,9 @@ def process_failed_execution(self, task_id):
 
 @celery.shared_task(bind=True)
 def process_pbs_id(self, task_id, pbs_id):
-    # TODO: move to task as set_pbs_id
     try:
         (task, _) = get_task_strategy_by_task_id(task_id)
+        task.set_queued_state()
         task.set_pbs_id(pbs_id)
     except ObjectDoesNotExist:
         _log.warn(

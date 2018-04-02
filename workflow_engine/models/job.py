@@ -174,6 +174,8 @@ class Job(models.Model):
         job.priority = priority
         job.save()
 
+        return job
+
     def get_enqueued_object(self):
         _logger.info(
             "importing %s" % (

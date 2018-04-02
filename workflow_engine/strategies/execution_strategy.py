@@ -2,7 +2,7 @@
 # license plus a third clause that prohibits redistribution for commercial
 # purposes without further permission.
 #
-# Copyright 2017. Allen Institute. All rights reserved.
+# Copyright 2017-2018. Allen Institute. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -81,16 +81,19 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 
         # populate the input file
         storage_dir = self.get_task_storage_directory(task)
-        ExecutionStrategy._log.info('task storage dir %s' % (storage_dir))
+
         enqueued_object = WorkflowController.get_enqueued_object(task)
-        ExecutionStrategy._log.info('enqueued_object')
+        
+        ExecutionStrategy._log.info(
+            'enqueued_object: %s',
+            str(enqueued_object))
+        
         self.create_input_file(input_file,
                                enqueued_object,
                                storage_dir,
                                task)
 
         output_file = self.get_output_file(task)
-        ExecutionStrategy._log.info('output file %s' % (output_file))
 
         task.input_file = input_file
         task.output_file = output_file
@@ -115,7 +118,11 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
             executable_elements.append(output_file)
 
         full_executable_string = ' '.join(executable_elements)
-        ExecutionStrategy._log.info(full_executable_string)
+
+        ExecutionStrategy._log.info(
+            'full executable string: %s',
+            full_executable_string)
+
         return full_executable_string
 
     # override if needed
@@ -147,11 +154,7 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
             ExecutionStrategy.log.info(err_msg) 
             task.set_error_message(err_msg)
 
-        task.set_failed_execution_state()
-        task.set_end_run_time()
-        task.job.set_failed_execution_state()
-        task.job.set_end_run_time()
-        task.rerun()
+        task.set_failed_execution_fields_and_rerun()
 
     # Do not override
     def running_task(self, task):
@@ -286,8 +289,13 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
     # TODO: this seems too rigid
     def get_output_file(self, task):
         storage_directory = self.get_or_create_task_storage_directory(task)
-        return os.path.join(storage_directory,
-                            'output_' + str(task.id) + '.json')
+        output_path = os.path.join(
+            storage_directory,
+            'output_' + str(task.id) + '.json')
+
+        ExecutionStrategy._log.info("output_path: %s", output_path)
+
+        return output_path
 
     # Do not override
     def get_pbs_file(self, task):
@@ -297,18 +305,26 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
     # Do not override
     def get_input_file(self, task):
         storage_directory = self.get_or_create_task_storage_directory(task)
-        ExecutionStrategy._log.info(
-            "Storage_directory: %s" % (storage_directory))
-        return os.path.join(storage_directory,
-                            'input_' + str(task.id) + '.json')
+
+        input_path = os.path.join(
+            storage_directory,
+            'input_' + str(task.id) + '.json')
+        ExecutionStrategy._log.info("input_path: %s", input_path)
+
+        return input_path
 
     # Do not override
     def get_task_storage_directory(self, task):
-        return os.path.join(
+        task_storage_dir = os.path.join(
             self.get_job_storage_directory(
                 self.get_base_storage_directory(), task.job),
             'tasks',
             'task_' + str(task.id))
+
+        ExecutionStrategy._log.info(
+            'task storage dir: %s', task_storage_dir)
+
+        return task_storage_dir
 
     # Do not override
     def get_or_create_task_storage_directory(self, task):
@@ -317,9 +333,15 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
             "Storage_directory: %s" % (storage_directory))
 
         # create directory if needed
-        if not os.path.exists(storage_directory):
-            os.makedirs(storage_directory) 
-            subprocess.call(['chmod', '0777', storage_directory]) 
+        try:
+            if not os.path.exists(storage_directory):
+                os.makedirs(storage_directory) 
+                subprocess.call(['chmod', '0777', storage_directory]) 
+        except Exception as e:
+            mess = str(e) + ' - ' + str(traceback.format_exc())
+            ExecutionStrategy._log.error(mess)
+            task.set_error_message(mess)
+            task.set_failed_execution_fields_and_rerun()
 
         return storage_directory
 

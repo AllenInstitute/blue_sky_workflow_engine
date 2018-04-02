@@ -136,8 +136,13 @@ def route_task(name, args, kwargs, options, task=None, **kw):
 
     if task_name in [ 'check_pbs_status' ]:
         return { 'queue': settings.PBS_MESSAGE_QUEUE_NAME }
-    elif task_name in { 
-        'running', 'set_running', 'set_queued', 'set_failed_execution' }:
+    elif task_name in [
+        'running',
+        'process_pbs_id',
+        'process_running',
+        'process_failed_execution',
+        'process_finished_execution'
+        ]:
         return { 'queue': 'result' }
     else:
         return { 'queue': 'null' }

@@ -90,8 +90,12 @@ class Task(models.Model):
         '''
             returns: environment variable list in form VAR=val
         '''
+        env = self.get_job_queue().executable.environment
+
+        if env is None:
+            return []
+
         return self.get_job_queue().executable.environment.split(';')
-        
 
     def pbs_task(self):
         pbs_workflow = self.job.workflow_node.workflow.use_pbs
@@ -188,6 +192,13 @@ class Task(models.Model):
     def fail_task(self):
         strategy = self.get_strategy()
         strategy.fail_task(self)
+
+    def set_failed_execution_fields_and_rerun(self):
+        self.set_failed_execution_state()
+        self.set_end_run_time()
+        self.job.set_failed_execution_state()
+        self.job.set_end_run_time()
+        self.rerun()
 
     def finish_task(self):
         try:
