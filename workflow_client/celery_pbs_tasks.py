@@ -36,6 +36,7 @@
 import celery
 from kombu import Exchange, Queue, binding
 from workflow_engine.celery import settings
+from django.conf import settings
 from workflow_client.client_settings \
     import load_settings_yaml, config_object
 import logging
@@ -115,20 +116,17 @@ def on_raw_message(body):
 def configure_queues(app, name):
     workflow_engine_exchange = Exchange(name, type='direct')
 
-    pbs_routes = [
-        binding(workflow_engine_exchange, routing_key='pbs')
-    ]
-
-    result_routes = [
-        binding(workflow_engine_exchange, routing_key='result')
-    ]
-    null_routes = [binding(workflow_engine_exchange,
-                               routing_key='null')]
-
     app.conf.task_queues = (
-        Queue(settings.PBS_MESSAGE_QUEUE_NAME, pbs_routes),
-        Queue('result', result_routes),
-        Queue('null', null_routes))
+        Queue(settings.PBS_MESSAGE_QUEUE_NAME,
+              [ binding(workflow_engine_exchange,
+                        routing_key='pbs')]),
+        Queue(settings.RESULT_MESSAGE_QUEUE_NAME,
+              [ binding(workflow_engine_exchange,
+                        routing_key='result')]),
+        Queue('null',
+              [ binding(workflow_engine_exchange,
+                        routing_key='result')])
+    )
 
 
 def route_task(name, args, kwargs, options, task=None, **kw):
@@ -143,7 +141,7 @@ def route_task(name, args, kwargs, options, task=None, **kw):
         'process_failed_execution',
         'process_finished_execution'
         ]:
-        return { 'queue': 'result' }
+        return { 'queue': settings.RESULT_MESSAGE_QUEUE_NAME }
     else:
         return { 'queue': 'null' }
 

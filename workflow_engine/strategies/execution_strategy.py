@@ -41,6 +41,7 @@ import subprocess
 import traceback
 import logging
 import simplejson as json
+from workflow_client.celery_moab_tasks import submit_moab_task
 
 
 class ExecutionStrategy(base_strategy.BaseStrategy):
@@ -210,7 +211,7 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
             task.pbs_id = None
             task.save()
             self.run_asynchronous_task(task)
-            task.set_queued_state()
+            # task.set_queued_state()
         except Exception as e:
             task.set_error_message(
                 str(e) + ' - ' + str(traceback.format_exc()))
@@ -258,12 +259,16 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 
             ExecutionStrategy._log.info(
                 'apply async celery queue: %s' % (queue_name))
-            result = run_celery_task.apply_async(
-                args=[executable,
-                      task.id,
-                      task.log_file,
-                      use_pbs],
-                queue=queue_name)
+#             result = run_celery_task.apply_async(
+#                 args=[executable,
+#                       task.id,
+#                       task.log_file,
+#                       use_pbs],
+#                 queue=queue_name)
+            result = submit_moab_task.apply_async(
+                (task.id,
+                ),
+                queue=settings.MOAB_MESSAGE_QUEUE_NAME)
             ExecutionStrategy._log.info(
                 'queue result: %s %s\n%s' % (result.status,
                                              str(result.result),
@@ -284,6 +289,7 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 
         with open(input_file, 'w') as in_file:
             json.dump(input_data, in_file, indent=2)
+        os.chmod(input_file, 0o664)
 
     # Do not override
     # TODO: this seems too rigid
@@ -334,9 +340,7 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 
         # create directory if needed
         try:
-            if not os.path.exists(storage_directory):
-                os.makedirs(storage_directory) 
-                subprocess.call(['chmod', '0777', storage_directory]) 
+            ExecutionStrategy.make_dirs_chmod(storage_directory, 0o777)
         except Exception as e:
             mess = str(e) + ' - ' + str(traceback.format_exc())
             ExecutionStrategy._log.error(mess)
@@ -355,11 +359,7 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
         storage_directory = \
             self.get_job_storage_directory(
                 self.get_base_storage_directory(), job)
-
-        # create directory if needed
-        if not os.path.exists(storage_directory):
-            os.makedirs(storage_directory) 
-            subprocess.call(['chmod', '0777', storage_directory]) 
+        ExecutionStrategy.make_dirs_chmod(storage_directory, 0o777)
 
         return storage_directory
 

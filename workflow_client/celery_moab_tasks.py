@@ -36,134 +36,120 @@
 import celery
 from kombu import Exchange, Queue, binding
 from workflow_engine.celery import settings
+from workflow_client.nb_utils.moab_api import query_and_combine_states,\
+    submit_job
+from workflow_engine.celery.workflow_tasks \
+    import process_running, process_finished_execution, \
+    process_failed_execution
 from workflow_client.client_settings \
     import load_settings_yaml, config_object
 import logging
 import django; django.setup()
 from celery.canvas import group
-import workflow_client.nb_utils.moab_api as moab_api
-from workflow_client.nb_utils.task_monitor import read_task_dataframe
-import re
-from celery.states import SUCCESS
-from workflow_client.celery_pbs_tasks import running
+import pandas as pd
 
 
 _log = logging.getLogger('workflow_client.celery_moab_tasks')
 
 
-def moab_record_response(moab_state):
-    if moab_state == 'Running':
-        return running
-    elif moab_state == 'Queued':
-        return running
-    elif moab_state == 'Completed':
-        # need to check success/fail here
-        return running
-    else:
-        return running
+def query_running_task_dict():
+    tasks = Task.objects.filter(
+        run_state__name__in=['QUEUED', 'RUNNING'])
+
+    task_dict = { t.id: t.run_state.name for t in tasks}
+
+    _log.info(task_dict)
+
+    return task_dict
 
 
-def get_running_task_df():
-    # TODO: this is too heavy a query for long-term use
-    task_url = \
-        'http://{}:{}/workflow_engine/data'.format(
-            settings.UI_HOST, settings.UI_PORT)
-    task_df = read_task_dataframe(task_url)
+result_queue = settings.RESULT_MESSAGE_QUEUE_NAME
 
-    RUNNING_STATE_ID = 11  # TODO: from RunState
-
-    return task_df.loc[lambda df: df.run_state == RUNNING_STATE_ID]
-
-
-def get_moab_query_result(pbs_ids):
-    return moab_api.moab_query(
-        moab_api.moab_url(
-            table='jobs',
-            jobs=pbs_ids))
-
-
-def custom_name_task_id(custom_name_string):
-    return int(re.sub(r'^task_',
-                      '',
-                      custom_name_string,
-                      count=1))
+result_actions = { 
+    'running_message':
+        lambda x: process_running.s(x).set(queue=result_queue),
+    'finished_message':
+        lambda x: process_finished_execution.s(x).set(queue=result_queue),
+    'failed_message': 
+        lambda x: process_failed_execution.s(x).set(queue=result_queue)
+}
 
 
 @celery.shared_task(bind=True, trail=True)
 def check_pbs_status(self):
-    running_task_df = get_running_task_df()
+    combined_workflow_moab_dataframe = \
+        query_and_combine_states(
+            query_running_task_dict())
 
-    moab_query_result = get_moab_query_result(
-        list(running_task_df.pbs_id))
+    _log.info('combined_dataframe' + str(combined_workflow_moab_dataframe))
 
-    _log.info([(
-        r['name'],  # "<pbs_id>"
-        r['customName'],  # "task_<workflow engine task id>"
-        r['states']['state'],
-        r['credentials']['user'])
-        for r in moab_query_result])
+    grp = group(list(pd.concat(
+        combined_workflow_moab_dataframe.loc[
+            combined_workflow_moab_dataframe[col] == True]['task_id'].apply(fn)
+        for (col,fn) in result_actions.items())))
 
-    # TODO: do this in pandas
-    workflow_task_moab_record = {
-        custom_name_task_id(r['customName']): {  # task_id
-            'pbs_id': int(r['name']),
-            'pbs_run_state': r['states']['state']
-        }
-        for r in moab_query_result
-    }
-    _log.info(workflow_task_moab_record)
+    _log.info(grp)
 
-    self.update_state(state=SUCCESS)
-    # see: http://docs.celeryproject.org/en/latest/reference/celery.result.html
-    # and: https://github.com/celery/celery/issues/1171
-    return group(
-        moab_record_response(
-            workflow_task_moab_record[task_id]['pbs_run_state']).s(
-                workflow_task_moab_record[task_id]['pbs_id']).set(queue='result')
-        for task_id in list(running_task_df.pbs_id)
-        if task_id in workflow_task_moab_record.keys()
-    )()
+    grp.apply_async(
+        queue=settings.RESULT_MESSAGE_QUEUE_NAME)
+
+    return 'OK'
 
 
-    #_log.info('sigs: ' + str(list(status_signatures)))
+@celery.shared_task(bind=True, trail=True)
+def submit_moab_task(self, task_id):
+    try:
+        the_task = Task.objects.get(id=task_id)
+        if the_task.in_pending_state():
+            the_task.set_queued_state()
 
-#     status_celery_tasks = group(
-#         status_signature(task_id)
-#         for (status_signature,task_id)
-#         in status_signatures)
-#     
-#     _log.info(status_celery_tasks)
-# 
-#     return group(status_celery_tasks)
-#     return group(
-#         running.s(t).set(queue='result') for t in range(0,10))()
+            return submit_job(
+                the_task.id,
+                the_task.pbs_file)
+        else:
+            return None
+    except:
+        # TODO: need to be able to set the execption message here
+        process_failed_execution.apply_async(
+            (task_id,),
+            queue=settings.RESULT_MESSAGE_QUEUE_NAME)
+
+
+@celery.shared_task(bind=True, trail=True)
+def kill_moab_task(self):
+    raise Exception("unimplemented")
 
 
 def configure_queues(app, name):
     workflow_engine_exchange = Exchange(name, type='direct')
 
     app.conf.task_queues = (
-        Queue('moab', [binding(workflow_engine_exchange,
-                               routing_key='moab')]),
-        Queue('result', [binding(workflow_engine_exchange,
-                                 routing_key='result')]),
-        Queue('null', [binding(workflow_engine_exchange,
-                               routing_key='null')]))
+        Queue(settings.MOAB_MESSAGE_QUEUE_NAME,
+              [binding(workflow_engine_exchange,
+                       routing_key='moab')]),
+        Queue(settings.RESULT_MESSAGE_QUEUE_NAME,
+              [binding(workflow_engine_exchange,
+                       routing_key='result')]),
+        Queue('null',
+              [binding(workflow_engine_exchange,
+                       routing_key='null')]))
 
 
 def route_task(name, args, kwargs, options, task=None, **kw):
     task_name = '.'.split(name)[-1]
 
-    if task_name == 'check_pbs_status':
-        return { 'queue': 'moab' }
+    if task_name in [
+        'submit_moab_task',
+        'kill_moab_task',
+        'check_pbs_status' ]:
+        return { 'queue': settings.MOAB_MESSAGE_QUEUE_NAME }
     elif task_name in [
-        'running',
         'process_pbs_id',
         'process_running',
         'process_failed_execution',
         'process_finished_execution'
         ]:
-        return { 'queue': 'result' }
+        return { 'queue': settings.RESULT_MESSAGE_QUEUE_NAME }
     else:
         return { 'queue': 'null' }
 
@@ -174,3 +160,7 @@ def configure_moab_consumer_app(app, app_name):
 
     configure_queues(app, app_name)
     app.conf.task_routes = [route_task]
+
+
+# circular imports
+from workflow_engine.models.task import Task

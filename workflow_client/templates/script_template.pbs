@@ -17,8 +17,4 @@ export {{ evar }}
 source activate {{ settings.PBS_CONDA_ENV }}
 
 {{ task.full_executable }}
-rtn_code=$?
 
-source activate {{ settings.PBS_RESPONSE_CONDA_ENV }}
-export PYTHONPATH={{ settings.PBS_PYTHONPATH }}
-BLUE_SKY_SETTINGS={{ settings.BLUE_SKY_SETTINGS }} python -m {{ settings.PBS_FINISH_MODULE }} $rtn_code {{ task.id }}

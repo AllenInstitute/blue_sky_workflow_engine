@@ -40,6 +40,7 @@ from workflow_engine.models import ONE, ZERO, TWO, SECONDS_IN_MIN
 from workflow_client.pbs_utils import PbsUtils
 import logging
 import traceback
+import os
 
 
 _logger = logging.getLogger('workflow_engine.models.task')
@@ -279,6 +280,9 @@ class Task(models.Model):
         self.run_state = RunState.get_queued_state()
         self.save()
 
+    def in_pending_state(self):
+        return (self.run_state.name == 'PENDING')
+
     def in_success_state(self):
         return (self.run_state.name == RunState.get_success_state().name)
 
@@ -313,6 +317,7 @@ class Task(models.Model):
 
         with open(pbs_file, 'w') as file_handle:
             file_handle.write(pbs_file_contents)
+        os.chmod(pbs_file, 0o664)
 
         self.pbs_file = pbs_file
         self.save()

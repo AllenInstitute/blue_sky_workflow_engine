@@ -204,8 +204,8 @@ def route_task(name, args, kwargs, options, task=None, **kw):
 
 
 def configure_run_app(app, app_name):
-    #settings = load_settings_yaml()
-    #app.config_from_object(config_object(settings))
+    settings = load_settings_yaml()
+    app.config_from_object(config_object(settings))
 
     configure_queues(app, app_name)
     app.conf.task_routes = [route_task]

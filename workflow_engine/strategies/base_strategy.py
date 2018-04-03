@@ -128,14 +128,24 @@ class BaseStrategy(object):
             self.get_storage_directory(base_storage_directory, job),
             'jobs', 'job_' + str(job.id))
 
+    @classmethod
+    def make_dirs_chmod(cls, path, mode):
+        if not path or os.path.exists(path):
+            return []
+        (head, _) = os.path.split(path)
+        res = cls.make_dirs_chmod(head, mode)
+        try:
+            os.mkdir(path)
+        except:
+            pass
+        os.chmod(path, mode)
+        res += [path]
+        return res
+
     # Do not override
     def get_or_create_task_storage_directory(self, task):
         storage_directory = self.get_task_storage_directory(task)
-
-        # create directory if needed
-        if not os.path.exists(storage_directory):
-            os.makedirs(storage_directory)  
-            subprocess.call(['chmod', '0777', storage_directory])
+        BaseStrategy.make_dirs_chmod(storage_directory, 0o777)
 
         return storage_directory
 
@@ -157,11 +167,7 @@ class BaseStrategy(object):
     def get_or_create_storage_directory(self, job):
         storage_directory = self.get_job_storage_directory(
             self.get_base_storage_directory(), job)
-
-        # create directory if needed
-        if not os.path.exists(storage_directory):
-            os.makedirs(storage_directory)
-            subprocess.call(['chmod', '0777', storage_directory])
+        BaseStrategy.make_dirs_chmod(storage_directory, 0o777)
 
         return storage_directory
 

@@ -8,7 +8,7 @@ import traceback
 from workflow_engine.workflow_controller import WorkflowController
 import logging
 from workflow_engine.celery.workflow_tasks import process_running,\
-    process_failed_execution
+    process_failed_execution, process_pbs_id, process_finished_execution
 
 
 _log = logging.getLogger('workflow_client.worker_client')
@@ -36,8 +36,12 @@ def report_error(msg):
 
 @celery.shared_task(bind=True)
 def create_job(self, workflow_node_id, enqueued_object_id, priority):
-    job = WorkflowController.create_job(
-        workflow_node_id, enqueued_object_id, priority)
+    try:
+        job = WorkflowController.create_job(
+            workflow_node_id, enqueued_object_id, priority)
+    except Exception as e:
+        report_exception(e)
+        return -1
 
     return job.id
 
@@ -99,7 +103,7 @@ def run_pbs(self, full_executable, task_id):
         pbs_id = stdout_message[FIRST].strip().split('.')[FIRST]
 
         _log.info('pbs task: %s, pbs id: %s' % (str(task_id), str(pbs_id)))
-        set_pbs_id.apply_async(
+        process_pbs_id.apply_async(
             (task_id, pbs_id),
             queue='result')
 
@@ -120,14 +124,14 @@ def run_normal(self, full_executable, task_id, logfile):
 
     if exit_code == SUCCESS_EXIT_CODE:
         #publish_message('FINISHED_EXECUTION', task_id)
-        set_finished_execution.apply_async((task_id))
+        process_finished_execution(task_id).apply_async((task_id))
 
         with open(logfile, "a") as log:
             log.write("SUCCESS - execution finished successfully for task " + str(task_id))
 
     else:
         #publish_message('FAILED_EXECUTION', task_id)
-        set_failed_execution.apply_async((task_id))
+        process_failed_execution.apply_async((task_id))
 
         with open(logfile, "a") as log:
             log.write("FAILURE - execution failed for task " + str(task_id))

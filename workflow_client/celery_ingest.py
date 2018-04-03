@@ -62,7 +62,7 @@ def run_strategy(app, workflow_name, body):
     r = run_task.apply_async(
         (workflow_name, body,),
         exchange=app,
-        queue='pbs',
+        queue=settings.PBS_MESSAGE_QUEUE_NAME,
         link=success.s(),
         link_error=fail.s())
 

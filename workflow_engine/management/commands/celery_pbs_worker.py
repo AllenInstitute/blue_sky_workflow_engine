@@ -46,17 +46,17 @@ app = celery.Celery('workflow_client.celery_pbs_app')
 configure_pbs_app(app, settings.APP_PACKAGE)
 
 
-# see: https://github.com/celery/celery/issues/3589
-@app.on_after_configure.connect
-def setup_periodic_tasks(sender, **kwargs):
-    sender.add_periodic_task(
-        30.0,
-        workflow_client.celery_moab_tasks.check_pbs_status.s(),
-        name='Check PBS Status',
-        exchange=settings.APP_PACKAGE,
-        routing_key='pbs',
-        # queue='pbs',
-        delivery_mode='transient')  # see celery issue 3620
+# # see: https://github.com/celery/celery/issues/3589
+# @app.on_after_configure.connect
+# def setup_periodic_tasks(sender, **kwargs):
+#     sender.add_periodic_task(
+#         30.0,
+#         workflow_client.celery_moab_tasks.check_pbs_status.s(),
+#         name='Check PBS Status',
+#         #exchange=settings.APP_PACKAGE,
+#         #routing_key='pbs',
+#         queue=settings.PBS_MESSAGE_QUEUE_NAME,
+#         delivery_mode='transient')  # see celery issue 3620
 
 
 @celery.signals.after_setup_task_logger.connect
@@ -77,5 +77,5 @@ class Command(BaseCommand):
             'worker',
             '--concurrency=2',
             '--heartbeat-interval=30',
-            '-Q', 'pbs',
+            '-Q', settings.PBS_MESSAGE_QUEUE_NAME,
             '-n', 'celery_pbs@' + app_name])
