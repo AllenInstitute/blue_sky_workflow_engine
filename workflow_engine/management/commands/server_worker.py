@@ -36,13 +36,12 @@
 import celery
 from django.core.management.base import BaseCommand
 from django.conf import settings
-from workflow_client.celery_ingest_consumer \
-    import configure_ingest_consumer_app
+from workflow_client.client_settings import configure_worker_app
 import logging.config
 
 
 app = celery.Celery('workflow_client.celery_ingest_consumer')
-configure_ingest_consumer_app(app, settings.APP_PACKAGE)
+configure_worker_app(app, settings.APP_PACKAGE)
 
 
 @celery.signals.after_setup_task_logger.connect
@@ -64,5 +63,5 @@ class Command(BaseCommand):
             'worker',
             '--concurrency=2',
             '--heartbeat-interval=30',
-            '-Q', 'ingest,result,null',
+            '-Q', settings.INGEST_MESSAGE_QUEUE_NAME,
             '-n', 'ingest@' + app_name])

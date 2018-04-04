@@ -2,7 +2,7 @@
 # license plus a third clause that prohibits redistribution for commercial
 # purposes without further permission.
 #
-# Copyright 2018. Allen Institute. All rights reserved.
+# Copyright 2017. Allen Institute. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -34,48 +34,64 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 import celery
-from django.core.management.base import BaseCommand
-from django.conf import settings
-import workflow_client.celery_moab_tasks
-from workflow_client.celery_pbs_tasks \
-    import configure_pbs_app
-import logging.config
+import django; django.setup()
+from django.core.exceptions import ObjectDoesNotExist
+from workflow_client.celery_run_consumer \
+    import run_workflow_node_jobs_by_id
+import logging
+import traceback
 
 
-app = celery.Celery('workflow_client.celery_pbs_app')
-configure_pbs_app(app, settings.APP_PACKAGE)
+_log = logging.getLogger('workflow_engine.celery.result_tasks')
 
 
-# # see: https://github.com/celery/celery/issues/3589
-# @app.on_after_configure.connect
-# def setup_periodic_tasks(sender, **kwargs):
-#     sender.add_periodic_task(
-#         30.0,
-#         workflow_client.celery_moab_tasks.check_pbs_status.s(),
-#         name='Check PBS Status',
-#         #exchange=settings.APP_PACKAGE,
-#         #routing_key='pbs',
-#         queue=settings.PBS_MESSAGE_QUEUE_NAME,
-#         delivery_mode='transient')  # see celery issue 3620
+def get_task_strategy_by_task_id(task_id):
+    try:
+        task = Task.objects.get(id=task_id)
+        strategy = task.get_strategy()
+    except Exception as e:
+        _log.error(
+            'Something went wrong: ' + (traceback.print_exc(e)))
+    
+    return (task, strategy)
 
 
-@celery.signals.after_setup_task_logger.connect
-def after_setup_celery_task_logger(logger, **kwargs):
-    logging.config.dictConfig(settings.LOGGING)
+@celery.shared_task(bind=True)
+def process_running(self, task_id):
+    (task, strategy) = get_task_strategy_by_task_id(task_id)
+    strategy.running_task(task)
 
 
-class Command(BaseCommand):
-    help = 'ingest handler for the message queues'
+@celery.shared_task(bind=True)
+def process_finished_execution(self, task_id):
+    (task, strategy) = get_task_strategy_by_task_id(task_id)
+    strategy.finish_task(task)
+    run_workflow_node_jobs_by_id.apply_async(
+        (task.job.workflow_node.id,),
+        queue='workflow')
 
-    def handle(self, *args, **options):
-        app_name = settings.APP_PACKAGE
 
-        app.start(argv=[
-            'celery', 
-            '-A',
-            'workflow_engine.management.commands.celery_pbs_worker',
-            'worker',
-            '--concurrency=2',
-            '--heartbeat-interval=30',
-            '-Q', settings.PBS_MESSAGE_QUEUE_NAME,
-            '-n', 'celery_pbs@' + app_name])
+@celery.shared_task(bind=True)
+def process_failed_execution(self, task_id):
+    (task, strategy) = get_task_strategy_by_task_id(task_id)
+    strategy.fail_execution_task(task)
+    run_workflow_node_jobs_by_id.apply_async(
+        (task.job.workflow_node.id,),
+        queue='workflow')
+
+
+@celery.shared_task(bind=True)
+def process_pbs_id(self, task_id, pbs_id):
+    try:
+        (task, _) = get_task_strategy_by_task_id(task_id)
+        task.set_queued_state()
+        task.set_pbs_id(pbs_id)
+    except ObjectDoesNotExist:
+        _log.warn(
+            "Task {} for PBS id {} does not exist",
+            task_id,
+            pbs_id)
+
+
+# circular imports
+from workflow_engine.models.task import Task

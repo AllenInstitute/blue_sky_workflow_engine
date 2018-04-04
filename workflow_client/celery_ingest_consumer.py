@@ -34,12 +34,11 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 import celery
-from kombu import Exchange, Queue, binding
-from workflow_client.client_settings import load_settings_yaml, config_object
 from workflow_engine.workflow_config import WorkflowConfig
 from workflow_engine.import_class import import_class
 from django.conf import settings
 import logging
+from workflow_client.client_settings import load_settings_yaml
 
 
 _log = logging.getLogger('workflow_client.celery_ingest_consumer')
@@ -72,66 +71,6 @@ def load_ingest_strategy_names(yaml_file):
         workflow_spec.name: workflow_spec.ingest_strategy
         for workflow_spec in workflow_config['flows']
     }
-
-
-def configure_task_queues(app, name, workflows):
-    ingest_routes = []
-    pbs_routes = []
-
-    ingest_exchange = Exchange(name + '_ingest', type='direct')
-    strategy_exchange = Exchange(name + '_workflow', type='direct')
-    result_exchange = Exchange('celery_' + name, type='direct')
-
-    for wf in workflows.keys():
-        ingest_routes.append(
-            binding(ingest_exchange,
-                    routing_key=wf))
-
-    for wf in workflows.keys():
-        for strat in workflows[wf]:
-            pbs_routes.append(
-                binding(strategy_exchange,
-                        routing_key='%s.%s' % (wf, strat )))
-
-    app.conf.task_queues = (
-        Queue('ingest', ingest_routes),
-        Queue('workflow', [binding(strategy_exchange,
-                                   routing_key='workflow')]),
-        Queue('old_pbs', pbs_routes),
-        Queue('result', [binding(result_exchange, routing_key='result')]),
-        Queue('null', [binding(result_exchange, routing_key='null')]))
-
-
-def route_task(name, args, kwargs, options, task=None, **kw):
-    task_name = '.'.split(name)[-1]
-
-    if task_name == 'ingest_task':
-        return { 'queue': 'ingest' }
-    # from worker_client
-    elif task_name in { 'create_job', 'queue_job' }:
-        return { 'queue': 'workflow' }
-    # elif task_name == 'run_task':
-    #    return { 'queue': 'old_pbs' }
-    elif task_name in [
-        'running',
-        'process_pbs_id',
-        'process_running',
-        'process_failed_execution',
-        'process_finished_execution'
-        ]:
-        return { 'queue': 'result' }
-    else:
-        return { 'queue': 'null' }
-
-
-def configure_ingest_consumer_app(app, app_name):
-    settings = load_settings_yaml()
-    app.config_from_object(config_object(settings))
-    workflow_config = load_workflow_config(
-        settings.WORKFLOW_CONFIG_YAML)
-
-    configure_task_queues(app, app_name, workflow_config)
-    app.conf.task_routes = [route_task]
 
 
 @celery.shared_task(bind=True)
@@ -183,31 +122,3 @@ def ingest_task(self, workflow, message, tags):
         ret = "FAIL" + str(e)
 
     return ret
-
-
-# TODO: migrate this from the other worker
-@celery.shared_task(bind=True)
-def run_task(self, name, args):
-    ret = None
-
-    try: 
-        ret = 'OK'
-        self.update_state(state="SUCCESS")
-    except:
-        ret = 'FAIL'
-        self.update_state(state="FAIL")
-
-    return ret
-
-@celery.shared_task
-def success(msg):
-    print(msg)
-
-@celery.shared_task
-def fail(uuid):
-    # e = result.get(propagate=False)
-    # print('Error: %s %s %s' % (uuid, e, e.traceback))
-    print('error')
-
-def on_raw_message(body):
-    print(body)

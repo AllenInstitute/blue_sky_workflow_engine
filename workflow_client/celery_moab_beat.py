@@ -34,13 +34,15 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 import celery
-from workflow_client.celery_pbs_tasks import configure_pbs_app
 from django.conf import settings
-import workflow_client.celery_moab_tasks
-import logging.config
 
-app = celery.Celery('workflow_client.celery_pbs_app')
-configure_pbs_app(app, settings.APP_PACKAGE)
+import logging.config
+import workflow_client.celery_moab_tasks
+from workflow_client.client_settings import configure_worker_app
+
+
+app = celery.Celery('workflow_client.celery_moab_beat')
+configure_worker_app(app, settings.APP_PACKAGE)
 
 
 # see: https://github.com/celery/celery/issues/3589
@@ -51,7 +53,7 @@ def setup_periodic_tasks(sender, **kwargs):
         workflow_client.celery_moab_tasks.check_pbs_status.s(),
         name='Check PBS Status',
         # exchange=settings.APP_PACKAGE,
-        # routing_key='pbs',
+        # routing_key='moab',
         queue=settings.MOAB_MESSAGE_QUEUE_NAME,
         delivery_mode='transient')  # see celery issue 3620
 

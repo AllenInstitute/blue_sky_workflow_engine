@@ -35,14 +35,13 @@
 #
 import celery
 from django.core.management.base import BaseCommand
-from workflow_client.celery_run_consumer \
-    import configure_run_app
 from django.conf import settings
+from workflow_client.client_settings import configure_worker_app
 import logging.config
 
 
 app = celery.Celery('workflow_client.celery_run_consumer')
-configure_run_app(app, settings.APP_PACKAGE)
+configure_worker_app(app, settings.APP_PACKAGE)
 
 
 @celery.signals.after_setup_task_logger.connect

@@ -34,15 +34,12 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 import celery
-from kombu import Exchange, Queue, binding
 from workflow_engine.celery import settings
 from workflow_client.nb_utils.moab_api import query_and_combine_states,\
     submit_job
-from workflow_engine.celery.workflow_tasks \
+from workflow_engine.celery.result_tasks \
     import process_running, process_finished_execution, \
     process_failed_execution
-from workflow_client.client_settings \
-    import load_settings_yaml, config_object
 import logging
 import django; django.setup()
 from celery.canvas import group
@@ -118,48 +115,6 @@ def submit_moab_task(self, task_id):
 @celery.shared_task(bind=True, trail=True)
 def kill_moab_task(self):
     raise Exception("unimplemented")
-
-
-def configure_queues(app, name):
-    workflow_engine_exchange = Exchange(name, type='direct')
-
-    app.conf.task_queues = (
-        Queue(settings.MOAB_MESSAGE_QUEUE_NAME,
-              [binding(workflow_engine_exchange,
-                       routing_key='moab')]),
-        Queue(settings.RESULT_MESSAGE_QUEUE_NAME,
-              [binding(workflow_engine_exchange,
-                       routing_key='result')]),
-        Queue('null',
-              [binding(workflow_engine_exchange,
-                       routing_key='null')]))
-
-
-def route_task(name, args, kwargs, options, task=None, **kw):
-    task_name = '.'.split(name)[-1]
-
-    if task_name in [
-        'submit_moab_task',
-        'kill_moab_task',
-        'check_pbs_status' ]:
-        return { 'queue': settings.MOAB_MESSAGE_QUEUE_NAME }
-    elif task_name in [
-        'process_pbs_id',
-        'process_running',
-        'process_failed_execution',
-        'process_finished_execution'
-        ]:
-        return { 'queue': settings.RESULT_MESSAGE_QUEUE_NAME }
-    else:
-        return { 'queue': 'null' }
-
-
-def configure_moab_consumer_app(app, app_name):
-    settings = load_settings_yaml()
-    app.config_from_object(config_object(settings))
-
-    configure_queues(app, app_name)
-    app.conf.task_routes = [route_task]
 
 
 # circular imports

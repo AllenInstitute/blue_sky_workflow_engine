@@ -34,14 +34,14 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 import celery
-from django.core.management.base import BaseCommand
 from django.conf import settings
-from workflow_engine.celery.workflow_tasks import configure_result_app
+from django.core.management.base import BaseCommand
+from workflow_client.client_settings import configure_worker_app
 import logging.config
 
 
-app = celery.Celery('workflow_engine.celery.workflow_tasks')
-configure_result_app(app, settings.APP_PACKAGE)
+app = celery.Celery('workflow_engine.celery.result_tasks')
+configure_worker_app(app, settings.APP_PACKAGE)
 
 
 @celery.signals.after_setup_task_logger.connect

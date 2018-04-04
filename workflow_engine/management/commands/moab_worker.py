@@ -35,23 +35,26 @@
 #
 import celery
 from django.core.management.base import BaseCommand
-from workflow_client.celery_moab_tasks \
-    import configure_moab_consumer_app
 from django.conf import settings
+from workflow_client.client_settings import configure_worker_app
+from workflow_client.celery_moab_tasks \
+    import check_pbs_status, submit_moab_task
 import logging.config
 
 
-app = celery.Celery('workflow_client.celery_run_consumer')
-configure_moab_consumer_app(app, settings.APP_PACKAGE)
+# TODO: this should be importing moab, not run
+app = celery.Celery('workflow_client.celery_moab_tasks')
+configure_worker_app(app, settings.APP_PACKAGE)
 
 
 @celery.signals.after_setup_task_logger.connect
 def after_setup_celery_task_logger(logger, **kwargs):
+    """ This function sets the 'celery.task' logger handler and formatter """
     logging.config.dictConfig(settings.LOGGING)
 
 
 class Command(BaseCommand):
-    help = 'ingest handler for the message queues'
+    help = 'moab handler for cluster management'
 
     def handle(self, *args, **options):
         app_name = settings.APP_PACKAGE
