@@ -37,6 +37,7 @@ import traceback
 from workflow_engine.import_class import import_class
 from django.core.exceptions import ObjectDoesNotExist
 import logging
+from django.conf import settings
 
 
 class WorkflowController(object):
@@ -52,7 +53,7 @@ class WorkflowController(object):
                 workflow_node, enqueued_object_id, priority)
             run_workflow_node_jobs_by_id.apply_async(
                 (job.workflow_node.id,),
-                queue='workflow')
+                queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
         except Exception as e:
             WorkflowController._logger.error(
                 'Something went wrong running jobs: ' + str(e) + "\n" + \
@@ -143,7 +144,7 @@ class WorkflowController(object):
             job.set_pending_state()
             run_workflow_node_jobs_by_id.apply_async(
                 (job.workflow_node.id,),
-                queue='workflow')
+                queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
 
     @classmethod
     def enqueue_next_queue(cls, job):
@@ -199,7 +200,7 @@ class WorkflowController(object):
         job.set_pending_state()
         run_workflow_node_jobs_by_id.apply_async(
             (job.workflow_node.id,),
-            queue='workflow')
+            queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
 
     @classmethod
     def set_jobs_for_run_by_id(cls, job_ids):
@@ -215,7 +216,7 @@ class WorkflowController(object):
             job.kill()
             run_workflow_node_jobs_by_id.apply_async(
                 (job.workflow_node.id,),
-                queue='workflow')
+                queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
         except ObjectDoesNotExist:
             WorkflowController._logger.warning(
                 'Tried to kill job %d which does not exist',
@@ -308,7 +309,7 @@ class WorkflowController(object):
             job.set_failed_state()
             run_workflow_node_jobs_by_id.apply_async(
                 (job.workflow_node.id,),
-                queue='workflow')
+                queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
 
     @classmethod
     def start_workflow(cls,
@@ -346,7 +347,7 @@ class WorkflowController(object):
 
         run_workflow_node_jobs_by_id.apply_async(
             (job.workflow_node.id,),
-            queue='workflow')
+            queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
 
     @classmethod
     def get_enqueued_object(cls, task):
@@ -394,5 +395,5 @@ from workflow_engine.models.task import Task
 from workflow_engine.models.run_state import RunState
 from workflow_engine.models.workflow_node import WorkflowNode
 from workflow_engine.models.workflow import Workflow
-from workflow_client.celery_run_consumer \
+from workflow_engine.celery.run_tasks \
     import run_workflow_node_jobs_by_id

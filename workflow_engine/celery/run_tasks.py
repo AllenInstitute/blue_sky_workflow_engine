@@ -39,7 +39,7 @@ import traceback
 import logging
 
 
-_log = logging.getLogger('workflow_client.celery_run_consumer')
+_log = logging.getLogger('workflow_engine.celery.run_tasks')
 
 
 @celery.shared_task(bind=True)

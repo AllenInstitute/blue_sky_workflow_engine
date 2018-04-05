@@ -46,7 +46,7 @@ from celery.canvas import group
 import pandas as pd
 
 
-_log = logging.getLogger('workflow_client.celery_moab_tasks')
+_log = logging.getLogger('workflow_engine.celery.moab_tasks')
 
 
 def query_running_task_dict():
@@ -73,7 +73,7 @@ result_actions = {
 
 
 @celery.shared_task(bind=True, trail=True)
-def check_pbs_status(self):
+def check_moab_status(self):
     combined_workflow_moab_dataframe = \
         query_and_combine_states(
             query_running_task_dict())

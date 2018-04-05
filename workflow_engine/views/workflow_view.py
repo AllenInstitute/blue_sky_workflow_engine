@@ -46,10 +46,11 @@ from workflow_engine.models.job import Job
 from workflow_engine.import_class import import_class
 from workflow_engine.views import shared, HEADER_PAGES
 from workflow_engine.workflow_controller import WorkflowController
-import workflow_client.worker_client as worker_client
+import workflow_engine.celery.worker_tasks as worker_tasks
 import logging
 import json
-from workflow_client.celery_run_consumer import run_workflow_node_jobs_by_id
+from workflow_engine.celery.run_tasks import run_workflow_node_jobs_by_id
+from django.conf import settings
 
 
 _log = logging.getLogger('workflow_engine.views.workflow_view')
@@ -422,11 +423,11 @@ def create_job(request):
             message = 'missing workflow_node_id param'
         else:
             # TODO: get some kind of resonse here
-            worker_client.create_job.apply_async((
+            worker_tasks.create_job.apply_async((
                 workflow_node_id,
                 enqueued_object_id,
                 priority),
-                queue='workflow')
+                queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
     except Exception as e:
             success = False
             message = str(e) + ' - ' + str(traceback.format_exc())
@@ -566,13 +567,13 @@ def update_workflow_node(request):
 
             run_workflow_node_jobs_by_id.apply_async(
                 (workflow_node.id,),
-                queue='workflow')
+                queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
 
             #run jobs if this workflow was enabled
             if not workflow_node.workflow.disabled and prev_disabled and not current_disabled:
                 run_workflow_node_jobs_by_id.apply_async(
                     (workflow_node.id,),
-                    queue='workflow')
+                    queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
 
     except ObjectDoesNotExist as e:
         success = False
@@ -661,7 +662,7 @@ def update_workflow(request):
                     if not workflow_node.disabled:
                         run_workflow_node_jobs_by_id.apply_async(
                             (workflow_node.id,),
-                            queue='workflow')
+                            queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
 
     except ObjectDoesNotExist as e:
         success = False

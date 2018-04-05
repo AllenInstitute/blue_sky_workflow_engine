@@ -91,40 +91,77 @@ def configure_queues(app, name):
                 workflow_engine_exchange,
                 routing_key='null') ]) )
 
+def invert_route_dict(rd):
+    inverted_route_dict = {}
 
-def route_task(name, args, kwargs, options, task=None, **kw):
-    task_name = '.'.split(name)[-1]
+    for q,task_names in rd.items():
+        inverted_route_dict.update(
+            { task_name: q for task_name in task_names })
+    
+    return inverted_route_dict
 
-    if task_name in {
-        'check_pbs_status',
+_ROUTE_DICT = invert_route_dict({
+    settings.MOAB_MESSAGE_QUEUE_NAME: {
+        'check_moab_status',
         'submit_moab_task',
         'kill_moab_task',
-        'run_task' }:
-        return { 
-            'queue':
-            settings.MOAB_MESSAGE_QUEUE_NAME }
-    elif task_name in {
+        'run_task' },
+    settings.WORKFLOW_MESSAGE_QUEUE_NAME: {
+        'create_job',
+        'queue_job',
         'run_workflow_node_jobs_by_id'
-        }:
-        return {
-            'queue':
-            settings.WORKFLOW_MESSAGE_QUEUED_NAME }
-    elif task_name in {
+        },
+    settings.INGEST_MESSAGE_QUEUE_NAME: {
         'ingest_task'
-        }:
-        return {
-            'queue':
-            settings.INGEST_MESSSAGE_QUEUE_NAME }
-    elif task_name in { 
+        },
+    settings.RESULT_MESSAGE_QUEUE_NAME: { 
         'process_pbs_id',
         'process_running',
         'process_finished_execution',
-        'process_failed_execution' }:
-        return { 
-            'queue': 
-            settings.RESULT_MESSAGE_QUEUE_NAME }
-    else:
-        return { 'queue': 'null' }
+        'process_failed_execution' }
+})
+
+
+def route_task(name, args, kwargs,
+               options, task=None, **kw):
+    task_name = '.'.split(name)[-1]
+
+    q = _ROUTE_DICT.get(task_name, 'null')
+
+    return { 'queue': q }
+
+#     if task_name in {
+#         'check_moab_status',
+#         'submit_moab_task',
+#         'kill_moab_task',
+#         'run_task' }:
+#         return { 
+#             'queue':
+#             settings.MOAB_MESSAGE_QUEUE_NAME }
+#     elif task_name in {
+#         'create_job',
+#         'queue_job',
+#         'run_workflow_node_jobs_by_id'
+#         }:
+#         return {
+#             'queue':
+#             settings.WORKFLOW_MESSAGE_QUEUE_NAME }
+#     elif task_name in {
+#         'ingest_task'
+#         }:
+#         return {
+#             'queue':
+#             settings.INGEST_MESSSAGE_QUEUE_NAME }
+#     elif task_name in { 
+#         'process_pbs_id',
+#         'process_running',
+#         'process_finished_execution',
+#         'process_failed_execution' }:
+#         return { 
+#             'queue': 
+#             settings.RESULT_MESSAGE_QUEUE_NAME }
+#     else:
+#         return { 'queue': 'null' }
 
 
 def configure_worker_app(app, app_name):

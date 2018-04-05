@@ -37,11 +37,11 @@ import celery
 from django.conf import settings
 
 import logging.config
-import workflow_client.celery_moab_tasks
+import workflow_engine.celery.moab_tasks
 from workflow_client.client_settings import configure_worker_app
 
 
-app = celery.Celery('workflow_client.celery_moab_beat')
+app = celery.Celery('workflow_engine.celery.moab_beat')
 configure_worker_app(app, settings.APP_PACKAGE)
 
 
@@ -49,9 +49,9 @@ configure_worker_app(app, settings.APP_PACKAGE)
 @app.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):
     sender.add_periodic_task(
-        30.0,
-        workflow_client.celery_moab_tasks.check_pbs_status.s(),
-        name='Check PBS Status',
+        15.0,
+        workflow_engine.celery.moab_tasks.check_moab_status.s(),
+        name='Check Moab Status',
         # exchange=settings.APP_PACKAGE,
         # routing_key='moab',
         queue=settings.MOAB_MESSAGE_QUEUE_NAME,

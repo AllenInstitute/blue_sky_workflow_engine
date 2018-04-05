@@ -35,7 +35,8 @@
 #
 from workflow_engine.strategies import base_strategy
 import traceback
-from workflow_client.celery_run_consumer import run_workflow_node_jobs_by_id
+from workflow_engine.celery.run_tasks import run_workflow_node_jobs_by_id
+from django.conf import settings
 
 class ManualStrategy(base_strategy.BaseStrategy):
     #####everthing bellow this can be overriden#####
@@ -67,7 +68,7 @@ class ManualStrategy(base_strategy.BaseStrategy):
                 task.job.set_end_run_time()
                 run_workflow_node_jobs_by_id.apply_async(
                     (task.job.workflow_node.id,),
-                    queue='workflow')
+                    queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
                 WorkflowController.enqueue_next_queue(task.job)
 
         return finished

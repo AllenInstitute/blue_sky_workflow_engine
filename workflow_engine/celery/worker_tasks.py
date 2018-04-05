@@ -10,7 +10,7 @@ from workflow_engine.celery.result_tasks \
     import process_failed_execution, process_finished_execution
 
 
-_log = logging.getLogger('workflow_client.worker_client')
+_log = logging.getLogger('workflow_engine.celery.worker_tasks')
 
 
 SUCCESS_EXIT_CODE = 0

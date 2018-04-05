@@ -44,7 +44,7 @@ from workflow_engine.models.task import Task
 import simplejson as json
 import traceback
 from workflow_engine.models.workflow_node import WorkflowNode
-from workflow_client.worker_client import ZERO
+from workflow_engine.celery.worker_tasks import ZERO
 
 
 def record_json_response(fn):

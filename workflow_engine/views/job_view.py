@@ -41,7 +41,7 @@ from workflow_engine.models.job import Job
 from workflow_engine.models.workflow_node import WorkflowNode
 from workflow_engine.models import ONE
 from workflow_engine.views import shared, HEADER_PAGES
-import workflow_client.worker_client as worker_client
+import workflow_engine.celery.worker_tasks as worker_tasks
 import logging
 
 _log = logging.getLogger('workflow_engine.views.job_view')
@@ -190,9 +190,9 @@ def job_json_response2(fn):
 
 @job_json_response2
 def queue_job(job_id, result):
-    r = worker_client.queue_job.apply_async(
+    r = worker_tasks.queue_job.apply_async(
         (job_id),
-        queue='workflow')
+        queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
     outp = r.get()
     _log.info('QUEUE_JOB ' + str(outp))
     #WorkflowController.set_job_for_run(job_object)
@@ -200,9 +200,9 @@ def queue_job(job_id, result):
 
 @job_json_response2
 def kill_job(job_id, result):
-    r = worker_client.kill_job.apply_async(
+    r = worker_tasks.kill_job.apply_async(
         (job_id),
-        queue='workflow')
+        queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
     outp = r.get()
     _log.info('QUEUE_JOB ' + str(outp))
     #Job.kill_job(job_id)
@@ -211,10 +211,9 @@ def kill_job(job_id, result):
 
 @job_json_response2
 def run_all_jobs(job_id, response):
-    worker_client.queue_job.apply_async(
+    worker_tasks.queue_job.apply_async(
         (job_id),
-        queue='workflow')
-    #WorkflowController.set_job_for_run_if_valid(job_id)
+        queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
 
 
 @job_json_response

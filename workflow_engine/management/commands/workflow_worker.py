@@ -40,7 +40,7 @@ from workflow_client.client_settings import configure_worker_app
 import logging.config
 
 
-app = celery.Celery('workflow_client.celery_run_consumer')
+app = celery.Celery('workflow_engine.celery.run_tasks')
 configure_worker_app(app, settings.APP_PACKAGE)
 
 
@@ -62,5 +62,5 @@ class Command(BaseCommand):
             'worker',
             '--concurrency=2',
             '--heartbeat-interval=30',
-            '-Q', 'workflow,null',
+            '-Q', settings.WORKFLOW_MESSAGE_QUEUE_NAME,
             '-n', 'workflow@' + app_name])

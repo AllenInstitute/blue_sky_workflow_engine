@@ -41,7 +41,7 @@ import logging
 from workflow_client.client_settings import load_settings_yaml
 
 
-_log = logging.getLogger('workflow_client.celery_ingest_consumer')
+_log = logging.getLogger('workflow_engine.celery.ingest_tasks')
 
 
 def load_workflow_config(yaml_file):

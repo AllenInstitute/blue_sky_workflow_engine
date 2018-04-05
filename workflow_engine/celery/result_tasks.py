@@ -36,7 +36,8 @@
 import celery
 import django; django.setup()
 from django.core.exceptions import ObjectDoesNotExist
-from workflow_client.celery_run_consumer \
+from django.conf import settings
+from workflow_engine.celery.run_tasks \
     import run_workflow_node_jobs_by_id
 import logging
 import traceback
@@ -68,7 +69,7 @@ def process_finished_execution(self, task_id):
     strategy.finish_task(task)
     run_workflow_node_jobs_by_id.apply_async(
         (task.job.workflow_node.id,),
-        queue='workflow')
+        queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
 
 
 @celery.shared_task(bind=True)
@@ -77,7 +78,7 @@ def process_failed_execution(self, task_id):
     strategy.fail_execution_task(task)
     run_workflow_node_jobs_by_id.apply_async(
         (task.job.workflow_node.id,),
-        queue='workflow')
+        queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
 
 
 @celery.shared_task(bind=True)

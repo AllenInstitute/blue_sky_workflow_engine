@@ -33,11 +33,11 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-from workflow_client.celery_ingest_consumer import \
-    run_task, ingest_task, success, fail, on_raw_message
+from workflow_engine.celery.ingest_tasks import ingest_task
 import logging
 import sys
 import os
+from django.conf import settings
 
 
 _log = logging.getLogger('workflow_client.celery_ingest')
@@ -62,7 +62,7 @@ def run_strategy(app, workflow_name, body):
     r = run_task.apply_async(
         (workflow_name, body,),
         exchange=app,
-        queue=settings.PBS_MESSAGE_QUEUE_NAME,
+        queue=settings.INGEST_MESSAGE_QUEUE_NAME,
         link=success.s(),
         link_error=fail.s())
 

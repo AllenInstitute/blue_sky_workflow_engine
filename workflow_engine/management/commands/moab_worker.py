@@ -37,14 +37,12 @@ import celery
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from workflow_client.client_settings import configure_worker_app
-from workflow_client.celery_moab_tasks \
-    import check_pbs_status, submit_moab_task
 import logging.config
 
 
-# TODO: this should be importing moab, not run
-app = celery.Celery('workflow_client.celery_moab_tasks')
+app = celery.Celery('workflow_engine.celery.moab_tasks')
 configure_worker_app(app, settings.APP_PACKAGE)
+app.conf.imports = ('workflow_engine.celery.moab_tasks',)
 
 
 @celery.signals.after_setup_task_logger.connect

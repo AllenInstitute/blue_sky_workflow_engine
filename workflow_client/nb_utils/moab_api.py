@@ -139,6 +139,11 @@ def combine_workflow_moab_states(workflow_dataframe,
         on="task_name",
         how="outer")
 
+    # work around pandas issues w/ NaN in int columns
+    # and merge promotion
+    combined_df.task_id.fillna(0, inplace=True)
+    combined_df.task_id = combined_df.task_id.astype(int)
+
     combined_df['moab_state'] = \
         combined_df['moab_state'].fillna('Expired')
 

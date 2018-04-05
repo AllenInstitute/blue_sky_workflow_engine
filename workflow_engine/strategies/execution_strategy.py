@@ -33,7 +33,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-from workflow_client.worker_client import cancel_task
+from workflow_engine.celery.moab_tasks import submit_moab_task
+from workflow_engine.celery.worker_tasks import cancel_task
 from workflow_engine.strategies import base_strategy
 from django.conf import settings
 import os
@@ -41,7 +42,6 @@ import subprocess
 import traceback
 import logging
 import simplejson as json
-from workflow_client.celery_moab_tasks import submit_moab_task
 
 
 class ExecutionStrategy(base_strategy.BaseStrategy):
@@ -225,7 +225,7 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
         if task.pbs_id != None:
             cancel_task.apply_async(
                 (True, task.pbs_id),
-                queue='workflow')
+                queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
 
     # Do not override
     def run_asynchronous_task(self, task):
@@ -248,8 +248,8 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
                 pbs_file = self.get_pbs_file(task)
                 task.create_pbs_file(pbs_file)
 
-                executable = 'qsub ' + pbs_file
-                queue_name = settings.PBS_MESSAGE_QUEUE_NAME
+                executable = 'qsub ' + pbs_file  # TODO deprecate
+                queue_name = settings.MOAB_MESSAGE_QUEUE_NAME
             elif 'spark' == remote_queue:
                 queue_name = settings.SPARK_MESSAGE_QUEUE_NAME
             else:
@@ -259,12 +259,6 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 
             ExecutionStrategy._log.info(
                 'apply async celery queue: %s' % (queue_name))
-#             result = run_celery_task.apply_async(
-#                 args=[executable,
-#                       task.id,
-#                       task.log_file,
-#                       use_pbs],
-#                 queue=queue_name)
             result = submit_moab_task.apply_async(
                 (task.id,
                 ),
