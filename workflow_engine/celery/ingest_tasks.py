@@ -39,6 +39,8 @@ from workflow_engine.import_class import import_class
 from django.conf import settings
 import logging
 from workflow_client.client_settings import load_settings_yaml
+from workflow_engine.models.workflow import Workflow
+import traceback
 
 
 _log = logging.getLogger('workflow_engine.celery.ingest_tasks')
@@ -52,25 +54,25 @@ def load_workflow_config(yaml_file):
         for workflow_spec in workflow_config['flows']
     }
 
-def load_ingest_strategy_names(yaml_file):
-    '''Read workflow names and ingest strategy class names
-    from the worflow configuration file.
-
-    Parameters
-    ----------
-    yaml_file : String
-        path to the workflow configuration file
-
-    Returns
-    -------
-    dict mapping workflow name key to ingest class name
-    '''
-    workflow_config = WorkflowConfig.from_yaml_file(yaml_file)
-
-    return {
-        workflow_spec.name: workflow_spec.ingest_strategy
-        for workflow_spec in workflow_config['flows']
-    }
+# def load_ingest_strategy_names(yaml_file):
+#     '''Read workflow names and ingest strategy class names
+#     from the worflow configuration file.
+# 
+#     Parameters
+#     ----------
+#     yaml_file : String
+#         path to the workflow configuration file
+# 
+#     Returns
+#     -------
+#     dict mapping workflow name key to ingest class name
+#     '''
+#     workflow_config = WorkflowConfig.from_yaml_file(yaml_file)
+# 
+#     return {
+#         workflow_spec.name: workflow_spec.ingest_strategy
+#         for workflow_spec in workflow_config['flows']
+#     }
 
 
 @celery.shared_task(bind=True)
@@ -97,28 +99,23 @@ def ingest_task(self, workflow, message, tags):
     try:
         _log.info('ingest ' + str(workflow) + ' ' + str(message))
 
-        settings = load_settings_yaml()
-        
-        _log.info(settings)
-
-        ingest_strategies = load_ingest_strategy_names(
-            settings.WORKFLOW_CONFIG_YAML)
-
-        _log.info('workflow %s' % (ingest_strategies))
-
-        # TODO: something better here
-        ingest_strategy_class_name = ingest_strategies[workflow]
-        _log.info('workflow strategy class: %s' % (ingest_strategy_class_name))
-
-        clz = import_class(ingest_strategy_class_name)
-        ingest_strategy = clz()
+        workflow_object = Workflow.objects.get(
+            name=workflow)
+        strategy_class = import_class(
+            workflow_object.ingest_strategy_class)
+        ingest_strategy = strategy_class()
 
         # TODO: use Celery router to call directly
-        ret = ingest_strategy.ingest_message(message, tags)
-        self.update_state(state="SUCCESS",
-                          meta=ret)
+        ret = ingest_strategy.ingest_message(
+            workflow,
+            message,
+            tags)
+#         self.update_state(state="SUCCESS",
+#                           meta=ret)
     except Exception as e:
-        self.update_state(state="FAILURE")
-        ret = "FAIL" + str(e)
+#         self.update_state(state="FAILURE")
+        mess = str(e) + ' - ' + str(traceback.format_exc())
+        _log.error(mess)
+        ret = "FAIL " + mess
 
     return ret

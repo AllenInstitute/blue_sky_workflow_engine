@@ -35,7 +35,6 @@
 #
 from workflow_engine.strategies.execution_strategy \
     import ExecutionStrategy
-from workflow_engine.models.workflow import Workflow
 from workflow_engine.import_class import import_class
 import traceback
 import logging
@@ -95,20 +94,18 @@ class IngestStrategy(ExecutionStrategy):
         return ingest_strategy.ingest_message(message)
 
 
-    def ingest_message(self, message, tags=None):
+    def ingest_message(self, workflow_name, message, tags=None):
         if tags == None:
             tags = []
 
-        if 'ReferenceSet' in tags:
-            start_node = 'Generate Lens Correction Transform'
-        else:
-            start_node = 'Generate Render Stack'
+        enqueued_object, start_node = \
+            self.create_enqueued_object(
+                message, tags)
 
-        enqueued_object = self.create_enqueued_object(message, tags)
-        
         ret = self.generate_response(enqueued_object)
-        
-        workflow_name = self.get_workflow_name()
+
+        IngestStrategy._log.info("Starting workflow: %s", workflow_name)
+
         WorkflowController.start_workflow(
             workflow_name,
             enqueued_object,
@@ -134,3 +131,4 @@ class IngestStrategy(ExecutionStrategy):
 
 
 from workflow_engine.workflow_controller import WorkflowController
+from workflow_engine.models.workflow import Workflow

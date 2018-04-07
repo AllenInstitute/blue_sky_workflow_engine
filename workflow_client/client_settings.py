@@ -130,39 +130,6 @@ def route_task(name, args, kwargs,
 
     return { 'queue': q }
 
-#     if task_name in {
-#         'check_moab_status',
-#         'submit_moab_task',
-#         'kill_moab_task',
-#         'run_task' }:
-#         return { 
-#             'queue':
-#             settings.MOAB_MESSAGE_QUEUE_NAME }
-#     elif task_name in {
-#         'create_job',
-#         'queue_job',
-#         'run_workflow_node_jobs_by_id'
-#         }:
-#         return {
-#             'queue':
-#             settings.WORKFLOW_MESSAGE_QUEUE_NAME }
-#     elif task_name in {
-#         'ingest_task'
-#         }:
-#         return {
-#             'queue':
-#             settings.INGEST_MESSSAGE_QUEUE_NAME }
-#     elif task_name in { 
-#         'process_pbs_id',
-#         'process_running',
-#         'process_finished_execution',
-#         'process_failed_execution' }:
-#         return { 
-#             'queue': 
-#             settings.RESULT_MESSAGE_QUEUE_NAME }
-#     else:
-#         return { 'queue': 'null' }
-
 
 def configure_worker_app(app, app_name):
     celery_settings = load_settings_yaml()
@@ -171,7 +138,6 @@ def configure_worker_app(app, app_name):
 
     configure_queues(app, app_name)
     app.conf.task_routes = [route_task]
-
 
 
 def config_object(s):
