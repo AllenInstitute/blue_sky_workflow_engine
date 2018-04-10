@@ -59,6 +59,11 @@ class Job(models.Model):
     archived = models.NullBooleanField(default=False)
     tags = models.CharField(max_length=255, null=True)
 
+    def __str__(self):
+        return "%s %s job %d" % (str(self.workflow_node),
+                                 str(self.get_enqueued_object()),
+                                 self.id)
+
     def archive_record(self):
         self.archived = True
         self.save()

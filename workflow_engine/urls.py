@@ -80,6 +80,7 @@ urlpatterns = [
     url(r'^workflows/get_workflow_info$', workflow_view.get_workflow_info, name='workflows'),
     url(r'^workflows/update_workflow$', workflow_view.update_workflow, name='workflows'),
     url(r'^workflows/get_workflow_status$', workflow_view.get_workflow_status, name='workflows'),
+    url(r'^workflows/monitor', workflow_view.monitor_workflow, name='workflows'),
     
     #job_queues
     url(r'^job_queues/get_show_data/$', job_queue_view.get_job_queues_show_data, name='job_queues'),

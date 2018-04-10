@@ -621,6 +621,51 @@ def get_workflow_info(request):
 
     return JsonResponse(result)
 
+
+def monitor_workflow(request):
+    result = {}
+    payload = {}
+    success = True
+    message = ''
+
+    nodes = WorkflowNode.objects.all()
+
+    result['nodes'] = [ str(n) for n in nodes]
+#     result['nodes'] = [
+#         'n0', 'n1', 'n2', 'n3', 'n4',
+#         'n5', 'n6', 'n7', 'n8', 'n9',
+#         'n10', 'n11', 'n12', 'n13',
+#         'n14', 'n15', 'n16']
+    
+    result['edges'] = [ {
+        'source': str(n.parent),
+        'target': str(n) } for n in nodes
+        if n.parent is not None ]
+    
+#     result['edges'] = [
+#         { 'source': 'n0', 'target': 'n1' },
+#         { 'source': 'n1', 'target': 'n2' },
+#         { 'source': 'n1', 'target': 'n3' },
+#         { 'source': 'n4', 'target': 'n5' },
+#         { 'source': 'n4', 'target': 'n6' },
+#         { 'source': 'n6', 'target': 'n7' },
+#         { 'source': 'n6', 'target': 'n8' },
+#         { 'source': 'n8', 'target': 'n9' },
+#         { 'source': 'n8', 'target': 'n10' },
+#         { 'source': 'n11', 'target': 'n12' },
+#         { 'source': 'n12', 'target': 'n13' },
+#         { 'source': 'n13', 'target': 'n14' },
+#         { 'source': 'n13', 'target': 'n15' },
+#         { 'source': 'n16', 'target': 'n12' },
+#          ]
+
+    result['success'] = success
+    result['payload'] = payload
+    result['message'] = message
+
+    return JsonResponse(result)
+
+
 def update_workflow(request):
     result = {}
     payload = {}

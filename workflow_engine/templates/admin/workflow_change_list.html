@@ -1,0 +1,24 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_static admin_list static %}
+
+{% block result_list %}
+    {% admin_actions %}
+    {% result_list cl %}
+
+    {% load staticfiles %}
+    <!--  >title>cytoscape-dagre.js demo</title>
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1" -->
+    <link href="{% static 'workflow_engine/css/dagre.css' %}" rel="stylesheet" />
+
+    <script src="{% static 'workflow_engine/javascript/cytoscape.min.js' %}"></script>
+
+    <!-- for testing with local version of cytoscape.js -->
+    <!--<script src="../cytoscape.js/build/cytoscape.js"></script>-->
+
+    <script src="https://cdn.rawgit.com/cpettitt/dagre/v0.7.4/dist/dagre.min.js"></script>
+    <script src="https://cdn.rawgit.com/cytoscape/cytoscape.js-dagre/1.5.0/cytoscape-dagre.js"></script>
+
+    <div id="cy"></div>
+    <script src="{% static 'workflow_engine/javascript/workflow_graph.js' %}"></script>
+
+{% endblock %}

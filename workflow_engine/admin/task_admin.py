@@ -1,63 +1,36 @@
 from django.contrib import admin
 from workflow_engine.workflow_controller import WorkflowController
-from workflow_engine.models.task import Task
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
 
-def kill_jobs(modeladmin, request, queryset):
-    kill_jobs.short_description = \
-        "Kill jobs"
-
-    for job in queryset:
-        job.kill()
-
-
-def start_jobs(modeladmin, request, queryset):
-    start_jobs.short_description = \
-        "Start jobs"
-
-    job_ids = [item.id for item in queryset]
-    WorkflowController.run_all_jobs(job_ids)
-
-
-class TaskInline(admin.StackedInline):
-    model = Task
-
-
-class JobAdmin(admin.ModelAdmin):
+class TaskAdmin(admin.ModelAdmin):
     list_display = (
         'id',
-        'enqueued_object_id',
-        'enqueued_object_link',
-        'start_run_time',
+        'enqueued_task_object_class',
         'duration',
-        'workflow_link',
-        'workflow_node_link',
+        'retry_count',
+        'start_run_time',
+        'end_run_time',
         'run_state',
-        'task_ids',
-        'archived',
         )
     read_only_fields = (
-        'workflow_link',
-        'workflow_node_link',
+        'start_run_time',
+        'end_run_time',
         )
     list_select_related = (
-        'workflow_node',
-        'workflow_node__workflow',
         'run_state',
         )
     list_filter = (
-        'workflow_node__workflow',
-        'workflow_node',
+        'job__workflow_node__workflow',
+        'job__workflow_node',
         'run_state',
         'archived',
         )
-    actions = (kill_jobs, start_jobs)
-    inlines = (TaskInline,)
 
     def enqueued_object_link(self, job_object):
-        enqueued_object = job_object.get_enqueued_object()
+        enqueued_object = WorkflowController.get_enqueued_object(self)
+
         clz = enqueued_object._meta.db_table
 
         return mark_safe('<a href="{}">{}</a>'.format(

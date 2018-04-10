@@ -2,6 +2,7 @@ import yaml
 from django.conf import settings
 from workflow_client import client_settings
 import copy
+import logging
 
 
 class Provenance(object):

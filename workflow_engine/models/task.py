@@ -70,8 +70,10 @@ class Task(models.Model):
     tags = models.CharField(max_length=255, null=True)
 
     def __str__(self):
-        return 'task: %s (%d)' % (self.full_executable, self.id)
-
+        return "%s %s task %d" % (
+            str(self.job.workflow_node),
+            str(WorkflowController.get_enqueued_object(self)),
+            self.id)
     def get_created_at(self):
         return timezone.localtime(self.created_at).strftime('%m/%d/%Y %I:%M:%S')
 
