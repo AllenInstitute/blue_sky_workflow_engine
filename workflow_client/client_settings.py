@@ -100,30 +100,33 @@ def invert_route_dict(rd):
     
     return inverted_route_dict
 
-_ROUTE_DICT = invert_route_dict({
-    settings.MOAB_MESSAGE_QUEUE_NAME: {
-        'check_moab_status',
-        'submit_moab_task',
-        'kill_moab_task',
-        'run_task' },
-    settings.WORKFLOW_MESSAGE_QUEUE_NAME: {
-        'create_job',
-        'queue_job',
-        'run_workflow_node_jobs_by_id'
-        },
-    settings.INGEST_MESSAGE_QUEUE_NAME: {
-        'ingest_task'
-        },
-    settings.RESULT_MESSAGE_QUEUE_NAME: { 
-        'process_pbs_id',
-        'process_running',
-        'process_finished_execution',
-        'process_failed_execution' }
-})
-
 
 def route_task(name, args, kwargs,
                options, task=None, **kw):
+    _ROUTE_DICT = invert_route_dict({
+        settings.INGEST_MESSAGE_QUEUE_NAME: {
+            'ingest_task',
+            },
+        settings.MOAB_MESSAGE_QUEUE_NAME: {
+            'check_moab_status',
+            'submit_moab_task',
+            'kill_moab_task',
+            'run_task' },
+        settings.WORKFLOW_MESSAGE_QUEUE_NAME: {
+            'create_job',
+            'queue_job',
+            'run_workflow_node_jobs_by_id',
+            },
+        settings.INGEST_MESSAGE_QUEUE_NAME: {
+            'ingest_task'
+            },
+        settings.RESULT_MESSAGE_QUEUE_NAME: { 
+            'process_pbs_id',
+            'process_running',
+            'process_finished_execution',
+            'process_failed_execution' }
+    })
+
     task_name = '.'.split(name)[-1]
 
     q = _ROUTE_DICT.get(task_name, 'null')

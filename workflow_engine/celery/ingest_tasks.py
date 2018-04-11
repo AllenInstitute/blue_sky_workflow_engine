@@ -34,12 +34,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 import celery
-from workflow_engine.workflow_config import WorkflowConfig
 from workflow_engine.import_class import import_class
-from django.conf import settings
 import logging
-from workflow_client.client_settings import load_settings_yaml
-from workflow_engine.models.workflow import Workflow
 import traceback
 
 
@@ -47,6 +43,8 @@ _log = logging.getLogger('workflow_engine.celery.ingest_tasks')
 
 
 def load_workflow_config(yaml_file):
+    from workflow_engine.workflow_config import WorkflowConfig
+
     workflow_config = WorkflowConfig.from_yaml_file(yaml_file)
 
     return { 
@@ -54,25 +52,6 @@ def load_workflow_config(yaml_file):
         for workflow_spec in workflow_config['flows']
     }
 
-# def load_ingest_strategy_names(yaml_file):
-#     '''Read workflow names and ingest strategy class names
-#     from the worflow configuration file.
-# 
-#     Parameters
-#     ----------
-#     yaml_file : String
-#         path to the workflow configuration file
-# 
-#     Returns
-#     -------
-#     dict mapping workflow name key to ingest class name
-#     '''
-#     workflow_config = WorkflowConfig.from_yaml_file(yaml_file)
-# 
-#     return {
-#         workflow_spec.name: workflow_spec.ingest_strategy
-#         for workflow_spec in workflow_config['flows']
-#     }
 
 
 @celery.shared_task(bind=True)
@@ -94,6 +73,8 @@ def ingest_task(self, workflow, message, tags):
     dict or String
         response message body to be sent to the sender process
     '''
+    from workflow_engine.models.workflow import Workflow
+
     ret = 'OK'
 
     try:

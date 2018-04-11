@@ -35,9 +35,6 @@
 #
 from workflow_engine.celery.ingest_tasks import ingest_task
 import logging
-import sys
-import os
-from django.conf import settings
 
 
 _log = logging.getLogger('workflow_client.celery_ingest')
@@ -47,78 +44,18 @@ _log.setLevel(logging.INFO)
 def ingest(app, workflow, body, tags):
     _log.info('sending ingest ' + app + ' ' + workflow + ' ' + str(body))
 
-    r = ingest_task.apply_async(
-        (workflow, body,tags),
-        exchange=app+'_ingest',
-        routing_key=workflow,
-        link=success.s(),
-        link_error=fail.s())
+    result = ingest_task.apply_async(
+        (workflow, body, tags),
+        queue='ingest_' + app)
 
-    return r.get(
-        on_message=on_raw_message,
-        propagate=False)
+    response_message = result.wait(10)
 
-def run_strategy(app, workflow_name, body):
-    r = run_task.apply_async(
-        (workflow_name, body,),
-        exchange=app,
-        queue=settings.INGEST_MESSAGE_QUEUE_NAME,
-        link=success.s(),
-        link_error=fail.s())
+    return response_message
 
-    return r.get(
-        on_message=on_raw_message,
-        propagate=False)
 
 if __name__ == '__main__':
-    from workflow_engine.import_class import import_class
-    import simplejson as json
-
-    app_key = sys.argv[-4]  # e.g. 'at_em_imaging_workflow
-    workflow_name = sys.argv[-3]  # e.g. '2d_em_montage'
-    body_file = sys.argv[-2]
-    fix_option = sys.argv[-1]
-
-    _, file_extension = os.path.splitext(body_file)
-
-    if 'json' == file_extension:
-        with open(body_file) as f:
-            body_data = json.loads(f.read())
-    else:  # module name
-        print("reading body message from module variable"  + body_file)
-        body_data = import_class(body_file)
-
-    if 'ReferenceSetTest' == fix_option:
-        # lens_correction_new_body_data.pop('reference_set_id', None) # doesn't have this`
-        body_data['acquisition_data']['microscope_type'] = 'TEM'
-        body_data['manifest_path'] = \
-            "/allen/aibs/pipeline/image_processing/volume_assembly/lc_test_data/Wij_Set_594451332/594089217_594451332/_trackem_20170502174048_295434_5LC_0064_01_20170502174047_reference_0_.txt"
-        body_data['storage_directory'] = \
-            "/allen/aibs/pipeline/image_processing/volume_assembly/lc_test_data/Wij_Set_594451332/594089217_594451332"
-        body_data['metafile'] = \
-            "/allen/aibs/pipeline/image_processing/volume_assembly/dataimport_test_data/_metadata_20170829130146_295434_5LC_0064_01_redo_001050_0_.json"
-    elif 'EMMontageSetTest' == fix_option:
-        body_data['acquisition_data']['microscope_type'] = 'TEM'
-        body_data['metafile'] = \
-            "/allen/aibs/pipeline/image_processing/volume_assembly/dataimport_test_data/_metadata_20170829130146_295434_5LC_0064_01_redo_001050_0_.json"
-    if 'ReferenceSet' == fix_option:
-        # lens_correction_new_body_data.pop('reference_set_id', None) # doesn't have this`
-        body_data['acquisition_data']['microscope_type'] = 'TEM'
-        body_data['manifest_path'] = \
-            "/allen/programs/celltypes/workgroups/em-connectomics/data/295434_5LC_0064_reimaging_03/20171004173254_reference/0/_trackem_20171004173254_295434_5LC_0064_reimaging_03_20171004173254_reference_0_.txt"
-        body_data['storage_directory'] = \
-            "/allen/programs/celltypes/workgroups/em-connectomics/data/295434_5LC_0064_reimaging_03/20171004173254_reference/0"
-        body_data['metafile'] = \
-            "/allen/programs/celltypes/workgroups/em-connectomics/data/295434_5LC_0064_reimaging_03/20171004173254_reference/0/_metadata_20171004173254_295434_5LC_0064_reimaging_03_20171004173254_reference_0_.json"
-    elif 'EMMontageSet' == fix_option:
-        body_data['acquisition_data']['microscope_type'] = 'TEM'
-        body_data['metafile'] = \
-            "/allen/programs/celltypes/workgroups/em-connectomics/data/295434_5LC_0064_reimaging_03/001047/0/_metadata_20171004191109_295434_5LC_0064_reimaging_03_001047_0_.json"
-    else:
-        pass
-
-    ingest(app_key,
-           workflow_name,
-           body_data,
-           [fix_option])
+    ingest('at_em_imaging_workflow',
+           'em_2d_montage',
+           {'this': 'is', "a": "test"},
+           ['Friday'])
 
