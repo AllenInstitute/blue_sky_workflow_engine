@@ -36,8 +36,8 @@
 import celery
 from django.core.management.base import BaseCommand
 from django.conf import settings
-from workflow_engine.celery.ingest_tasks import ingest_task
 from workflow_client.client_settings import configure_worker_app
+from workflow_engine.celery.ingest_tasks import ingest_task
 import logging.config
 
 

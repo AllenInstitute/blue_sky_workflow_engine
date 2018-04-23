@@ -48,12 +48,13 @@ def load_settings_yaml():
 
     try: 
         blue_sky_settings_json = \
-            os.getenv('BLUE_SKY_SETTINGS')
+            os.environ.get('BLUE_SKY_SETTINGS',
+                           'blue_sky_settings.yml')
 
         with open(blue_sky_settings_json) as f:
             settings_dict = settings_attr_dict(yaml.load(f))
-    except:
-        raise Exception('need to set BLUE_SKY_SETTINGS')
+    except Exception as e:
+        raise Exception('need to set BLUE_SKY_SETTINGS' + str(e))
 
     return settings_dict
 

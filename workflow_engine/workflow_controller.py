@@ -41,7 +41,7 @@ from django.conf import settings
 
 
 class WorkflowController(object):
-    _logger = logging.getLogger('workflow_engine.models')
+    _logger = logging.getLogger('workflow_engine.workflow_controller')
 
     @classmethod
     def create_job(cls, workflow_node_id,

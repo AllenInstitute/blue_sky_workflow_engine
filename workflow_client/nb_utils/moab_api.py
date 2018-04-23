@@ -90,6 +90,13 @@ def moab_post(url, body_data):
         auth=moab_auth()
     ).text   # todo: content?
 
+
+def moab_delete(url):
+    s = requests.delete(
+        url,
+        auth=moab_auth()
+    ).text   # todo: content?
+
     #result_data = json.loads(s)
 
     #return result_data
@@ -163,7 +170,7 @@ def combine_workflow_moab_states(workflow_dataframe,
 
     combined_df.loc[
         combined_df.workflow_state.isin(["QUEUED","RUNNING"]) &
-        combined_df.moab_state.isin(["Expired"]),
+        combined_df.moab_state.isin(["Expired", "Removed", "Vacated"]),
         'failed_message'] = True
 
     return combined_df
@@ -205,6 +212,20 @@ def submit_job(
         'durationRequested': duration_seconds
     }
 
-    return moab_post(
+    response_text = moab_post(
         url,
         body_data=payload)
+
+    response_message = json.loads(response_text)
+
+    moab_id = response_message['name']
+
+    return moab_id
+
+
+def delete_moab_task(moab_id):
+    url = moab_url(
+        table='jobs',
+        oid=moab_id)
+
+    return moab_delete(url)

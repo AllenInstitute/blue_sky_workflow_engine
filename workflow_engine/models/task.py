@@ -70,9 +70,15 @@ class Task(models.Model):
     tags = models.CharField(max_length=255, null=True)
 
     def __str__(self):
+        try:
+            enqueued_object_name = str(
+                WorkflowController.get_enqueued_object(self))
+        except:
+            enqueued_object_name = 'None'
+
         return "%s %s task %d" % (
             str(self.job.workflow_node),
-            str(WorkflowController.get_enqueued_object(self)),
+            enqueued_object_name,
             self.id)
     def get_created_at(self):
         return timezone.localtime(self.created_at).strftime('%m/%d/%Y %I:%M:%S')
@@ -87,6 +93,7 @@ class Task(models.Model):
 
     def set_pbs_id(self, pbs_id):
         self.pbs_id = pbs_id
+        _logger.info("Set PBS ID for task %d to %s", self.id, pbs_id)
         self.save()
 
     def environment_vars(self):
@@ -110,12 +117,14 @@ class Task(models.Model):
         return is_pbs
 
     def kill_task(self):
-        from celery.task.control import revoke
+        # from celery.task.control import revoke
         self.set_process_killed_state()
-        revoke(self.id, terminate=True)
-        strategy = self.get_strategy()
-        if strategy.is_execution_strategy():
-            strategy.kill_pbs_task(self)
+        # revoke(self.id, terminate=True)
+        # strategy = self.get_strategy()
+        # if strategy.is_execution_strategy():
+        kill_moab_task.apply_async(
+            (self.pbs_id,),
+            queue=settings.MOAB_MESSAGE_QUEUE_NAME)
 
         self.set_end_run_time()
 
@@ -336,3 +345,4 @@ class Task(models.Model):
 from workflow_engine.models.run_state import RunState
 from workflow_engine.models.file_record import FileRecord
 from workflow_engine.workflow_controller import WorkflowController
+from workflow_engine.celery.moab_tasks import kill_moab_task

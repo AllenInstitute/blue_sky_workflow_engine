@@ -34,7 +34,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 import celery
-import django; django.setup()
+#import django; django.setup()
 from django.core.exceptions import ObjectDoesNotExist
 from django.conf import settings
 from workflow_engine.celery.run_tasks \
@@ -82,7 +82,7 @@ def process_failed_execution(self, task_id):
 
 
 @celery.shared_task(bind=True)
-def process_pbs_id(self, task_id, pbs_id):
+def process_pbs_id(self, pbs_id, task_id):
     try:
         (task, _) = get_task_strategy_by_task_id(task_id)
         task.set_queued_state()

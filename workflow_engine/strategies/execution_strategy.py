@@ -34,6 +34,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 from workflow_engine.celery.moab_tasks import submit_moab_task
+from workflow_engine.celery.result_tasks import process_pbs_id
 from workflow_engine.celery.worker_tasks import cancel_task
 from workflow_engine.strategies import base_strategy
 from django.conf import settings
@@ -259,14 +260,12 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 
             ExecutionStrategy._log.info(
                 'apply async celery queue: %s' % (queue_name))
-            result = submit_moab_task.apply_async(
-                (task.id,
-                ),
-                queue=settings.MOAB_MESSAGE_QUEUE_NAME)
-            ExecutionStrategy._log.info(
-                'queue result: %s %s\n%s' % (result.status,
-                                             str(result.result),
-                                             str(result)))
+            set_moab_id = process_pbs_id.s(task.id).set(
+                queue_name=settings.RESULT_MESSAGE_QUEUE_NAME)
+            submit_moab_task.apply_async(
+                (task.id,),
+                queue=settings.MOAB_MESSAGE_QUEUE_NAME,
+                link=[set_moab_id])
 
     # this method creates the input file
     # Do not override

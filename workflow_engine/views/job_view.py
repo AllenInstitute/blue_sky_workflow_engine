@@ -35,6 +35,7 @@
 #
 from django.http import JsonResponse
 from django.http import HttpResponse
+from django.conf import settings
 import traceback
 from django.template import loader
 from workflow_engine.models.job import Job
@@ -191,7 +192,7 @@ def job_json_response2(fn):
 @job_json_response2
 def queue_job(job_id, result):
     r = worker_tasks.queue_job.apply_async(
-        (job_id),
+        (job_id,),
         queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
     outp = r.get()
     _log.info('QUEUE_JOB ' + str(outp))
@@ -201,7 +202,7 @@ def queue_job(job_id, result):
 @job_json_response2
 def kill_job(job_id, result):
     r = worker_tasks.kill_job.apply_async(
-        (job_id),
+        (job_id[0],),
         queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
     outp = r.get()
     _log.info('QUEUE_JOB ' + str(outp))
@@ -212,7 +213,7 @@ def kill_job(job_id, result):
 @job_json_response2
 def run_all_jobs(job_id, response):
     worker_tasks.queue_job.apply_async(
-        (job_id),
+        (job_id,),
         queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
 
 

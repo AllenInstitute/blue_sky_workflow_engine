@@ -36,12 +36,14 @@
 import celery
 from workflow_engine.celery import settings
 from workflow_client.nb_utils.moab_api import query_and_combine_states,\
-    submit_job
-from workflow_engine.celery.result_tasks \
-    import process_running, process_finished_execution, \
-    process_failed_execution
+    submit_job, delete_moab_task
+from django.core.exceptions import ObjectDoesNotExist
+from workflow_engine.celery.signatures import \
+    process_running_signature, \
+    process_failed_execution_signature, \
+    process_finished_execution_signature
 import logging
-import django; django.setup()
+# import django; django.setup()
 from celery.canvas import group
 import pandas as pd
 
@@ -60,15 +62,13 @@ def query_running_task_dict():
     return task_dict
 
 
-result_queue = settings.RESULT_MESSAGE_QUEUE_NAME
-
 result_actions = { 
     'running_message':
-        lambda x: process_running.s(x).set(queue=result_queue),
+        lambda x: process_running_signature(x),
     'finished_message':
-        lambda x: process_finished_execution.s(x).set(queue=result_queue),
+        lambda x: process_finished_execution_signature(x),
     'failed_message': 
-        lambda x: process_failed_execution.s(x).set(queue=result_queue)
+        lambda x: process_failed_execution_signature(x),
 }
 
 
@@ -96,26 +96,36 @@ def check_moab_status(self):
 @celery.shared_task(bind=True, trail=True)
 def submit_moab_task(self, task_id):
     try:
+        _log.info('Submitting task %d', task_id)
         the_task = Task.objects.get(id=task_id)
         if the_task.in_pending_state():
+            _log.info('in pending state')
             the_task.set_queued_state()
 
-            return submit_job(
+            moab_id = submit_job(
                 the_task.id,
                 the_task.pbs_file)
+
+            _log.info("MOAB ID: {}".format(
+                moab_id))
+
+            return moab_id
         else:
             return None
     except:
         # TODO: need to be able to set the execption message here
-        process_failed_execution.apply_async(
-            (task_id,),
-            queue=settings.RESULT_MESSAGE_QUEUE_NAME)
+        process_failed_execution_signature.delay(task_id)
 
 
 @celery.shared_task(bind=True, trail=True)
-def kill_moab_task(self):
-    raise Exception("unimplemented")
-
+def kill_moab_task(self, task_id):
+    try:
+        the_task = Task.objects.get(id=task_id)
+        delete_moab_task(the_task.pbs_id)
+    except ObjectDoesNotExist as e:
+        _log.warning("Cannot kill task %s, does not exist. %s",
+                     task_id,
+                     str(e))
 
 # circular imports
 from workflow_engine.models.task import Task

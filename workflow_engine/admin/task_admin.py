@@ -7,7 +7,7 @@ from django.utils.safestring import mark_safe
 class TaskAdmin(admin.ModelAdmin):
     list_display = (
         'id',
-        'enqueued_task_object_class',
+        'enqueued_task_object_link',
         'duration',
         'retry_count',
         'start_run_time',
@@ -28,7 +28,7 @@ class TaskAdmin(admin.ModelAdmin):
         'archived',
         )
 
-    def enqueued_object_link(self, job_object):
+    def enqueued_task_object_link(self, job_object):
         enqueued_object = WorkflowController.get_enqueued_object(self)
 
         clz = enqueued_object._meta.db_table

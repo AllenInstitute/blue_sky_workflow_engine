@@ -2,7 +2,7 @@
 # license plus a third clause that prohibits redistribution for commercial
 # purposes without further permission.
 #
-# Copyright 2017. Allen Institute. All rights reserved.
+# Copyright 2017-2018. Allen Institute. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -43,7 +43,7 @@ _model_logger = logging.getLogger('workflow_engine.models')
 class WorkflowNode(models.Model):
     job_queue = models.ForeignKey(
         'workflow_engine.JobQueue')
-    parent = models.ForeignKey('self', null=True)
+    parent = models.ForeignKey('self', null=True, blank=True)
     is_head = models.BooleanField(default=False)
     workflow = models.ForeignKey(
         'workflow_engine.Workflow')

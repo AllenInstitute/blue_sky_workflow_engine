@@ -53,7 +53,6 @@ def load_workflow_config(yaml_file):
     }
 
 
-
 @celery.shared_task(bind=True)
 def ingest_task(self, workflow, message, tags):
     '''Receive the ingest message, look up the strategy class and

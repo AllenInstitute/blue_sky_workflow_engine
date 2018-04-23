@@ -60,8 +60,13 @@ class Job(models.Model):
     tags = models.CharField(max_length=255, null=True)
 
     def __str__(self):
+        try:
+            enqueued_object_name = str(self.get_enqueued_object())
+        except:
+            enqueued_object_name = "None"
+
         return "%s %s job %d" % (str(self.workflow_node),
-                                 str(self.get_enqueued_object()),
+                                 enqueued_object_name,
                                  self.id)
 
     def archive_record(self):

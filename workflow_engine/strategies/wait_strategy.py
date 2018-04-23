@@ -27,8 +27,9 @@ class WaitStrategy(ExecutionStrategy):
                 self.prep_task(task)
                 self.finish_task(task)
         except Exception as e:
-            task.set_error_message(
-                str(e) + ' - ' + str(traceback.format_exc()))
+            mess = str(e) + ' - ' + str(traceback.format_exc())
+            WaitStrategy._log.error(mess)
+            task.set_error_message(mess)
             self.fail_task(task)
 
     # deprected
