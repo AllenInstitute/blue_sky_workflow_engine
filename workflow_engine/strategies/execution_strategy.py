@@ -33,9 +33,6 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-from workflow_engine.celery.moab_tasks import submit_moab_task
-from workflow_engine.celery.result_tasks import process_pbs_id
-from workflow_engine.celery.worker_tasks import cancel_task
 from workflow_engine.strategies import base_strategy
 from django.conf import settings
 import os
@@ -43,6 +40,10 @@ import subprocess
 import traceback
 import logging
 import simplejson as json
+from workflow_engine.celery.signatures import process_pbs_id_signature,\
+    submit_moab_task_signature, cancel_task_signature
+from workflow_engine.celery.result_tasks import process_pbs_id
+from workflow_engine.celery.moab_tasks import submit_moab_task
 
 
 class ExecutionStrategy(base_strategy.BaseStrategy):
@@ -212,8 +213,8 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
             task.pbs_id = None
             task.save()
             self.run_asynchronous_task(task)
-            # task.set_queued_state()
         except Exception as e:
+            ExecutionStrategy._log.error(e)
             task.set_error_message(
                 str(e) + ' - ' + str(traceback.format_exc()))
             self.fail_task(task)
@@ -224,9 +225,7 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 
     def kill_pbs_task(self, task):
         if task.pbs_id != None:
-            cancel_task.apply_async(
-                (True, task.pbs_id),
-                queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
+            cancel_task_signature.delay(True, task.pbs_id)
 
     # Do not override
     def run_asynchronous_task(self, task):

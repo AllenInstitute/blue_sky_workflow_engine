@@ -37,6 +37,10 @@ from kombu import Exchange, Queue, binding
 from django.conf import settings
 import os
 import yaml
+import logging
+
+
+_log = logging.getLogger('workflow_client.client_settings')
 
 
 class settings_attr_dict(dict):
@@ -80,7 +84,12 @@ def configure_queues(app, name):
             settings.WORKFLOW_MESSAGE_QUEUE_NAME,
             [ binding(
                 workflow_engine_exchange,
-                routing_key='run') ]),
+                routing_key='workfow') ]),
+        Queue(
+            settings.MOAB_MESSAGE_QUEUE_NAME,
+            [ binding(
+                workflow_engine_exchange,
+                routing_key='moab') ]),
         Queue(
             settings.RESULT_MESSAGE_QUEUE_NAME,
             [ binding(
@@ -104,7 +113,7 @@ def invert_route_dict(rd):
 
 def route_task(name, args, kwargs,
                options, task=None, **kw):
-    _ROUTE_DICT = invert_route_dict({
+    route_task._ROUTE_DICT = invert_route_dict({
         settings.INGEST_MESSAGE_QUEUE_NAME: {
             'ingest_task',
             },
@@ -128,9 +137,11 @@ def route_task(name, args, kwargs,
             'process_failed_execution' }
     })
 
-    task_name = '.'.split(name)[-1]
+    task_name = name.split('.')[-1]
 
-    q = _ROUTE_DICT.get(task_name, 'null')
+    q = route_task._ROUTE_DICT.get(task_name, 'null')
+
+    _log.info('Routing task %s to %s', task_name, q)
 
     return { 'queue': q }
 

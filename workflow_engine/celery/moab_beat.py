@@ -35,14 +35,15 @@
 #
 import celery
 from django.conf import settings
-
+import django; django.setup()
 import logging.config
-import workflow_engine.celery.moab_tasks
 from workflow_client.client_settings import configure_worker_app
+from workflow_engine.celery.signatures import check_moab_status_signature
 
 
 app = celery.Celery('workflow_engine.celery.moab_beat')
 configure_worker_app(app, settings.APP_PACKAGE)
+app.conf.imports = ('workflow_engine.celery.moab_tasks',)
 
 
 # see: https://github.com/celery/celery/issues/3589
@@ -50,12 +51,7 @@ configure_worker_app(app, settings.APP_PACKAGE)
 def setup_periodic_tasks(sender, **kwargs):
     sender.add_periodic_task(
         15.0,
-        workflow_engine.celery.moab_tasks.check_moab_status.s(),
-        name='Check Moab Status',
-        # exchange=settings.APP_PACKAGE,
-        # routing_key='moab',
-        queue=settings.MOAB_MESSAGE_QUEUE_NAME,
-        delivery_mode='transient')  # see celery issue 3620
+        check_moab_status_signature)
 
 
 @celery.signals.after_setup_task_logger.connect

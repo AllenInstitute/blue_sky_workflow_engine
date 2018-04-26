@@ -42,7 +42,10 @@ import logging.config
 
 app = celery.Celery('workflow_engine.celery.moab_tasks')
 configure_worker_app(app, settings.APP_PACKAGE)
-app.conf.imports = ('workflow_engine.celery.moab_tasks',)
+app.conf.imports = (
+    'workflow_engine.celery.moab_tasks',
+    'workflow_engine.celery.result_tasks',
+    'workflow_engine.celery.worker_tasks')
 
 
 @celery.signals.after_setup_task_logger.connect

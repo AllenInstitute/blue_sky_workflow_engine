@@ -42,10 +42,13 @@ _model_logger = logging.getLogger('workflow_engine.models')
 class Executable(models.Model):
     name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=255, null=True)
-    static_arguments = models.CharField(max_length=255, null=True)
-    environment = models.CharField(max_length=1000, null=True)
+    static_arguments = models.CharField(max_length=255,
+                                        null=True, blank=True)
+    environment = models.CharField(max_length=1000,
+                                   null=True, blank=True)
     executable_path = models.CharField(max_length=1000)
-    pbs_executable_path = models.CharField(max_length=1000, null=True)
+    pbs_executable_path = models.CharField(max_length=1000,
+                                           null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     remote_queue = models.CharField(max_length=255, default='pbs')

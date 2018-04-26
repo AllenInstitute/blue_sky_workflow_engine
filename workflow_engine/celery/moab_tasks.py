@@ -38,14 +38,13 @@ from workflow_engine.celery import settings
 from workflow_client.nb_utils.moab_api import query_and_combine_states,\
     submit_job, delete_moab_task
 from django.core.exceptions import ObjectDoesNotExist
-from workflow_engine.celery.signatures import \
-    process_running_signature, \
-    process_failed_execution_signature, \
-    process_finished_execution_signature
 import logging
-# import django; django.setup()
 from celery.canvas import group
 import pandas as pd
+from workflow_engine.celery.result_tasks \
+    import process_running, process_finished_execution, process_failed_execution
+from workflow_engine.celery.signatures import process_failed_execution_signature
+import simplejson as json
 
 
 _log = logging.getLogger('workflow_engine.celery.moab_tasks')
@@ -62,13 +61,18 @@ def query_running_task_dict():
     return task_dict
 
 
+result_queue = settings.RESULT_MESSAGE_QUEUE_NAME
+
 result_actions = { 
     'running_message':
-        lambda x: process_running_signature(x),
+        lambda x: process_running.s(x).set(
+            queue=result_queue),
     'finished_message':
-        lambda x: process_finished_execution_signature(x),
+        lambda x: process_finished_execution.s(x).set(
+            queue=result_queue),
     'failed_message': 
-        lambda x: process_failed_execution_signature(x),
+        lambda x: process_failed_execution.s(x).set(
+            queue=result_queue)
 }
 
 
@@ -85,10 +89,13 @@ def check_moab_status(self):
             combined_workflow_moab_dataframe[col] == True]['task_id'].apply(fn)
         for (col,fn) in result_actions.items())))
 
-    _log.info(grp)
-
     grp.apply_async(
-        queue=settings.RESULT_MESSAGE_QUEUE_NAME)
+        broker_connection_timeout=10,
+        broker_connection_retry=False,
+        queue=settings.RESULT_MESSAGE_QUEUE_NAME,
+        on_raw_message=lambda x: _log.info('group result {}', str(x)))
+
+    _log.info('Result group:' + json.dumps(grp, indent=2))
 
     return 'OK'
 
@@ -112,8 +119,9 @@ def submit_moab_task(self, task_id):
             return moab_id
         else:
             return None
-    except:
-        # TODO: need to be able to set the execption message here
+    except Exception as e:
+        # TODO: need to be able to set the exception message here
+        _log.error(e)
         process_failed_execution_signature.delay(task_id)
 
 

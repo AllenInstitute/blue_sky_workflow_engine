@@ -38,6 +38,7 @@ from workflow_engine.import_class import import_class
 from django.core.exceptions import ObjectDoesNotExist
 import logging
 from django.conf import settings
+from workflow_engine.celery.signatures import run_workflow_node_jobs_signature
 
 
 class WorkflowController(object):
@@ -51,9 +52,7 @@ class WorkflowController(object):
                 id=workflow_node_id)
             job = Job.enqueue_object(
                 workflow_node, enqueued_object_id, priority)
-            run_workflow_node_jobs_by_id.apply_async(
-                (job.workflow_node.id,),
-                queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
+            run_workflow_node_jobs_signature.delay(job.workflow_node.id)
         except Exception as e:
             WorkflowController._logger.error(
                 'Something went wrong running jobs: ' + str(e) + "\n" + \
@@ -142,9 +141,7 @@ class WorkflowController(object):
 
         for job in jobs:
             job.set_pending_state()
-            run_workflow_node_jobs_by_id.apply_async(
-                (job.workflow_node.id,),
-                queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
+            run_workflow_node_jobs_signature.delay(job.workflow_node.id)
 
     @classmethod
     def enqueue_next_queue(cls, job):
@@ -198,9 +195,7 @@ class WorkflowController(object):
     def set_job_for_run(cls, job):
         WorkflowController._logger.info('set for run')
         job.set_pending_state()
-        run_workflow_node_jobs_by_id.apply_async(
-            (job.workflow_node.id,),
-            queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
+        run_workflow_node_jobs_signature.delay(job.workflow_node.id)
 
     @classmethod
     def set_jobs_for_run_by_id(cls, job_ids):
@@ -214,9 +209,7 @@ class WorkflowController(object):
         try:
             job = Job.objects.get(id=job_id)
             job.kill()
-            run_workflow_node_jobs_by_id.apply_async(
-                (job.workflow_node.id,),
-                queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
+            run_workflow_node_jobs_signature.delay(job.workflow_node.id)
         except ObjectDoesNotExist:
             WorkflowController._logger.warning(
                 'Tried to kill job %d which does not exist',
@@ -307,9 +300,7 @@ class WorkflowController(object):
             WorkflowController._logger.info(
                 "Job exception: %s" % (job.error_message))
             job.set_failed_state()
-            run_workflow_node_jobs_by_id.apply_async(
-                (job.workflow_node.id,),
-                queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
+            run_workflow_node_jobs_signature.delay(job.workflow_node.id)
 
     @classmethod
     def start_workflow(cls,
@@ -345,13 +336,12 @@ class WorkflowController(object):
 
         WorkflowController._logger.info("Start workflow job state: %s" % (str(job.run_state)))
 
-        run_workflow_node_jobs_by_id.apply_async(
-            (job.workflow_node.id,),
-            queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
+        run_workflow_node_jobs_signature.delay(job.workflow_node.id)
 
     @classmethod
     def get_enqueued_object(cls, task):
-        WorkflowController._logger.info('Task.get_enqueued_object')
+        WorkflowController._logger.info(
+            'WorkflowController.get_enqueued_object')
         if task.enqueued_task_object_class == None:
             WorkflowController._logger.info(
                 'enqueued_task_object_class is nil for task')

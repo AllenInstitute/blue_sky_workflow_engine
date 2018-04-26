@@ -34,11 +34,9 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 import celery
-#import django; django.setup()
 from django.core.exceptions import ObjectDoesNotExist
-from django.conf import settings
-from workflow_engine.celery.run_tasks \
-    import run_workflow_node_jobs_by_id
+from workflow_engine.celery.signatures \
+    import run_workflow_node_jobs_signature
 import logging
 import traceback
 
@@ -59,30 +57,38 @@ def get_task_strategy_by_task_id(task_id):
 
 @celery.shared_task(bind=True)
 def process_running(self, task_id):
+    _log.info('processing running task %s', task_id)
     (task, strategy) = get_task_strategy_by_task_id(task_id)
     strategy.running_task(task)
+
+    return 'set running for task {}'.format(task_id)
 
 
 @celery.shared_task(bind=True)
 def process_finished_execution(self, task_id):
+    _log.info('processing finished task %s', task_id)
     (task, strategy) = get_task_strategy_by_task_id(task_id)
     strategy.finish_task(task)
-    run_workflow_node_jobs_by_id.apply_async(
-        (task.job.workflow_node.id,),
-        queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
+    run_workflow_node_jobs_signature.delay(
+        task.job.workflow_node.id)
+
+    return 'set finished for task {}'.format(task_id)
 
 
 @celery.shared_task(bind=True)
 def process_failed_execution(self, task_id):
+    _log.info('processing failed execution task %s', task_id)
     (task, strategy) = get_task_strategy_by_task_id(task_id)
     strategy.fail_execution_task(task)
-    run_workflow_node_jobs_by_id.apply_async(
-        (task.job.workflow_node.id,),
-        queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
+    run_workflow_node_jobs_signature.delay(
+        task.job.workflow_node.id)
+
+    return 'set failed for task {}'.format(task_id)
 
 
 @celery.shared_task(bind=True)
 def process_pbs_id(self, pbs_id, task_id):
+    _log.info('processing pbs id %s task %s', pbs_id, task_id)
     try:
         (task, _) = get_task_strategy_by_task_id(task_id)
         task.set_queued_state()
@@ -92,6 +98,8 @@ def process_pbs_id(self, pbs_id, task_id):
             "Task {} for PBS id {} does not exist",
             task_id,
             pbs_id)
+
+    return 'done'
 
 
 # circular imports

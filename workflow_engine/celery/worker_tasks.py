@@ -1,13 +1,13 @@
-from django.conf import settings
-import django; django.setup()
+# import django; django.setup()
 import os
 import celery
 from workflow_engine.models.task import Task
 import traceback
 from workflow_engine.workflow_controller import WorkflowController
 import logging
-from workflow_engine.celery.result_tasks \
-    import process_failed_execution, process_finished_execution
+from workflow_engine.celery.signatures import \
+    process_failed_execution_signature, \
+    process_finished_execution_signature
 
 
 _log = logging.getLogger('workflow_engine.celery.worker_tasks')
@@ -72,15 +72,14 @@ def run_normal(self, full_executable, task_id, logfile):
     exit_code = os.system(full_executable)
 
     if exit_code == SUCCESS_EXIT_CODE:
-        process_finished_execution(task_id).apply_async((task_id))
+        process_finished_execution_signature.delay(task_id)
 
         with open(logfile, "a") as log:
-            log.write("SUCCESS - execution finished successfully for task " + str(task_id))
+            log.write("SUCCESS - execution finished successfully for task " +
+                      str(task_id))
 
     else:
-        process_failed_execution.apply_async(
-            (task_id,),
-            queue=settings.RESULT_MESSAGE_QUEUE_NAME)
+        process_failed_execution_signature.delay(task_id)
 
         with open(logfile, "a") as log:
             log.write("FAILURE - execution failed for task " + str(task_id))

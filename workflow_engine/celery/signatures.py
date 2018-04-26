@@ -34,9 +34,10 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 from celery import signature
-from workflow_engine.celery import settings
+from django.conf import settings
 
 
+#_EXCHANGE = settings.APP_PACKAGE
 #
 # INGEST TASKS
 #
@@ -45,6 +46,8 @@ ingest_signature = signature(
 ingest_signature.set(
     broker_connection_timeout=10,
     broker_connection_retry=False,
+    # exchange=_EXCHANGE,
+    routing_key='ingest',
     queue=settings.INGEST_MESSAGE_QUEUE_NAME)
 
 
@@ -56,6 +59,9 @@ check_moab_status_signature = signature(
 check_moab_status_signature.set(
     broker_connection_timeout=10,
     broker_connection_retry=False,
+    delivery_mode='transient',  # see celery issue 3620
+    # exchange=_EXCHANGE,
+    routing_key='moab',
     queue=settings.MOAB_MESSAGE_QUEUE_NAME)
 
 
@@ -64,6 +70,8 @@ submit_moab_task_signature = signature(
 submit_moab_task_signature.set(
     broker_connection_timeout=10,
     broker_connection_retry=False,
+    # exchange=_EXCHANGE,
+    routing_key='moab',
     queue=settings.MOAB_MESSAGE_QUEUE_NAME)
 
 
@@ -72,6 +80,8 @@ kill_moab_task_signature = signature(
 kill_moab_task_signature.set(
     broker_connection_timeout=10,
     broker_connection_retry=False,
+    # exchange=_EXCHANGE,
+    routing_key='moab',
     queue=settings.MOAB_MESSAGE_QUEUE_NAME)
 
 
@@ -83,15 +93,10 @@ process_running_signature = signature(
 process_running_signature.set(
     broker_connection_timeout=10,
     broker_connection_retry=False,
-    queue=settings.RESULT_MESSAGE_QUEUE_NAME)
-
-
-process_running_signature = signature(
-    'workflow_engine.celery.result_tasks.process_running')
-process_running_signature.set(
-    broker_connection_timeout=10,
-    broker_connection_retry=False,
-    queue=settings.RESULT_MESSAGE_QUEUE_NAME)
+    # exchange=_EXCHANGE,
+    routing_key='result',
+    queue=settings.RESULT_MESSAGE_QUEUE_NAME,
+    debug=True)
 
 
 process_finished_execution_signature = signature(
@@ -99,6 +104,8 @@ process_finished_execution_signature = signature(
 process_finished_execution_signature.set(
     broker_connection_timeout=10,
     broker_connection_retry=False,
+    # exchange=_EXCHANGE,
+    routing_key='result',
     queue=settings.RESULT_MESSAGE_QUEUE_NAME)
 
 
@@ -107,6 +114,8 @@ process_failed_execution_signature = signature(
 process_failed_execution_signature.set(
     broker_connection_timeout=10,
     broker_connection_retry=False,
+    # exchange=_EXCHANGE,
+    routing_key='result',
     queue=settings.RESULT_MESSAGE_QUEUE_NAME)
 
 
@@ -115,6 +124,8 @@ process_pbs_id_signature = signature(
 process_pbs_id_signature.set(
     broker_connection_timeout=10,
     broker_connection_retry=False,
+    # exchange=_EXCHANGE,
+    routing_key='result',
     queue=settings.RESULT_MESSAGE_QUEUE_NAME)
 
 
@@ -126,6 +137,8 @@ run_workflow_node_jobs_signature = signature(
 run_workflow_node_jobs_signature.set(
     broker_connection_timeout=10,
     broker_connection_retry=False,
+    # exchange=_EXCHANGE,
+    routing_key='workflow',
     queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
 
 
@@ -135,6 +148,8 @@ run_tasks_signature = signature(
 run_tasks_signature.set(
     broker_connection_timeout=10,
     broker_connection_retry=False,
+    # exchange=_EXCHANGE,
+    routing_key='moab',
     queue=settings.MOAB_MESSAGE_QUEUE_NAME)
 
 
@@ -143,6 +158,8 @@ create_job_signature = signature(
 create_job_signature.set(
     broker_connection_timeout=10,
     broker_connection_retry=False,
+    # exchange=_EXCHANGE,
+    routing_key='workflow',
     queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
 
 
@@ -151,6 +168,8 @@ queue_job_signature = signature(
 queue_job_signature.set(
     broker_connection_timeout=10,
     broker_connection_retry=False,
+    # exchange=_EXCHANGE,
+    routing_key='workflow',
     queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
 
 
@@ -159,6 +178,8 @@ run_normal_signature = signature(
 run_normal_signature.set(
     broker_connection_timeout=10,
     broker_connection_retry=False,
+    # exchange=_EXCHANGE,
+    routing_key='workflow',
     queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
 
 
@@ -167,6 +188,8 @@ kill_job_signature = signature(
 kill_job_signature.set(
     broker_connection_timeout=10,
     broker_connection_retry=False,
+    # exchange=_EXCHANGE,
+    routing_key='workflow',
     queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
 
 
@@ -175,4 +198,6 @@ cancel_task_signature = signature(
 cancel_task_signature.set(
     broker_connection_timeout=10,
     broker_connection_retry=False,
+    # exchange=_EXCHANGE,
+    routing_key='workflow',
     queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
