@@ -42,27 +42,33 @@ import logging
 from celery.canvas import group
 import pandas as pd
 from workflow_engine.celery.result_tasks \
-    import process_running, process_finished_execution, process_failed_execution
-from workflow_engine.celery.signatures import process_failed_execution_signature
+    import process_running, process_finished_execution, \
+    process_failed_execution, process_pbs_id, process_failed
+from workflow_engine.celery.signatures \
+    import process_failed_execution_signature
 import simplejson as json
 
 
 _log = logging.getLogger('workflow_engine.celery.moab_tasks')
 
 
-def query_running_task_dict():
+def query_running_task_dicts():
     tasks = Task.objects.filter(
         run_state__name__in=['QUEUED', 'RUNNING'])
 
-    task_dict = { t.id: t.run_state.name for t in tasks}
+    task_dicts = [{
+        'task_id': t.id,
+        'workflow_state': t.run_state.name,  # TODO: run_state
+        'moab_id': t.pbs_id } for t in tasks]
 
-    _log.info(task_dict)
+    _log.info('task dicts: ' + str(task_dicts))
 
-    return task_dict
+    return task_dicts
 
 
 result_queue = settings.RESULT_MESSAGE_QUEUE_NAME
 
+# Todo need to use moab id and task id in all cases
 result_actions = { 
     'running_message':
         lambda x: process_running.s(x).set(
@@ -70,8 +76,11 @@ result_actions = {
     'finished_message':
         lambda x: process_finished_execution.s(x).set(
             queue=result_queue),
-    'failed_message': 
+    'failed_execution_message': 
         lambda x: process_failed_execution.s(x).set(
+            queue=result_queue),
+    'failed_message':
+        lambda x: process_failed.s(x).set(
             queue=result_queue)
 }
 
@@ -80,7 +89,7 @@ result_actions = {
 def check_moab_status(self):
     combined_workflow_moab_dataframe = \
         query_and_combine_states(
-            query_running_task_dict())
+            query_running_task_dicts())
 
     _log.info('combined_dataframe' + str(combined_workflow_moab_dataframe))
 
@@ -118,11 +127,13 @@ def submit_moab_task(self, task_id):
 
             return moab_id
         else:
+            _log.info('Task in %s state', the_task.run_state)
             return None
     except Exception as e:
         # TODO: need to be able to set the exception message here
-        _log.error(e)
+        _log.error('Error submitting task %s', e)
         process_failed_execution_signature.delay(task_id)
+        return e
 
 
 @celery.shared_task(bind=True, trail=True)

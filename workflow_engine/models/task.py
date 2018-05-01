@@ -123,7 +123,7 @@ class Task(models.Model):
         # revoke(self.id, terminate=True)
         # strategy = self.get_strategy()
         # if strategy.is_execution_strategy():
-        kill_moab_task_signature.delay(self.pbs_id)
+        kill_moab_task_signature.delay(self.id)
 
         self.set_end_run_time()
 

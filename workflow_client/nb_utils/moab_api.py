@@ -18,7 +18,8 @@ def moab_url(
     oid=None,
     user=None,
     jobs=None,
-    tasks=None):
+    tasks=None,
+    moab_ids=None):
     url_list = [ _MOAB_ENDPOINT ]
     
     if table is not None:
@@ -49,6 +50,15 @@ def moab_url(
             "query=" + 
             requests.compat.quote_plus(
                 '{"customName": { $in: [%s]} }' % (task_list)))
+
+    if moab_ids is not None:
+        _log.info('MOAB IDS: %s', str(moab_ids))
+        moab_ids = [m for m in moab_ids if m is not None]
+        moab_list = '"' + '","'.join(moab_ids) + '"'
+        param_list.append(
+            "query=" + 
+            requests.compat.quote_plus(
+                '{"name": { $in: [%s]} }' % (moab_list)))
 
     param_list.append('api-version=3')
     
@@ -88,29 +98,35 @@ def moab_post(url, body_data):
         url,
         json=body_data,
         auth=moab_auth()
-    ).text   # todo: content?
+    ).text
+
+    result_data = json.loads(s)
+
+    return result_data
+
 
 
 def moab_delete(url):
     s = requests.delete(
         url,
         auth=moab_auth()
-    ).text   # todo: content?
+    ).content
 
-    #result_data = json.loads(s)
+    result_data = json.loads(s)
 
-    #return result_data
-    return s
+    return result_data
 
 
 def workflow_state_dataframe(state_dict):
     """
     state_dict: { id: "<state>" }
     """
-    workflow_state_df = pd.DataFrame.from_records(
-        list(state_dict.items()),
-        columns=['task_id', 'workflow_state'])
-    
+    workflow_state_df = pd.DataFrame(
+        state_dict,
+        columns=['task_id', 'workflow_state', 'moab_id'])
+
+    _log.info('workflow_state_df: ' + str(workflow_state_df))
+
     workflow_state_df['task_name'] = \
         workflow_state_df['task_id'].map(
             lambda s: 'task_%d' % (s))
@@ -118,21 +134,23 @@ def workflow_state_dataframe(state_dict):
     return workflow_state_df
 
 
-def query_moab_state(state_dict):
+def query_moab_state(state_dicts):
     """
-    state_dict: { id: "<state>" }
+    state_dicts: [{ 'moab_id': 'Moab.123'}, ... ]
     """
     moab_dict = moab_query(
         moab_url(
             table='jobs',
-            tasks=state_dict.keys()))
+            moab_ids=[d['moab_id'] for d in state_dicts]))
 
     moab_state_df = pd.DataFrame.from_records([
         (job['name'],
          job['customName'],
          job['states']['state'],
-         job['credentials']['user']) for job in moab_dict],
-        columns=['name', 'task_name', 'moab_state', 'user']
+         job['credentials']['user'],
+         job['completionCode']) for job in moab_dict],
+        columns=[
+            'moab_id', 'task_name', 'moab_state', 'user', 'exit_code']
     )
 
     return moab_state_df
@@ -143,7 +161,7 @@ def combine_workflow_moab_states(workflow_dataframe,
     combined_df = pd.DataFrame.merge(
         workflow_dataframe,
         moab_dataframe,
-        on="task_name",
+        on=["task_name", 'moab_id'],
         how="outer")
 
     # work around pandas issues w/ NaN in int columns
@@ -151,12 +169,14 @@ def combine_workflow_moab_states(workflow_dataframe,
     combined_df.task_id.fillna(0, inplace=True)
     combined_df.task_id = combined_df.task_id.astype(int)
 
+    # TODO: fail these
     combined_df['moab_state'] = \
-        combined_df['moab_state'].fillna('Expired')
+        combined_df['moab_state'].fillna('Unknown')
 
     combined_df['running_message'] = False
     combined_df['finished_message'] = False
     combined_df['failed_message'] = False
+    combined_df['failed_execution_message'] = False
 
     combined_df.loc[
         combined_df.workflow_state.isin(["QUEUED"]) &
@@ -165,13 +185,20 @@ def combine_workflow_moab_states(workflow_dataframe,
 
     combined_df.loc[
         combined_df.workflow_state.isin(["QUEUED","RUNNING"]) &
-        combined_df.moab_state.isin(["Completed"]),
+        combined_df.moab_state.isin(["Completed"]) &
+        (combined_df.exit_code == 0),
         'finished_message'] = True
 
     combined_df.loc[
         combined_df.workflow_state.isin(["QUEUED","RUNNING"]) &
-        combined_df.moab_state.isin(["Expired", "Removed", "Vacated"]),
+        combined_df.moab_state.isin(["Completed"]) &
+        (combined_df.exit_code != 0),
         'failed_message'] = True
+
+    combined_df.loc[
+        combined_df.workflow_state.isin(["QUEUED","RUNNING"]) &
+        combined_df.moab_state.isin(["Expired", "Removed", "Vacated"]),
+        'failed_execution_message'] = True
 
     return combined_df
 
@@ -212,13 +239,13 @@ def submit_job(
         'durationRequested': duration_seconds
     }
 
-    response_text = moab_post(
+    response_message = moab_post(
         url,
         body_data=payload)
 
-    response_message = json.loads(response_text)
-
     moab_id = response_message['name']
+
+    _log.info('MOAB ID: %s', moab_id)
 
     return moab_id
 

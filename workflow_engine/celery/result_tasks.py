@@ -83,6 +83,17 @@ def process_failed_execution(self, task_id):
     run_workflow_node_jobs_signature.delay(
         task.job.workflow_node.id)
 
+    return 'set failed execution for task {}'.format(task_id)
+
+
+@celery.shared_task(bind=True)
+def process_failed(self, task_id):
+    _log.info('processing failed task %s', task_id)
+    (task, strategy) = get_task_strategy_by_task_id(task_id)
+    strategy.fail_task(task)
+    run_workflow_node_jobs_signature.delay(
+        task.job.workflow_node.id)
+
     return 'set failed for task {}'.format(task_id)
 
 
@@ -92,7 +103,11 @@ def process_pbs_id(self, pbs_id, task_id):
     try:
         (task, _) = get_task_strategy_by_task_id(task_id)
         task.set_queued_state()
-        task.set_pbs_id(pbs_id)
+
+        if (pbs_id is not None):
+            task.set_pbs_id(pbs_id)
+        else:
+           _log.warn('Got None for moab id: %s', str(task_id)) 
     except ObjectDoesNotExist:
         _log.warn(
             "Task {} for PBS id {} does not exist",
