@@ -45,7 +45,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Blue Sky Workflow Engine'
-copyright = u'2017, Allen Institute for Brain Science'
+copyright = u'2017-2018, Allen Institute for Brain Science'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -174,7 +174,7 @@ html_show_copyright = False
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Allen SDKdoc'
+htmlhelp_basename = 'BlueSkydoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -193,7 +193,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'Allen SDK.tex', u'Allen SDK Documentation',
+  ('index', 'BlueSky.tex', u'Blue Sky Documentation',
    u'Allen Institute for Brain Science', 'manual'),
 ]
 
@@ -255,10 +255,10 @@ texinfo_documents = [
 # -- Options for Epub output ---------------------------------------------------
 
 # Bibliographic Dublin Core info.
-epub_title = u'Allen SDK'
+epub_title = u'Blue Sky'
 epub_author = u'Allen Institute for Brain Science'
 epub_publisher = u'Allen Institute for Brain Science'
-epub_copyright = u'2015, Allen Institute for Brain Science'
+epub_copyright = u'2017-2018, Allen Institute for Brain Science'
 
 # The language of the text. It defaults to the language option
 # or en if the language is not set.
