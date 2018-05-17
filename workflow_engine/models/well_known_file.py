@@ -50,6 +50,11 @@ class WellKnownFile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        file_r = self.filerecord_set.order_by('order').first()
+        return str(file_r)
+
+
     @classmethod
     def set(cls, full_path, attachable_object, well_known_file_type, task=None):
         #make sure file is valid
@@ -124,6 +129,8 @@ class WellKnownFile(models.Model):
             most_recent_file.save()
 
     def get_file_records(self):
+        # TODO: replace with wkf.filerecord_set.all()
+        # wkf.filerecord_set.order_by('order').first()
         return FileRecord.objects.filter(
             well_known_file_id=self.id).order_by('order')
 

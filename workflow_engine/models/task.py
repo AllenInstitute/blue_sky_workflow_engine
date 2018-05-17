@@ -285,9 +285,11 @@ class Task(models.Model):
         self.run_state = RunState.get_success_state()
         self.save()
 
-    def set_queued_state(self):
-        _logger.info("set queued state")
+    def set_queued_state(self, pbs_id=None):
+        _logger.info("set queued state: %s", str(pbs_id))
         self.run_state = RunState.get_queued_state()
+        if pbs_id is not None:
+            self.pbs_id = pbs_id
         self.save()
 
     def in_pending_state(self):
@@ -327,7 +329,6 @@ class Task(models.Model):
 
         with open(pbs_file, 'w') as file_handle:
             file_handle.write(pbs_file_contents)
-        os.chmod(pbs_file, 0o664)
 
         self.pbs_file = pbs_file
         self.save()

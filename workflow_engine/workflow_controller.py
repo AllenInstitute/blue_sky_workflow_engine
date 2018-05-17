@@ -385,5 +385,4 @@ from workflow_engine.models.task import Task
 from workflow_engine.models.run_state import RunState
 from workflow_engine.models.workflow_node import WorkflowNode
 from workflow_engine.models.workflow import Workflow
-from workflow_engine.celery.run_tasks \
-    import run_workflow_node_jobs_by_id
+

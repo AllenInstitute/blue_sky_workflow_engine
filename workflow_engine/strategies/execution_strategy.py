@@ -281,7 +281,7 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 
         with open(input_file, 'w') as in_file:
             json.dump(input_data, in_file, indent=2)
-        os.chmod(input_file, 0o664)
+        #os.chmod(input_file, 0o664)
 
     # Do not override
     # TODO: this seems too rigid

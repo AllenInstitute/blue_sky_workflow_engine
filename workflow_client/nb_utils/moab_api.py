@@ -81,16 +81,20 @@ def moab_auth():
 
 
 def moab_query(url):
-    s = requests.get(
-        url,
-    auth=moab_auth()).content
+    try:
+        result_data = requests.get(
+            url,
+            auth=moab_auth()).json()
 
-    result_data = json.loads(s)
+        if 'results' in result_data:
+            result_data = result_data['results']
 
-    if 'results' in result_data:
-        result_data = result_data['results']
+        return result_data
 
-    return result_data
+    except Exception as e:
+        _log.error('Moab query ' + str(e) + ', ' + ', ' + str(url))
+        raise e
+
 
 
 def moab_post(url, body_data):

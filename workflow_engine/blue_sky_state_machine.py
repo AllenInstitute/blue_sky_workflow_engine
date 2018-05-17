@@ -58,18 +58,36 @@ class BlueSkyStateMachine:
     def transitions(self, model):
         return self.machines[self.machine_key(model)]['transitions']
 
+    def in_state(self, model, state_machine_field, state_list):
+        try:
+            model._meta.get_field(state_machine_field)
+            current_state = getattr(model, state_machine_field)
+
+            BlueSkyStateMachine._log.info(
+                "%s in %s", str(current_state), str(state_list))
+
+            if current_state in state_list:
+                return True
+
+            return False
+        except FieldDoesNotExist:
+            mess = 'Field named: ' + str(state_machine_field) + ' does not exist'
+            BlueSkyStateMachine._log.error(mess)
+            raise Exception(mess)
+
     def can_transition(self, model, from_state, to_state):
         transitions = self.transitions(model)
         allowed = transitions.get(from_state, [])
 
         return to_state in allowed
 
-    def transition(self, model, state_machine_field, to_state):
+    def transition(self, model, state_machine_field, to_state, force=False):
         try:
             model._meta.get_field(state_machine_field)
+
             current_state = getattr(model, state_machine_field)
 
-            if self.can_transition(model, current_state, to_state):
+            if force or self.can_transition(model, current_state, to_state):
                 setattr(model, state_machine_field, to_state)
                 model.save()
             else:

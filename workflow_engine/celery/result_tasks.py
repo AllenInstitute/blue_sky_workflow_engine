@@ -101,13 +101,12 @@ def process_failed(self, task_id):
 def process_pbs_id(self, pbs_id, task_id):
     _log.info('processing pbs id %s task %s', pbs_id, task_id)
     try:
-        (task, _) = get_task_strategy_by_task_id(task_id)
-        task.set_queued_state()
-
         if (pbs_id is not None):
+            task = Task.objects.get(id=task_id)
+            task.set_queued_state()
             task.set_pbs_id(pbs_id)
         else:
-           _log.warn('Got None for moab id: %s', str(task_id)) 
+            _log.warn('Got None for moab id: %s', str(task_id)) 
     except ObjectDoesNotExist:
         _log.warn(
             "Task {} for PBS id {} does not exist",

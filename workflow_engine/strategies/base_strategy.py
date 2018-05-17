@@ -138,7 +138,7 @@ class BaseStrategy(object):
             os.mkdir(path)
         except:
             pass
-        os.chmod(path, mode)
+        # os.chmod(path, mode)
         res += [path]
         return res
 
