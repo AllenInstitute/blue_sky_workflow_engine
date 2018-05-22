@@ -36,7 +36,6 @@
 from django.db import models
 import logging
 from django.contrib.contenttypes.fields import GenericRelation
-from workflow_engine.models.configuration import Configuration
 _model_logger = logging.getLogger('workflow_engine.models')
 
 
@@ -54,7 +53,7 @@ class WorkflowNode(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     overwrite_previous_job = models.BooleanField(default=True)
     max_retries = models.IntegerField(default=3)
-    configurations = GenericRelation(Configuration)
+    configurations = GenericRelation('workflow_engine.Configuration')
 
     def __str__(self):
         return self.get_node_short_name()
@@ -94,3 +93,4 @@ class WorkflowNode(models.Model):
 # circular imports
 from workflow_engine.models.job import Job
 from workflow_engine.models.run_state import RunState
+from workflow_engine.models.configuration import Configuration
