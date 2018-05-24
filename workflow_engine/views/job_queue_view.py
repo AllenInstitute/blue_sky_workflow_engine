@@ -35,9 +35,9 @@
 #
 from django.http import JsonResponse
 from django.http import HttpResponse
-import traceback
 from django.template import loader
 from django.apps import apps
+from workflow_engine.views.decorators import object_json_response
 from workflow_engine.models.job_queue import JobQueue
 from workflow_engine.models import ONE
 from workflow_engine.views import shared, HEADER_PAGES
@@ -48,42 +48,8 @@ context = {
 }
 
 
-# TODO: generalize for any model
-def job_queue_json_response(fn):
-    def wrapper(request):
-        result = {
-            'success': True,
-            'message': '',
-            'payload': {} 
-            }
-
-        try:
-            if 'job_queue_id'in request.GET:
-                job_queue_ids = [ request.GET.get('job_queue_id') ]
-            elif 'job_queue_ids' in request.GET:
-                job_queue_ids = request.GET.get('job_queue_ids').split(',')
-
-            if job_queue_ids is not None:
-                records = JobQueue.objects.filter(id__in=job_queue_ids)
-                for job_queue_object in records:
-                    fn(job_queue_object, result)
-            else:
-                result['success'] = False
-                result['message'] = 'Missing job_queue_ids'
-        except Exception as e:
-                result['success'] = False
-                result['message'] = str(e) + ' - ' + str(traceback.format_exc())
-        except Exception as e:
-                result['success'] = False
-                result['message'] = str(e) + ' - ' + str(traceback.format_exc())
-
-        return JsonResponse(result)
-
-    return wrapper
-
-
-@job_queue_json_response
-def get_job_queues_show_data(job_queue_object, result):
+@object_json_response('job_queue_id', JobQueue)
+def get_job_queues_show_data(job_queue_object, request, result):
     result['payload'] = shared.order_payload([
         ('id', job_queue_object.id),
         ('name', job_queue_object.name),
@@ -101,6 +67,7 @@ def job_queues(request):
 
     return job_queues_page(request, ONE, url)
 
+
 def add_sort_job_queues(context, sort, url, set_params):
     context['sort'] = sort
     context['id_sort'] = shared.sort_helper('id', sort, url, set_params)
@@ -111,6 +78,7 @@ def add_sort_job_queues(context, sort, url, set_params):
     context['executable_sort'] = shared.sort_helper('executable', sort, url, set_params)
     context['created_at_sort'] = shared.sort_helper('created_at', sort, url, set_params)
     context['updated_at_sort'] = shared.sort_helper('updated_at', sort, url, set_params)
+
 
 def job_queues_page(request, page, url = None):
     job_queue_ids = request.GET.get('job_queue_ids')
@@ -153,7 +121,7 @@ def job_queues_page(request, page, url = None):
     shared.add_settings_info_to_context(context)
     return HttpResponse(template.render(context, request))
 
-def get_enqueued_object_classses(request):
+def get_enqueued_object_classes(request):
     result = {}
     success = True
     payload = []

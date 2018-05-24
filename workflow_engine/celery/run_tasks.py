@@ -49,7 +49,7 @@ def run_workflow_node_jobs_by_id(self, workflow_node_id):
         WorkflowController.run_workflow_node_jobs(workflow_node)
     except ObjectDoesNotExist as e:
         _log.error(str(e) + ' - ' + str(traceback.format_exc()))
-    
+
     return 'done'
 
 

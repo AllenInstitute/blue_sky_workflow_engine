@@ -84,7 +84,7 @@ def configure_queues(app, name):
             settings.WORKFLOW_MESSAGE_QUEUE_NAME,
             [ binding(
                 workflow_engine_exchange,
-                routing_key='workfow') ]),
+                routing_key='workflow') ]),
         Queue(
             settings.MOAB_MESSAGE_QUEUE_NAME,
             [ binding(

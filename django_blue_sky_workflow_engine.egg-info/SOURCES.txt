@@ -18,6 +18,7 @@ workflow_client/pbs_utils.py
 workflow_client/__pycache__/__init__.cpython-36.pyc
 workflow_client/__pycache__/celery_ingest.cpython-36-PYTEST.pyc
 workflow_client/__pycache__/celery_ingest.cpython-36.pyc
+workflow_client/__pycache__/client_settings.cpython-36-PYTEST.pyc
 workflow_client/__pycache__/client_settings.cpython-36.pyc
 workflow_client/__pycache__/pbs_utils.cpython-36.pyc
 workflow_client/ingest/__init__.py
@@ -43,7 +44,6 @@ workflow_engine/__init__.py
 workflow_engine/admin.py
 workflow_engine/apps.py
 workflow_engine/blue_sky_state_machine.py
-workflow_engine/celery.py
 workflow_engine/celeryconfig.py
 workflow_engine/file_holder.py
 workflow_engine/import_class.py
@@ -58,6 +58,7 @@ workflow_engine/admin/executable_admin.py
 workflow_engine/admin/job_admin.py
 workflow_engine/admin/job_queue_admin.py
 workflow_engine/admin/task_admin.py
+workflow_engine/admin/well_known_file_admin.py
 workflow_engine/admin/workflow_admin.py
 workflow_engine/celery/__init__.py
 workflow_engine/celery/ingest_tasks.py
@@ -84,13 +85,17 @@ workflow_engine/management/commands/__pycache__/workflow_worker.cpython-36.pyc
 workflow_engine/migrations/0001_initial.py
 workflow_engine/migrations/0002_configuration.py
 workflow_engine/migrations/0003_improved_json_configuration.py
-workflow_engine/migrations/0004_auto_20180423_1204.py
+workflow_engine/migrations/0004_blank_admin_fields.py
+workflow_engine/migrations/0005_blank_executable_fields.py
 workflow_engine/migrations/__init__.py
 workflow_engine/migrations/__pycache__/0001_initial.cpython-36.pyc
 workflow_engine/migrations/__pycache__/0002_configuration.cpython-36.pyc
 workflow_engine/migrations/__pycache__/0003_improved_json_configuration.cpython-36.pyc
 workflow_engine/migrations/__pycache__/0004_auto_20180412_1222.cpython-36.pyc
 workflow_engine/migrations/__pycache__/0004_auto_20180423_1204.cpython-36.pyc
+workflow_engine/migrations/__pycache__/0004_blank_admin_fields.cpython-36.pyc
+workflow_engine/migrations/__pycache__/0005_auto_20180425_1456.cpython-36.pyc
+workflow_engine/migrations/__pycache__/0005_blank_executable_fields.cpython-36.pyc
 workflow_engine/migrations/__pycache__/__init__.cpython-36.pyc
 workflow_engine/models/__init__.py
 workflow_engine/models/configuration.py
@@ -149,6 +154,7 @@ workflow_engine/static/workflow_engine/javascript/raphael.js
 workflow_engine/static/workflow_engine/javascript/treant.js
 workflow_engine/static/workflow_engine/javascript/tree_creator.js
 workflow_engine/static/workflow_engine/javascript/workflow_creator.js
+workflow_engine/static/workflow_engine/javascript/workflow_graph.js
 workflow_engine/strategies/__init__.py
 workflow_engine/strategies/base_strategy.py
 workflow_engine/strategies/execution_strategy.py
@@ -159,6 +165,7 @@ workflow_engine/strategies/__pycache__/__init__.cpython-36.pyc
 workflow_engine/strategies/__pycache__/base_strategy.cpython-36.pyc
 workflow_engine/strategies/__pycache__/execution_strategy.cpython-36.pyc
 workflow_engine/strategies/__pycache__/ingest_strategy.cpython-36.pyc
+workflow_engine/strategies/__pycache__/manual_strategy.cpython-36.pyc
 workflow_engine/strategies/__pycache__/wait_strategy.cpython-36.pyc
 workflow_engine/templates/executables.html
 workflow_engine/templates/home.html

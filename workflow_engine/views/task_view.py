@@ -40,10 +40,13 @@ from django.template import loader
 from workflow_engine.models.task import Task
 from workflow_engine.models import ONE
 from workflow_engine.views import shared, HEADER_PAGES
+from workflow_engine.views.decorators import object_json_response
+
 
 context = {
     'pages': HEADER_PAGES,
 }
+
 
 def tasks_page(request, page, url = None):
     job_id = request.GET.get('job_id')
@@ -102,6 +105,7 @@ def tasks(request):
 
     return tasks_page(request, ONE, url)
 
+
 def add_sort_tasks(context, sort, url, set_params):
     context['sort'] = sort
     context['id_sort'] = shared.sort_helper('id', sort, url, set_params)
@@ -112,42 +116,9 @@ def add_sort_tasks(context, sort, url, set_params):
     context['end_run_time_sort'] = shared.sort_helper('end_run_time', sort, url, set_params)
     context['run_state_sort'] = shared.sort_helper('run_state', sort, url, set_params)
 
-# TODO: generalize for any model
-def task_json_response(fn):
-    def wrapper(request):
-        result = {
-            'success': True,
-            'message': '',
-            'payload': {} 
-            }
 
-        try:
-            if 'task_id'in request.GET:
-                task_ids = [ request.GET.get('task_id') ]
-            elif 'task_ids' in request.GET:
-                task_ids = request.GET.get('task_ids').split(',')
-
-            if task_ids is not None:
-                records = Task.objects.filter(id__in=task_ids)
-                for task_object in records:
-                    fn(task_object, result)
-            else:
-                result['success'] = False
-                result['message'] = 'Missing task_ids'
-        except Exception as e:
-                result['success'] = False
-                result['message'] = str(e) + ' - ' + str(traceback.format_exc())
-        except Exception as e:
-                result['success'] = False
-                result['message'] = str(e) + ' - ' + str(traceback.format_exc())
-
-        return JsonResponse(result)
-
-    return wrapper
-
-
-@task_json_response
-def get_tasks_show_data(task_object, result):
+@object_json_response('task_id', Task)
+def get_tasks_show_data(task_object, request, result):
     result['payload'] = shared.order_payload([
         ('id', task_object.id),
         ('job_id', task_object.job_id),

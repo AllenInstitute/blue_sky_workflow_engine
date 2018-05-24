@@ -92,7 +92,7 @@ def record_json_response(fn):
                     data = {}
 
                 for record_object in records:
-                    fn(record_object, result, record_type, data)
+                    fn(record_object, request, result, record_type, data)
             else:
                 result['success'] = False
                 result['message'] = 'Missing record_ids'
@@ -109,7 +109,7 @@ def record_json_response(fn):
 
 
 @record_json_response
-def get_record_info(record, result, record_type, data):
+def get_record_info(record, request, result, record_type, data):
     if record_type == 'executable' and record is None:
         result['payload'] = shared.order_payload([
             ('name', ''),

@@ -89,8 +89,67 @@ class WorkflowNode(models.Model):
             workflow_node=self,
             archived=False)
 
+    def update(self,
+               current_disabled,
+               overwrite_previous_job,
+               max_retries,
+               batch_size,
+               priority):
+        prev_disabled = self.disabled
+
+        self.disabled = current_disabled
+        self.overwrite_previous_job = overwrite_previous_job,
+        self.max_retries = int(max_retries)
+        self.batch_size = int(batch_size)
+        self.priority = int(priority)
+
+        self.save()
+
+        return prev_disabled
+
+    def get_job_states(self):
+        result = {}
+        
+        running_state = RunState.get_running_state()
+        pending_state = RunState.get_pending_state()
+        queued_state = RunState.get_queued_state()
+        finished_execution_state = RunState.get_finished_execution_state()
+        success_state = RunState.get_success_state()
+        failed_execution_state = RunState.get_failed_execution_state()
+        failed_state = RunState.get_failed_state()
+        killed_state = RunState.get_process_killed_state()
+    
+        node_jobs = self.job_set.filter(archived=False)
+    
+        success_count = node_jobs.filter(
+            run_state_id__in=[success_state.id]).count()
+
+        failed_count = node_jobs.filter(
+            run_state_id__in=[
+                failed_execution_state.id,
+                failed_state.id,
+                killed_state.id]).count()
+                
+        running_count = node_jobs.filter(
+            run_state_id__in=[
+                running_state.id,
+                pending_state.id,
+                queued_state.id,
+                finished_execution_state.id]).count()
+
+        if success_count > 0:
+            result[success_state.name] = success_count
+
+        if failed_count > 0:
+            result[failed_state.name] = failed_count
+
+        if running_count > 0:
+            result[running_state.name] = running_count
+
+        return result
+
 
 # circular imports
 from workflow_engine.models.job import Job
 from workflow_engine.models.run_state import RunState
-from workflow_engine.models.configuration import Configuration
+

@@ -50,9 +50,21 @@ class Workflow(models.Model):
     def __str__(self):
         return self.name
 
-    def get_head_workfow_nodes(self):
-        return WorkflowNode.objects.filter(is_head=True, workflow=self.id)
+    def get_head_workflow_nodes(self):
+        return WorkflowNode.objects.filter(is_head=True, workflow=self)
 
+    def update(self, name, description, current_disabled):
+        prev_disabled = self.disabled
+    
+        if description == '':
+            description = None
+    
+        self.name = name
+        self.description = description
+        self.disabled = current_disabled
+        self.save()
+
+        return prev_disabled
 
 # circular imports
 from workflow_engine.models.workflow_node import WorkflowNode

@@ -37,7 +37,6 @@ import traceback
 from workflow_engine.import_class import import_class
 from django.core.exceptions import ObjectDoesNotExist
 import logging
-from django.conf import settings
 from workflow_engine.celery.signatures import run_workflow_node_jobs_signature
 
 
@@ -60,6 +59,12 @@ class WorkflowController(object):
 
         return job
 
+    @classmethod
+    def run_workflow_nodes(cls, workflow_object):
+        for workflow_node in WorkflowNode.objects.filter(
+            workflow=workflow_object):
+            if not workflow_node.disabled:
+                run_workflow_node_jobs_signature.delay(workflow_node.id)
 
     @classmethod
     def run_workflow_node_jobs(cls, workflow_node):

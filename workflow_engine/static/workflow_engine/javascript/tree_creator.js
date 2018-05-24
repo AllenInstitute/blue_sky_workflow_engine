@@ -1,5 +1,4 @@
 function TreeCreator(workflows, milliseconds_between_refresh){
-    UPDATE_PBS = '/workflow_engine/workflows/update_pbs';
     GET_ENQUEUED_OBJECTS_URL = '/workflow_engine/workflows/get_enqueued_objects';
     GET_HEAD_WORKFLOW_NODE_URL = '/workflow_engine/workflows/get_head_workflow_node_id';
     CREATE_JOB_URL = '/workflow_engine/workflows/create_job';
@@ -19,25 +18,6 @@ function TreeCreator(workflows, milliseconds_between_refresh){
     ONE_HUNDRED_THOUSAND = 100000;
 
     init(workflows, milliseconds_between_refresh);
-
-    this.update_pbs = function(id, workflow_id){
-        var use_pbs = $('#' + id).is(":checked");
-        var url = UPDATE_PBS + '?workflow_id=' + workflow_id + '&use_pbs=' + use_pbs;
-
-        var request = $.ajax({
-            method: "GET",
-            url: url,
-            dataType: "JSON",
-            async: false
-        });
-
-        //on success
-        request.done(function (data) {
-            if (!data.success){
-                alert('someting went wrong updating pbs - ' + data.message)
-            }
-        });
-    }
 
     function create_tree(workflow){
         var my_chart = new Treant(workflow, $);

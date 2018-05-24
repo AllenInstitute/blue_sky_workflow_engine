@@ -2,7 +2,7 @@
 # license plus a third clause that prohibits redistribution for commercial
 # purposes without further permission.
 #
-# Copyright 2017. Allen Institute. All rights reserved.
+# Copyright 2017-2018. Allen Institute. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -33,24 +33,21 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-from django.http import JsonResponse
 from django.http import HttpResponse
-from django.core.exceptions import ObjectDoesNotExist
-import traceback
 from django.template import loader
 from workflow_engine.models import ZERO
 from workflow_engine.models.workflow import Workflow
 from workflow_engine.models.workflow_node import WorkflowNode
 from workflow_engine.models.run_state import RunState
-from workflow_engine.models.job import Job
 from workflow_engine.import_class import import_class
-from workflow_engine.views import shared, HEADER_PAGES
+from workflow_engine.views   import shared, HEADER_PAGES
 from workflow_engine.workflow_controller import WorkflowController
-import workflow_engine.celery.worker_tasks as worker_tasks
+from workflow_engine.celery.signatures \
+    import run_workflow_node_jobs_signature, create_job_signature
+from workflow_engine.views.decorators \
+    import object_json_response, object_json_response2, object_json_all_response
 import logging
 import json
-from workflow_engine.celery.run_tasks import run_workflow_node_jobs_by_id
-from django.conf import settings
 
 
 _log = logging.getLogger('workflow_engine.views.workflow_view')
@@ -96,7 +93,7 @@ def workflows(request):
 
         workflow_setups.append({'name': workflow.name, 'id':workflow.id, 'use_pbs':workflow.use_pbs, 'disabled_class': disabled_class})
 
-        head_workflow_nodes = workflow.get_head_workfow_nodes()
+        head_workflow_nodes = workflow.get_head_workflow_nodes()
         _log.info('found %d head nodes' % (len(head_workflow_nodes)))
 
         for node in head_workflow_nodes:
@@ -116,6 +113,7 @@ def child_connector():
     style = {'arrow-end' : 'classic', 'stroke': '#bbb'}
     return {'style': style, 'type':'bCurve'} 
 
+
 def get_node_color_class(run_state, prev_run_state):
     if prev_run_state == 'failed_state':
         node_color_class = prev_run_state
@@ -128,74 +126,24 @@ def get_node_color_class(run_state, prev_run_state):
 
     return node_color_class
 
-def get_workflow_status(request):
-    result = {}
-    success = True
-    message = ''
-    payload = {}
 
-    try:
-        workflow_node_ids = request.GET.get('workflow_node_ids')
-    
-        if workflow_node_ids != None:
-            records = WorkflowNode.objects.filter(id__in=workflow_node_ids.split(','))
+@object_json_response('workflow_node_id', WorkflowNode)
+def get_workflow_status(node, request, result):
+    job_states = node.get_job_states()
+    node_color_class = get_node_color_class(None, None)
 
-            for record in records:
-                job_states = get_job_states(record)
-                node_color_class = get_node_color_class(None, None)
+    for name in job_states.keys():
+        node_color_class = get_node_color_class(name, node_color_class)
 
-                for name in job_states.keys():
-                    node_color_class = get_node_color_class(name, node_color_class)
+    node_data = {}
+    node_data['name'] = node.get_node_name()
+    node_data['node_color_class'] = node_color_class
 
-                node_data = {}
-                node_data['name'] = record.get_node_name()
-                node_data['node_color_class'] = node_color_class
+    result['payload'][node.id] = node_data
 
-                payload[record.id] = node_data
-        else:
-            success = False
-            message = 'Missing workflow_node_ids'
-    except Exception as e:
-            success = False
-            message = str(e) + ' - ' + str(traceback.format_exc())
-        
-    result['success'] = success
-    result['message'] = message
-    result['payload'] = payload
-
-    return JsonResponse(result)
-
-def get_job_states(node):
-    result = {}
-    
-    running_state = RunState.get_running_state()
-    pending_state = RunState.get_pending_state()
-    queued_state = RunState.get_queued_state()
-    finished_execution_state = RunState.get_finished_execution_state()
-
-    success_state = RunState.get_success_state()
-
-    failed_execution_state = RunState.get_failed_execution_state()
-    failed_state = RunState.get_failed_state()
-    killed_state = RunState.get_process_killed_state()
-
-    success_count = Job.objects.filter(run_state_id__in=[success_state.id], workflow_node_id=node.id, archived=False).count()
-    failed_count = Job.objects.filter(run_state_id__in=[failed_execution_state.id, failed_state.id, killed_state.id], workflow_node_id=node.id, archived=False).count()
-    running_count = Job.objects.filter(run_state_id__in=[running_state.id, pending_state.id, queued_state.id, finished_execution_state.id], workflow_node_id=node.id, archived=False).count()
-
-    if success_count > ZERO:
-        result[success_state.name] = success_count
-
-    if failed_count > ZERO:
-        result[failed_state.name] = failed_count
-
-    if running_count > ZERO:
-        result[running_state.name] = running_count
-
-    return result
 
 def get_node_content(node):
-    job_states = get_job_states(node)
+    job_states = node.get_job_states()
 
     node_color_class = get_node_color_class(None, None)
 
@@ -255,470 +203,194 @@ def build_node_structure(node):
     return node_structure
 
 
-def workflow_creator(request):
-    context['selected_page'] = 'workflow_creator'
-    template = loader.get_template('workflow_creator.html')
-    shared.add_settings_info_to_context(context)
-    return HttpResponse(template.render(context, request))
+@object_json_response('workflow_id', Workflow)
+def get_head_workflow_node_id(workflow_object, request, result):
+    result['payload'] = workflow_object.get_head_workflow_nodes().first().id
 
-def update_pbs(request):
-    result = {}
-    success = True
-    message = ''
 
-    try:
-        workflow_id = request.GET.get('workflow_id')
-        use_pbs = request.GET.get('use_pbs')
-
-        if workflow_id == None:
-            success = False
-            message = 'missing workflow_id param'
-        elif use_pbs == None:
-            success = False
-            message = 'missing use_pbs param'
-        else:
-            workflow = Workflow.objects.get(id=workflow_id)
-            use_pbs = (use_pbs == 'true')
-
-            workflow.use_pbs = use_pbs
-            workflow.save()
-
-    except ObjectDoesNotExist as e:
-        success = False
-        message = 'Could not find a workflow record with id of ' + str(workflow_id) 
-
-    except Exception as e:
-            success = False
-            message = str(e) + ' - ' + str(traceback.format_exc())
-        
-    result['success'] = success
-    result['message'] = message
-
-    return JsonResponse(result)
-
-def get_head_workflow_node_id(request):
-    result = {}
-    success = True
-    message = ''
-    payload = None
-
-    try:
-        workflow_id = request.GET.get('workflow_id')
-
-        if workflow_id == None:
-            success = False
-            message = 'missing workflow_id param'
-        else:
-            head_workflow_node = WorkflowNode.objects.get(is_head=True, workflow_id=workflow_id)
-            payload = head_workflow_node.id
-
-    except ObjectDoesNotExist as e:
-        success = False
-        message = 'Could not find a workflow record with id of ' + str(workflow_id) 
-
-    except Exception as e:
-            success = False
-            message = str(e) + ' - ' + str(traceback.format_exc())
-        
-    result['success'] = success
-    result['message'] = message
-    result['payload'] = payload
-
-    return JsonResponse(result)
-
-def get_enqueued_objects(request):
-    result = {}
-    success = True
-    message = ''
+@object_json_response('workflow_node_id', WorkflowNode)
+def get_enqueued_objects(workflow_node, request, result):
     record_names = []
     record_ids = {}
-    priority = None
-    enqueued_object_class = None
 
-    try:
-        workflow_node_id = request.GET.get('workflow_node_id')
+    enqueued_object_class = workflow_node.job_queue.enqueued_object_class
+    _log.debug('Workflow node job queue enqueued class name: %s' % (
+        (enqueued_object_class)))
 
-        if workflow_node_id == None:
-            success = False
-            message = 'missing workflow_node_id param'
-        else:
-            workflow_node = WorkflowNode.objects.get(id=workflow_node_id)
-            enqueued_object_class = workflow_node.job_queue.enqueued_object_class
-            _log.debug('Workflow node job queue enqueued class name: %s' % (
-                (enqueued_object_class)))
-            enqueued_object_class_instance = \
-                import_class(enqueued_object_class)
-            _log.debug('Workflow node job queue enqueued class: %s' % (
-                str(enqueued_object_class)))
-            for record in enqueued_object_class_instance.objects.all():
-                record_names.append(str(record))
-                record_ids[str(record)] = record.id
+    enqueued_object_class_instance = \
+        import_class(enqueued_object_class)
+    _log.debug('Workflow node job queue enqueued class: %s' % (
+        str(enqueued_object_class)))
 
-            record_names.sort()
+    for record in enqueued_object_class_instance.objects.all():
+        record_names.append(str(record))
+        record_ids[str(record)] = record.id
 
-            priority = workflow_node.priority
+    record_names.sort()
 
-    except ObjectDoesNotExist as e:
-        success = False
-        message = 'Could not find a workflow record with id of ' + \
-            str(workflow_node_id) 
-
-    except Exception as e:
-            success = False
-            message = str(e) + ' - ' + str(traceback.format_exc())
-        
-    result['success'] = success
-    result['message'] = message
     result['record_names'] = record_names
     result['record_ids'] = record_ids
-    result['priority'] = priority
-    result['enqueued_object_class'] = enqueued_object_class
-
-    return JsonResponse(result)
+    result['priority'] = workflow_node.priority
+    result['enqueued_object_class'] = enqueued_object_class.split('.')[-1]
 
 
-def run_jobs(request):
-    result = {}
-    success = True
-    message = ''
+@object_json_response('workflow_node_id', WorkflowNode)
+def run_jobs(workflow_node, request, result):
+    n = workflow_node.job_queue.name
+    result['message'] = n
+    WorkflowController.set_jobs_for_run(n)
 
+
+@object_json_response2('workflow_node_id')
+def create_job(workflow_node_id, request, result):
+    priority = request.GET.get('priority')
+    enqueued_object_id = request.GET.get('enqueued_object_id')
+
+    if priority == None:
+        result['success'] = False
+        result['message'] = 'missing priority param'
+    elif enqueued_object_id == None:
+        result['success'] = False
+        result['message'] = 'missing enqueued_object_id param'
+    else:
+        # TODO: get some kind of resonse here
+        create_job_signature.delay(
+            workflow_node_id,
+            enqueued_object_id,
+            priority)
+
+
+@object_json_response('workflow_node_id', WorkflowNode)
+def get_node_info(workflow_node, request, result):
+    payload = result['payload']
+
+    payload['job_queue'] = workflow_node.job_queue.name
+    payload['job_queue_link'] = \
+        'job_queues?job_queue_ids=' + \
+        str(workflow_node.job_queue.id)
     try:
-        workflow_node_id = request.GET.get('workflow_node_id')
-        workflow_node = WorkflowNode.objects.get(id=workflow_node_id)
-        n = workflow_node.job_queue.name
-        message = n
-        WorkflowController.set_jobs_for_run(n)
-    except ObjectDoesNotExist as e:
-        success = False
-        message = 'Could not find a workflow node with id of ' + \
-            str(workflow_node_id)
-    except Exception as e:
-            success = False
-            message = str(e) + ' - ' + str(traceback.format_exc())
-
-    result['success'] = success
-    result['message'] = message
-
-    return JsonResponse(result)
-
-
-def create_job(request):
-    result = {}
-    success = True
-    message = ''
-
-    try:
-        priority = request.GET.get('priority')
-        enqueued_object_id = request.GET.get('enqueued_object_id')
-        workflow_node_id = request.GET.get('workflow_node_id')
-
-        if priority == None:
-            success = False
-            message = 'missing priority param'
-        elif enqueued_object_id == None:
-            success = False
-            message = 'missing enqueued_object_id param'
-        elif workflow_node_id == None:
-            success = False
-            message = 'missing workflow_node_id param'
-        else:
-            # TODO: get some kind of resonse here
-            worker_tasks.create_job.apply_async((
-                workflow_node_id,
-                enqueued_object_id,
-                priority),
-                queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
-    except Exception as e:
-            success = False
-            message = str(e) + ' - ' + str(traceback.format_exc())
-        
-    result['success'] = success
-    result['message'] = message
-
-    return JsonResponse(result)
-
-def get_node_info(request):
-    result = {}
-    payload = {}
-    success = True
-    message = ''
-
-    try:
-        workflow_node_id = request.GET.get('workflow_node_id')
-
-        if workflow_node_id == None:
-            success = False
-            message = 'missing workflow_node_id param'
-        else:
-            workflow_node = WorkflowNode.objects.get(id=workflow_node_id)
-            payload['job_queue'] = workflow_node.job_queue.name
-            payload['job_queue_link'] = 'job_queues?job_queue_ids=' + str(workflow_node.job_queue.id)
-            try:
-                payload['executable'] = workflow_node.job_queue.executable.name
-                payload['executable_link'] = 'executables?executable_ids=' + str(workflow_node.job_queue.executable.id)
-            except:
-                payload['executable'] = ''
-                payload['executable_link'] = ''
-            
-            payload['enqueued_object_class'] = workflow_node.job_queue.enqueued_object_class
-            payload['disabled'] = workflow_node.disabled
-            payload['overwrite_previous_job'] = workflow_node.overwrite_previous_job
-            payload['max_retries'] = workflow_node.max_retries
-            payload['batch_size'] = workflow_node.batch_size    
-            payload['priority'] = workflow_node.priority    
-
-            pending_state = RunState.get_pending_state()
-            queued_state = RunState.get_queued_state()
-            running_state = RunState.get_running_state()
-            finished_execution_state = RunState.get_finished_execution_state()
-            failed_execution_state = RunState.get_failed_execution_state()
-            failed_state = RunState.get_failed_state()
-            success_state = RunState.get_success_state()
-            process_killed_state = RunState.get_process_killed_state()
-
-            number_of_jobs = Job.objects.filter(workflow_node_id=workflow_node_id, archived=False).count()
-            pending = Job.objects.filter(workflow_node_id=workflow_node_id, run_state=pending_state, archived=False).count()
-            queued = Job.objects.filter(workflow_node_id=workflow_node_id, run_state=queued_state, archived=False).count()
-            running = Job.objects.filter(workflow_node_id=workflow_node_id, run_state=running_state, archived=False).count()
-            finished_execution = Job.objects.filter(workflow_node_id=workflow_node_id, run_state=finished_execution_state, archived=False).count()
-            failed_execution = Job.objects.filter(workflow_node_id=workflow_node_id, run_state=failed_execution_state, archived=False).count()
-            failed = Job.objects.filter(workflow_node_id=workflow_node_id, run_state=failed_state, archived=False).count()
-            success_count = Job.objects.filter(workflow_node_id=workflow_node_id, run_state=success_state, archived=False).count()
-            process_killed = Job.objects.filter(workflow_node_id=workflow_node_id, run_state=process_killed_state, archived=False).count()
-
-            payload['number_of_jobs'] = number_of_jobs
-            payload['pending'] = pending
-            payload['queued'] = queued
-            payload['running'] = running
-            payload['finished_execution'] = finished_execution
-            payload['failed_execution'] = failed_execution
-            payload['failed'] = failed
-            payload['success_count'] = success_count
-            payload['process_killed'] = process_killed
-
-            payload['number_of_jobs_link'] = 'jobs/1/?workflow_node_ids=' + workflow_node_id
-            payload['pending_link'] = 'jobs/1/?run_state_ids=' + str(pending_state.id) + '&workflow_node_ids=' + workflow_node_id
-            payload['queued_link'] = 'jobs/1/?run_state_ids=' + str(queued_state.id) + '&workflow_node_ids=' + workflow_node_id
-            payload['running_link'] = 'jobs/1/?run_state_ids=' + str(running_state.id) + '&workflow_node_ids=' + workflow_node_id
-            payload['finished_execution_link'] = 'jobs/1/?run_state_ids=' + str(finished_execution_state.id) + '&workflow_node_ids=' + workflow_node_id
-            payload['failed_execution_link'] = 'jobs/1/?run_state_ids=' + str(failed_execution_state.id) + '&workflow_node_ids=' + workflow_node_id
-            payload['failed_link'] = 'jobs/1/?run_state_ids=' + str(failed_state.id) + '&workflow_node_ids=' + workflow_node_id
-            payload['success_count_link'] = 'jobs/1/?run_state_ids=' + str(success_state.id) + '&workflow_node_ids=' + workflow_node_id
-            payload['process_killed_link'] = 'jobs/1/?run_state_ids=' + str(process_killed_state.id) + '&workflow_node_ids=' + workflow_node_id
-
-    except ObjectDoesNotExist as e:
-        success = False
-        message = 'Could not find a workflow node record with id of ' + str(workflow_node_id) 
-
-    except Exception as e:
-            success = False
-            message = str(e) + ' - ' + str(traceback.format_exc())
-        
-    result['success'] = success
-    result['payload'] = payload
-    result['message'] = message
-
-    return JsonResponse(result)
-
-def update_workflow_node(request):
-    result = {}
-    payload = {}
-    success = True
-    message = ''
-
-    try:
-        workflow_node_id = request.GET.get('workflow_node_id')
-        disabled = request.GET.get('disabled')
-        overwrite = request.GET.get('overwrite')
-        max_retries = request.GET.get('max_retries')
-        batch_size = request.GET.get('batch_size')
-        priority = request.GET.get('priority')
-
-        if workflow_node_id == None:
-            success = False
-            message = 'missing workflow_node_id param'
-        elif disabled == None:
-            success = False
-            message = 'missing disabled param'
-        elif overwrite == None:
-            success = False
-            message = 'missing overwrite param'
-        elif max_retries == None:
-            success = False
-            message = 'missing max_retries param'
-        elif batch_size == None:
-            success = False
-            message = 'missing batch_size param'
-        elif priority == None:
-            success = False
-            message = 'missing priority param'
-        else:
-            workflow_node = WorkflowNode.objects.get(id=workflow_node_id)
-
-            current_disabled = (disabled == 'true')
-            prev_disabled = workflow_node.disabled
-
-            workflow_node.disabled = current_disabled
-            workflow_node.overwrite_previous_job = (overwrite == 'true')
-            workflow_node.max_retries = int(max_retries)
-            workflow_node.batch_size = int(batch_size)
-            workflow_node.priority = int(priority)
-            workflow_node.save()
-
-            run_workflow_node_jobs_by_id.apply_async(
-                (workflow_node.id,),
-                queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
-
-            #run jobs if this workflow was enabled
-            if not workflow_node.workflow.disabled and prev_disabled and not current_disabled:
-                run_workflow_node_jobs_by_id.apply_async(
-                    (workflow_node.id,),
-                    queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
-
-    except ObjectDoesNotExist as e:
-        success = False
-        message = 'Could not find a workflow node record with id of ' + str(workflow_node_id) 
-
-    except Exception as e:
-            success = False
-            message = str(e) + ' - ' + str(traceback.format_exc())
-        
-    result['success'] = success
-    result['payload'] = payload
-    result['message'] = message
-
-    return JsonResponse(result)
-
-def get_workflow_info(request):
-    result = {}
-    payload = {}
-    success = True
-    message = ''
-
-    try:
-        workflow_id = request.GET.get('workflow_id')
-
-        if workflow_id == None:
-            success = False
-            message = 'missing workflow_id param'
-        else:
-            workflow = Workflow.objects.get(id=workflow_id)
-            payload['name'] = workflow.name
-            payload['description'] = workflow.description
-            payload['disabled'] = workflow.disabled
-
-    except ObjectDoesNotExist as e:
-        success = False
-        message = 'Could not find a workflow record with id of ' + str(workflow_id) 
-
-    except Exception as e:
-            success = False
-            message = str(e) + ' - ' + str(traceback.format_exc())
-        
-    result['success'] = success
-    result['payload'] = payload
-    result['message'] = message
-
-    return JsonResponse(result)
-
-
-def monitor_workflow(request):
-    result = {}
-    payload = {}
-    success = True
-    message = ''
-
-    nodes = WorkflowNode.objects.all()
-
-    result['nodes'] = [ str(n) for n in nodes]
-#     result['nodes'] = [
-#         'n0', 'n1', 'n2', 'n3', 'n4',
-#         'n5', 'n6', 'n7', 'n8', 'n9',
-#         'n10', 'n11', 'n12', 'n13',
-#         'n14', 'n15', 'n16']
+        payload['executable'] = workflow_node.job_queue.executable.name
+        payload['executable_link'] = \
+            'executables?executable_ids=' + \
+            str(workflow_node.job_queue.executable.id)
+    except:
+        payload['executable'] = ''
+        payload['executable_link'] = ''
     
+    payload['enqueued_object_class'] = \
+        workflow_node.job_queue.enqueued_object_class.split('.')[-1]
+    payload['disabled'] = workflow_node.disabled
+    payload['overwrite_previous_job'] = workflow_node.overwrite_previous_job
+    payload['max_retries'] = workflow_node.max_retries
+    payload['batch_size'] = workflow_node.batch_size
+    payload['priority'] = workflow_node.priority
+
+    pending_state = RunState.get_pending_state()
+    queued_state = RunState.get_queued_state()
+    running_state = RunState.get_running_state()
+    finished_execution_state = RunState.get_finished_execution_state()
+    failed_execution_state = RunState.get_failed_execution_state()
+    failed_state = RunState.get_failed_state()
+    success_state = RunState.get_success_state()
+    process_killed_state = RunState.get_process_killed_state()
+
+    node_jobs = workflow_node.job_set.filter(archived=False)
+
+    payload['number_of_jobs'] = node_jobs.count()
+    payload['pending'] = node_jobs.filter(
+        run_state=pending_state).count()
+    payload['queued'] = node_jobs.filter(
+        run_state=queued_state).count()
+    payload['running'] = node_jobs.filter(
+        run_state=running_state).count()
+    payload['finished_execution'] = node_jobs.filter(
+        run_state=finished_execution_state).count()
+    payload['failed_execution'] = node_jobs.filter(
+        run_state=failed_execution_state).count()
+    payload['failed'] = node_jobs.filter(
+        run_state=failed_state).count()
+    payload['success_count'] = node_jobs.filter(
+        run_state=success_state).count()
+    payload['process_killed'] = node_jobs.filter(
+        run_state=process_killed_state).count()
+
+    payload['number_of_jobs_link'] = 'jobs/1/?workflow_node_ids=' + str(workflow_node.id)
+    payload['pending_link'] = 'jobs/1/?run_state_ids=' + str(pending_state.id) + '&workflow_node_ids=' + str(workflow_node.id)
+    payload['queued_link'] = 'jobs/1/?run_state_ids=' + str(queued_state.id) + '&workflow_node_ids=' + str(workflow_node.id)
+    payload['running_link'] = 'jobs/1/?run_state_ids=' + str(running_state.id) + '&workflow_node_ids=' + str(workflow_node.id)
+    payload['finished_execution_link'] = 'jobs/1/?run_state_ids=' + str(finished_execution_state.id) + '&workflow_node_ids=' + str(workflow_node.id)
+    payload['failed_execution_link'] = 'jobs/1/?run_state_ids=' + str(failed_execution_state.id) + '&workflow_node_ids=' + str(workflow_node.id)
+    payload['failed_link'] = 'jobs/1/?run_state_ids=' + str(failed_state.id) + '&workflow_node_ids=' + str(workflow_node.id)
+    payload['success_count_link'] = 'jobs/1/?run_state_ids=' + str(success_state.id) + '&workflow_node_ids=' + str(workflow_node.id)
+    payload['process_killed_link'] = 'jobs/1/?run_state_ids=' + str(process_killed_state.id) + '&workflow_node_ids=' + str(workflow_node.id)
+
+    result['payload'] = payload
+
+
+@object_json_response('workflow_node_id', WorkflowNode)
+def update_workflow_node(workflow_node, request, result):
+    disabled = request.GET.get('disabled')
+    overwrite = request.GET.get('overwrite')
+    max_retries = request.GET.get('max_retries')
+    batch_size = request.GET.get('batch_size')
+    priority = request.GET.get('priority')
+
+    if disabled == None:
+        result['success'] = False
+        result['message'] = 'missing disabled param'
+    elif overwrite == None:
+        result['success'] = False
+        result['message'] = 'missing overwrite param'
+    elif max_retries == None:
+        result['success'] = False
+        result['message'] = 'missing max_retries param'
+    elif batch_size == None:
+        result['success'] = False
+        result['message'] = 'missing batch_size param'
+    elif priority == None:
+        result['success'] = False
+        result['message'] = 'missing priority param'
+    else:
+        current_disabled = (disabled == 'true')
+
+        prev_disabled = workflow_node.update(
+            current_disabled,
+            (overwrite == 'true'),
+            int(max_retries),
+            int(batch_size),
+            int(priority))
+
+        #run jobs if this workflow was enabled
+        if not workflow_node.workflow.disabled and prev_disabled and not current_disabled:
+            run_workflow_node_jobs_signature.delay(workflow_node.id)
+
+
+@object_json_response('workflow_id', Workflow)
+def get_workflow_info(workflow_object, request, result):
+    result['payload']['name'] = workflow_object.name
+    result['payload']['description'] = workflow_object.description
+    result['payload']['disabled'] = workflow_object.disabled
+
+
+@object_json_all_response(WorkflowNode)
+def monitor_workflow(nodes, request, result):
+    result['nodes'] = [ str(n) for n in nodes]
+
     result['edges'] = [ {
         'source': str(n.parent),
         'target': str(n) } for n in nodes
         if n.parent is not None ]
-    
-#     result['edges'] = [
-#         { 'source': 'n0', 'target': 'n1' },
-#         { 'source': 'n1', 'target': 'n2' },
-#         { 'source': 'n1', 'target': 'n3' },
-#         { 'source': 'n4', 'target': 'n5' },
-#         { 'source': 'n4', 'target': 'n6' },
-#         { 'source': 'n6', 'target': 'n7' },
-#         { 'source': 'n6', 'target': 'n8' },
-#         { 'source': 'n8', 'target': 'n9' },
-#         { 'source': 'n8', 'target': 'n10' },
-#         { 'source': 'n11', 'target': 'n12' },
-#         { 'source': 'n12', 'target': 'n13' },
-#         { 'source': 'n13', 'target': 'n14' },
-#         { 'source': 'n13', 'target': 'n15' },
-#         { 'source': 'n16', 'target': 'n12' },
-#          ]
-
-    result['success'] = success
-    result['payload'] = payload
-    result['message'] = message
-
-    return JsonResponse(result)
 
 
-def update_workflow(request):
-    result = {}
-    payload = {}
-    success = True
-    message = ''
+@object_json_response(id_name='workflow_id', clazz=Workflow)
+def update_workflow(workflow_object, request, response):
+    name = request.GET.get('name')
+    description = request.GET.get('description')
+    current_disabled = (request.GET.get('disabled') == 'true')
 
-    try:
-        workflow_id = request.GET.get('workflow_id')
-        name = request.GET.get('name')
-        description = request.GET.get('description')
-        disabled = request.GET.get('disabled')
+    prev_disabled = workflow_object.update(
+        name, description, current_disabled)
 
-        if workflow_id == None:
-            success = False
-            message = 'missing workflow_id param'
-        elif name == None:
-            success = False
-            message = 'missing name param'
-        elif disabled == None:
-            success = False
-            message = 'missing disabled param'
-        else:
-            workflow = Workflow.objects.get(id=workflow_id)
-
-            current_disabled = (disabled == 'true')
-            prev_disabled = workflow.disabled
-
-            if description == '':
-                description = None
-
-            workflow.name = name
-            workflow.description = description
-            workflow.disabled = current_disabled
-            workflow.save()
-
-            #run jobs if this workflow was enabled
-            if prev_disabled and not current_disabled:
-                for workflow_node in WorkflowNode.objects.filter(workflow=workflow):
-                    if not workflow_node.disabled:
-                        run_workflow_node_jobs_by_id.apply_async(
-                            (workflow_node.id,),
-                            queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
-
-    except ObjectDoesNotExist as e:
-        success = False
-        message = 'Could not find a workflow record with id of ' + str(workflow_id) 
-
-    except Exception as e:
-            success = False
-            message = str(e) + ' - ' + str(traceback.format_exc())
-        
-    result['success'] = success
-    result['payload'] = payload
-    result['message'] = message
-
-    return JsonResponse(result)
+    #run jobs if this workflow was enabled
+    if prev_disabled and not current_disabled:
+        WorkflowController.run_workflow_nodes(workflow_object)

@@ -19,7 +19,7 @@ function BaseWorkflow(milliseconds_between_refresh){
     RUN_ALL_JOBS = '/workflow_engine/jobs/run_all';
     DOWNLOAD_BASH_URL = '/workflow_engine/tasks/download_bash';
     GET_EXECUTABLES_URL = '/workflow_engine/executables/get_names';
-    GET_ENQUEUED_OBJECT_CLASSES_URL = '/workflow_engine/job_queues/get_enqueued_object_classses';
+    GET_ENQUEUED_OBJECT_CLASSES_URL = '/workflow_engine/job_queues/get_enqueued_object_classes';
     GET_SEARCH_DATA_URL = '/workflow_engine/get_search_data';
     var search_criteria = {};
     var search_set = false;
@@ -673,7 +673,7 @@ function BaseWorkflow(milliseconds_between_refresh){
             var executables = get_executables();
             executables.push('');
             valid = validate_acceptable_field(id, type, 'executable', executables) && valid
-            valid = validate_acceptable_field(id, type, 'enqueued_object_class', get_enqueued_object_classses()) && valid
+            valid = validate_acceptable_field(id, type, 'enqueued_object_class', get_enqueued_object_classes()) && valid
 
         }
         else if(id = 'new' && type == 'job'){
@@ -790,8 +790,8 @@ function BaseWorkflow(milliseconds_between_refresh){
         }
     }
 
-    function get_enqueued_object_classses(){
-        var enqueued_object_classses = [];
+    function get_enqueued_object_classes(){
+        var enqueued_object_classes = [];
         var url = GET_ENQUEUED_OBJECT_CLASSES_URL;
 
         var request = $.ajax({
@@ -804,14 +804,14 @@ function BaseWorkflow(milliseconds_between_refresh){
         //on success
         request.done(function (data) {
             if (data.success){
-                enqueued_object_classses = data.payload
+                enqueued_object_classes = data.payload
             }
             else{
                 alert('someting went wrong loading enqueued object classes')
             }
         });
 
-        return enqueued_object_classses;
+        return enqueued_object_classes;
     }
 
     function get_executables(){
@@ -851,12 +851,12 @@ function BaseWorkflow(milliseconds_between_refresh){
 
     function add_enqueued_object_class_lookahead(id, type){
         var enqueued_object_class_id = get_create_update_id(id, type, 'enqueued_object_class')
-        var enqueued_object_classses = get_enqueued_object_classses();
+        var enqueued_object_classes = get_enqueued_object_classes();
 
         var input = $('#' + enqueued_object_class_id);
 
         input.autocomplete({
-            source: enqueued_object_classses,
+            source: enqueued_object_classes,
             minLength:0
         });
 

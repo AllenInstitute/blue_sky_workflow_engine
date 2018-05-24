@@ -33,31 +33,35 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-from django.http import JsonResponse
 from django.http import HttpResponse
-from django.conf import settings
-import traceback
 from django.template import loader
 from workflow_engine.models.job import Job
 from workflow_engine.models.workflow_node import WorkflowNode
 from workflow_engine.models import ONE
 from workflow_engine.views import shared, HEADER_PAGES
-import workflow_engine.celery.worker_tasks as worker_tasks
+from workflow_engine.celery.signatures \
+    import queue_job_signature, kill_job_signature
 import logging
+from workflow_engine.views.decorators \
+    import object_json_response, object_json_response2
 
+
+_TIMEOUT = 20
 _log = logging.getLogger('workflow_engine.views.job_view')
+
 
 context = {
     'pages': HEADER_PAGES,
 }
+
 
 def jobs(request):
     url = request.get_full_path() + '/1/'
 
     return jobs_page(request, ONE, url)
 
-def jobs_page(request, page, url=None):
 
+def jobs_page(request, page, url=None):
     job_ids = request.GET.get('job_ids')
     sort = request.GET.get('sort')
 
@@ -78,7 +82,8 @@ def jobs_page(request, page, url=None):
         records = Job.objects.filter(archived=False)
 
     if workflow_node_ids != None:
-        records = records.filter(workflow_node_id__in=(workflow_node_ids.split(',')))
+        records = records.filter(
+            workflow_node_id__in=(workflow_node_ids.split(',')))
         set_params = True
 
     if run_state_ids != None:
@@ -117,108 +122,28 @@ def add_sort_jobs(context, sort, url, set_params):
     context['duration_sort'] = shared.sort_helper('duration', sort, url, set_params)
     context['run_state_id_sort'] = shared.sort_helper('run_state_id', sort, url, set_params)
 
-def job_json_response(fn):
-    def wrapper(request):
-        result = {
-            'success': True,
-            'message': '',
-            'payload': {} 
-            }
 
-        try:
-            if 'job_id'in request.GET:
-                job_ids = [ request.GET.get('job_id') ]
-            elif 'job_ids' in request.GET:
-                job_ids = request.GET.get('job_ids').split(',')
-
-            if job_ids is not None:
-                records = Job.objects.filter(id__in=job_ids)
-                for job_object in records:
-                    fn(job_object, result)
-            else:
-                result['success'] = False
-                result['message'] = 'Missing job_ids'
-        except Exception as e:
-                result['success'] = False
-                result['message'] = str(e) + ' - ' + str(traceback.format_exc())
-        except Exception as e:
-                result['success'] = False
-                result['message'] = str(e) + ' - ' + str(traceback.format_exc())
-
-        return JsonResponse(result)
-
-    return wrapper
-
-# TODO: generalize for any model
-def job_json_response2(fn):
-    def wrapper(request):
-        result = {
-            'success': True,
-            'message': '',
-            'payload': {} 
-            }
-
-        try:
-            if 'job_id'in request.GET:
-                job_ids = [ request.GET.get('job_id') ]
-            elif 'job_ids' in request.GET:
-                job_ids = request.GET.get('job_ids').split(',')
-            else:
-                job_ids = None
-
-            if job_ids is not None:
-                fn(job_ids, result)
-            else:
-                result['success'] = False
-                result['message'] = 'Missing job_ids'
-
-            _log.info(result)
-        except Exception as e:
-                result['success'] = False
-                mess = str(e) + ' - ' + str(traceback.format_exc())
-                _log.error(mess)
-                result['message'] = mess
-        except Exception as e:
-                result['success'] = False
-                mess = str(e) + ' - ' + str(traceback.format_exc())
-                _log.error(mess)
-                result['message'] = mess
-
-        return JsonResponse(result)
-
-    return wrapper
-
-
-@job_json_response2
-def queue_job(job_id, result):
-    r = worker_tasks.queue_job.apply_async(
-        (job_id,),
-        queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
-    outp = r.get()
+@object_json_response2('job_id')
+def queue_job(job_id, request, result):
+    r = queue_job_signature.delay(job_id)
+    outp = r.wait(_TIMEOUT)
     _log.info('QUEUE_JOB ' + str(outp))
-    #WorkflowController.set_job_for_run(job_object)
 
 
-@job_json_response2
-def kill_job(job_id, result):
-    r = worker_tasks.kill_job.apply_async(
-        (job_id[0],),
-        queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
-    outp = r.get()
+@object_json_response2('job_id')
+def kill_job(job_id, request, result):
+    r = kill_job_signature.delay(job_id[0])
+    outp = r.wait(_TIMEOUT)
     _log.info('QUEUE_JOB ' + str(outp))
-    #Job.kill_job(job_id)
-    # job_object.kill()
 
 
-@job_json_response2
-def run_all_jobs(job_id, response):
-    worker_tasks.queue_job.apply_async(
-        (job_id,),
-        queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
+@object_json_response2('job_id')
+def run_all_jobs(job_id, request, response):
+    queue_job_signature.delay(job_id)
 
 
-@job_json_response
-def get_job_status(job_object, result):
+@object_json_response(id_name='job_id', clazz=Job)
+def get_job_status(job_object, request, result):
     job_data = {}
     job_data['run_state_name'] = job_object.run_state.name
     job_data['start_run_time'] = job_object.get_start_run_time()
@@ -228,8 +153,8 @@ def get_job_status(job_object, result):
     result['payload'][job_object.id] = job_data
 
 
-@job_json_response
-def get_job_show_data(job_object, result):
+@object_json_response(id_name='job_id', clazz=Job)
+def get_job_show_data(job_object, request, result):
     result['payload'] = shared.order_payload([
         ('id', job_object.id),
         ('enqueued_object_id', job_object.enqueued_object_id),

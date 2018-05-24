@@ -14,3 +14,46 @@ Celery Task Queue and RabbitMQ Broker Configuration
  * blue_sky_settings.yml
  * workflow_config.yml
  * DJANGO_SETTINGS_MODULE - settings.py
+ * Moab credentials
+ * Mounting writable volumes in Docker
+
+
+Restarting the Worker Processes
+-------------------------------
+
+cd /at_em_imaging_workflow
+./restart_processes.sh
+
+
+Restarting the Docker Container
+-------------------------------
+
+This is necessary if you edit a volume-mounted file (for example settings.py)
+
+
+Applying Database Migrations
+----------------------------
+
+cd /at_em_imaging_workflow
+python -m manage showmigrations
+python -m manage migrate
+
+
+Django Shell
+------------
+
+cd /at_em_imaging_workflow
+django-admin shell
+
+
+Restoring a Nightly Backup Database
+-----------------------------------
+
+# backups are stored at /allen/ai/sqlbkup/vol_assem
+# delete all existing data
+django-admin flush
+# using the postgres command line tool
+pg_restore -n public -v -U <db username> -h <db host> -p <db port> -d vol_assem /allen/ai/sqlbkup/vol/assem/vol_assem_pg_20180307_2247
+
+
+

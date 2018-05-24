@@ -2,7 +2,7 @@
 # license plus a third clause that prohibits redistribution for commercial
 # purposes without further permission.
 #
-# Copyright 2017. Allen Institute. All rights reserved.
+# Copyright 2017-2018. Allen Institute. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -35,8 +35,7 @@
 #
 from workflow_engine.strategies import base_strategy
 import traceback
-from workflow_engine.celery.run_tasks import run_workflow_node_jobs_by_id
-from django.conf import settings
+from workflow_engine.celery.signatures import run_workflow_node_jobs_signature
 
 class ManualStrategy(base_strategy.BaseStrategy):
     #####everthing bellow this can be overriden#####
@@ -66,9 +65,10 @@ class ManualStrategy(base_strategy.BaseStrategy):
             if task.job.all_tasks_finished():
                 task.job.set_success_state()
                 task.job.set_end_run_time()
-                run_workflow_node_jobs_by_id.apply_async(
-                    (task.job.workflow_node.id,),
-                    queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
+
+                run_workflow_node_jobs_signature.delay(
+                    task.job.workflow_node.id)
+
                 WorkflowController.enqueue_next_queue(task.job)
 
         return finished

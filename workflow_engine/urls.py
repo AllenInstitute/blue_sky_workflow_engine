@@ -69,8 +69,6 @@ urlpatterns = [
     
     #workflows
     url(r'^workflows$', workflow_view.workflows, name='workflows'),
-    url(r'^workflow_creator$', workflow_view.workflow_creator, name='workflow_creator'),
-    url(r'^workflows/update_pbs$', workflow_view.update_pbs, name='workflows'),
     url(r'^workflows/get_head_workflow_node_id$', workflow_view.get_head_workflow_node_id, name='workflows'),
     url(r'^workflows/get_enqueued_objects$', workflow_view.get_enqueued_objects, name='workflows'),
     url(r'^workflows/run_jobs$', workflow_view.run_jobs, name='workflows'),
@@ -86,7 +84,7 @@ urlpatterns = [
     url(r'^job_queues/get_show_data/$', job_queue_view.get_job_queues_show_data, name='job_queues'),
     url(r'^job_queues$', job_queue_view.job_queues, name='job_queues'),
     url(r'^job_queues/([0-9]+)/$', job_queue_view.job_queues_page, name='job_queues'),
-    url(r'^job_queues/get_enqueued_object_classses$', job_queue_view.get_enqueued_object_classses, name='job_queues'),
+    url(r'^job_queues/get_enqueued_object_classes$', job_queue_view.get_enqueued_object_classes, name='job_queues'),
 
     #executable
     url(r'^executables/([0-9]+)/$', executable_view.executables_page, name='executables'),
