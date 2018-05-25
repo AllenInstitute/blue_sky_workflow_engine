@@ -57,11 +57,6 @@ class WorkflowConfig:
                 if s['key'] in parents:
                     state['parents'] = parents[s['key']]
 
-                if 'manual' in s and s['manual'] is True:
-                    state['manual'] = True
-                else:
-                    state['manual'] = False
-
                 if 'workflow' in s and s['workflow'] is True:
                     state['workflow'] = True
                 else:

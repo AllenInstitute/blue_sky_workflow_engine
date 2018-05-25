@@ -43,7 +43,7 @@ from celery.canvas import group
 import pandas as pd
 from workflow_engine.celery.result_tasks \
     import process_running, process_finished_execution, \
-    process_failed_execution, process_pbs_id, process_failed
+    process_failed_execution, process_failed
 from workflow_engine.celery.signatures \
     import process_failed_execution_signature
 import simplejson as json
@@ -134,6 +134,14 @@ def submit_moab_task(self, task_id):
         _log.error('Error submitting task %s', e)
         process_failed_execution_signature.delay(task_id)
         return e
+
+
+# TODO: change name to something like process task state
+# Not sure if we still need name
+# Do need a UI task like this
+@celery.shared_task(bind=True, soft_time_limit=10, time_limit=30)
+def run_task(self, name, args):
+    raise Exception("Removed/Unimplemented")
 
 
 @celery.shared_task(bind=True, trail=True)

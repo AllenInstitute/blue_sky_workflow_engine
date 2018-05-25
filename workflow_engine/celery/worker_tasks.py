@@ -1,13 +1,14 @@
-# import django; django.setup()
-import os
-import celery
 from workflow_engine.models.task import Task
-import traceback
+from workflow_engine.models.workflow_node import WorkflowNode
 from workflow_engine.workflow_controller import WorkflowController
-import logging
+from django.core.exceptions import ObjectDoesNotExist
 from workflow_engine.celery.signatures import \
     process_failed_execution_signature, \
     process_finished_execution_signature
+import logging
+import traceback
+import os
+import celery
 
 
 _log = logging.getLogger('workflow_engine.celery.worker_tasks')
@@ -38,15 +39,31 @@ def create_job(self, workflow_node_id, enqueued_object_id, priority):
         job = WorkflowController.create_job(
             workflow_node_id, enqueued_object_id, priority)
     except Exception as e:
-        report_exception(e)
+        report_exception('Error creating job. ', e)
         return -1
 
     return job.id
 
 
 @celery.shared_task(bind=True)
+def run_workflow_node_jobs_by_id(self, workflow_node_id):
+    try:
+        workflow_node = WorkflowNode.objects.get(id=workflow_node_id)
+        WorkflowController.run_workflow_node_jobs(workflow_node)
+    except ObjectDoesNotExist as e:
+        _log.error(str(e) + ' - ' + str(traceback.format_exc()))
+
+    return 'done'
+
+
+@celery.shared_task(bind=True)
 def queue_job(self, job_ids):
     WorkflowController.set_jobs_for_run_by_id(job_ids)
+
+
+@celery.shared_task(bind=True)
+def enqueue_next_queue(self, job_id):
+    WorkflowController.enqueue_next_queue_by_job_id(job_id)
 
 
 #

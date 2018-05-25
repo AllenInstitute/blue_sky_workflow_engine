@@ -16,6 +16,12 @@ class WaitStrategy(ExecutionStrategy):
 
         return True
 
+    def is_wait_strategy(self):
+        return True
+
+    def is_execution_strategy(self):
+        return False
+
     def run_task(self, task):
         try:
             enqueued_object = WorkflowController.get_enqueued_object(task)
@@ -31,10 +37,6 @@ class WaitStrategy(ExecutionStrategy):
             WaitStrategy._log.error(mess)
             task.set_error_message(mess)
             self.fail_task(task)
-
-    # deprected
-    def finish_task(self, task):
-        task.finish_task()
 
 
 from workflow_engine.workflow_controller import WorkflowController

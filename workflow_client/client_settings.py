@@ -125,6 +125,7 @@ def route_task(name, args, kwargs,
         settings.WORKFLOW_MESSAGE_QUEUE_NAME: {
             'create_job',
             'queue_job',
+            'enqueue_next_queue',
             'run_workflow_node_jobs_by_id',
             },
         settings.INGEST_MESSAGE_QUEUE_NAME: {

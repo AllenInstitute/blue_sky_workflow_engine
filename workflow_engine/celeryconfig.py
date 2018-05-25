@@ -36,6 +36,5 @@
 imports = (
     'workflow_engine.celery.worker_tasks',
     'workflow_engine.celery.moab_tasks',
-    'workflow_engine.celery.result_tasks',
-    'workflow_engine.celery.run_tasks'
+    'workflow_engine.celery.result_tasks'
 )

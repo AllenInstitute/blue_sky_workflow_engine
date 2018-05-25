@@ -133,7 +133,7 @@ process_pbs_id_signature.set(
 # WORKFLOW / UI TASKS
 #
 run_workflow_node_jobs_signature = signature(
-    'workflow_engine.celery.run_tasks.run_workflow_node_jobs_by_id')
+    'workflow_engine.celery.worker_tasks.run_workflow_node_jobs_by_id')
 run_workflow_node_jobs_signature.set(
     broker_connection_timeout=10,
     broker_connection_retry=False,
@@ -144,7 +144,7 @@ run_workflow_node_jobs_signature.set(
 
 # TODO: unimplemented?
 run_tasks_signature = signature(
-    'workflow_engine.celery.run_tasks.run_task')
+    'workflow_engine.celery.moab_tasks.run_task')
 run_tasks_signature.set(
     broker_connection_timeout=10,
     broker_connection_retry=False,
@@ -165,6 +165,16 @@ create_job_signature.set(
 
 queue_job_signature = signature(
     'workflow_engine.celery.worker_tasks.queue_job')
+queue_job_signature.set(
+    broker_connection_timeout=10,
+    broker_connection_retry=False,
+    # exchange=_EXCHANGE,
+    routing_key='workflow',
+    queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
+
+
+enqueue_next_queue_signature = signature(
+    'workflow_engine.celery.worker_tasks.enqueue_next_queue')
 queue_job_signature.set(
     broker_connection_timeout=10,
     broker_connection_retry=False,

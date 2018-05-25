@@ -115,10 +115,6 @@ class BaseStrategy(object):
     def is_execution_strategy(self):
         return False
 
-    # Do not override
-    def is_manual_strategy(self):
-        return False
-
     def is_wait_strategy(self):
         return False
 
@@ -148,15 +144,6 @@ class BaseStrategy(object):
         BaseStrategy.make_dirs_chmod(storage_directory, 0o777)
 
         return storage_directory
-
-    # Do not override
-    def check_if_manual_jobs_finished(self):
-        tasks = Task.objects.filter(run_state=RunState.get_running_state(),
-                                    archived=False)
-        for task in tasks:
-            strategy = task.get_strategy()
-            if strategy.is_manual_strategy():
-                strategy.check_if_task_finished(task)
 
     # Do not override
     def check_key(self, dictionary, key):

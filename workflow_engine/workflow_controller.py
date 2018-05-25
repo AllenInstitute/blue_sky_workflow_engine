@@ -52,12 +52,13 @@ class WorkflowController(object):
             job = Job.enqueue_object(
                 workflow_node, enqueued_object_id, priority)
             run_workflow_node_jobs_signature.delay(job.workflow_node.id)
+
+            return job
         except Exception as e:
             WorkflowController._logger.error(
                 'Something went wrong running jobs: ' + str(e) + "\n" + \
                 traceback.format_exc())
-
-        return job
+            raise e
 
     @classmethod
     def run_workflow_nodes(cls, workflow_object):
@@ -147,6 +148,12 @@ class WorkflowController(object):
         for job in jobs:
             job.set_pending_state()
             run_workflow_node_jobs_signature.delay(job.workflow_node.id)
+
+
+    @classmethod
+    def enqueue_next_queue_by_job_id(cls, job_id):
+        job = Job.objects.get(id=job_id)
+        WorkflowController.enqueue_next_queue(job)
 
     @classmethod
     def enqueue_next_queue(cls, job):

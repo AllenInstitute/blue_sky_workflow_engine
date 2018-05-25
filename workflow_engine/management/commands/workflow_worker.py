@@ -40,7 +40,7 @@ from workflow_client.client_settings import configure_worker_app
 import logging.config
 
 
-app = celery.Celery('workflow_engine.celery.run_tasks')
+app = celery.Celery('workflow_engine.celery.worker_tasks')
 configure_worker_app(app, settings.APP_PACKAGE)
 app.conf.imports = (
     'workflow_engine.celery.result_tasks',

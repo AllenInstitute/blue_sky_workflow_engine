@@ -40,8 +40,8 @@ from workflow_engine.models import ONE, ZERO, TWO, SECONDS_IN_MIN
 from workflow_client.pbs_utils import PbsUtils
 import logging
 import traceback
-import os
-from workflow_engine.celery.signatures import kill_moab_task_signature
+from workflow_engine.celery.signatures \
+    import kill_moab_task_signature, enqueue_next_queue_signature
 
 
 _logger = logging.getLogger('workflow_engine.models.task')
@@ -118,12 +118,11 @@ class Task(models.Model):
         return is_pbs
 
     def kill_task(self):
-        # from celery.task.control import revoke
         self.set_process_killed_state()
-        # revoke(self.id, terminate=True)
-        # strategy = self.get_strategy()
-        # if strategy.is_execution_strategy():
-        kill_moab_task_signature.delay(self.id)
+        strategy = self.get_strategy()
+
+        if strategy.is_execution_strategy():
+            kill_moab_task_signature.delay(self.id)
 
         self.set_end_run_time()
 
@@ -210,21 +209,6 @@ class Task(models.Model):
         self.job.set_failed_execution_state()
         self.job.set_end_run_time()
         self.rerun()
-
-    def finish_task(self):
-        try:
-            self.set_finished_execution_state()
-            self.set_success_state()
-            self.set_end_run_time()
-            self.job.set_success_state()
-            self.job.set_end_run_time()
-            WorkflowController.enqueue_next_queue(self.job)
-        except Exception as e:
-            mess = str(e) + ' - ' + str(traceback.format_exc())
-            _logger.error(mess)
-            self.set_error_message(mess)
-            self.fail_task()
-
 
     def get_max_retries(self):
         return self.job.workflow_node.max_retries

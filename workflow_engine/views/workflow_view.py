@@ -242,7 +242,8 @@ def run_jobs(workflow_node, request, result):
 
 
 @object_json_response2('workflow_node_id')
-def create_job(workflow_node_id, request, result):
+def create_job(workflow_node_ids, request, result):
+    workflow_node_id = workflow_node_ids[0]
     priority = request.GET.get('priority')
     enqueued_object_id = request.GET.get('enqueued_object_id')
 

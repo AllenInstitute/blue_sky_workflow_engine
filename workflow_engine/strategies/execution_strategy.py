@@ -40,8 +40,8 @@ import subprocess
 import traceback
 import logging
 import simplejson as json
-from workflow_engine.celery.signatures import process_pbs_id_signature,\
-    submit_moab_task_signature, cancel_task_signature
+from workflow_engine.celery.signatures \
+    import enqueue_next_queue_signature, cancel_task_signature
 from workflow_engine.celery.result_tasks import process_pbs_id
 from workflow_engine.celery.moab_tasks import submit_moab_task
 
@@ -182,7 +182,8 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
             task.set_finished_execution_state()
 
             ExecutionStrategy._log.info('reading output')
-            self.read_output(task)
+            if self.is_execution_strategy():
+                self.read_output(task)
 
             ExecutionStrategy._log.info('setting success state')
             task.set_success_state()
@@ -192,7 +193,7 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
             if task.job.all_tasks_finished():
                 task.job.set_success_state()
                 task.job.set_end_run_time()
-                WorkflowController.enqueue_next_queue(task.job)
+                enqueue_next_queue_signature.delay(task.job.id)
 
         except Exception as e:
             ExecutionStrategy._log.error(
@@ -355,7 +356,6 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 
         return storage_directory
 
-    # Do not override
     def is_execution_strategy(self):
         return True
 

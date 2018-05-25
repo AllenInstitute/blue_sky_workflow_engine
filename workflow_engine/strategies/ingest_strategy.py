@@ -79,6 +79,9 @@ class IngestStrategy(ExecutionStrategy):
     def is_ingest_strategy(self):
         return True
 
+    def is_execution_strategy(self):
+        return False
+
     @classmethod
     def call_ingest_strategy(cls, wf_name, message):
         wf = Workflow.objects.get(name=wf_name)
@@ -124,10 +127,6 @@ class IngestStrategy(ExecutionStrategy):
             task.set_error_message(
                 str(e) + ' - ' + str(traceback.format_exc()))
             self.fail_task(task)
-
-    # deprecated
-    def finish_task(self, task):
-        task.finish_task()
 
 
 from workflow_engine.workflow_controller import WorkflowController

@@ -39,7 +39,6 @@ from workflow_engine.views import executable_view
 from workflow_engine.views import job_queue_view
 from workflow_engine.views import job_view
 from workflow_engine.views import log_view
-from workflow_engine.views import manual_queue_view
 from workflow_engine.views import record_view
 from workflow_engine.views import task_view
 from workflow_engine.views import workflow_view
@@ -100,9 +99,6 @@ urlpatterns = [
     url(r'^get_record_info/$', record_view.get_record_info, name='info'),
     url(r'^check_unique/$', record_view.check_unique, name='info'),
     url(r'^get_search_data/$', record_view.get_search_data, name='info'),
-
-    #manual queues
-    url(r'^manual_queues/check_if_finished/$', manual_queue_view.check_if_finished, name='manual_queues'),
 
    url(r'^data', MonitorView.as_view())
 ]
