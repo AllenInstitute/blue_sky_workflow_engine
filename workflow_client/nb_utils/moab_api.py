@@ -173,7 +173,6 @@ def combine_workflow_moab_states(workflow_dataframe,
     combined_df.task_id.fillna(0, inplace=True)
     combined_df.task_id = combined_df.task_id.astype(int)
 
-    # TODO: fail these
     combined_df['moab_state'] = \
         combined_df['moab_state'].fillna('Unknown')
 
@@ -201,7 +200,8 @@ def combine_workflow_moab_states(workflow_dataframe,
 
     combined_df.loc[
         combined_df.workflow_state.isin(["QUEUED","RUNNING"]) &
-        combined_df.moab_state.isin(["Expired", "Removed", "Vacated"]),
+        combined_df.moab_state.isin(
+            ["Expired", "Removed", "Vacated", "Unknown"]),
         'failed_execution_message'] = True
 
     return combined_df

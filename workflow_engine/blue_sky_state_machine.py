@@ -36,6 +36,17 @@
 from django.core.exceptions import FieldDoesNotExist
 import logging
 
+class FailedExecutionException(Exception):
+    pass
+
+class IllegalStateTransition(FailedExecutionException):
+    def __init__(self, model, field, from_state, to_state):
+        self.model = model,
+        self.field = field,
+        self.from_state = from_state
+        self.to_state = to_state
+
+
 class BlueSkyStateMachine:
     _log = logging.getLogger('workflow_engine.blue_sky_state_machine')
 
@@ -93,7 +104,8 @@ class BlueSkyStateMachine:
             else:
                 mess = 'State: ' + str(current_state) + ' cannot transition to ' + str(to_state)
                 BlueSkyStateMachine._log.error(mess)
-                raise Exception(mess)
+                raise IllegalStateTransition(
+                    model, state_machine_field, current_state, to_state)
 
         except FieldDoesNotExist:
             mess = 'Field named: ' + str(state_machine_field) + ' does not exist'

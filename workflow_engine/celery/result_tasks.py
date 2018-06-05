@@ -35,6 +35,9 @@
 #
 import celery
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils import timezone
+from datetime import timedelta
+from builtins import ModuleNotFoundError
 from workflow_engine.celery.signatures \
     import run_workflow_node_jobs_signature
 import logging
@@ -48,6 +51,8 @@ def get_task_strategy_by_task_id(task_id):
     try:
         task = Task.objects.get(id=task_id)
         strategy = task.get_strategy()
+    except ModuleNotFoundError:
+        strategy = None
     except Exception as e:
         _log.error(
             'Something went wrong: ' + (traceback.print_exc(e)))
@@ -79,7 +84,14 @@ def process_finished_execution(self, task_id):
 def process_failed_execution(self, task_id):
     _log.info('processing failed execution task %s', task_id)
     (task, strategy) = get_task_strategy_by_task_id(task_id)
-    strategy.fail_execution_task(task)
+
+    if timezone.now() - task.start_run_time < timedelta(seconds=15):
+        return 'Not failing execution for task {} in 15 second window'.format(
+            task_id)
+
+    if strategy:
+        strategy.fail_execution_task(task)
+
     run_workflow_node_jobs_signature.delay(
         task.job.workflow_node.id)
 
@@ -90,7 +102,10 @@ def process_failed_execution(self, task_id):
 def process_failed(self, task_id):
     _log.info('processing failed task %s', task_id)
     (task, strategy) = get_task_strategy_by_task_id(task_id)
-    strategy.fail_task(task)
+
+    if strategy:
+        strategy.fail_task(task)
+
     run_workflow_node_jobs_signature.delay(
         task.job.workflow_node.id)
 

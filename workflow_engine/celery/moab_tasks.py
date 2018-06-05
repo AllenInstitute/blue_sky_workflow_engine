@@ -46,7 +46,7 @@ from workflow_engine.celery.result_tasks \
     process_failed_execution, process_failed
 from workflow_engine.celery.signatures \
     import process_failed_execution_signature
-import simplejson as json
+#import simplejson as json
 
 
 _log = logging.getLogger('workflow_engine.celery.moab_tasks')
@@ -59,7 +59,7 @@ def query_running_task_dicts():
     task_dicts = [{
         'task_id': t.id,
         'workflow_state': t.run_state.name,  # TODO: run_state
-        'moab_id': t.pbs_id } for t in tasks]
+        'moab_id': t.pbs_id } for t in tasks if t.pbs_task()]
 
     _log.info('task dicts: ' + str(task_dicts))
 
@@ -67,6 +67,7 @@ def query_running_task_dicts():
 
 
 result_queue = settings.RESULT_MESSAGE_QUEUE_NAME
+_FINISHED_DELAY = 10
 
 # Todo need to use moab id and task id in all cases
 result_actions = { 
@@ -75,7 +76,8 @@ result_actions = {
             queue=result_queue),
     'finished_message':
         lambda x: process_finished_execution.s(x).set(
-            queue=result_queue),
+            queue=result_queue,
+            countdown=_FINISHED_DELAY),
     'failed_execution_message': 
         lambda x: process_failed_execution.s(x).set(
             queue=result_queue),
@@ -104,7 +106,7 @@ def check_moab_status(self):
         queue=settings.RESULT_MESSAGE_QUEUE_NAME,
         on_raw_message=lambda x: _log.info('group result {}', str(x)))
 
-    _log.info('Result group:' + json.dumps(grp, indent=2))
+    # _log.info('Result group:' + json.dumps(grp, indent=2))
 
     return 'OK'
 
