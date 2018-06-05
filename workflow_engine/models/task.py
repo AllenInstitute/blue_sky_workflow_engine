@@ -108,11 +108,15 @@ class Task(models.Model):
 
         return self.get_job_queue().executable.environment.split(';')
 
-    def pbs_task(self):
-        pbs_workflow = self.job.workflow_node.workflow.use_pbs
-        pbs_executable = self.get_job_queue().executable.remote_queue == 'pbs'
+    def has_pbs_workflow(self):
+        self.job.workflow_node.workflow.use_pbs
 
-        is_pbs = pbs_executable or pbs_workflow 
+    def has_pbs_executable(self):
+        return self.get_job_queue().executable.remote_queue == 'pbs'
+
+    def pbs_task(self):
+        is_pbs = self.has_pbs_executable() or self.has_pbs_workflow() 
+
         _logger.info("pbs_task: %s" % (is_pbs))
 
         return is_pbs

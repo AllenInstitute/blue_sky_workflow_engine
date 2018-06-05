@@ -51,6 +51,9 @@ def get_task_strategy_by_task_id(task_id):
     try:
         task = Task.objects.get(id=task_id)
         strategy = task.get_strategy()
+    except ObjectDoesNotExist as e:
+        task = None
+        strategy = None
     except ModuleNotFoundError:
         strategy = None
     except Exception as e:
@@ -85,9 +88,12 @@ def process_failed_execution(self, task_id):
     _log.info('processing failed execution task %s', task_id)
     (task, strategy) = get_task_strategy_by_task_id(task_id)
 
-    if timezone.now() - task.start_run_time < timedelta(seconds=15):
-        return 'Not failing execution for task {} in 15 second window'.format(
-            task_id)
+    if task:
+        if (timezone.now() - task.start_run_time) < timedelta(seconds=15):
+            return 'Not failing execution for task {} in 15 second window'.format(
+                task_id)
+    else:
+        return 'Task {} not found'.format(task_id)
 
     if strategy:
         strategy.fail_execution_task(task)
