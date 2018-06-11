@@ -14,8 +14,11 @@ Welcome to the Blue Sky Workflow Engine
    :hidden:
 
    install
-   configuration
+   settings
    customizing
+   workflows
+   execution_strategies
+   configurations
    develop
    authors
    Source Documentation <workflow_engine>
