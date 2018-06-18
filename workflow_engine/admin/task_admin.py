@@ -38,7 +38,7 @@ class TaskAdmin(admin.ModelAdmin):
                     args=(job_object.enqueued_object_id,)),
             str(enqueued_object)))
 
-    enqueued_object_link.short_description = "Enqueued Object"
+    enqueued_task_object_link.short_description = "Enqueued Object"
 
     def workflow_link(self, job_object):
         return mark_safe('<a href="{}">{}</a>'.format(

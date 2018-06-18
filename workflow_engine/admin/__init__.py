@@ -15,6 +15,8 @@ from workflow_engine.models.job import Job
 from workflow_engine.models.configuration import Configuration
 from workflow_engine.admin.job_admin \
     import JobAdmin
+from workflow_engine.admin.workflow_node_admin \
+    import WorkflowNodeAdmin
 
 
 # Register your models here.
@@ -27,5 +29,5 @@ admin.site.register(RunState)
 admin.site.register(Task)
 admin.site.register(WellKnownFile)
 admin.site.register(Workflow, WorkflowAdmin)
-admin.site.register(WorkflowNode)
+admin.site.register(WorkflowNode, WorkflowNodeAdmin)
 admin.site.register(Configuration)
