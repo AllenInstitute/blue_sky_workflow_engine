@@ -17,7 +17,7 @@ Welcome to the Blue Sky Workflow Engine
    settings
    customizing
    workflows
-   execution_strategies
+   strategies
    configurations
    develop
    authors

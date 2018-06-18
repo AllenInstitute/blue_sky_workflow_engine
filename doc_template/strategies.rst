@@ -84,7 +84,7 @@ An ingest strategy is used to create or update an object from an external
 message source. It is usually the first strategy in a workflow.
 An ingest strategy does not run an executable module.
 
-.. code-block:: yaml
+.. code-block:: python
 
     from django.conf import settings
     from workflow_engine.strategies.ingest_strategy import IngestStrategy
