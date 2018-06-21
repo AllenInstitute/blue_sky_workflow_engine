@@ -13,6 +13,7 @@ class JobQueueAdmin(admin.ModelAdmin):
         'executable_link',
         'created_at',
         'updated_at',
+        'archived'
         ]
     read_only_fields = (
         'executable_link',
@@ -20,7 +21,7 @@ class JobQueueAdmin(admin.ModelAdmin):
     list_select_related = (
         'executable',
         )
-    list_filter = []
+    list_filter = ['archived']
     actions = []
     inlines = []
 

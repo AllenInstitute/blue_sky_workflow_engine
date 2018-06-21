@@ -21,6 +21,7 @@ class WorkflowNodeAdmin(admin.ModelAdmin):
         'max_retries',
         'is_head',
         'disabled',
+        'archived'
         ]
     read_only_fields = (
         )
@@ -29,6 +30,7 @@ class WorkflowNodeAdmin(admin.ModelAdmin):
     list_filter = [
         'workflow',
         'is_head',
-        'disabled']
+        'disabled',
+        'archived']
     actions = []
     inlines = (ConfigurationInline,)

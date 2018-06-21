@@ -13,9 +13,10 @@ class ExecutableAdmin(admin.ModelAdmin):
         'pbs_processor',
         'pbs_walltime',
         'created_at',
-        'updated_at'
+        'updated_at',
+        'archived'
         ]
     list_select_related = []
-    list_filter = []
+    list_filter = ['archived']
     actions = []
     inlines = []

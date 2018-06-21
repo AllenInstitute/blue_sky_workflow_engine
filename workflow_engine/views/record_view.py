@@ -180,7 +180,9 @@ def update_record(record, result, record_type, data):
         else:
             record.executable = None
     elif record_type == 'job' and record is None:
-        workflow_node = WorkflowNode.objects.get(id=data['workflow_node_id'])
+        workflow_node = WorkflowNode.objects.get(
+            id=data['workflow_node_id'],
+            archived=False)
 
         record = Job()
         record.workflow_node = workflow_node

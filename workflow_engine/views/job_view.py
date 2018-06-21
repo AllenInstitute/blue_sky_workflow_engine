@@ -96,7 +96,9 @@ def jobs_page(request, page, url=None):
 
     if workflow_ids != None:
         worflow_node_ids = {}
-        workflow_nodes = WorkflowNode.objects.filter(workflow_id__in=workflow_ids.split(','))
+        workflow_nodes = WorkflowNode.objects.filter(
+            workflow_id__in=workflow_ids.split(','),
+            archived=False)
         for workflow_node in workflow_nodes:
             worflow_node_ids[workflow_node.id] = True
 

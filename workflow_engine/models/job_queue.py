@@ -41,7 +41,7 @@ _model_logger = logging.getLogger('workflow_engine.models')
 
 
 class JobQueue(models.Model):
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255)
     description = models.CharField(max_length=255, null=True)
     job_strategy_class = models.CharField(max_length=255)
     enqueued_object_class = models.CharField(max_length=255)
@@ -49,6 +49,8 @@ class JobQueue(models.Model):
         'workflow_engine.Executable', null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    archived = models.NullBooleanField(default=False)
+
 
     def __str__(self):
         return self.name
@@ -69,5 +71,9 @@ class JobQueue(models.Model):
 
     def get_workflow_nodes(self):
         return WorkflowNode.objects.filter(job_queue=self)
+
+    def archive(self):
+        self.archived = True
+        self.save()
 
 from workflow_engine.models.workflow_node import WorkflowNode

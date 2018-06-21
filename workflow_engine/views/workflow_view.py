@@ -42,10 +42,13 @@ from workflow_engine.models.run_state import RunState
 from workflow_engine.import_class import import_class
 from workflow_engine.views   import shared, HEADER_PAGES
 from workflow_engine.workflow_controller import WorkflowController
+from workflow_engine.models.executable import Executable
+from collections import deque
 from workflow_engine.celery.signatures \
     import run_workflow_node_jobs_signature, create_job_signature
 from workflow_engine.views.decorators \
-    import object_json_response, object_json_response2, object_json_all_response
+    import object_json_response, object_json_response2, object_json_all_response,\
+    object_yaml_all_response
 import logging
 import json
 
@@ -66,17 +69,25 @@ def workflows(request):
     search_use_pbs = request.GET.get('search_use_pbs')
     
     if workflow_ids != None:
-        workflows = Workflow.objects.filter(id__in=workflow_ids.split(','))
+        workflows = Workflow.objects.filter(
+            id__in=workflow_ids.split(','),
+            archived=False)
     elif workflow_names != None:
-        workflows = Workflow.objects.filter(name__in=workflow_names.split(','))
+        workflows = Workflow.objects.filter(
+            name__in=workflow_names.split(','),
+            archived=False)
     else:
-        workflows = Workflow.objects.all()
+        workflows = Workflow.objects.filter(archived=False)
 
     if search_disabled != None:
-        workflows = workflows.filter(disabled=shared.string_to_bool(search_disabled))
+        workflows = workflows.filter(
+            disabled=shared.string_to_bool(search_disabled),
+            archived=False)
 
     if search_use_pbs != None:
-        workflows = workflows.filter(use_pbs=shared.string_to_bool(search_use_pbs))
+        workflows = workflows.filter(
+            use_pbs=shared.string_to_bool(search_use_pbs),
+            archived=False)
 
     workflows = workflows.order_by('-name')
 
@@ -381,6 +392,67 @@ def monitor_workflow(nodes, request, result):
         'source': str(n.parent),
         'target': str(n) } for n in nodes
         if n.parent is not None ]
+
+def to_key(s):
+    return s.lower().replace(' ', '_')
+
+@object_yaml_all_response(Workflow)
+def download_workflow(flows, request, result):
+    exes = Executable.objects.filter(archived=False)
+
+    result['executables'] = {}
+    for ex in exes:
+        k = to_key(ex.name)
+        result['executables'][k] = {
+            'name': ex.name,
+            'path': ex.executable_path,
+            'pbs_queue': ex.pbs_queue,
+            'pbs_processor': ex.pbs_processor,
+            'pbs_walltime': ex.pbs_walltime
+        } 
+
+    result['workflows'] = {}
+    for f in flows:
+        k = to_key(f.name)
+        result['workflows'][k] = {
+            "ingest": f.ingest_strategy_class,
+            "states": [],
+            "graph": []
+        }
+
+        states = result['workflows'][k]['states']
+        for n in f.workflownode_set.filter(archived=False):
+            states.append({
+                'key': to_key(n.job_queue.name),
+                'label': n.job_queue.name,
+                'class': n.job_queue.job_strategy_class,
+                'enqueued_class': n.job_queue.enqueued_object_class,
+                'executable': to_key(n.job_queue.executable.name)
+            })
+
+        graph = result['workflows'][k]['graph']
+        head = f.workflownode_set.filter(
+            archived=False,
+            is_head=True).first()
+        work_list = deque()
+
+        current = head
+        try:
+            while current:
+                children = current.get_children()
+                children_keys = [to_key(c.job_queue.name) for c in children]
+                if current.is_head or (len(children_keys) > 0):
+                    graph.append([to_key(current.job_queue.name), children_keys])
+                    for c in children:
+                        if c not in work_list:
+                            work_list.append(c)
+                current = work_list.popleft()
+        except IndexError:
+            pass
+
+    del result['message']
+    del result['payload']
+    del result['success']
 
 
 @object_json_response(id_name='workflow_id', clazz=Workflow)

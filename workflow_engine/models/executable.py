@@ -40,7 +40,7 @@ _model_logger = logging.getLogger('workflow_engine.models')
 
 
 class Executable(models.Model):
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255)
     description = models.CharField(max_length=255, null=True)
     static_arguments = models.CharField(max_length=255,
                                         null=True, blank=True)
@@ -56,6 +56,7 @@ class Executable(models.Model):
     pbs_walltime = models.CharField(max_length=255, default='walltime=5:00:00')
     pbs_queue = models.CharField(max_length=255, default='lims')
     version = models.CharField(max_length=255, default='0.1')
+    archived = models.NullBooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -68,6 +69,10 @@ class Executable(models.Model):
 
     def get_job_queues(self):
         return JobQueue.objects.filter(executable=self)
+
+    def archive(self):
+        self.archived = True
+        self.save()
 
 
 from workflow_engine.models.job_queue import JobQueue

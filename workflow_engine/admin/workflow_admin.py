@@ -9,9 +9,10 @@ class WorkflowAdmin(admin.ModelAdmin):
         'description',
         'disabled',
         'use_pbs',
+        'archived'
         ]
     list_select_related = []
-    list_filter = []
+    list_filter = ['archived']
     actions = []
     inlines = []
 

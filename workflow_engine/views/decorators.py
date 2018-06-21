@@ -36,9 +36,40 @@
 from django.http import JsonResponse
 import logging
 import traceback
+from django.core.exceptions import FieldDoesNotExist
+from django.http.response import HttpResponse
+import yaml 
 
 
 _log = logging.getLogger('workflow_engine.views.decorators')
+
+
+def object_yaml_all_response(clazz):
+    def decor(fn):
+        def wrapper(request):
+            result = {
+                'success': True,
+                'message': '',
+                'payload': {} 
+                }
+
+            try:
+                try:
+                    clazz._meta.get_field('archived')
+                    objects = clazz.objects.filter(archived=False)
+                except FieldDoesNotExist:
+                    objects = clazz.objects.all()
+                fn(objects, request, result)
+            except Exception as e:
+                    result['success'] = False
+                    result['message'] = str(e) + ' - ' + str(traceback.format_exc())
+
+            return HttpResponse(
+                yaml.dump(result, default_flow_style=False),
+                content_type="application/x-yaml")
+
+        return wrapper
+    return decor
 
 
 def object_json_all_response(clazz):
@@ -51,7 +82,11 @@ def object_json_all_response(clazz):
                 }
 
             try:
-                objects = clazz.objects.all()
+                try:
+                    clazz._meta.get_field('archived')
+                    objects = clazz.objects.filter(archived=False)
+                except FieldDoesNotExist:
+                    objects = clazz.objects.all()
                 fn(objects, request, result)
             except Exception as e:
                     result['success'] = False

@@ -51,6 +51,7 @@ class WorkflowNode(models.Model):
     priority = models.IntegerField(default=50)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    archived = models.NullBooleanField(default=False)
     overwrite_previous_job = models.BooleanField(default=True)
     max_retries = models.IntegerField(default=3)
     configurations = GenericRelation('workflow_engine.Configuration')
@@ -71,7 +72,9 @@ class WorkflowNode(models.Model):
         return self.job_queue.get_strategy()
 
     def get_children(self):
-        return WorkflowNode.objects.filter(parent=self)
+        return WorkflowNode.objects.filter(
+            parent=self,
+            archived=False)
 
     def get_total_number_of_jobs(self):
         return Job.objects.filter(
@@ -147,6 +150,10 @@ class WorkflowNode(models.Model):
             result[running_state.name] = running_count
 
         return result
+
+    def archive(self):
+        self.archived = True
+        self.save()
 
 
 # circular imports

@@ -46,6 +46,8 @@ class Workflow(models.Model):
     use_pbs = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    archived = models.NullBooleanField(default=False)
+
 
     def __str__(self):
         return self.name
@@ -65,6 +67,11 @@ class Workflow(models.Model):
         self.save()
 
         return prev_disabled
+
+    def archive(self):
+        self.archived = True
+        self.save()
+
 
 # circular imports
 from workflow_engine.models.workflow_node import WorkflowNode

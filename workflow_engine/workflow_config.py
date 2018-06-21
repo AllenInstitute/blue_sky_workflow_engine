@@ -132,6 +132,7 @@ class WorkflowConfig:
             executables[k], _ = \
                 Executable.objects.update_or_create(
                     name=e['name'],
+                    archived=False,
                     defaults= {
                         'description': 'N/A',
                         'executable_path': e['path'],
@@ -152,6 +153,7 @@ class WorkflowConfig:
             workflow, _ = \
                 Workflow.objects.update_or_create(
                     name=workflow_name,
+                    archived=False,
                     defaults={
                         'description': 'N/A',
                         'ingest_strategy_class': workflow_spec.ingest_strategy,
@@ -176,6 +178,7 @@ class WorkflowConfig:
                 queue, _ = \
                     JobQueue.objects.update_or_create(
                         name=queue_name,
+                        archived=False,
                         defaults={
                             'job_strategy_class': str(node['class']),
                             'enqueued_object_class': node['enqueued_class'],
@@ -190,6 +193,7 @@ class WorkflowConfig:
                         parent=None,
                         is_head=False,
                         workflow=workflow,
+                        archived=False,
                         defaults={
                             'batch_size': batch_size,
                             'max_retries': max_retries})
@@ -218,15 +222,19 @@ class WorkflowConfig:
                                            str(nodes[parent_key])))
 
     @classmethod
-    def delete_all_workflows(cls):
+    def archive_all_workflows(cls):
         from workflow_engine.models.job_queue import JobQueue
         from workflow_engine.models.executable import Executable
         from workflow_engine.models.workflow_node import WorkflowNode
         from workflow_engine.models.workflow import Workflow
         from workflow_engine.models.run_state import RunState
 
-        JobQueue.objects.all().delete()
-        WorkflowNode.objects.all().delete()
-        Executable.objects.all().delete()
-        Workflow.objects.all().delete()
-        RunState.objects.all().delete()
+        for queue in JobQueue.objects.all():
+            queue.archive()
+        for node in WorkflowNode.objects.all():
+            node.archive()
+        for exe in Executable.objects.all():
+            exe.archive()
+        for flow in Workflow.objects.all():
+            flow.archive()
+        # RunState.objects.all().delete()  # TODO: runstates are in regular config.
