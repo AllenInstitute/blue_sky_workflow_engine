@@ -934,7 +934,7 @@ function BaseWorkflow(milliseconds_between_refresh){
 
     this.delete_record = function(type, id){
 
-        if(type === 'executable' || type === 'job_queue' || type === 'job'){
+        if(type === 'executable' || type === 'job_queue' || type === 'job' || type === 'task'){
             if(confirm("Are you sure you wish to delete this record?")){
 
                 var url = DELETE_URL + '?record_type=' + type + '&record_id=' + id;

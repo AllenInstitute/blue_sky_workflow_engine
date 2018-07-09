@@ -53,6 +53,7 @@
 		<td class="wf_td run_link" id="run_option_{{record.id}}""><img onclick="base_workflow.kill_task({{record.id}})" src="{% static 'workflow_engine/images/kill.png' %}" alt="Kill"/></td>
 	{% endif %}
 	<td class="wf_td show_link" onclick="base_workflow.set_show_dialog('Task', 'task', {{record.id}})">Show</td>
+	<td class="wf_td show_link" onclick="base_workflow.delete_record('task', {{record.id}})"">Delete</td>
 
 	</tr>
 {% endfor %}

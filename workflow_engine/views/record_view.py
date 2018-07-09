@@ -59,6 +59,7 @@ def record_json_response(fn):
             'executable': Executable,
             'job_queue': JobQueue,
             'job': Job,
+            'task': Task
         }
 
         try:
@@ -154,7 +155,7 @@ def get_record_info(record, request, result, record_type, data):
 
 
 @record_json_response
-def update_record(record, result, record_type, data):
+def update_record(record, request, result, record_type, data):
     if record_type == 'executable' and record is None:
         record = Executable()
     elif record_type == 'executable':
@@ -198,7 +199,7 @@ def update_record(record, result, record_type, data):
 
 
 @record_json_response
-def delete_record(record, result, record_type, data):
+def delete_record(record, request, result, record_type, data):
     result['link_content'] = ''
     result['link'] = ''
 
@@ -249,6 +250,9 @@ def delete_record(record, result, record_type, data):
     elif record_type == 'job':
         job = record
         job.archive_record()
+    elif record_type == 'task':
+        tsk = record
+        tsk.delete()
 
 
 def check_unique(request):

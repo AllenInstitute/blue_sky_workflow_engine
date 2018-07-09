@@ -403,9 +403,24 @@ def download_workflow(flows, request, result):
     result['executables'] = {}
     for ex in exes:
         k = to_key(ex.name)
+
+        try:
+            args = ex.static_arguments.split(' ')
+        except:
+            args = None
+
+        try:
+            env = ex.environment.split(';')
+        except:
+            env = None
+
         result['executables'][k] = {
             'name': ex.name,
+            'description': ex.description,
             'path': ex.executable_path,
+            'args': args,
+            'environment': env,
+            'remote_queue': ex.remote_queue,
             'pbs_queue': ex.pbs_queue,
             'pbs_processor': ex.pbs_processor,
             'pbs_walltime': ex.pbs_walltime

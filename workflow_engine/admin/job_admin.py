@@ -18,7 +18,7 @@ def start_jobs(modeladmin, request, queryset):
         "Start jobs"
 
     job_ids = [item.id for item in queryset]
-    WorkflowController.run_all_jobs(job_ids)
+    WorkflowController.set_jobs_for_run_by_id(job_ids)
 
 
 class TaskInline(admin.StackedInline):
@@ -30,6 +30,7 @@ class JobAdmin(admin.ModelAdmin):
         'id',
         'enqueued_object_id',
         'enqueued_object_link',
+        'enqueued_object_state',
         'start_run_time',
         'duration',
         'workflow_link',
@@ -41,6 +42,7 @@ class JobAdmin(admin.ModelAdmin):
     read_only_fields = (
         'workflow_link',
         'workflow_node_link',
+        'enqueued_object_state',
         )
     list_select_related = (
         'workflow_node',
@@ -56,14 +58,27 @@ class JobAdmin(admin.ModelAdmin):
     actions = (kill_jobs, start_jobs)
     inlines = (TaskInline,)
 
-    def enqueued_object_link(self, job_object):
-        enqueued_object = job_object.get_enqueued_object()
-        clz = enqueued_object._meta.db_table
+    def enqueued_object_state(self, job_object):
+        try:
+            enqueued_object = job_object.get_enqueued_object()
+            workflow_state = enqueued_object.workflow_state
+            return workflow_state
+        except:
+            return "-"
 
-        return mark_safe('<a href="{}">{}</a>'.format(
-            reverse("admin:{}_change".format(clz),
-                    args=(job_object.enqueued_object_id,)),
-            str(enqueued_object)))
+    def enqueued_object_link(self, job_object):
+        try:
+            enqueued_object = job_object.get_enqueued_object()
+            clz = enqueued_object._meta.db_table
+
+            link_text = str(enqueued_object)
+
+            return mark_safe('<a href="{}">{}</a>'.format(
+                reverse("admin:{}_change".format(clz),
+                        args=(job_object.enqueued_object_id,)),
+                link_text))
+        except:
+            return ''
 
     enqueued_object_link.short_description = "Enqueued Object"
 
