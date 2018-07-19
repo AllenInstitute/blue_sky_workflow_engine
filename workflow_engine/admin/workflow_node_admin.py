@@ -7,6 +7,8 @@ from django.utils.safestring import mark_safe
 
 class ConfigurationInline(GenericStackedInline):
     model = Configuration
+    fields = ('name', 'configuration_type', 'json_object')
+    extra = 0
 
 
 class WorkflowNodeAdmin(admin.ModelAdmin):

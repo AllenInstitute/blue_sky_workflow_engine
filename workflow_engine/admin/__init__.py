@@ -17,6 +17,8 @@ from workflow_engine.admin.job_admin \
 from workflow_engine.admin.workflow_node_admin \
     import WorkflowNodeAdmin
 from workflow_engine.admin.well_known_file_admin import WellKnownFileAdmin
+from workflow_engine.admin.configuration_admin import ConfigurationAdmin
+
 
 # Register your models here.
 # admin.site.register(Datafix)
@@ -29,4 +31,4 @@ admin.site.register(RunState)
 admin.site.register(Task)
 admin.site.register(Workflow, WorkflowAdmin)
 admin.site.register(WorkflowNode, WorkflowNodeAdmin)
-admin.site.register(Configuration)
+admin.site.register(Configuration, ConfigurationAdmin)

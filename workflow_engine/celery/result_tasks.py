@@ -89,8 +89,8 @@ def process_failed_execution(self, task_id):
     (task, strategy) = get_task_strategy_by_task_id(task_id)
 
     if task:
-        if (timezone.now() - task.start_run_time) < timedelta(seconds=15):
-            return 'Not failing execution for task {} in 15 second window'.format(
+        if (timezone.now() - task.start_run_time) < timedelta(seconds=45):
+            return 'Not failing execution for task {} in 45 second window'.format(
                 task_id)
     else:
         return 'Task {} not found'.format(task_id)

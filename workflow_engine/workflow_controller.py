@@ -351,6 +351,53 @@ class WorkflowController(object):
         run_workflow_node_jobs_signature.delay(job.workflow_node.id)
 
     @classmethod
+    def start_workflow_2(
+        cls,
+        workflow_name,
+        enqueued_object,
+        start_node_name=None,
+        reuse_job=False):
+        workflow = Workflow.objects.get(name=workflow_name)
+        WorkflowController._logger.info(
+            "starting %s at %s" % (
+                workflow_name, str(start_node_name)))
+
+        if start_node_name is not None:
+            workflow_nodes = WorkflowNode.objects.filter(
+                job_queue__name=start_node_name)
+        else:
+            workflow_nodes = WorkflowNode.objects.filter(
+                workflow=workflow, parent=None)
+
+        if len(workflow_nodes) != ONE:
+            raise Exception(
+                'Expected to find a single head workflow node but found: ' + \
+                str(len(workflow_nodes)) + ': ' + \
+                    ', '.join(str(wn) for wn in workflow_nodes))
+
+        workflow_node = workflow_nodes[ZERO]
+
+        if reuse_job:
+            job, _ = Job.objects.update_or_create(
+                enqueued_object_id=enqueued_object.id,
+                workflow_node=workflow_node,
+                defaults={
+                    'run_state': RunState.get_pending_state(),
+                    'priority': workflow_node.priority
+                })
+        else:
+            job = Job()
+            job.enqueued_object_id=enqueued_object.id
+            job.workflow_node=workflow_node
+            job.run_state=RunState.get_pending_state()
+            job.priority = workflow_node.priority
+            job.save()
+
+        WorkflowController._logger.info("Start workflow job state: %s" % (str(job.run_state)))
+
+        run_workflow_node_jobs_signature.delay(job.workflow_node.id)
+
+    @classmethod
     def get_enqueued_object(cls, task):
         WorkflowController._logger.info(
             'WorkflowController.get_enqueued_object')

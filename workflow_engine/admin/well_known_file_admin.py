@@ -25,10 +25,20 @@ class WellKnownFileAdmin(admin.ModelAdmin):
     ]
 
     def record_dir(self, wkf_object):
-        return wkf_object.get_most_recent_file_record().storage_directory
+        try:
+            rd = str(wkf_object.get_most_recent_file_record().storage_directory)
+        except:
+            rd = '-'
+
+        return rd
 
     def record_filename(self, wkf_object):
-        return wkf_object.get_most_recent_file_record().filename
+        try:
+            rfn = str(wkf_object.get_most_recent_file_record().filename)
+        except:
+            rfn = '-'
+
+        return rfn
 
 
 
