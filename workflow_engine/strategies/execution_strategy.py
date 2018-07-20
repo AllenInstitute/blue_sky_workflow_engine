@@ -154,7 +154,7 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
             err_msg = '%s - %s' % (
                 str(e),
                 str(traceback.format_exc()))
-            ExecutionStrategy.log.info(err_msg) 
+            ExecutionStrategy._log.info(err_msg)
             task.set_error_message(err_msg)
 
         task.set_failed_execution_fields_and_rerun()
