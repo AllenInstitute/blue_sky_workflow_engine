@@ -23,6 +23,7 @@ def start_jobs(modeladmin, request, queryset):
 
 class TaskInline(admin.StackedInline):
     model = Task
+    extra = 0
 
 
 class JobAdmin(admin.ModelAdmin):

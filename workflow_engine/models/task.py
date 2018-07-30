@@ -36,6 +36,8 @@
 from django.db import models
 from django.utils import timezone
 from django.conf import settings
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from workflow_engine.models import ONE, ZERO, TWO, SECONDS_IN_MIN
 from workflow_client.pbs_utils import PbsUtils
 import logging
@@ -48,7 +50,12 @@ _logger = logging.getLogger('workflow_engine.models.task')
 
 
 class Task(models.Model):
+    enqueued_task_object_type = models.ForeignKey(
+        ContentType, default=None, null=True)
     enqueued_task_object_id = models.IntegerField(null=True)
+    enqueued_task_object = GenericForeignKey(
+        'enqueued_task_object_type',
+        'enqueued_task_object_id')
     enqueued_task_object_class = models.CharField(max_length=255, null=True)
     job = models.ForeignKey(
         'workflow_engine.Job')

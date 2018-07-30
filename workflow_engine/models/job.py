@@ -36,6 +36,8 @@
 from django.db import models
 from django.utils import timezone
 from workflow_engine.import_class import import_class
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from workflow_engine.models import TWO, SECONDS_IN_MIN
 import logging
 
@@ -44,7 +46,12 @@ _logger = logging.getLogger('workflow_engine.models.job')
 
 
 class Job(models.Model):
-    enqueued_object_id = models.IntegerField()
+    enqueued_object_type = models.ForeignKey(
+        ContentType, default=None, null=True)
+    enqueued_object_id = models.IntegerField(null=True)
+    enqueued_object = GenericForeignKey(
+        'enqueued_object_type',
+        'enqueued_object_id')
     workflow_node = models.ForeignKey(
         'workflow_engine.WorkflowNode')
     run_state = models.ForeignKey(

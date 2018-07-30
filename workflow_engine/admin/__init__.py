@@ -9,6 +9,7 @@ from workflow_engine.models.well_known_file \
     import WellKnownFile, FileRecord
 from workflow_engine.models.workflow import  Workflow
 from workflow_engine.models.task import Task
+from workflow_engine.admin.task_admin import TaskAdmin
 from workflow_engine.models.workflow_node import WorkflowNode
 from workflow_engine.models.job import Job
 from workflow_engine.models.configuration import Configuration
@@ -28,7 +29,7 @@ admin.site.register(Job, JobAdmin)
 admin.site.register(JobQueue, JobQueueAdmin)
 admin.site.register(WellKnownFile, WellKnownFileAdmin)
 admin.site.register(RunState)
-admin.site.register(Task)
+admin.site.register(Task, TaskAdmin)
 admin.site.register(Workflow, WorkflowAdmin)
 admin.site.register(WorkflowNode, WorkflowNodeAdmin)
 admin.site.register(Configuration, ConfigurationAdmin)
