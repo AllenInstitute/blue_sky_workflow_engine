@@ -50,7 +50,9 @@ class WorkflowController(object):
             workflow_node = WorkflowNode.objects.get(
                 id=workflow_node_id)
             job = Job.enqueue_object(
-                workflow_node, enqueued_object_id, priority)
+                workflow_node,
+                enqueued_object_id,
+                priority)
             run_workflow_node_jobs_signature.delay(job.workflow_node.id)
 
             return job
@@ -159,15 +161,19 @@ class WorkflowController(object):
     def enqueue_next_queue(cls, job):
         WorkflowController._logger.info('enqueue_next_queue')
         children = job.workflow_node.get_children()
+
+        parent_enqueued_object = job.enqueued_object
+
         for child in children:
             strategy = child.get_strategy()
-            enqueued_objects = strategy.get_objects_for_queue(job)
+            child_enqueued_objects = strategy.get_objects_for_queue(
+                parent_enqueued_object)
 
-            for enqueued_object in enqueued_objects:
+            for enqueued_object in child_enqueued_objects:
                 if strategy.can_transition(enqueued_object):
                     #try to get the job
                     jobs = Job.objects.filter(
-                        enqueued_object_id=enqueued_object.id,
+                        enqueued_object=enqueued_object,
                         workflow_node_id=child.id,
                         archived=False)
 
@@ -190,7 +196,7 @@ class WorkflowController(object):
                             index += ONE
                     else:
                         # create the job if needed
-                        job = Job(enqueued_object_id=enqueued_object.id,
+                        job = Job(enqueued_object=enqueued_object,
                                   workflow_node=child,
                                   run_state=RunState.get_pending_state(),
                                   priority=child.priority)
@@ -244,23 +250,16 @@ class WorkflowController(object):
 
             if job.workflow_node.overwrite_previous_job:
                 try:
-                    WorkflowController._logger.info(
-                        'overwriting task with enqueued class: %s' %
-                        (enqueued_object_full_class))
                     task = Task.objects.get(
-                        enqueued_task_object_id=task_object.id,
-                        enqueued_task_object_class=enqueued_object_full_class,
+                        enqueued_task_object=task_object,
                         job=job)
                     task.run_state = pending_state
                     task.archived = False
                     task.retry_count = ZERO
                     task.save()
                 except:
-                    WorkflowController._logger.info(
-                        'creating task with enqueued class: %s' %
-                        (enqueued_object_full_class))
                     task = Task(
-                        enqueued_task_object_id=task_object.id,
+                        enqueued_task_object=task_object,
                         enqueued_task_object_class=enqueued_object_full_class,
                         run_state=pending_state,
                         job=job)
@@ -270,8 +269,7 @@ class WorkflowController(object):
                     'creating task with enqueued class: %s' %
                     (enqueued_object_full_class))
                 task = Task(
-                    enqueued_task_object_id=task_object.id,
-                    enqueued_task_object_class=enqueued_object_full_class,
+                    enqueued_task_object=task_object,
                     run_state=pending_state, job=job)
                 task.save()
 
@@ -279,11 +277,12 @@ class WorkflowController(object):
 
         return reused_tasks
 
+    # TODO: combine w/ job.enqueue_object
     @classmethod
     def enqueue_object(cls, workflow_node, enqueued_object):
         job = Job()
         job.workflow_node = workflow_node
-        job.enqueued_object_id = enqueued_object.id
+        job.enqueued_object = enqueued_object
         job.run_state = RunState.get_pending_state()
         job.priority = job.workflow_node.priority
         job.save()
@@ -340,7 +339,7 @@ class WorkflowController(object):
         workflow_node = workflow_nodes[ZERO]
 
         job = Job()
-        job.enqueued_object_id=enqueued_object.id
+        job.enqueued_object=enqueued_object
         job.workflow_node=workflow_node
         job.run_state=RunState.get_pending_state()
         job.priority = workflow_node.priority
@@ -387,7 +386,7 @@ class WorkflowController(object):
                 })
         else:
             job = Job()
-            job.enqueued_object_id=enqueued_object.id
+            job.enqueued_object=enqueued_object
             job.workflow_node=workflow_node
             job.run_state=RunState.get_pending_state()
             job.priority = workflow_node.priority

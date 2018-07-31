@@ -185,6 +185,7 @@ class Job(models.Model):
     @classmethod
     def enqueue_object(cls, workflow_node, enqueued_object_id, priority):
         job = Job()
+        job.enqueued_object_type=workflow_node.job_queue.enqueued_object_type
         job.enqueued_object_id=enqueued_object_id
         job.workflow_node=workflow_node
         job.run_state=RunState.get_pending_state()

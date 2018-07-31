@@ -37,7 +37,9 @@ def report_error(msg):
 def create_job(self, workflow_node_id, enqueued_object_id, priority):
     try:
         job = WorkflowController.create_job(
-            workflow_node_id, enqueued_object_id, priority)
+            workflow_node_id,
+            enqueued_object_id,
+            priority)
     except Exception as e:
         report_exception('Error creating job. ', e)
         return -1

@@ -36,6 +36,7 @@
 from django.db import models
 from django.utils import timezone
 from workflow_engine.import_class import import_class
+from django.contrib.contenttypes.models import ContentType
 import logging
 _model_logger = logging.getLogger('workflow_engine.models')
 
@@ -45,6 +46,8 @@ class JobQueue(models.Model):
     description = models.CharField(max_length=255, null=True)
     job_strategy_class = models.CharField(max_length=255)
     enqueued_object_class = models.CharField(max_length=255)
+    enqueued_object_type = models.ForeignKey(
+        ContentType, default=None, null=True)
     executable = models.ForeignKey(
         'workflow_engine.Executable', null=True)
     created_at = models.DateTimeField(auto_now_add=True)
