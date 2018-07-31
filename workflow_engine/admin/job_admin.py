@@ -68,6 +68,9 @@ class JobAdmin(admin.ModelAdmin):
             return "-"
 
     def enqueued_object_link(self, job_object):
+        return job_object.enqueued_object
+
+    def enqueued_object_link(self, job_object):
         try:
             enqueued_object = job_object.get_enqueued_object()
             clz = enqueued_object._meta.db_table

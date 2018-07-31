@@ -28,14 +28,14 @@ class TaskAdmin(admin.ModelAdmin):
         'archived',
         )
 
-    def enqueued_task_object_link(self, job_object):
-        enqueued_object = WorkflowController.get_enqueued_object(self)
+    def enqueued_task_object_link(self, task_object):
+        enqueued_object = WorkflowController.get_enqueued_object(task_object)
 
         clz = enqueued_object._meta.db_table
 
         return mark_safe('<a href="{}">{}</a>'.format(
             reverse("admin:{}_change".format(clz),
-                    args=(job_object.enqueued_object_id,)),
+                    args=(enqueued_object.id,)),
             str(enqueued_object)))
 
     enqueued_task_object_link.short_description = "Enqueued Object"

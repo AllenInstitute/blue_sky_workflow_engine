@@ -399,6 +399,10 @@ class WorkflowController(object):
 
     @classmethod
     def get_enqueued_object(cls, task):
+        return task.enqueued_task_object
+
+    @classmethod
+    def get_enqueued_object_deprecated(cls, task):
         WorkflowController._logger.info(
             'WorkflowController.get_enqueued_object')
         if task.enqueued_task_object_class == None:

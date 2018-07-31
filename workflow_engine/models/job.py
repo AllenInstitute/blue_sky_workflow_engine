@@ -194,6 +194,9 @@ class Job(models.Model):
         return job
 
     def get_enqueued_object(self):
+        return self.enqueued_object
+
+    def get_enqueued_object_deprecated(self):
         _logger.info(
             "importing %s" % (
                 self.workflow_node.job_queue.enqueued_object_class)) 
