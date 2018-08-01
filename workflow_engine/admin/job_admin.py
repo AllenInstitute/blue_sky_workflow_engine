@@ -21,6 +21,14 @@ def start_jobs(modeladmin, request, queryset):
     WorkflowController.set_jobs_for_run_by_id(job_ids)
 
 
+def enqueue_next(modeladmin, request, queryset):
+    enqueue_next.short_description = \
+        "Enqueue next queue"
+
+    for job_item in queryset:
+        WorkflowController.enqueue_next_queue_by_job_id(job_item.id)
+
+
 class TaskInline(admin.StackedInline):
     model = Task
     extra = 0
@@ -30,7 +38,7 @@ class JobAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'enqueued_object_id',
-        'enqueued_object_link',
+        'enqueued_object',
         'enqueued_object_state',
         'start_run_time',
         'duration',
@@ -43,7 +51,7 @@ class JobAdmin(admin.ModelAdmin):
     read_only_fields = (
         'workflow_link',
         'workflow_node_link',
-        'enqueued_object_state',
+        'enqueued_object_state'
         )
     list_select_related = (
         'workflow_node',
@@ -56,7 +64,7 @@ class JobAdmin(admin.ModelAdmin):
         'run_state',
         'archived',
         )
-    actions = (kill_jobs, start_jobs)
+    actions = (kill_jobs, start_jobs, enqueue_next)
     inlines = (TaskInline,)
 
     def enqueued_object_state(self, job_object):
@@ -67,24 +75,6 @@ class JobAdmin(admin.ModelAdmin):
         except:
             return "-"
 
-    def enqueued_object_link(self, job_object):
-        return job_object.enqueued_object
-
-    def enqueued_object_link(self, job_object):
-        try:
-            enqueued_object = job_object.get_enqueued_object()
-            clz = enqueued_object._meta.db_table
-
-            link_text = str(enqueued_object)
-
-            return mark_safe('<a href="{}">{}</a>'.format(
-                reverse("admin:{}_change".format(clz),
-                        args=(job_object.enqueued_object_id,)),
-                link_text))
-        except:
-            return ''
-
-    enqueued_object_link.short_description = "Enqueued Object"
 
     def workflow_link(self, job_object):
         return mark_safe('<a href="{}">{}</a>'.format(

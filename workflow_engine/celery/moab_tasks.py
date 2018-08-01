@@ -76,8 +76,8 @@ result_actions = {
             queue=result_queue),
     'finished_message':
         lambda x: process_finished_execution.s(x).set(
-            queue=result_queue,
-            countdown=_FINISHED_DELAY),
+            queue=result_queue),
+            #countdown=_FINISHED_DELAY),
     'failed_execution_message': 
         lambda x: process_failed_execution.s(x).set(
             queue=result_queue),

@@ -377,7 +377,7 @@ def get_search_data(request):
         elif(search_type == 'job'):
             jobs = Job.objects.all()
             ids = {}
-            enqueued_object_ids = {}   
+            enqueued_object_ids = {}
             run_state_ids = {}
             workflow_ids = {}
             

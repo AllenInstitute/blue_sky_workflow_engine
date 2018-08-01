@@ -355,7 +355,8 @@ class WorkflowController(object):
         workflow_name,
         enqueued_object,
         start_node_name=None,
-        reuse_job=False):
+        reuse_job=False,
+        raise_priority=False):
         workflow = Workflow.objects.get(name=workflow_name)
         WorkflowController._logger.info(
             "starting %s at %s" % (
@@ -376,14 +377,20 @@ class WorkflowController(object):
 
         workflow_node = workflow_nodes[ZERO]
 
+        if raise_priority:
+            priority = workflow_node.priority - 10
+        else:
+            priority = workflow_node.priority
+
         if reuse_job:
+            default_options = {
+                'run_state': RunState.get_pending_state(),
+                'priority': priority
+            }
             job, _ = Job.objects.update_or_create(
                 enqueued_object_id=enqueued_object.id,
                 workflow_node=workflow_node,
-                defaults={
-                    'run_state': RunState.get_pending_state(),
-                    'priority': workflow_node.priority
-                })
+                defaults=default_options)
         else:
             job = Job()
             job.enqueued_object=enqueued_object

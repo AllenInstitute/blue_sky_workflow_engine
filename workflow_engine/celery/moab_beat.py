@@ -50,7 +50,7 @@ app.conf.imports = ('workflow_engine.celery.moab_tasks',)
 @app.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):
     sender.add_periodic_task(
-        15.0,
+        45.0,
         check_moab_status_signature)
 
 
