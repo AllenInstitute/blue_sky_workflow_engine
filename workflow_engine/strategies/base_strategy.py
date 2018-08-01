@@ -86,10 +86,9 @@ class BaseStrategy(object):
     # this is called when a job is transitioning from a previous queue
     # given the previous job, return an array of enqueued objects
     # for this queue
-    def get_objects_for_queue(self, enqueued_object):
+    def get_objects_for_queue(self, prev_queue_job):
         objects = []
-        objects.append(enqueued_object)
-
+        objects.append(prev_queue_job.get_enqueued_object())
         return objects
 
     # override if needed

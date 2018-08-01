@@ -167,7 +167,7 @@ class WorkflowController(object):
         for child in children:
             strategy = child.get_strategy()
             child_enqueued_objects = strategy.get_objects_for_queue(
-                parent_enqueued_object)
+                job)
 
             for enqueued_object in child_enqueued_objects:
                 if strategy.can_transition(enqueued_object):
@@ -241,8 +241,7 @@ class WorkflowController(object):
         pending_state = RunState.get_pending_state()
 
         task_objects = \
-            strategy.get_task_objects_for_queue(
-                job.get_enqueued_object())
+            strategy.get_task_objects_for_queue(job.enqueued_object)
 
         for task_object in task_objects:
             enqueued_object_full_class = \
@@ -260,7 +259,7 @@ class WorkflowController(object):
                     task.save()
                 except:
                     task = Task(
-                        enqueued_task_object_id=task_object.id,
+                        enqueued_task_object=task_object,
                         enqueued_task_object_class=enqueued_object_full_class,
                         run_state=pending_state,
                         job=job)
@@ -271,6 +270,7 @@ class WorkflowController(object):
                     (enqueued_object_full_class))
                 task = Task(
                     enqueued_task_object=task_object,
+                    enqueued_task_object_class=enqueued_object_full_class,
                     run_state=pending_state, job=job)
                 task.save()
 

@@ -129,13 +129,15 @@ def submit_moab_task(self, task_id):
 
             return moab_id
         else:
-            _log.info('Task in %s state', the_task.run_state)
-            return None
+            msg = 'Task in %s state {}'.format(the_task.run_state)
+            _log.info(msg)
+            return msg
     except Exception as e:
         # TODO: need to be able to set the exception message here
-        _log.error('Error submitting task %s', e)
+        msg = 'Error submitting task %s'.format(str(e))
+        _log.error(msg)
         process_failed_execution_signature.delay(task_id)
-        return e
+        return (msg)
 
 
 # TODO: change name to something like process task state
