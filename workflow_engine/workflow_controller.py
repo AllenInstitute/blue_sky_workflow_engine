@@ -173,7 +173,7 @@ class WorkflowController(object):
                 if strategy.can_transition(enqueued_object):
                     #try to get the job
                     jobs = Job.objects.filter(
-                        enqueued_object=enqueued_object,
+                        enqueued_object_id=enqueued_object.id,
                         workflow_node_id=child.id,
                         archived=False)
 
@@ -251,7 +251,8 @@ class WorkflowController(object):
             if job.workflow_node.overwrite_previous_job:
                 try:
                     task = Task.objects.get(
-                        enqueued_task_object=task_object,
+                        enqueued_task_object_id=task_object.id,
+                        enqueued_task_object_class=enqueued_object_full_class,
                         job=job)
                     task.run_state = pending_state
                     task.archived = False
@@ -259,7 +260,7 @@ class WorkflowController(object):
                     task.save()
                 except:
                     task = Task(
-                        enqueued_task_object=task_object,
+                        enqueued_task_object_id=task_object.id,
                         enqueued_task_object_class=enqueued_object_full_class,
                         run_state=pending_state,
                         job=job)

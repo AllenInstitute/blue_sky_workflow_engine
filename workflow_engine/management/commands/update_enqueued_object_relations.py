@@ -60,8 +60,11 @@ class Command(BaseCommand):
             for wn in wns:
                 print(str(wn))
                 eoc_string = wn.job_queue.enqueued_object_class
-                eoc = import_class(eoc_string)
-                eo_content_type = ContentType.objects.get_for_model(eoc)
+                try:
+                    eoc = import_class(eoc_string)
+                    eo_content_type = ContentType.objects.get_for_model(eoc)
+                except:
+                    continue
 
                 if dry_run == 'false':
                     wn.job_queue.enqueued_object_type = eo_content_type
@@ -81,8 +84,13 @@ class Command(BaseCommand):
                 ts = Task.objects.filter(job__workflow_node=wn)
                 for t in ts:
                     eto_string = t.enqueued_task_object_class
-                    eto = import_class(eto_string)
-                    eto_content_type = ContentType.objects.get_for_model(eto)
+                    try:
+                        eto = import_class(eto_string)
+                        eto_content_type = \
+                            ContentType.objects.get_for_model(eto)
+                    except:
+                        print('update failed')
+                        continue
                     print("{} / {} / {}".format(
                         str(t),
                         str(eto_string),
