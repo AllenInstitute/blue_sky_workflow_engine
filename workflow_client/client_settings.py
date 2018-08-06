@@ -34,6 +34,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 from kombu import Exchange, Queue, binding
+from kombu.common import Broadcast
 from django.conf import settings
 import os
 import yaml
@@ -91,10 +92,20 @@ def configure_queues(app, name):
                 workflow_engine_exchange,
                 routing_key='moab') ]),
         Queue(
+            settings.LOCAL_MESSAGE_QUEUE_NAME,
+            [ binding(
+                workflow_engine_exchange,
+                routing_key='local') ]),
+        Queue(
             settings.RESULT_MESSAGE_QUEUE_NAME,
             [ binding(
                 workflow_engine_exchange,
                 routing_key='result') ]),
+        Queue(
+            Broadcast(settings.BROADCAST_MESSAGE_QUEUE_NAME),
+            [ binding(
+                workflow_engine_exchange,
+                routing_key='broadcast')]),
         Queue(
             'null',
             [ binding(
@@ -122,6 +133,8 @@ def route_task(name, args, kwargs,
             'submit_moab_task',
             'kill_moab_task',
             'run_task' },
+        settings.LOCAL_MESSAGE_QUEUE_NAME: {
+            'submit_worker_task' },
         settings.WORKFLOW_MESSAGE_QUEUE_NAME: {
             'create_job',
             'queue_job',
@@ -135,7 +148,9 @@ def route_task(name, args, kwargs,
             'process_pbs_id',
             'process_running',
             'process_finished_execution',
-            'process_failed_execution' }
+            'process_failed_execution' },
+        'at_em_broadcast': { 
+            'update_dashboard' }
     })
 
     task_name = name.split('.')[-1]

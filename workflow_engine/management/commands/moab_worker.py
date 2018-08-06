@@ -65,7 +65,7 @@ class Command(BaseCommand):
             '-A',
             'workflow_engine.management.commands.moab_worker',
             'worker',
-            '--concurrency=1',
+            '--concurrency=2',
             '--heartbeat-interval=30',
             '-Q', settings.MOAB_MESSAGE_QUEUE_NAME,
             '-n', 'moab@' + app_name])

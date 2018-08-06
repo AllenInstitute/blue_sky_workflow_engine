@@ -41,9 +41,10 @@ import traceback
 import logging
 import simplejson as json
 from workflow_engine.celery.signatures \
-    import enqueue_next_queue_signature, cancel_task_signature
-from workflow_engine.celery.result_tasks import process_pbs_id
+    import enqueue_next_queue_signature, \
+    cancel_task_signature
 from workflow_engine.celery.moab_tasks import submit_moab_task
+from workflow_engine.celery.local_tasks import submit_worker_task
 
 
 class ExecutionStrategy(base_strategy.BaseStrategy):
@@ -239,32 +240,21 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
             self.running_task(task)
             self.finish_task(task)
         else:
-            remote_queue = self.get_remote_queue(task)
-            use_pbs = False
-            if task.pbs_task():
-                use_pbs = True
-                ExecutionStrategy._log.info('pbs task')
-
-                pbs_file = self.get_pbs_file(task)
-                task.create_pbs_file(pbs_file)
-
-                executable = 'qsub ' + pbs_file  # TODO deprecate
+            queue_name = self.get_remote_queue(task)
+            if queue_name == 'pbs':
                 queue_name = settings.MOAB_MESSAGE_QUEUE_NAME
-            elif 'spark' == remote_queue:
-                queue_name = settings.SPARK_MESSAGE_QUEUE_NAME
-            else:
-                queue_name = settings.MESSAGE_QUEUE_NAME
-                executable = self.add_write_to_log_command(
-                    task.full_executable, task.log_file)
+            elif queue_name == 'local':
+                queue_name = settings.LOCAL_MESSAGE_QUEUE_NAME
 
-            ExecutionStrategy._log.info(
-                'apply async celery queue: %s' % (queue_name))
-            set_moab_id = process_pbs_id.s(task.id).set(
-                queue_name=settings.RESULT_MESSAGE_QUEUE_NAME)
-            submit_moab_task.apply_async(
-                (task.id,),
-                queue=settings.MOAB_MESSAGE_QUEUE_NAME,
-                link=[set_moab_id])
+            if task.pbs_task():
+                submit_moab_task.apply_async(
+                    (task.id,),
+                    queue=queue_name)
+            else:
+                submit_worker_task.apply_async(
+                    (task.id,),
+                    queue=queue_name)
+
 
     # this method creates the input file
     # Do not override

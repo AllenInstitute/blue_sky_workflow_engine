@@ -8,6 +8,7 @@ class TaskAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'enqueued_task_object',
+        'storage_link',
         'duration',
         'retry_count',
         'start_run_time',
@@ -45,6 +46,18 @@ class TaskAdmin(admin.ModelAdmin):
             str(job_object.workflow_node.workflow)))
 
     workflow_link.short_description = "Workflow"
+
+
+    def storage_link(self, task_object):
+        try:
+            sd = task_object.job.get_strategy(
+                ).get_task_storage_directory(task_object)
+        except:
+            sd = "-"
+
+        return sd
+
+    storage_link.short_description = 'Storage directory'
 
 
     def workflow_node_link(self, job_object):

@@ -229,27 +229,43 @@ def submit_job(
     user='timf'):
     url = moab_url(table='jobs')
 
-    payload = {
-        'customName': 'task_%d' % (task_id),
-        'commandFile': command_file,
-        'group': 'em-connectome',
-        'user': user,
-        # 'initialWorkingDirectory': '/home/timf',
-        'requirements': [{
-            'requiredProcessorCountMinimum': processors,
-            'tasksPerNode': tasks,
-            'taskCount': 1,
-        }],
-        'durationRequested': duration_seconds
-    }
+    try:
+        payload = {
+            'customName': 'task_%d' % (task_id),
+            'commandFile': command_file,
+            'group': 'em-connectome',
+            'user': user,
+            'requirements': [{
+                'requiredProcessorCountMinimum': processors,
+                'tasksPerNode': tasks,
+                'taskCount': 1,
+            }],
+            'durationRequested': duration_seconds
+        }
+    
+        _log.info('MOAB URL: %s', url)
+        _log.info('MOAB task_id: %d', task_id)
+        _log.info('MOAB commandFile: %s', command_file)
+        _log.info('MOAB user: %s', user)
+        _log.info('MOAB processors: %d', processors)
+        _log.info('MOAB tasks: %d', tasks)
+        _log.info('MOAB duration_seconds: %d', duration_seconds)
 
-    response_message = moab_post(
-        url,
-        body_data=payload)
+        _log.info('body_data: ' + json.dumps(payload))
+    
+        response_message = moab_post(
+            url,
+            body_data=payload)
 
-    moab_id = response_message['name']
-
-    _log.info('MOAB ID: %s', moab_id)
+        if 'name' in response_message:
+            moab_id = response_message['name']
+            _log.info('MOAB ID: %s', moab_id)
+        else:
+            _log.info('MOAB response' + json.dumps(response_message))
+            moab_id = 'ERROR'
+    except Exception as e:
+        _log.error(e)
+        moab_id = 'ERROR'
 
     return moab_id
 

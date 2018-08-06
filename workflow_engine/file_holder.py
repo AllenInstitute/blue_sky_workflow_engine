@@ -39,17 +39,24 @@ from django.utils import timezone
 from django.conf import settings
 import pytz
 import re
+import subprocess
 
 ZERO = 0
 ONE_MINUTES = 60
 
 class FileHolder(object):
-    _TRUNCATE_TAIL_LINES = 500
+    _TRUNCATE_TAIL_LINES = 300
 
     def load_file(self, filename):
         if self.is_valid:
-            with open(filename) as f:
-                self.lines = f.readlines()[-FileHolder._TRUNCATE_TAIL_LINES:]
+            cmd = [
+                "/usr/bin/tail",
+                "-n",
+                str(FileHolder._TRUNCATE_TAIL_LINES),
+                filename]
+            p = subprocess.run(
+                cmd, stdout=subprocess.PIPE)
+            self.lines = p.stdout.decode('utf-8').split('\n')
 
 
     @classmethod

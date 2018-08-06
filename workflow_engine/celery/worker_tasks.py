@@ -14,8 +14,6 @@ import celery
 _log = logging.getLogger('workflow_engine.celery.worker_tasks')
 
 
-SUCCESS_EXIT_CODE = 0
-ERROR_EXIT_CODE = 1
 ZERO = 0
 FIRST = 0
 
@@ -84,28 +82,6 @@ def get_task_strategy_by_task_id(task_id):
 #
 # REQUESTS
 #
-
-@celery.shared_task(bind=True)
-def run_normal(self, full_executable, task_id, logfile):
-    _log.info('run_normal')
-    exit_code = os.system(full_executable)
-
-    if exit_code == SUCCESS_EXIT_CODE:
-        process_finished_execution_signature.delay(task_id)
-
-        with open(logfile, "a") as log:
-            log.write("SUCCESS - execution finished successfully for task " +
-                      str(task_id))
-
-    else:
-        process_failed_execution_signature.delay(task_id)
-
-        with open(logfile, "a") as log:
-            log.write("FAILURE - execution failed for task " + str(task_id))
-
-    return exit_code
-
-
 @celery.shared_task(bind=True)
 def kill_job(self, job_id):
     WorkflowController.kill_job(job_id)

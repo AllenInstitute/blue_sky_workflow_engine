@@ -84,12 +84,12 @@ def process_finished_execution(self, task_id):
 
 
 @celery.shared_task(bind=True)
-def process_failed_execution(self, task_id):
+def process_failed_execution(self, task_id, fail_now=False):
     _log.info('processing failed execution task %s', task_id)
     (task, strategy) = get_task_strategy_by_task_id(task_id)
 
     if task:
-        if (timezone.now() - task.start_run_time) < timedelta(seconds=45):
+        if not fail_now and (timezone.now() - task.start_run_time) < timedelta(seconds=45):
             return 'Not failing execution for task {} in 45 second window'.format(
                 task_id)
     else:
@@ -119,20 +119,21 @@ def process_failed(self, task_id):
 
 
 @celery.shared_task(bind=True)
-def process_pbs_id(self, pbs_id, task_id):
-    _log.info('processing pbs id %s task %s', pbs_id, task_id)
+def process_pbs_id(self, moab_id, task_id):
+    _log.info('processing moab id %s task %s', moab_id, task_id)
     try:
-        if (pbs_id is not None):
-            task = Task.objects.get(id=task_id)
-            task.set_queued_state()
-            task.set_pbs_id(pbs_id)
+        task = Task.objects.get(id=task_id)
+        if (moab_id is not None):
+            task.set_queued_state(moab_id)
         else:
-            _log.warn('Got None for moab id: %s', str(task_id)) 
+            # TODO: this message is coming in wrong order for local
+            # _log.warn('Got None for moab id: %s', str(task_id))
+            pass
     except ObjectDoesNotExist:
         _log.warn(
             "Task {} for PBS id {} does not exist",
             task_id,
-            pbs_id)
+            moab_id)
 
     return 'done'
 

@@ -34,7 +34,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 import celery
-from workflow_engine.celery import settings
+from django.conf import settings
 from workflow_client.nb_utils.moab_api import query_and_combine_states,\
     submit_job, delete_moab_task
 from django.core.exceptions import ObjectDoesNotExist
@@ -45,7 +45,9 @@ from workflow_engine.celery.result_tasks \
     import process_running, process_finished_execution, \
     process_failed_execution, process_failed
 from workflow_engine.celery.signatures \
-    import process_failed_execution_signature
+    import process_pbs_id_signature, \
+    process_failed_execution_signature, \
+    process_pbs_id_signature
 #import simplejson as json
 
 
@@ -110,34 +112,40 @@ def check_moab_status(self):
 
     return 'OK'
 
-
 @celery.shared_task(bind=True, trail=True)
 def submit_moab_task(self, task_id):
+    _log.info('Submitting task %d', task_id)
+
     try:
-        _log.info('Submitting task %d', task_id)
         the_task = Task.objects.get(id=task_id)
+ 
+        pbs_file = the_task.get_strategy().get_pbs_file(the_task)
+        the_task.create_pbs_file(pbs_file)
+
         if the_task.in_pending_state():
             _log.info('in pending state')
-            the_task.set_queued_state()
 
             moab_id = submit_job(
                 the_task.id,
                 the_task.pbs_file)
 
-            _log.info("MOAB ID: {}".format(
-                moab_id))
+            if moab_id != 'ERROR':
+                the_task.set_queued_state(moab_id)
+                process_pbs_id_signature.delay(
+                    moab_id, task_id)
+            else:
+                process_failed_execution_signature.delay(
+                    task_id, fail_now=True)
 
-            return moab_id
-        else:
-            msg = 'Task in %s state {}'.format(the_task.run_state)
-            _log.info(msg)
-            return msg
+        _log.info("MOAB ID: {}".format(moab_id))
+
+        process_pbs_id_signature.delay(task_id, moab_id)
     except Exception as e:
-        # TODO: need to be able to set the exception message here
-        msg = 'Error submitting task %s'.format(str(e))
+        moab_id = None
+        msg = 'Error submitting task {}'.format(str(e))
         _log.error(msg)
-        process_failed_execution_signature.delay(task_id)
-        return (msg)
+        process_failed_execution_signature.delay(
+            task_id, fail_now=True)
 
 
 # TODO: change name to something like process task state

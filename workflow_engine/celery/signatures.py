@@ -75,6 +75,16 @@ submit_moab_task_signature.set(
     queue=settings.MOAB_MESSAGE_QUEUE_NAME)
 
 
+submit_worker_task_signature = signature(
+    'workflow_engine.celery.local_tasks.submit_worker_task')
+submit_worker_task_signature.set(
+    broker_connection_timeout=10,
+    broker_connection_retry=False,
+    # exchange=_EXCHANGE,
+    routing_key='local',
+    queue=settings.LOCAL_MESSAGE_QUEUE_NAME)
+
+
 kill_moab_task_signature = signature(
     'workflow_engine.celery.moab_tasks.kill_moab_task')
 kill_moab_task_signature.set(
@@ -183,16 +193,6 @@ queue_job_signature.set(
     queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
 
 
-run_normal_signature = signature(
-    'workflow_engine.celery.worker_tasks.run_normal')
-run_normal_signature.set(
-    broker_connection_timeout=10,
-    broker_connection_retry=False,
-    # exchange=_EXCHANGE,
-    routing_key='workflow',
-    queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
-
-
 kill_job_signature = signature(
     'workflow_engine.celery.worker_tasks.kill_job')
 kill_job_signature.set(
@@ -211,3 +211,13 @@ cancel_task_signature.set(
     # exchange=_EXCHANGE,
     routing_key='workflow',
     queue=settings.WORKFLOW_MESSAGE_QUEUE_NAME)
+
+
+# MONITOR TASKS
+update_dashboard_signature = signature(
+    'workflow_engine.broadcast.update_dashboard')
+update_dashboard_signature.set(
+    broker_connection_timeout=10,
+    broker_connection_retry=False,
+    delivery_mode='transient',  # see celery issue 3620
+    queue=settings.BROADCAST_MESSAGE_QUEUE_NAME)
