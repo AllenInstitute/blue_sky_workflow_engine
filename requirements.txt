@@ -13,3 +13,4 @@ rest-pandas>=1.0.0
 matplotlib>=2.0.2
 django-extensions>=2.1.0
 cherrypy>=17.0.0
+jupyter>=1.0.0
