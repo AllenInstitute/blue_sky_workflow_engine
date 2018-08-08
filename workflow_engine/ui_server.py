@@ -1,8 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-#os.environ["DJANGO_SETTINGS_MODULE"] = "webapp.settings"
-
 import cherrypy
 from django.conf import settings
 import django; django.setup()
@@ -14,10 +9,6 @@ class DjangoApplication(object):
     PORT = 8000
 
     def mount_static(self, url, root):
-        """
-        :param url: Relative url
-        :param root: Path to static files root
-        """
         config = {
             'tools.staticdir.on': True,
             'tools.staticdir.dir': root,
@@ -33,15 +24,13 @@ class DjangoApplication(object):
             'engine.autoreload_on': False,
             'log.screen': True
         })
+
+        # use python -m manage collectstatic to populate static files
         self.mount_static(
             settings.STATIC_URL,
-            '/blue_sky_workflow_engine/workflow_engine/static')
-            #settings.STATIC_ROOT)
-
-        cherrypy.log("Loading and serving Django application")
+            settings.STATIC_ROOT)
         cherrypy.tree.graft(WSGIHandler())
         cherrypy.engine.start()
-
         cherrypy.engine.block()
 
 

@@ -119,7 +119,7 @@ def process_failed(self, task_id):
 
 
 @celery.shared_task(bind=True)
-def process_pbs_id(self, moab_id, task_id):
+def process_pbs_id(self, task_id, moab_id):
     _log.info('processing moab id %s task %s', moab_id, task_id)
     try:
         task = Task.objects.get(id=task_id)

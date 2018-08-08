@@ -132,14 +132,12 @@ def submit_moab_task(self, task_id):
             if moab_id != 'ERROR':
                 the_task.set_queued_state(moab_id)
                 process_pbs_id_signature.delay(
-                    moab_id, task_id)
+                    task_id, moab_id)
             else:
                 process_failed_execution_signature.delay(
                     task_id, fail_now=True)
 
         _log.info("MOAB ID: {}".format(moab_id))
-
-        process_pbs_id_signature.delay(task_id, moab_id)
     except Exception as e:
         moab_id = None
         msg = 'Error submitting task {}'.format(str(e))
