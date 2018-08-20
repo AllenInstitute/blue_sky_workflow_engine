@@ -38,6 +38,7 @@ from django.template import loader
 from workflow_engine.models import ZERO
 from workflow_engine.models.workflow import Workflow
 from workflow_engine.models.workflow_node import WorkflowNode
+from workflow_engine.models.job import Job
 from workflow_engine.models.run_state import RunState
 from workflow_engine.import_class import import_class
 from workflow_engine.views   import shared, HEADER_PAGES
@@ -49,6 +50,9 @@ from workflow_engine.celery.signatures \
 from workflow_engine.views.decorators \
     import object_json_response, object_json_response2, object_json_all_response,\
     object_yaml_all_response
+from django_pandas.io import read_frame
+import itertools as it
+import pandas as pd
 import logging
 import json
 
@@ -384,6 +388,47 @@ def get_workflow_info(workflow_object, request, result):
     result['payload']['disabled'] = workflow_object.disabled
 
 
+def count_node_jobs_in_state(node, run_state):
+    return Job.objects.filter(
+        workflow_node__job_queue__name=node,
+        run_state__name=run_state,
+        archived=False).count()
+
+
+def workflow_summary(workflow_name):
+    wns = WorkflowNode.objects.filter(
+        archived=False)
+    rs = RunState.objects.all()
+
+    jobs = Job.objects.filter(
+        archived=False)
+    jobs_df = read_frame(jobs)
+
+    counts = [{
+        'node': node,
+        'state': run_state,
+        'count':  count_node_jobs_in_state(node, run_state) } 
+        for (node, run_state) in it.product(
+            (str(n) for n in wns),
+            (s.name for s in rs)) ]
+
+    counts.extend([{
+        'node': str(n),
+        'state': 'BATCH_SIZE',
+        'count': n.batch_size
+    } for n in wns ])
+
+    counts_df = pd.DataFrame.from_records(counts)
+
+    totals = counts_df.groupby(by='node')['count'].sum()
+
+    summary = {
+        'run_states': counts_df.to_dict('records'),
+        'totals': totals.to_dict()
+    }
+    
+    return summary
+
 @object_json_all_response(WorkflowNode)
 def monitor_workflow(nodes, request, result):
     result['nodes'] = [ str(n) for n in nodes]
@@ -392,6 +437,11 @@ def monitor_workflow(nodes, request, result):
         'source': str(n.parent),
         'target': str(n) } for n in nodes
         if n.parent is not None ]
+
+    summary = workflow_summary(
+        nodes[0].workflow.name)
+
+    result.update(summary)
 
 def to_key(s):
     return s.lower().replace(' ', '_')
