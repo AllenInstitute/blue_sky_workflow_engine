@@ -45,12 +45,19 @@ import os
 
 _log = logging.getLogger('workflow_engine.celery.monitor_tasks')
 
+EXTRA_FUNCTIONS = []
+
+def append_extra_function(fn):
+    EXTRA_FUNCTIONS.append(fn)
+
 @celery.shared_task(
     name='workflow_engine.broadcast.update_dashboard',
     bind=True, trail=True)
 def update_dashboard(self):
     _log.info(datetime.now())
-    update_workflow_state_json()
+
+    for fn in EXTRA_FUNCTIONS:
+        fn()
 
     return 'OK'
 
@@ -77,3 +84,5 @@ def update_workflow_state_json():
         o.write(resp.content.decode('utf-8'))
  
     return 'OK'
+
+append_extra_function(update_workflow_state_json)
