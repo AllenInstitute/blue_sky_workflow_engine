@@ -44,9 +44,10 @@ import logging.config
 
 app = celery.Celery('workflow_engine.celery.monitor_tasks')
 configure_worker_app(app, settings.APP_PACKAGE)
-app.conf.imports = (
+app.conf.imports = [
     'workflow_engine.celery.monitor_tasks',
-)
+]
+app.conf.imports.extend(settings.MONITOR_TASK_MODULES)
 
 
 @celery.signals.after_setup_task_logger.connect
