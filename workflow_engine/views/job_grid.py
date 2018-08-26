@@ -91,7 +91,7 @@ class JobGrid(object):
             self.enqueued_object_df,
             left_on='enqueued_object_id',
             right_index=True,
-            how='left')#.dropna(subset=['end_run_time'])
+            how='left')
 
         enqueued_object_job_df = enqueued_object_job_df.sort_values(
             by=[self.index_field(), 'end_run_time'],

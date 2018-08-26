@@ -2,7 +2,7 @@
 # license plus a third clause that prohibits redistribution for commercial
 # purposes without further permission.
 #
-# Copyright 2017. Allen Institute. All rights reserved.
+# Copyright 2017-2018. Allen Institute. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -43,6 +43,7 @@ from workflow_engine.views import record_view
 from workflow_engine.views import task_view
 from workflow_engine.views import workflow_view
 from workflow_engine.views import home_view
+from workflow_engine.views import grid_view
 from workflow_engine.views import ingest_view
 from workflow_engine.views.monitor_view import MonitorView
 
@@ -103,5 +104,6 @@ urlpatterns = [
     url(r'^get_search_data/$', record_view.get_search_data, name='info'),
     url(r'^ingest/(?P<workflow_name>[0-9a-zA-z_]+)$', ingest_view.ingest, name='ingest'),
 
-   url(r'^data', MonitorView.as_view())
+    url(r'^data', MonitorView.as_view()),
+    url(r'^job_grid$', grid_view.index, name='grid'),
 ]

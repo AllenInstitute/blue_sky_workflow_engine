@@ -42,7 +42,8 @@ _model_logger = logging.getLogger('workflow_engine.models')
 class WorkflowNode(models.Model):
     job_queue = models.ForeignKey(
         'workflow_engine.JobQueue')
-    parent = models.ForeignKey('self', null=True, blank=True)
+    parent = models.ForeignKey(
+        'workflow_engine.WorkflowNode', null=True, blank=True)
     is_head = models.BooleanField(default=False)
     workflow = models.ForeignKey(
         'workflow_engine.Workflow')

@@ -38,6 +38,7 @@ import django; django.setup()
 from django.conf import settings
 from workflow_engine.views import workflow_view
 from rest_framework.test import APIRequestFactory
+from workflow_engine.import_class import import_class
 from datetime import datetime
 import logging
 import os
@@ -85,4 +86,21 @@ def update_workflow_state_json():
  
     return 'OK'
 
+
+def update_job_grid_json():
+    job_grid_class = import_class(settings.JOB_GRID_CLASS)
+    grid = job_grid_class()
+    grid.query_workflow_objects()
+    grid.query_enqueued_objects()
+
+    df = grid.generate_grid()
+
+    outfile = '/var/www/static/job_grid_data.json'
+
+    df.to_json(outfile, orient='table')
+
+    return 'OK'
+
+
 append_extra_function(update_workflow_state_json)
+append_extra_function(update_job_grid_json)

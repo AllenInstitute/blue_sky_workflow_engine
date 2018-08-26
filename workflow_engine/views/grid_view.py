@@ -33,32 +33,45 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-import celery
 from django.conf import settings
-import django; django.setup()
-import logging.config
-from workflow_client.client_settings import configure_worker_app
-from workflow_engine.celery.signatures \
-    import check_moab_status_signature, update_dashboard_signature 
+from django.http import HttpResponse
+from django.template import loader
+from workflow_engine.views import shared, HEADER_PAGES
+import django
+import sys
+import workflow_engine
 
+context = {
+    'pages': HEADER_PAGES,
+}
 
-app = celery.Celery('workflow_engine.celery.moab_beat')
-configure_worker_app(app, settings.APP_PACKAGE)
-app.conf.imports = ('workflow_engine.celery.moab_tasks',)
+ZERO = 0
+ONE = 1
+TWO = 2
+MILLISECONDS_IN_SECOND = 1000
 
+def get_python_version():
+    info = sys.version_info
+    return str(info.major) + '.' + str(info.minor) + '.' + str(info.micro)
 
-# see: https://github.com/celery/celery/issues/3589
-@app.on_after_configure.connect
-def setup_periodic_tasks(sender, **kwargs):
-    sender.add_periodic_task(
-        45000.0,
-        check_moab_status_signature)
-    sender.add_periodic_task(
-        15.0,
-        update_dashboard_signature)
+def index(request):
+    context['selected_page'] = 'index'
+    context['base_path'] = settings.BASE_FILE_PATH
+    context['workflow_version']  = workflow_engine.__version__
+    context['python_version']  = get_python_version()
+    context['django_version']  = django.get_version()
+    context['database_host'] = settings.DATABASES['default']['HOST']
+    context['database_name'] = settings.DATABASES['default']['NAME']
+    context['database_port'] = settings.DATABASES['default']['PORT']
+    context['results_per_page']  = settings.RESULTS_PER_PAGE
 
+    context['flower_monitor_url'] = settings.FLOWER_MONITOR_URL
+    context['rabbit_monitor_url'] = settings.RABBIT_MONITOR_URL
+    context['message_queue_host']  = settings.MESSAGE_QUEUE_HOST
+    context['admin_url'] = settings.ADMIN_URL
 
-@celery.signals.after_setup_task_logger.connect
-def after_setup_celery_task_logger(logger, **kwargs):
-    """ This function sets the 'celery.task' logger handler and formatter """
-    logging.config.dictConfig(settings.LOGGING)
+    context['seconds_between_refresh'] = 300
+    shared.add_settings_info_to_context(context)
+    
+    template = loader.get_template('job_grid.html')
+    return HttpResponse(template.render(context, request))
