@@ -34,6 +34,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 import celery
+import traceback
 from workflow_engine.celery import settings
 from workflow_client.nb_utils.moab_api import query_and_combine_states,\
     submit_job, delete_moab_task
@@ -76,8 +77,7 @@ result_actions = {
             queue=result_queue),
     'finished_message':
         lambda x: process_finished_execution.s(x).set(
-            queue=result_queue,
-            countdown=_FINISHED_DELAY),
+            queue=result_queue),
     'failed_execution_message': 
         lambda x: process_failed_execution.s(x).set(
             queue=result_queue),
