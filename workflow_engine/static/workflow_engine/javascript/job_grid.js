@@ -2,19 +2,8 @@
 
 function draw_grid(msg) {
     var schema = msg['schema'];
+    var qnames = msg['columns'];
     msg = msg['data'];
-
-    var qnames = [];
-
-    for (idx in schema['fields']) {
-        var workflow_node_name = schema['fields'][idx]['name'];
-        var sample_content = msg[0][workflow_node_name]
-        if ((schema['primaryKey'].indexOf(workflow_node_name) == -1) &&
-            (sample_content !== null) &&
-            (sample_content.toString().indexOf('/') > -1)) {
-            qnames.push(workflow_node_name);
-        }
-    }
 
     var run_state_class = {
             "PENDING": "run_state_pending",

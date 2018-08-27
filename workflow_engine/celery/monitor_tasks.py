@@ -40,6 +40,7 @@ from workflow_engine.views import workflow_view
 from rest_framework.test import APIRequestFactory
 from workflow_engine.import_class import import_class
 from datetime import datetime
+import simplejson as json
 import logging
 import os
 
@@ -94,10 +95,15 @@ def update_job_grid_json():
     grid.query_enqueued_objects()
 
     df = grid.generate_grid()
+    
+
+    json_dict = json.loads(df.to_json(orient='table'))
+    json_dict['columns'] = grid.sorted_node_names()
 
     outfile = '/var/www/static/job_grid_data.json'
 
-    df.to_json(outfile, orient='table')
+    with open(outfile, 'w') as f:
+        json.dump(json_dict, f, indent=2)
 
     return 'OK'
 
