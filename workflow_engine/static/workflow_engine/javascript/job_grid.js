@@ -92,7 +92,7 @@ function draw_grid(msg) {
         var index_td = $("<td></td>").text(current_z);
         section_row.append(index_td);
 
-        var montage_state_text = msg[i]['workflow_state']
+        var montage_state_text = msg[i]['object_state']
         var montage_state_td = $("<td></td>").text(montage_state_text);
 
         try {

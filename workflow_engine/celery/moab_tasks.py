@@ -137,7 +137,7 @@ def submit_moab_task(self, task_id):
                 process_failed_execution_signature.delay(
                     task_id, fail_now=True)
 
-        _log.info("MOAB ID: {}".format(moab_id))
+            _log.info("MOAB ID: {}".format(moab_id))
     except Exception as e:
         moab_id = None
         msg = 'Error submitting task {}'.format(str(e))

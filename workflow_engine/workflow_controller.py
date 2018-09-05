@@ -315,10 +315,10 @@ class WorkflowController(object):
             run_workflow_node_jobs_signature.delay(job.workflow_node.id)
 
     @classmethod
-    def start_workflow(cls,
-                       workflow_name,
-                       enqueued_object,
-                       start_node_name=None):
+    def find_start_node(
+        cls,
+        workflow_name,
+        start_node_name=None):
         workflow = Workflow.objects.get(name=workflow_name)
         WorkflowController._logger.info(
             "starting %s at %s" % (
@@ -339,6 +339,18 @@ class WorkflowController(object):
 
         workflow_node = workflow_nodes[ZERO]
 
+        return workflow_node
+
+    @classmethod
+    def start_workflow(
+        cls,
+        workflow_name,
+        enqueued_object,
+        start_node_name=None):
+        workflow_node = cls.find_workflow_node(
+            workflow_name,
+            start_node_name)
+
         job = Job()
         job.enqueued_object=enqueued_object
         job.workflow_node=workflow_node
@@ -346,9 +358,25 @@ class WorkflowController(object):
         job.priority = workflow_node.priority
         job.save()
 
-        WorkflowController._logger.info("Start workflow job state: %s" % (str(job.run_state)))
+        WorkflowController._logger.info(
+            "Start workflow job state: %s" % (str(job.run_state)))
 
         run_workflow_node_jobs_signature.delay(job.workflow_node.id)
+
+    @classmethod
+    def enqueue_next_queue_by_workflow_node(
+        cls,
+        workflow_name,
+        enqueued_object,
+        start_node_name=None):
+        workflow_node = cls.find_workflow_node(
+            workflow_name,
+            start_node_name)
+
+        job = workflow_node.job_set.get(
+            enqueued_object=enqueued_object,
+            archived=False)
+        cls.enqueue_next_queue(job)
 
     @classmethod
     def start_workflow_2(
@@ -358,25 +386,9 @@ class WorkflowController(object):
         start_node_name=None,
         reuse_job=False,
         raise_priority=False):
-        workflow = Workflow.objects.get(name=workflow_name)
-        WorkflowController._logger.info(
-            "starting %s at %s" % (
-                workflow_name, str(start_node_name)))
-
-        if start_node_name is not None:
-            workflow_nodes = WorkflowNode.objects.filter(
-                job_queue__name=start_node_name)
-        else:
-            workflow_nodes = WorkflowNode.objects.filter(
-                workflow=workflow, parent=None)
-
-        if len(workflow_nodes) != ONE:
-            raise Exception(
-                'Expected to find a single head workflow node but found: ' + \
-                str(len(workflow_nodes)) + ': ' + \
-                    ', '.join(str(wn) for wn in workflow_nodes))
-
-        workflow_node = workflow_nodes[ZERO]
+        workflow_node = cls.find_workflow_node(
+            workflow_name,
+            start_node_name)
 
         if raise_priority:
             priority = workflow_node.priority - 10
