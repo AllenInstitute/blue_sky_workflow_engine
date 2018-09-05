@@ -315,7 +315,7 @@ class WorkflowController(object):
             run_workflow_node_jobs_signature.delay(job.workflow_node.id)
 
     @classmethod
-    def find_start_node(
+    def find_workflow_node(
         cls,
         workflow_name,
         start_node_name=None):
