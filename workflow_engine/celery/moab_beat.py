@@ -50,11 +50,21 @@ app.conf.imports = ('workflow_engine.celery.moab_tasks',)
 # see: https://github.com/celery/celery/issues/3589
 @app.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):
+    try:
+        moab_check_seconds = settings.MOAB_CHECK_SECONDS
+    except:
+        moab_check_seconds = 45000.0
+
+    try:
+        dashboard_update_seconds = settings.DASHBOARD_UPDATE_SECONDS
+    except:
+        dashboard_update_seconds = 15.0
+
     sender.add_periodic_task(
-        45000.0,
+        moab_check_seconds,
         check_moab_status_signature)
     sender.add_periodic_task(
-        15.0,
+        dashboard_update_seconds,
         update_dashboard_signature)
 
 

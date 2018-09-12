@@ -69,6 +69,7 @@ def index(request):
     context['rabbit_monitor_url'] = settings.RABBIT_MONITOR_URL
     context['message_queue_host']  = settings.MESSAGE_QUEUE_HOST
     context['admin_url'] = settings.ADMIN_URL
+    context['notebook_url'] = settings.NOTEBOOK_URL
 
     context['seconds_between_refresh'] = settings.MILLISECONDS_BETWEEN_REFRESH / MILLISECONDS_IN_SECOND
     shared.add_settings_info_to_context(context)

@@ -326,6 +326,7 @@ class WorkflowController(object):
 
         if start_node_name is not None:
             workflow_nodes = WorkflowNode.objects.filter(
+                workflow=workflow,
                 job_queue__name=start_node_name)
         else:
             workflow_nodes = WorkflowNode.objects.filter(
@@ -368,14 +369,18 @@ class WorkflowController(object):
         cls,
         workflow_name,
         enqueued_object,
-        start_node_name=None):
+        start_node_name=None,
+        set_success=True):
         workflow_node = cls.find_workflow_node(
             workflow_name,
             start_node_name)
 
         job = workflow_node.job_set.get(
-            enqueued_object=enqueued_object,
+            enqueued_object_id=enqueued_object.id,
             archived=False)
+        if set_success:
+            job.run_state=RunState.get_success_state()
+            job.save()
         cls.enqueue_next_queue(job)
 
     @classmethod
