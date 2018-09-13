@@ -69,7 +69,8 @@ class JobGrid(object):
 
                     children = list(
                         self.workflow_node_df[
-                            self.workflow_node_df.parent_id == float(current_node)].id)
+                            self.workflow_node_df.parent_id == \
+                                float(current_node)].id)
                     children.sort()
 
                     for c in children:
@@ -94,14 +95,19 @@ class JobGrid(object):
             right_index=True,
             how='left')
 
-        enqueued_object_job_df = enqueued_object_job_df.sort_values(
-            by=[self.index_field(), 'end_run_time'],
-            axis='rows',
-            ascending=[True, True],
-            na_position='first')
+        sort_cols = self.sort_columns()
+        sort_cols.append('end_run_time')
+
+        enqueued_object_job_df = \
+            enqueued_object_job_df.sort_values(
+                by=sort_cols,
+                axis='rows',
+                na_position='first')
 
         enqueued_object_job_df.loc[:,'job_and_state'] = \
-            enqueued_object_job_df.loc[:,['job_id','run_state','enqueued_object_id']].apply(
+            enqueued_object_job_df.loc[:, [
+                'job_id','run_state','enqueued_object_id'
+            ]].apply(
                 lambda x: '{}/{}/{}'.format(*x),
                 axis=1)
 
@@ -120,14 +126,15 @@ class JobGrid(object):
 
         grid_df.loc[-1,:] = grid_df.count()
 
-        extra_columns = [ self.index_field() ]
-        extra_columns.extend(self.extra_columns())
-
-        return grid_df.merge(
-            self.enqueued_object_df.loc[:,extra_columns],
+        grid_df = grid_df.merge(
+            self.enqueued_object_df.loc[:,self.extra_columns()],
             left_index=True,
-            right_on=self.index_field(),
-            how='left').set_index(self.index_field())
+            right_on='id',
+            how='outer')
+
+        return grid_df.sort_values(
+            by=self.sort_columns(),
+            axis='rows')
 
     def sorted_node_names(self):
         return list(self.filter_workflow_nodes().job_queue)
@@ -142,4 +149,7 @@ class JobGrid(object):
         return []
 
     def index_field(self):
-        return 'index'  # TODO: default? or raise abstract class exception
+        return 'enqueued_object_id'
+
+    def sort_columns(self):
+        return [ self.index_field() ]
