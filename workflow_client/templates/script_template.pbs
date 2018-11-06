@@ -11,6 +11,7 @@ source /etc/profile
 module load anaconda
 
 export TMPDIR="/scratch/capacity/${PBS_JOBID}/"
+export SPARK_LOCAL_DIRS="/scratch/capacity/${PBS_JOBID}/"
 
 {% for evar in task.environment_vars() %}
 export {{ evar }}

@@ -35,6 +35,10 @@ class TaskInline(admin.StackedInline):
 
 
 class JobAdmin(admin.ModelAdmin):
+    search_fields = (
+        'id',
+        'enqueued_object_id',
+    )
     list_display = (
         'id',
         'enqueued_object_id',
@@ -70,8 +74,8 @@ class JobAdmin(admin.ModelAdmin):
     def enqueued_object_state(self, job_object):
         try:
             enqueued_object = job_object.get_enqueued_object()
-            workflow_state = enqueued_object.workflow_state
-            return workflow_state
+            object_state = enqueued_object.object_state
+            return object_state
         except:
             return "-"
 

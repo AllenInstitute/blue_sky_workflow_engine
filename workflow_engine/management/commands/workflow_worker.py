@@ -66,7 +66,7 @@ class Command(BaseCommand):
             '-A',
             'workflow_engine.management.commands.workflow_worker',
             'worker',
-            '--concurrency=2',
+            '--concurrency=1',
             '--heartbeat-interval=30',
             '-Q', settings.WORKFLOW_MESSAGE_QUEUE_NAME,
             '-n', 'workflow@' + app_name])

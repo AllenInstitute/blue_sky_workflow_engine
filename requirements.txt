@@ -16,3 +16,4 @@ cherrypy>=17.0.0
 jupyter>=1.0.0
 paramiko>=2.3.1
 django-fsm>=2.6.0
+xlrd>=1.1.0

@@ -93,7 +93,7 @@ def update_job_grid_json():
     grid = job_grid_class()
     grid.query_workflow_objects()
     grid.query_enqueued_objects()
-
+    grid.chunk_assignment_mapping()
     df = grid.generate_grid()
     
 

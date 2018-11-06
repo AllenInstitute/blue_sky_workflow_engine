@@ -36,8 +36,11 @@
 import traceback
 from workflow_engine.import_class import import_class
 from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.contenttypes.models import ContentType
 import logging
-from workflow_engine.celery.signatures import run_workflow_node_jobs_signature
+from workflow_engine.celery.signatures import (
+    run_workflow_node_jobs_signature
+)
 
 
 class WorkflowController(object):
@@ -170,7 +173,8 @@ class WorkflowController(object):
                 job)
 
             for enqueued_object in child_enqueued_objects:
-                if strategy.can_transition(enqueued_object):
+                if strategy.can_transition(
+                    enqueued_object, job.workflow_node):
                     #try to get the job
                     jobs = Job.objects.filter(
                         enqueued_object_id=enqueued_object.id,
@@ -406,6 +410,9 @@ class WorkflowController(object):
                 'priority': priority
             }
             job, _ = Job.objects.update_or_create(
+                enqueued_object_type=ContentType.objects.get_for_model(
+                    enqueued_object.__class__
+                ),
                 enqueued_object_id=enqueued_object.id,
                 workflow_node=workflow_node,
                 defaults=default_options)

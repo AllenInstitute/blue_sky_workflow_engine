@@ -273,8 +273,11 @@ class Job(models.Model):
 
     def set_end_run_time(self):
         self.end_run_time = timezone.now()
-        self.duration = self.end_run_time - self.start_run_time
-        self.save()
+        try:
+            self.duration = self.end_run_time - self.start_run_time
+            self.save()
+        except:
+            pass
 
     # check if all tasks have finished
     def all_tasks_finished(self):

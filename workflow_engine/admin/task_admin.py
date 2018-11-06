@@ -15,6 +15,10 @@ class TaskAdmin(admin.ModelAdmin):
         'end_run_time',
         'run_state',
         )
+    search_fields = (
+        'id',
+        'enqueued_task_object_id',
+    )
     read_only_fields = (
         'start_run_time',
         'end_run_time',

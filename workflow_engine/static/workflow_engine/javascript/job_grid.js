@@ -46,6 +46,9 @@ function draw_grid(msg) {
     queue_td = $("<td></td>").text('state');
     section_row.append(queue_td);
 
+    var queue_td = $("<td></td>").text('reindex');
+    section_row.append(queue_td);
+
     queue_td = $("<td></td>").text('chunks');
     section_row.append(queue_td);
 
@@ -60,7 +63,7 @@ function draw_grid(msg) {
     var totals_row = $("<tr></tr>");
     var total_td = $("<td></td>").text('totals');
     totals_row.append(total_td);
-    var spacer_td = $("<td colspan=2></td>");
+    var spacer_td = $("<td colspan=3></td>");
     totals_row.append(spacer_td);
 
     var idx = 0;
@@ -85,8 +88,6 @@ function draw_grid(msg) {
             $('#grid_table').append(skip_row)
         }
 
-	last_z = current_z
-
         section_row = $("<tr></tr>");
 
         var index_td = $("<td></td>").text(current_z);
@@ -103,6 +104,15 @@ function draw_grid(msg) {
             montage_state_td.attr('class', 'montage_state_unknown');
         }
         section_row.append(montage_state_td);
+
+        var reimage_text = ' '
+        if (current_z == last_z) {
+            reimage_text = 'X'
+        }
+        var reimage_td = $('<td align="center"></td>').text(reimage_text);
+        section_row.append(reimage_td);
+
+	last_z = current_z
 
         var chunk_text = msg[i]['chunks']
         var chunk_td = $("<td></td>").text(chunk_text);
@@ -197,5 +207,5 @@ function render_progress_grid() {
 
 $(document).ready(function(){
     render_progress_grid();
-    setInterval(render_progress_grid, 15*1000)
+    // setInterval(render_progress_grid, 15*1000)
 })

@@ -100,7 +100,7 @@ class BaseStrategy(object):
         return objects
 
     # override if needed
-    def can_transition(self, enqueued_object):
+    def can_transition(self, enqueued_object, workflow_node=None):
         return True
 
     #

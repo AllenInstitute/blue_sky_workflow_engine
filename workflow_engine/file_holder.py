@@ -55,7 +55,9 @@ class FileHolder(object):
                 str(FileHolder._TRUNCATE_TAIL_LINES),
                 filename]
             p = subprocess.run(
-                cmd, stdout=subprocess.PIPE)
+                cmd,
+                stdout=subprocess.PIPE,
+                timeout=2)
             self.lines = p.stdout.decode('utf-8').split('\n')
 
 

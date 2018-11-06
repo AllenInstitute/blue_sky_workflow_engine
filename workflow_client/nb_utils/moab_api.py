@@ -226,7 +226,8 @@ def submit_job(
     duration_seconds=600,
     processors=1,
     tasks=1,
-    user='timf'):
+    user='timf',
+    moab_cfg=None):
     url = moab_url(table='jobs')
 
     try:
@@ -242,7 +243,15 @@ def submit_job(
             }],
             'durationRequested': duration_seconds
         }
-    
+
+        if moab_cfg:
+            if 'excluded_nodes' in moab_cfg:
+                payload['nodesExcluded'] = [
+                    { 'name': n } for n in moab_cfg['excluded_nodes']
+                ]
+
+
+        _log.info('MOAB excluded: {}'.format(moab_cfg))
         _log.info('MOAB URL: %s', url)
         _log.info('MOAB task_id: %d', task_id)
         _log.info('MOAB commandFile: %s', command_file)

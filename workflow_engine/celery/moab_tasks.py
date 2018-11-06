@@ -35,19 +35,26 @@
 #
 import celery
 from django.conf import settings
-from workflow_client.nb_utils.moab_api import query_and_combine_states,\
-    submit_job, delete_moab_task
+from workflow_client.nb_utils.moab_api import (
+    query_and_combine_states,
+    submit_job,
+    delete_moab_task
+)
 from django.core.exceptions import ObjectDoesNotExist
 import logging
 from celery.canvas import group
 import pandas as pd
-from workflow_engine.celery.result_tasks \
-    import process_running, process_finished_execution, \
-    process_failed_execution, process_failed
-from workflow_engine.celery.signatures \
-    import process_pbs_id_signature, \
-    process_failed_execution_signature, \
+from workflow_engine.celery.result_tasks import (
+    process_running,
+    process_finished_execution,
+    process_failed_execution,
+    process_failed
+)
+from workflow_engine.celery.signatures import (
+    process_pbs_id_signature,
+    process_failed_execution_signature,
     process_pbs_id_signature
+)
 #import simplejson as json
 
 
@@ -118,16 +125,23 @@ def submit_moab_task(self, task_id):
 
     try:
         the_task = Task.objects.get(id=task_id)
- 
+
         pbs_file = the_task.get_strategy().get_pbs_file(the_task)
         the_task.create_pbs_file(pbs_file)
 
         if the_task.in_pending_state():
             _log.info('in pending state')
 
+            try:
+                moab_cfg = Configuration.objects.get(
+                    configuration_type='moab_configuration').json_object
+            except:
+                moab_cfg = None
+    
             moab_id = submit_job(
                 the_task.id,
-                the_task.pbs_file)
+                the_task.pbs_file,
+                moab_cfg=moab_cfg)
 
             if moab_id != 'ERROR':
                 the_task.set_queued_state(moab_id)
@@ -166,3 +180,4 @@ def kill_moab_task(self, task_id):
 
 # circular imports
 from workflow_engine.models.task import Task
+from workflow_engine.models.configuration import Configuration

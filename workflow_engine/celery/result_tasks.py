@@ -2,7 +2,7 @@
 # license plus a third clause that prohibits redistribution for commercial
 # purposes without further permission.
 #
-# Copyright 2017. Allen Institute. All rights reserved.
+# Copyright 2017-2018. Allen Institute. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -40,6 +40,7 @@ from datetime import timedelta
 from builtins import ModuleNotFoundError
 from workflow_engine.celery.signatures \
     import run_workflow_node_jobs_signature
+from django.conf import settings
 import logging
 import traceback
 
@@ -89,8 +90,11 @@ def process_failed_execution(self, task_id, fail_now=False):
     (task, strategy) = get_task_strategy_by_task_id(task_id)
 
     if task:
-        if not fail_now and (timezone.now() - task.start_run_time) < timedelta(seconds=45):
-            return 'Not failing execution for task {} in 45 second window'.format(
+        if not fail_now and \
+            (task.run_state.name != 'QUEUED') and \
+            (timezone.now() - task.start_run_time) < timedelta(
+                seconds=settings.MOAB_CHECK_SECONDS):
+            return 'Not failing execution for task {} in moab check window'.format(
                 task_id)
     else:
         return 'Task {} not found'.format(task_id)
