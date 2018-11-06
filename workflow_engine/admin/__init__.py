@@ -1,5 +1,4 @@
 from django.contrib import admin
-import django; django.setup()
 from workflow_engine.models.executable import Executable
 from workflow_engine.models.job_queue import  JobQueue
 from workflow_engine.models.run_state import RunState
