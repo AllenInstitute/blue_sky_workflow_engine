@@ -1,6 +1,7 @@
 from django.contrib import admin
 from workflow_engine.workflow_controller import WorkflowController
 from workflow_engine.models.task import Task
+from workflow_engine.models.run_state import RunState
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
@@ -11,6 +12,14 @@ def kill_jobs(modeladmin, request, queryset):
 
     for job in queryset:
         job.kill()
+
+def set_killed(modeladmin, request, queryset):
+    set_killed.short_description = \
+        "Set job state to killed"
+
+    for job in queryset:
+        job.run_state = RunState.objects.get(name='PROCESS_KILLED')
+        job.save()
 
 
 def start_jobs(modeladmin, request, queryset):
@@ -28,6 +37,29 @@ def enqueue_next(modeladmin, request, queryset):
     for job_item in queryset:
         WorkflowController.enqueue_next_queue_by_job_id(job_item.id)
 
+def raise_priority(modeladmin, request, queryset):
+    raise_priority.short_description = \
+        "Run sooner"
+
+    for job_item in queryset:
+        job_item.priority = job_item.priority - 10
+        job_item.save()
+
+def lower_priority(modeladmin, request, queryset):
+    lower_priority.short_description = \
+        "Run later"
+
+    for job_item in queryset:
+        job_item.priority = job_item.priority + 10
+        job_item.save()
+
+def reset_priority(modeladmin, request, queryset):
+    reset_priority.short_description = \
+        "Reset priority"
+
+    for job_item in queryset:
+        job_item.priority = job_item.workflow_node.priority
+        job_item.save()
 
 class TaskInline(admin.StackedInline):
     model = Task
@@ -68,7 +100,14 @@ class JobAdmin(admin.ModelAdmin):
         'run_state',
         'archived',
         )
-    actions = (kill_jobs, start_jobs, enqueue_next)
+    actions = (
+        kill_jobs,
+        set_killed,
+        start_jobs,
+        enqueue_next,
+        raise_priority,
+        lower_priority,
+        reset_priority)
     inlines = (TaskInline,)
 
     def enqueued_object_state(self, job_object):

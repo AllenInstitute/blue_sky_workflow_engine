@@ -74,8 +74,13 @@ def moab_url(
 
 
 def moab_auth():
+    cred = os.environ.get('MOAB_AUTH', 'user:pass')
+
+    if cred == ':':
+        raise Exception('credentials not set')
+
     (moab_user, moab_pass) = \
-        os.environ.get('MOAB_AUTH', 'user:pass').split(':', 1)
+        cred.split(':', 1)
 
     return HTTPBasicAuth(moab_user, moab_pass)
 

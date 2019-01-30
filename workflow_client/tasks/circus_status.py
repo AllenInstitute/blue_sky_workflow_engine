@@ -2,7 +2,7 @@
 # license plus a third clause that prohibits redistribution for commercial
 # purposes without further permission.
 #
-# Copyright 2018. Allen Institute. All rights reserved.
+# Copyright 2019. Allen Institute. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -33,38 +33,42 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-import celery
-from django.conf import settings
-from django.core.management.base import BaseCommand
-from workflow_client.client_settings import configure_worker_app
-import logging.config
+from .task_status import TaskStatus
+from workflow_client.tasks.circus_signatures import (
+    check_status_signature,
+)
+import pandas as pd
 
 
-app = celery.Celery('workflow_engine.celery.result_tasks')
-configure_worker_app(app, settings.APP_PACKAGE, 'result')
-app.conf.imports = (
-    'workflow_engine.celery.moab_tasks',
-    'workflow_engine.celery.result_tasks',
-    'workflow_engine.celery.worker_tasks',
-    'workflow_engine.celery.error_handler')
+class CircusStatus(TaskStatus):
+    STATUS_MAP = {
+        0: 'Running',
+        1: 'Completed'
+    }
+
+    def __init__(self, remote_queue='circus'):
+        super(CircusStatus, self).__init__(remote_queue)
 
 
-@celery.signals.after_setup_task_logger.connect
-def after_setup_celery_task_logger(logger, **kwargs):
-    logging.config.dictConfig(settings.LOGGING)
+    def query_remote_state(self, status_dict):
+        """
+        state_dicts: [{ 'remote_id': 'Moab.123'}, ... ]
+        """
+        #circus_inspect = inspect_signature.delay().get() # TODO: asynchronous
+        status_dict = check_status_signature()# TODO: asynchronous
 
+        circus_state_df = pd.DataFrame.from_records((
+            (k,
+             job['wid'],
+             CircusStatus.STATUS_MAP.get(job['status'], 'Unknown'),
+             job['username'],
+             (job['exit_code']
+                  if job['exit_code'] is not None
+                  else -1
+             )) for k,job in status_dict.items()),
+            columns=[
+                'remote_id', 'task_name', 'remote_state', 'user', 'exit_code']
+        )
 
-class Command(BaseCommand):
-    help = 'response handler for job status updates'
+        return circus_state_df
 
-    def handle(self, *args, **options):
-        app_name = settings.APP_PACKAGE
-
-        app.start(argv=[
-            'celery', 
-            '-A',
-            'workflow_engine.management.commands.result_worker',
-            'worker',
-            '--concurrency=1',
-            '--heartbeat-interval=30',
-            '-n', 'result@' + app_name])

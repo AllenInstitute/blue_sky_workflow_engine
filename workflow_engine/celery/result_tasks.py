@@ -38,8 +38,9 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from datetime import timedelta
 from builtins import ModuleNotFoundError
-from workflow_engine.celery.signatures \
-    import run_workflow_node_jobs_signature
+from workflow_engine.celery.signatures import (
+    run_workflow_node_jobs_signature
+)
 from django.conf import settings
 import logging
 import traceback
@@ -123,7 +124,10 @@ def process_failed(self, task_id):
 
 
 @celery.shared_task(bind=True)
-def process_pbs_id(self, task_id, moab_id):
+def process_pbs_id(self, task_id, moab_id, chained=False):
+    if chained is True:
+        moab_id, task_id = task_id, moab_id
+
     _log.info('processing moab id %s task %s', moab_id, task_id)
     try:
         task = Task.objects.get(id=task_id)

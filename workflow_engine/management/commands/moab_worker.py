@@ -41,7 +41,7 @@ import logging.config
 
 
 app = celery.Celery('workflow_engine.celery.moab_tasks')
-configure_worker_app(app, settings.APP_PACKAGE)
+configure_worker_app(app, settings.APP_PACKAGE, 'moab')
 app.conf.imports = (
     'workflow_engine.celery.moab_tasks',
     'workflow_engine.celery.result_tasks',
@@ -65,7 +65,6 @@ class Command(BaseCommand):
             '-A',
             'workflow_engine.management.commands.moab_worker',
             'worker',
-            '--concurrency=2',
+            '--concurrency=1',
             '--heartbeat-interval=30',
-            '-Q', settings.MOAB_MESSAGE_QUEUE_NAME,
             '-n', 'moab@' + app_name])

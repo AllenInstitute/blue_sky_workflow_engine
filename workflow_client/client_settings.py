@@ -36,6 +36,7 @@
 from kombu import Exchange, Queue, binding
 from kombu.common import Broadcast
 from django.conf import settings
+from workflow_client.simple_router import SimpleRouter
 import os
 import yaml
 import logging
@@ -72,103 +73,14 @@ def get_message_broker_url(celery_settings):
         celery_settings.MESSAGE_QUEUE_PORT)
 
 
-def configure_queues(app, name):
-    workflow_engine_exchange = Exchange(name, type='direct')
-
-    app.conf.task_queues = (
-        Queue(
-            settings.INGEST_MESSAGE_QUEUE_NAME,
-            [ binding(
-                workflow_engine_exchange,
-                routing_key='ingest') ]),
-        Queue(
-            settings.WORKFLOW_MESSAGE_QUEUE_NAME,
-            [ binding(
-                workflow_engine_exchange,
-                routing_key='workflow') ]),
-        Queue(
-            settings.MOAB_MESSAGE_QUEUE_NAME,
-            [ binding(
-                workflow_engine_exchange,
-                routing_key='moab') ]),
-        Queue(
-            settings.LOCAL_MESSAGE_QUEUE_NAME,
-            [ binding(
-                workflow_engine_exchange,
-                routing_key='local') ]),
-        Queue(
-            settings.RESULT_MESSAGE_QUEUE_NAME,
-            [ binding(
-                workflow_engine_exchange,
-                routing_key='result') ]),
-        Queue(
-            Broadcast(settings.BROADCAST_MESSAGE_QUEUE_NAME),
-            [ binding(
-                workflow_engine_exchange,
-                routing_key='broadcast')]),
-        Queue(
-            'null',
-            [ binding(
-                workflow_engine_exchange,
-                routing_key='null') ]) )
-
-def invert_route_dict(rd):
-    inverted_route_dict = {}
-
-    for q,task_names in rd.items():
-        inverted_route_dict.update(
-            { task_name: q for task_name in task_names })
-    
-    return inverted_route_dict
-
-
-def route_task(name, args, kwargs,
-               options, task=None, **kw):
-    route_task._ROUTE_DICT = invert_route_dict({
-        settings.INGEST_MESSAGE_QUEUE_NAME: {
-            'ingest_task',
-            },
-        settings.MOAB_MESSAGE_QUEUE_NAME: {
-            'check_moab_status',
-            'submit_moab_task',
-            'kill_moab_task',
-            'run_task' },
-        settings.LOCAL_MESSAGE_QUEUE_NAME: {
-            'submit_worker_task' },
-        settings.WORKFLOW_MESSAGE_QUEUE_NAME: {
-            'create_job',
-            'queue_job',
-            'enqueue_next_queue',
-            'run_workflow_node_jobs_by_id',
-            },
-        settings.INGEST_MESSAGE_QUEUE_NAME: {
-            'ingest_task'
-            },
-        settings.RESULT_MESSAGE_QUEUE_NAME: { 
-            'process_pbs_id',
-            'process_running',
-            'process_finished_execution',
-            'process_failed_execution' },
-        'at_em_broadcast': { 
-            'update_dashboard' }
-    })
-
-    task_name = name.split('.')[-1]
-
-    q = route_task._ROUTE_DICT.get(task_name, 'null')
-
-    _log.info('Routing task %s to %s', task_name, q)
-
-    return { 'queue': q }
-
-
-def configure_worker_app(app, app_name):
+def configure_worker_app(app, app_name, worker_name=None):
     celery_settings = load_settings_yaml()
+    router = SimpleRouter(app_name)
+
     app.config_from_object(config_object(
         celery_settings))
-
-    configure_queues(app, app_name)
-    app.conf.task_routes = [route_task]
+    app.conf.task_queues = router.task_queues(worker_name)
+    app.conf.task_routes = (router.route_task,)
 
 
 def config_object(s):

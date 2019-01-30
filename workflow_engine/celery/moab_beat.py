@@ -38,8 +38,11 @@ from django.conf import settings
 import django; django.setup()
 import logging.config
 from workflow_client.client_settings import configure_worker_app
-from workflow_engine.celery.signatures \
-    import check_moab_status_signature, update_dashboard_signature 
+from workflow_engine.celery.signatures import (
+    check_moab_status_signature,
+    check_circus_task_status_signature,
+    update_dashboard_signature
+)
 
 
 app = celery.Celery('workflow_engine.celery.moab_beat')
@@ -63,6 +66,9 @@ def setup_periodic_tasks(sender, **kwargs):
     sender.add_periodic_task(
         moab_check_seconds,
         check_moab_status_signature)
+    sender.add_periodic_task(
+        moab_check_seconds,
+        check_circus_task_status_signature)
     sender.add_periodic_task(
         dashboard_update_seconds,
         update_dashboard_signature)

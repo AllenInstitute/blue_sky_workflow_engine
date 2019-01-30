@@ -41,12 +41,13 @@ import logging.config
 
 
 app = celery.Celery('workflow_engine.celery.worker_tasks')
-configure_worker_app(app, settings.APP_PACKAGE)
+configure_worker_app(app, settings.APP_PACKAGE, 'workflow')
 app.conf.imports = (
     'workflow_engine.celery.result_tasks',
     'workflow_engine.celery.moab_tasks',
     'workflow_engine.celery.local_tasks',
     'workflow_engine.celery.worker_tasks',
+    'workflow_engine.celery.error_handler'
     )
 
 
@@ -68,5 +69,4 @@ class Command(BaseCommand):
             'worker',
             '--concurrency=1',
             '--heartbeat-interval=30',
-            '-Q', settings.WORKFLOW_MESSAGE_QUEUE_NAME,
             '-n', 'workflow@' + app_name])

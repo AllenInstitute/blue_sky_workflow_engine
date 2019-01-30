@@ -2,9 +2,10 @@ from workflow_engine.models.task import Task
 from workflow_engine.models.workflow_node import WorkflowNode
 from workflow_engine.workflow_controller import WorkflowController
 from django.core.exceptions import ObjectDoesNotExist
-from workflow_engine.celery.signatures import \
-    process_failed_execution_signature, \
+from workflow_engine.celery.signatures import (
+    process_failed_execution_signature,
     process_finished_execution_signature
+)
 import logging
 import traceback
 import os
@@ -85,8 +86,3 @@ def get_task_strategy_by_task_id(task_id):
 @celery.shared_task(bind=True)
 def kill_job(self, job_id):
     WorkflowController.kill_job(job_id)
-
-
-@celery.shared_task(bind=True)
-def cancel_task(self, use_pbs, p_id):
-    raise Exception("unimplemented")

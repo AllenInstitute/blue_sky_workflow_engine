@@ -42,7 +42,7 @@ import logging.config
 
 
 app = celery.Celery('workflow_engine.celery.ingest_tasks')
-configure_worker_app(app, settings.APP_PACKAGE)
+configure_worker_app(app, settings.APP_PACKAGE, 'ingest')
 
 
 @celery.signals.after_setup_task_logger.connect
@@ -62,7 +62,6 @@ class Command(BaseCommand):
             '-A',
             'workflow_engine.management.commands.server_worker',
             'worker',
-            '--concurrency=2',
+            '--concurrency=1',
             '--heartbeat-interval=30',
-            '-Q', settings.INGEST_MESSAGE_QUEUE_NAME,
             '-n', 'ingest@' + app_name])

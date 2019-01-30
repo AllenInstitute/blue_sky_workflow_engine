@@ -46,7 +46,7 @@ from workflow_engine.views.decorators \
     import object_json_response, object_json_response2
 
 
-_TIMEOUT = 20
+#_TIMEOUT = 20
 _log = logging.getLogger('workflow_engine.views.job_view')
 
 
@@ -128,15 +128,15 @@ def add_sort_jobs(context, sort, url, set_params):
 @object_json_response2('job_id')
 def queue_job(job_id, request, result):
     r = queue_job_signature.delay(job_id)
-    outp = r.wait(_TIMEOUT)
-    _log.info('QUEUE_JOB ' + str(outp))
+    #outp = r.wait(_TIMEOUT)
+    #_log.info('QUEUE_JOB ' + str(outp))
 
 
 @object_json_response2('job_id')
 def kill_job(job_id, request, result):
     r = kill_job_signature.delay(job_id[0])
-    outp = r.wait(_TIMEOUT)
-    _log.info('QUEUE_JOB ' + str(outp))
+    #outp = r.wait(_TIMEOUT)
+    #_log.info('QUEUE_JOB ' + str(outp))
 
 
 @object_json_response2('job_id')

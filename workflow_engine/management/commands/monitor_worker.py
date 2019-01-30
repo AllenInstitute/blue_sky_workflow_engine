@@ -43,7 +43,7 @@ import logging.config
 
 
 app = celery.Celery('workflow_engine.celery.monitor_tasks')
-configure_worker_app(app, settings.APP_PACKAGE)
+configure_worker_app(app, settings.APP_PACKAGE, 'broadcast')
 app.conf.imports = [
     'workflow_engine.celery.monitor_tasks',
 ]
@@ -68,5 +68,4 @@ class Command(BaseCommand):
             'worker',
             '--concurrency=1',
             '--heartbeat-interval=30',
-            '-Q', settings.BROADCAST_MESSAGE_QUEUE_NAME,
             '-n', 'monitor@' + app_name])

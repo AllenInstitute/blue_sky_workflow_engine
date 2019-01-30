@@ -34,90 +34,20 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 import celery
-from django.conf import settings
 from workflow_client.nb_utils.moab_api import (
-    query_and_combine_states,
     submit_job,
     delete_moab_task
 )
 from django.core.exceptions import ObjectDoesNotExist
 import logging
-from celery.canvas import group
-import pandas as pd
-from workflow_engine.celery.result_tasks import (
-    process_running,
-    process_finished_execution,
-    process_failed_execution,
-    process_failed
-)
 from workflow_engine.celery.signatures import (
-    process_pbs_id_signature,
     process_failed_execution_signature,
     process_pbs_id_signature
 )
-#import simplejson as json
 
 
 _log = logging.getLogger('workflow_engine.celery.moab_tasks')
 
-
-def query_running_task_dicts():
-    tasks = Task.objects.filter(
-        run_state__name__in=['QUEUED', 'RUNNING'])
-
-    task_dicts = [{
-        'task_id': t.id,
-        'workflow_state': t.run_state.name,  # TODO: run_state
-        'moab_id': t.pbs_id } for t in tasks if t.pbs_task()]
-
-    _log.info('task dicts: ' + str(task_dicts))
-
-    return task_dicts
-
-
-result_queue = settings.RESULT_MESSAGE_QUEUE_NAME
-_FINISHED_DELAY = 10
-
-# Todo need to use moab id and task id in all cases
-result_actions = { 
-    'running_message':
-        lambda x: process_running.s(x).set(
-            queue=result_queue),
-    'finished_message':
-        lambda x: process_finished_execution.s(x).set(
-            queue=result_queue),
-            #countdown=_FINISHED_DELAY),
-    'failed_execution_message': 
-        lambda x: process_failed_execution.s(x).set(
-            queue=result_queue),
-    'failed_message':
-        lambda x: process_failed.s(x).set(
-            queue=result_queue)
-}
-
-
-@celery.shared_task(bind=True, trail=True)
-def check_moab_status(self):
-    combined_workflow_moab_dataframe = \
-        query_and_combine_states(
-            query_running_task_dicts())
-
-    _log.info('combined_dataframe' + str(combined_workflow_moab_dataframe))
-
-    grp = group(list(pd.concat(
-        combined_workflow_moab_dataframe.loc[
-            combined_workflow_moab_dataframe[col] == True]['task_id'].apply(fn)
-        for (col,fn) in result_actions.items())))
-
-    grp.apply_async(
-        broker_connection_timeout=10,
-        broker_connection_retry=False,
-        queue=settings.RESULT_MESSAGE_QUEUE_NAME,
-        on_raw_message=lambda x: _log.info('group result {}', str(x)))
-
-    # _log.info('Result group:' + json.dumps(grp, indent=2))
-
-    return 'OK'
 
 @celery.shared_task(bind=True, trail=True)
 def submit_moab_task(self, task_id):
@@ -144,7 +74,7 @@ def submit_moab_task(self, task_id):
                 moab_cfg=moab_cfg)
 
             if moab_id != 'ERROR':
-                the_task.set_queued_state(moab_id)
+                # the_task.set_queued_state(moab_id)
                 process_pbs_id_signature.delay(
                     task_id, moab_id)
             else:

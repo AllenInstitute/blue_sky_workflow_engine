@@ -2,7 +2,7 @@
 # license plus a third clause that prohibits redistribution for commercial
 # purposes without further permission.
 #
-# Copyright 2018. Allen Institute. All rights reserved.
+# Copyright 2019. Allen Institute. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -33,38 +33,30 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-import celery
-from django.conf import settings
-from django.core.management.base import BaseCommand
-from workflow_client.client_settings import configure_worker_app
-import logging.config
+from .task_status import TaskStatus
 
 
-app = celery.Celery('workflow_engine.celery.result_tasks')
-configure_worker_app(app, settings.APP_PACKAGE, 'result')
-app.conf.imports = (
-    'workflow_engine.celery.moab_tasks',
-    'workflow_engine.celery.result_tasks',
-    'workflow_engine.celery.worker_tasks',
-    'workflow_engine.celery.error_handler')
+class MoabStatus(TaskStatus):
+    def __init__(self, remote_queue='pbs'):
+        super(MoabStatus, self).__init__(remote_queue)
 
-
-@celery.signals.after_setup_task_logger.connect
-def after_setup_celery_task_logger(logger, **kwargs):
-    logging.config.dictConfig(settings.LOGGING)
-
-
-class Command(BaseCommand):
-    help = 'response handler for job status updates'
-
-    def handle(self, *args, **options):
-        app_name = settings.APP_PACKAGE
-
-        app.start(argv=[
-            'celery', 
-            '-A',
-            'workflow_engine.management.commands.result_worker',
-            'worker',
-            '--concurrency=1',
-            '--heartbeat-interval=30',
-            '-n', 'result@' + app_name])
+#     def query_remote_state(self, state_dicts):
+#         """
+#         state_dicts: [{ 'remote_id': 'Moab.123'}, ... ]
+#         """
+#         moab_dict = moab_query(
+#             moab_url(
+#                 table='jobs',
+#                 moab_ids=[d['remote_id'] for d in state_dicts]))
+# 
+#         moab_state_df = pd.DataFrame.from_records([
+#             (job['name'],
+#              job['customName'],
+#              job['states']['state'],
+#              job['credentials']['user'],
+#              job['completionCode']) for job in moab_dict],
+#             columns=[
+#                 'remote_id', 'task_name', 'remote_state', 'user', 'exit_code']
+#         )
+# 
+#         return moab_state_df    

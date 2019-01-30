@@ -40,11 +40,23 @@ import subprocess
 import traceback
 import logging
 import simplejson as json
-from workflow_engine.celery.signatures \
-    import enqueue_next_queue_signature, \
-    cancel_task_signature
-from workflow_engine.celery.moab_tasks import submit_moab_task
-from workflow_engine.celery.local_tasks import submit_worker_task
+from celery import chain
+from workflow_engine.celery.signatures import (
+    enqueue_next_queue_signature,
+    kill_moab_task_signature,
+    process_pbs_id_signature,
+    process_running_signature,
+    submit_moab_task_signature,
+    failed_execution_handler_signature,
+)
+#from workflow_engine.celery.error_handler import failed_execution_handler
+#from workflow_engine.celery.moab_tasks import submit_moab_task
+#from workflow_engine.celery.local_tasks import submit_worker_task
+from workflow_client.tasks.circus_signatures import (
+    submit_task_signature,
+    kill_task_signature
+)
+from workflow_engine.workflow_controller import WorkflowController 
 
 
 class ExecutionStrategy(base_strategy.BaseStrategy):
@@ -59,6 +71,7 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 
         return input_data
 
+    # TODO: deprecate for task.get_executable()
     def get_executable(self, task):
         return task.job.workflow_node.job_queue.executable
 
@@ -225,8 +238,12 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
         return str(executable) + ' > ' + str(log_file) + ' 2>&1'
 
     def kill_pbs_task(self, task):
-        if task.pbs_id != None:
-            cancel_task_signature.delay(True, task.pbs_id)
+        if task.pbs_task():
+            if task.pbs_id != None:
+                kill_moab_task_signature.delay(task.id)
+        else:
+            if self.get_remote_queue(task) == 'circus':
+                kill_task_signature.delay(int(task.pbs_id))
 
     # Do not override
     def run_asynchronous_task(self, task):
@@ -245,15 +262,48 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
                 queue_name = settings.MOAB_MESSAGE_QUEUE_NAME
             elif queue_name == 'local':
                 queue_name = settings.LOCAL_MESSAGE_QUEUE_NAME
+            elif queue_name == 'circus':
+                queue_name = 'circus'
 
             if task.pbs_task():
-                submit_moab_task.apply_async(
-                    (task.id,),
-                    queue=queue_name)
+                submit_moab_task_signature.delay(task.id)
             else:
-                submit_worker_task.apply_async(
-                    (task.id,),
-                    queue=queue_name)
+                if queue_name == 'circus':
+                    executable = task.get_executable()
+                    env = {
+                        k_v[0]: k_v[1] for k_v in (
+                            pair.split('=', 1) for pair in executable.environment_vars())
+                    }
+                    chain(
+                        submit_task_signature.clone((
+                            "task_{}".format(task.id),
+                            self.get_pbs_file(task),
+                            executable.executable_path,
+                            self.get_input_file(task),
+                            self.get_output_file(task),
+                            executable.static_arguments,
+                            self.get_or_create_task_storage_directory(task),
+                            env),
+                        ).set(
+                            task_time_limit=15
+                        ),
+                        process_pbs_id_signature.clone(
+                            (task.id, True)
+                        ).set(
+                            task_time_limit=15
+                        ),
+                        process_running_signature.clone(
+                            (task.id,)
+                        ).set(
+                            task_time_limit=15,
+                            immutable=True
+                        )
+                    ).apply_async(
+                        task_time_limit=15
+                        #link_error=failed_execution_handler_signature.clone(
+                        #    (task.id,)
+                        #)
+                    )
 
 
     # this method creates the input file

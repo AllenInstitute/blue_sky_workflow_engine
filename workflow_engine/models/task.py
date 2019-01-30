@@ -42,8 +42,6 @@ from workflow_engine.models import ONE, ZERO, TWO, SECONDS_IN_MIN
 from workflow_client.pbs_utils import PbsUtils
 import logging
 import traceback
-from workflow_engine.celery.signatures \
-    import kill_moab_task_signature, enqueue_next_queue_signature
 
 
 _logger = logging.getLogger('workflow_engine.models.task')
@@ -124,8 +122,6 @@ class Task(models.Model):
     def pbs_task(self):
         is_pbs = self.has_pbs_executable() or self.has_pbs_workflow() 
 
-        _logger.info("pbs_task: %s" % (is_pbs))
-
         return is_pbs
 
     def kill_task(self):
@@ -133,7 +129,7 @@ class Task(models.Model):
         strategy = self.get_strategy()
 
         if strategy.is_execution_strategy():
-            kill_moab_task_signature.delay(self.id)
+            strategy.kill_pbs_task(self)
 
         self.set_end_run_time()
 

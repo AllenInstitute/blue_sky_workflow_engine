@@ -34,28 +34,27 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 import celery
-from django.conf import settings
 from django.core.management.base import BaseCommand
+from django.conf import settings
 from workflow_client.client_settings import configure_worker_app
 import logging.config
 
 
-app = celery.Celery('workflow_engine.celery.result_tasks')
-configure_worker_app(app, settings.APP_PACKAGE, 'result')
+app = celery.Celery('workflow_engine.celery.moab_status_tasks')
+configure_worker_app(app, settings.APP_PACKAGE, 'moab_status')
 app.conf.imports = (
-    'workflow_engine.celery.moab_tasks',
-    'workflow_engine.celery.result_tasks',
-    'workflow_engine.celery.worker_tasks',
-    'workflow_engine.celery.error_handler')
+    'workflow_engine.celery.moab_status_tasks',
+    'workflow_engine.celery.result_tasks')
 
 
 @celery.signals.after_setup_task_logger.connect
 def after_setup_celery_task_logger(logger, **kwargs):
+    """ This function sets the 'celery.task' logger handler and formatter """
     logging.config.dictConfig(settings.LOGGING)
 
 
 class Command(BaseCommand):
-    help = 'response handler for job status updates'
+    help = 'moab handler for cluster management'
 
     def handle(self, *args, **options):
         app_name = settings.APP_PACKAGE
@@ -63,8 +62,8 @@ class Command(BaseCommand):
         app.start(argv=[
             'celery', 
             '-A',
-            'workflow_engine.management.commands.result_worker',
+            'workflow_engine.management.commands.moab_status_worker',
             'worker',
             '--concurrency=1',
             '--heartbeat-interval=30',
-            '-n', 'result@' + app_name])
+            '-n', 'moab_status@' + app_name])

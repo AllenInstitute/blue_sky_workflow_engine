@@ -41,7 +41,7 @@ import logging.config
 
 
 app = celery.Celery('workflow_engine.celery.local_tasks')
-configure_worker_app(app, settings.APP_PACKAGE)
+configure_worker_app(app, settings.APP_PACKAGE, 'local')
 app.conf.imports = (
     'workflow_engine.celery.local_tasks',
     'workflow_engine.celery.result_tasks')
@@ -66,5 +66,4 @@ class Command(BaseCommand):
             'worker',
             '--concurrency=2',
             '--heartbeat-interval=30',
-            '-Q', settings.LOCAL_MESSAGE_QUEUE_NAME,
             '-n', 'local@' + app_name])

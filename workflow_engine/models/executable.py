@@ -74,5 +74,16 @@ class Executable(models.Model):
         self.archived = True
         self.save()
 
+    def environment_vars(self):
+        '''
+            returns: environment variable list in form VAR=val
+        '''
+        env = self.environment
+
+        if env is None:
+            return []
+
+        return env.split(';')
+
 
 from workflow_engine.models.job_queue import JobQueue

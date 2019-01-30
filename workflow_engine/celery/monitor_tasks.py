@@ -89,24 +89,28 @@ def update_workflow_state_json():
 
 
 def update_job_grid_json():
-    job_grid_class = import_class(settings.JOB_GRID_CLASS)
-    grid = job_grid_class()
-    grid.query_workflow_objects()
-    grid.query_enqueued_objects()
-    grid.chunk_assignment_mapping()
-    df = grid.generate_grid()
-    
+    try:
+        job_grid_class = import_class(settings.JOB_GRID_CLASS)
 
-    json_dict = json.loads(df.to_json(orient='table'))
-    json_dict['columns'] = grid.sorted_node_names()
+        grid = job_grid_class()
+        grid.query_workflow_objects()
+        grid.query_enqueued_objects()
+        grid.chunk_assignment_mapping()
+        df = grid.generate_grid()
 
-    outfile = '/var/www/static/job_grid_data.json'
+        json_dict = json.loads(df.to_json(orient='table'))
+        json_dict['columns'] = grid.sorted_node_names()
 
-    with open(outfile, 'w') as f:
-        json.dump(json_dict, f, indent=2)
+        outfile = '/var/www/static/job_grid_data.json'
 
-    return 'OK'
+        with open(outfile, 'w') as f:
+            json.dump(json_dict, f, indent=2)
+
+        return 'OK'
+    except:
+        return 'FAIL'
 
 
 append_extra_function(update_workflow_state_json)
-append_extra_function(update_job_grid_json)
+if settings.JOB_GRID_CLASS:
+    append_extra_function(update_job_grid_json)
