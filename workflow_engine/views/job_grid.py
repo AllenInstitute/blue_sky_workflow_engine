@@ -1,8 +1,10 @@
 import django; django.setup()
 import pandas as pd
-from workflow_engine.models.workflow_node import WorkflowNode
-from workflow_engine.models.job import Job
-from workflow_engine.models.job_queue import JobQueue
+from workflow_engine.models import (
+    WorkflowNode,
+    Job,
+    JobQueue
+)
 from django_pandas.io import read_frame
 import numpy as np
 from collections import deque
@@ -25,11 +27,16 @@ class JobGrid(object):
     def query_workflow_objects(self):
         self.workflow_nodes = WorkflowNode.objects.filter(archived=False)
         self.workflow_node_df = read_frame(self.workflow_nodes)
-        self.workflow_node_df.loc[:,'parent'] = \
-            [str(wn.parent) for wn in self.workflow_nodes]
-        self.workflow_node_df.loc[:,'parent_id'] = \
-            [wn.parent.pk if wn.parent else None for wn in self.workflow_nodes]
-
+        self.workflow_node_df.loc[:,'parent'] = [
+            str(wn.sources.first())
+            if wn.sources.count() >= 1 else None
+            for wn in self.workflow_nodes
+        ]
+        self.workflow_node_df.loc[:,'parent_id'] = [
+            wn.sources.first().pk
+            if wn.sources.count() >= 1 else None
+            for wn in self.workflow_nodes
+        ]
         self.job_queues = JobQueue.objects.filter(archived=False)
         self.job_queue_df = read_frame(self.job_queues)
 

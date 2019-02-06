@@ -53,7 +53,7 @@ class Workflow(models.Model):
         return self.name
 
     def get_head_workflow_nodes(self):
-        return WorkflowNode.objects.filter(is_head=True, workflow=self)
+        return self.workflownode_set.filter(is_head=True, workflow=self)
 
     def update(self, name, description, current_disabled):
         prev_disabled = self.disabled
@@ -71,7 +71,3 @@ class Workflow(models.Model):
     def archive(self):
         self.archived = True
         self.save()
-
-
-# circular imports
-from workflow_engine.models.workflow_node import WorkflowNode

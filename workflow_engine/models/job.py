@@ -305,4 +305,4 @@ class Job(models.Model):
         return self.workflow_node.workflow.name
 
 # circular imports
-from workflow_engine.models.run_state import RunState
+from .run_state import RunState

@@ -1,4 +1,4 @@
-from workflow_engine.models.task import Task
+from workflow_engine.models import Task
 from rest_framework.serializers import ModelSerializer
 from rest_framework.fields import DateTimeField
 

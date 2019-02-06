@@ -130,4 +130,4 @@ class IngestStrategy(ExecutionStrategy):
 
 
 from workflow_engine.workflow_controller import WorkflowController
-from workflow_engine.models.workflow import Workflow
+from workflow_engine.models import Workflow

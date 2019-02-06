@@ -35,9 +35,11 @@
 #
 from django.http import HttpResponse
 from django.template import loader
-from workflow_engine.models.job import Job
-from workflow_engine.models.workflow_node import WorkflowNode
-from workflow_engine.models import ONE
+from workflow_engine.models import (
+    Job,
+    WorkflowNode,
+    ONE
+)
 from workflow_engine.views import shared, HEADER_PAGES
 from workflow_engine.celery.signatures \
     import queue_job_signature, kill_job_signature

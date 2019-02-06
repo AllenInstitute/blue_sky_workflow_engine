@@ -1,5 +1,7 @@
-from workflow_engine.models.task import Task
-from workflow_engine.models.workflow_node import WorkflowNode
+from workflow_engine.models import (
+    Task,
+    WorkflowNode
+)
 from workflow_engine.workflow_controller import WorkflowController
 from django.core.exceptions import ObjectDoesNotExist
 from workflow_engine.celery.signatures import (

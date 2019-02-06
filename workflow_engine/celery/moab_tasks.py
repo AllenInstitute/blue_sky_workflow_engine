@@ -109,5 +109,8 @@ def kill_moab_task(self, task_id):
                      str(e))
 
 # circular imports
-from workflow_engine.models.task import Task
-from workflow_engine.models.configuration import Configuration
+from workflow_engine.models import (
+    Task,
+    Configuration
+)
+

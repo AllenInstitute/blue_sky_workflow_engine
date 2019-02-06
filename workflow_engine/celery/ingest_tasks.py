@@ -72,7 +72,7 @@ def ingest_task(self, workflow, message, tags):
     dict or String
         response message body to be sent to the sender process
     '''
-    from workflow_engine.models.workflow import Workflow
+    from workflow_engine.models import Workflow
 
     ret = 'OK'
 

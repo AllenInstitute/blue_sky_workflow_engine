@@ -77,8 +77,7 @@ class Task(models.Model):
 
     def __str__(self):
         try:
-            enqueued_object_name = str(
-                WorkflowController.get_enqueued_object(self))
+            enqueued_object_name = str(self.enqueued_task_object)
         except:
             enqueued_object_name = 'None'
 
@@ -152,7 +151,7 @@ class Task(models.Model):
     def get_enqueued_object_display(self):
         result = None
         try:
-            enqueued_object = WorkflowController.get_enqueued_object(self)
+            enqueued_object = self.enqueued_task_object
             result = str(enqueued_object)
         except:
             result = None
@@ -325,15 +324,8 @@ class Task(models.Model):
         self.save()
 
     def get_file_records(self):
-        results = []
-        file_records = FileRecord.objects.filter(task=self)
-        for file_record in file_records:
-            results.append(file_record.get_full_name())
+        return list(self.filerecord_set.all())
 
-        return results
 
 # circular imports
-from workflow_engine.models.run_state import RunState
-from workflow_engine.models.file_record import FileRecord
-from workflow_engine.workflow_controller import WorkflowController
-from workflow_engine.celery.moab_tasks import kill_moab_task
+from .run_state import RunState

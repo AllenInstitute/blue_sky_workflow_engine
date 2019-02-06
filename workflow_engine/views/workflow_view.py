@@ -36,14 +36,16 @@
 from django.http import HttpResponse
 from django.template import loader
 from workflow_engine.models import ZERO
-from workflow_engine.models.workflow import Workflow
-from workflow_engine.models.workflow_node import WorkflowNode
-from workflow_engine.models.job import Job
-from workflow_engine.models.run_state import RunState
+from workflow_engine.models import (
+    Workflow,
+    WorkflowNode,
+    Job,
+    RunState,
+    Executable
+)
 from workflow_engine.import_class import import_class
 from workflow_engine.views   import shared, HEADER_PAGES
 from workflow_engine.workflow_controller import WorkflowController
-from workflow_engine.models.executable import Executable
 from collections import deque
 from workflow_engine.celery.signatures \
     import run_workflow_node_jobs_signature, create_job_signature
@@ -54,7 +56,7 @@ from django_pandas.io import read_frame
 import itertools as it
 import pandas as pd
 import logging
-import json
+import simplejson as json
 
 
 _log = logging.getLogger('workflow_engine.views.workflow_view')
@@ -294,7 +296,7 @@ def get_node_info(workflow_node, request, result):
         payload['executable_link'] = ''
     
     payload['enqueued_object_class'] = \
-        workflow_node.job_queue.enqueued_object_class.split('.')[-1]
+        workflow_node.short_enqueued_object_class_name()
     payload['disabled'] = workflow_node.disabled
     payload['overwrite_previous_job'] = workflow_node.overwrite_previous_job
     payload['max_retries'] = workflow_node.max_retries
@@ -431,12 +433,17 @@ def workflow_summary(workflow_name):
 
 @object_json_all_response(WorkflowNode)
 def monitor_workflow(nodes, request, result):
-    result['nodes'] = [ str(n) for n in nodes]
+    result['nodes'] = []
+    result['edges'] = []
 
-    result['edges'] = [ {
-        'source': str(n.parent),
-        'target': str(n) } for n in nodes
-        if n.parent is not None ]
+    for n in nodes:
+        result['nodes'].append(str(n))
+
+        for s in n.sources.filter(archived=False):
+            result['edges'].append({
+                'source': str(s),
+                'target': str(n)
+            })
 
     summary = workflow_summary(
         nodes[0].workflow.name)

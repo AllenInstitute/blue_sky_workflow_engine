@@ -1,12 +1,13 @@
 from __future__ import absolute_import, unicode_literals
+
 try:
     import os
     from celery import Celery
     from workflow_client.client_settings import load_settings_yaml, config_object
     from django.conf import settings
     from workflow_client.client_settings import configure_worker_app
- 
- 
+    
+    
     # set the default Django settings module for the 'celery' program.
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'proj.settings')
      
@@ -24,7 +25,7 @@ try:
     #app.config_from_object('django.conf:settings', namespace='CELERY')
     blue_sky_settings = load_settings_yaml()
     app.config_from_object(config_object(blue_sky_settings))
- 
+    
     configure_worker_app(app, settings.APP_PACKAGE)
      
     # Load task modules from all registered Django app configs.

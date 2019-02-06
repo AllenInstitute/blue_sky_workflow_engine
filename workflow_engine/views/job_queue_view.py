@@ -38,8 +38,10 @@ from django.http import HttpResponse
 from django.template import loader
 from django.apps import apps
 from workflow_engine.views.decorators import object_json_response
-from workflow_engine.models.job_queue import JobQueue
-from workflow_engine.models import ONE
+from workflow_engine.models import (
+    JobQueue,
+    ONE
+)
 from workflow_engine.views import shared, HEADER_PAGES
 
 

@@ -36,9 +36,18 @@
 import celery
 import django; django.setup()
 from django.conf import settings
-from workflow_engine.views import workflow_view
-from rest_framework.test import APIRequestFactory
+#from workflow_engine.views import workflow_view
+#from rest_framework.test import APIRequestFactory
+from workflow_engine.models import (
+    WorkflowNode,
+    WorkflowEdge,
+    RunState,
+    Job
+)
 from workflow_engine.import_class import import_class
+import pandas as pd
+import itertools as it
+from django_pandas.io import read_frame
 from datetime import datetime
 import simplejson as json
 import logging
@@ -64,13 +73,83 @@ def update_dashboard(self):
     return 'OK'
 
 
+# TODO: move into utilities class
+def count_node_jobs_in_state(node, run_state):
+    return Job.objects.filter(
+        workflow_node__job_queue__name=node,
+        run_state__name=run_state,
+        archived=False).count()
+
+
+# TODO move into utilities class
+def workflow_summary(workflow_object):
+    wns = workflow_object.workflownode_set.filter(
+        archived=False)
+    rs = RunState.objects.all()
+
+    jobs = Job.objects.filter(
+        archived=False)
+    jobs_df = read_frame(jobs)
+
+    counts = [{
+        'node': node,
+        'state': run_state,
+        'count':  count_node_jobs_in_state(node, run_state) } 
+        for (node, run_state) in it.product(
+            (str(n) for n in wns),
+            (s.name for s in rs)) ]
+
+    counts.extend([{
+        'node': str(n),
+        'state': 'BATCH_SIZE',
+        'count': n.batch_size
+    } for n in wns ])
+
+    counts_df = pd.DataFrame.from_records(counts)
+
+    totals = counts_df.groupby(by='node')['count'].sum()
+
+    summary = {
+        'run_states': counts_df.to_dict('records'),
+        'totals': totals.to_dict()
+    }
+    
+    return summary
+
+
 def update_workflow_state_json():
-    v = workflow_view.monitor_workflow
-    f = APIRequestFactory()
-    r = f.get('/workflow_engine/workflows/monitor')
-    resp = v(r)
+#     v = workflow_view.monitor_workflow
+#     f = APIRequestFactory()
+#     r = f.get('/workflow_engine/workflows/monitor')
+#     resp = v(r)
     # resp.render()
- 
+    result = {
+        'success': True,
+        'message': '',
+        'payload': {}
+    }
+
+    # TODO: move this into payload
+    result['nodes'] = []
+    result['edges'] = []
+
+    nodes = WorkflowNode.objects.all()
+
+    for n in nodes:
+        result['nodes'].append(str(n))
+
+        for s in n.sources.filter(archived=False):
+            result['edges'].append({
+                'source': str(s),
+                'target': str(n)
+            })
+
+    summary = workflow_summary(
+        nodes[0]
+    )
+
+    result.update(summary)
+
     outfile = os.path.join(
         settings.STATIC_ROOT,
         'workflow_engine',
@@ -83,7 +162,7 @@ def update_workflow_state_json():
         pass
  
     with open(outfile, 'w') as o:
-        o.write(resp.content.decode('utf-8'))
+        json.dump(result, o, indent=2)
  
     return 'OK'
 
@@ -101,7 +180,12 @@ def update_job_grid_json():
         json_dict = json.loads(df.to_json(orient='table'))
         json_dict['columns'] = grid.sorted_node_names()
 
-        outfile = '/var/www/static/job_grid_data.json'
+        outfile = os.path.join(
+            settings.STATIC_ROOT,
+            'workflow_engine',
+            'javascript',
+            'job_grid_data.json'
+        )
 
         with open(outfile, 'w') as f:
             json.dump(json_dict, f, indent=2)

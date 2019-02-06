@@ -118,4 +118,4 @@ def kill_task(self, task_id):
     raise Exception("Removed/Unimplemented")
 
 # circular imports
-from workflow_engine.models.task import Task
+from workflow_engine.models import Task

@@ -36,14 +36,21 @@
 from django.db import models
 import logging
 from django.contrib.contenttypes.fields import GenericRelation
-_model_logger = logging.getLogger('workflow_engine.models')
 
 
 class WorkflowNode(models.Model):
+    _log = logging.getLogger('workflow_engine.models.workflow_node')
+
     job_queue = models.ForeignKey(
         'workflow_engine.JobQueue')
     parent = models.ForeignKey(
         'workflow_engine.WorkflowNode', null=True, blank=True)
+    sinks = models.ManyToManyField(
+        'self', through='workflow_engine.WorkflowEdge',
+        related_name='sources',
+        symmetrical=False,
+        through_fields=('source', 'sink')
+    )
     is_head = models.BooleanField(default=False)
     workflow = models.ForeignKey(
         'workflow_engine.Workflow')
@@ -73,24 +80,19 @@ class WorkflowNode(models.Model):
         return self.job_queue.get_strategy()
 
     def get_children(self):
-        return WorkflowNode.objects.filter(
-            parent=self,
-            archived=False)
+        return self.sinks.filter(archived=False)
 
     def get_total_number_of_jobs(self):
-        return Job.objects.filter(
-            workflow_node=self,
-            archived=False).count()
+        return self.job_set.filter(archived=False).count()
 
     def get_number_of_queued_and_running_jobs(self):
         return len(self.get_queued_and_running_jobs())
 
     def get_queued_and_running_jobs(self):
-        return Job.objects.filter(
+        return self.job_set.filter(
             run_state_id__in=[
                 RunState.get_queued_state().id,
                 RunState.get_running_state().id],
-            workflow_node=self,
             archived=False)
 
     def update(self,
@@ -102,7 +104,7 @@ class WorkflowNode(models.Model):
         prev_disabled = self.disabled
 
         self.disabled = current_disabled
-        self.overwrite_previous_job = overwrite_previous_job,
+        self.overwrite_previous_job = overwrite_previous_job
         self.max_retries = int(max_retries)
         self.batch_size = int(batch_size)
         self.priority = int(priority)
@@ -152,12 +154,14 @@ class WorkflowNode(models.Model):
 
         return result
 
+    def short_enqueued_object_class_name(self):
+        return self.job_queue.enqueued_object_type.model_class().__name__
+
     def archive(self):
         self.archived = True
         self.save()
 
 
 # circular imports
-from workflow_engine.models.job import Job
-from workflow_engine.models.run_state import RunState
+from .run_state import RunState
 

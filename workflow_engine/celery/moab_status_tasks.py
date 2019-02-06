@@ -110,4 +110,4 @@ def check_moab_status(self):
 
 
 # circular imports
-from workflow_engine.models.task import Task
+from workflow_engine.models import Task

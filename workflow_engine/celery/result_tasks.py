@@ -147,4 +147,4 @@ def process_pbs_id(self, task_id, moab_id, chained=False):
 
 
 # circular imports
-from workflow_engine.models.task import Task
+from workflow_engine.models import Task

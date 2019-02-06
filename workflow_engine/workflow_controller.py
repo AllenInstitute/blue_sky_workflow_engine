@@ -165,16 +165,18 @@ class WorkflowController(object):
         WorkflowController._logger.info('enqueue_next_queue')
         children = job.workflow_node.get_children()
 
-        parent_enqueued_object = job.enqueued_object
-
+        # TODO: factor out this loop body
         for child in children:
             strategy = child.get_strategy()
+
             child_enqueued_objects = strategy.get_objects_for_queue(
                 job)
 
             for enqueued_object in child_enqueued_objects:
                 if strategy.can_transition(
                     enqueued_object, job.workflow_node):
+
+                    # TODO: change this to use get_or_create
                     #try to get the job
                     jobs = Job.objects.filter(
                         enqueued_object_id=enqueued_object.id,
@@ -191,7 +193,8 @@ class WorkflowController(object):
                                 job.archived = False
                                 job.save()
                                 WorkflowController.set_job_for_run(job)
-                                
+
+                            # TODO: raise exception
                             #should not have more than one job but just in case
                             else:
                                 job.archived = True
@@ -334,7 +337,7 @@ class WorkflowController(object):
                 job_queue__name=start_node_name)
         else:
             workflow_nodes = WorkflowNode.objects.filter(
-                workflow=workflow, parent=None)
+                workflow=workflow, sources=None)
 
         if len(workflow_nodes) != ONE:
             raise Exception(
@@ -473,10 +476,13 @@ class WorkflowController(object):
 
 
 # circular imports
-from workflow_engine.models import ZERO, ONE
-from workflow_engine.models.job import Job
-from workflow_engine.models.task import Task
-from workflow_engine.models.run_state import RunState
-from workflow_engine.models.workflow_node import WorkflowNode
-from workflow_engine.models.workflow import Workflow
+from workflow_engine.models import (
+    ZERO,
+    ONE,
+    Job,
+    Task,
+    RunState,
+    WorkflowNode,
+    Workflow
+)
 

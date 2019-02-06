@@ -146,4 +146,4 @@ class WellKnownFile(models.Model):
 
 
 # Circular imports
-from workflow_engine.models.file_record import FileRecord
+from .file_record import FileRecord

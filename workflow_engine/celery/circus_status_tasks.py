@@ -37,7 +37,7 @@ import celery
 import os
 from workflow_client.simple_router import SimpleRouter
 import django; django.setup()
-from workflow_engine.models.task import Task
+from workflow_engine.models import Task
 from workflow_client.tasks.circus_signatures import ( 
     check_remote_status_signature
 )

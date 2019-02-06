@@ -36,6 +36,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist
 from workflow_engine.workflow_config import WorkflowConfig
+import traceback
 import logging
 
 
@@ -54,9 +55,14 @@ class Command(BaseCommand):
 
         try:
             WorkflowConfig.archive_all_workflows()
-            WorkflowConfig.create_workflow(file_path)
         except Exception as e:
-            Command._log.error('Something went wrong: ' + str(e))
+            Command._log.error('Something went quite wrong: ' + str(e))
+            Command._log.error(str(traceback.format_exc()))
             raise(e)
 
-       
+        try:
+            WorkflowConfig.create_workflow(file_path)
+        except Exception as e:
+            Command._log.error('Something went very wrong: ' + str(e))
+            Command._log.error(str(traceback.format_exc()))
+            raise(e)

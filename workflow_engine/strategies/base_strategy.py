@@ -33,9 +33,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-from workflow_engine.models.task import Task
-from workflow_engine.models.run_state import RunState
-from workflow_engine.models.well_known_file import WellKnownFile
+from workflow_engine.models import WellKnownFile
 from django.conf import settings
 import subprocess
 import logging

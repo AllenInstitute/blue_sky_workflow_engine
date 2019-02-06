@@ -1,7 +1,9 @@
 from django.contrib import admin
 from workflow_engine.workflow_controller import WorkflowController
-from workflow_engine.models.task import Task
-from workflow_engine.models.run_state import RunState
+from workflow_engine.models import (
+    Task,
+    RunState
+)
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
@@ -12,6 +14,7 @@ def kill_jobs(modeladmin, request, queryset):
 
     for job in queryset:
         job.kill()
+
 
 def set_killed(modeladmin, request, queryset):
     set_killed.short_description = \
@@ -37,29 +40,30 @@ def enqueue_next(modeladmin, request, queryset):
     for job_item in queryset:
         WorkflowController.enqueue_next_queue_by_job_id(job_item.id)
 
+
 def raise_priority(modeladmin, request, queryset):
-    raise_priority.short_description = \
-        "Run sooner"
+    raise_priority.short_description = "Run sooner"
 
     for job_item in queryset:
         job_item.priority = job_item.priority - 10
         job_item.save()
 
+
 def lower_priority(modeladmin, request, queryset):
-    lower_priority.short_description = \
-        "Run later"
+    lower_priority.short_description = "Run later"
 
     for job_item in queryset:
         job_item.priority = job_item.priority + 10
         job_item.save()
 
+
 def reset_priority(modeladmin, request, queryset):
-    reset_priority.short_description = \
-        "Reset priority"
+    reset_priority.short_description = "Reset priority"
 
     for job_item in queryset:
         job_item.priority = job_item.workflow_node.priority
         job_item.save()
+
 
 class TaskInline(admin.StackedInline):
     model = Task
@@ -118,7 +122,6 @@ class JobAdmin(admin.ModelAdmin):
         except:
             return "-"
 
-
     def workflow_link(self, job_object):
         return mark_safe('<a href="{}">{}</a>'.format(
             reverse("admin:workflow_engine_workflow_change",
@@ -126,7 +129,6 @@ class JobAdmin(admin.ModelAdmin):
             str(job_object.workflow_node.workflow)))
 
     workflow_link.short_description = "Workflow"
-
 
     def workflow_node_link(self, job_object):
         return mark_safe('<a href="{}">{}</a>'.format(

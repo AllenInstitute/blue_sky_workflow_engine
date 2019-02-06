@@ -35,9 +35,11 @@
 #
 from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ObjectDoesNotExist
-from workflow_engine.models.job import Job
-from workflow_engine.models.task import Task
-from workflow_engine.models.workflow_node import WorkflowNode
+from workflow_engine.models import (
+    Job,
+    Task,
+    WorkflowNode
+)
 from django.contrib.contenttypes.models import ContentType
 from workflow_engine.import_class import import_class
 import logging

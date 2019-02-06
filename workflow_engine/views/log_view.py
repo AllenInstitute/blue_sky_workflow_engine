@@ -37,11 +37,13 @@ from django.http import HttpResponse
 from workflow_engine.file_holder import FileHolder
 from workflow_engine.log_holder import LogHolder
 from django.template import loader
-from workflow_engine.models.job_queue import JobQueue
-from workflow_engine.models.executable import Executable
-from workflow_engine.models.job import Job
-from workflow_engine.models.task import Task
-from workflow_engine.models import ONE
+from workflow_engine.models import (
+    JobQueue,
+    Executable,
+    Job,
+    Task,
+    ONE
+)
 from workflow_engine.views import shared, HEADER_PAGES
 import os
 
