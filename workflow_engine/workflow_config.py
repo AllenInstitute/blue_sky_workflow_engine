@@ -238,32 +238,33 @@ class WorkflowConfig:
                 queue_name = node['label']
 
                 # For now only use the first parent
-                parent_key = next(iter(node['parents']), None)
+#                parent_key = next(iter(node['parents']), None)
+                for parent_key in iter(node['parents']):
 
-                if parent_key in nodes and parent_key is not None:
-                    parent_node = nodes[parent_key]
-                    head = False
-                else:
-                    parent_node = None
-                    head = True
+                    if parent_key in nodes and parent_key is not None:
+                        parent_node = nodes[parent_key]
+                        head = False
+                    else:
+                        parent_node = None
+                        head = True
+# 
+                    # TODO: deprecated
+                    nodes[node['key']].parent = parent_node
+                    nodes[node['key']].is_head = head
+                    nodes[node['key']].save()
 
-                # TODO: deprecated
-                nodes[node['key']].parent = parent_node
-                nodes[node['key']].is_head = head
-                nodes[node['key']].save()
+                    WorkflowEdge.objects.update_or_create(
+                        workflow=workflow,
+                        source=parent_node,
+                        sink=nodes[node['key']],
+                        disabled=False,
+                        archived=False
+                    )
 
-                WorkflowEdge.objects.update_or_create(
-                    workflow=workflow,
-                    source=parent_node,
-                    sink=nodes[node['key']],
-                    disabled=False,
-                    archived=False
-                )
-
-                WorkflowConfig._log.info(
-                    "parent: %s->%s %s" % (node['key'],
-                                           parent_key,
-                                           str(nodes[parent_key])))
+                    WorkflowConfig._log.info(
+                        "edge: %s->%s %s" % (node['key'],
+                                               parent_key,
+                                               str(nodes[parent_key])))
 
     @classmethod
     def archive_all_workflows(cls):

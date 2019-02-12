@@ -504,8 +504,8 @@ def download_workflow(flows, request, result):
 
         graph = result['workflows'][k]['graph']
         head = f.workflownode_set.filter(
-            archived=False,
-            is_head=True).first()
+            sources=None,
+            archived=False).first()
         work_list = deque()
 
         current = head

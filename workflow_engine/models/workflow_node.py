@@ -86,7 +86,7 @@ class WorkflowNode(models.Model):
         return self.job_set.filter(archived=False).count()
 
     def get_number_of_queued_and_running_jobs(self):
-        return len(self.get_queued_and_running_jobs())
+        return self.get_queued_and_running_jobs().count()
 
     def get_queued_and_running_jobs(self):
         return self.job_set.filter(
@@ -94,6 +94,13 @@ class WorkflowNode(models.Model):
                 RunState.get_queued_state().id,
                 RunState.get_running_state().id],
             archived=False)
+
+    def get_n_pending_jobs(self, number_jobs_to_run):
+        return self.job_set.filter(
+            run_state=RunState.get_pending_state(),
+            archived=False).order_by(
+                'priority',
+                '-updated_at')[:number_jobs_to_run]
 
     def update(self,
                current_disabled,

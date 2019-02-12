@@ -176,27 +176,10 @@ class Job(models.Model):
         self.run_state = RunState.get_success_state()
         self.save()
 
-
     def set_process_killed_state(self):
         _logger.info('set process_killed')
         self.run_state = RunState.get_process_killed_state()
         self.save()
-
-    @classmethod
-    def enqueue_object(cls, workflow_node, enqueued_object_id, priority):
-        enqueued_object_type = workflow_node.job_queue.enqueued_object_type
-        job = Job()
-        job.enqueued_object_type = enqueued_object_type
-        job.enqueued_object_id = enqueued_object_id
-        job.enqueued_object = \
-            enqueued_object_type.get_object_for_this_type(
-                pk=enqueued_object_id)
-        job.workflow_node = workflow_node
-        job.run_state = RunState.get_pending_state()
-        job.priority = priority
-        job.save()
-
-        return job
 
     def get_enqueued_object(self):
         return self.enqueued_object
@@ -232,7 +215,7 @@ class Job(models.Model):
         return [t.id for t in self.tasks()]
 
     def number_of_tasks(self):
-        return len(self.get_tasks())
+        return self.get_tasks().count()
 
     def prep_job(self):
         strategy = self.get_strategy()

@@ -78,7 +78,10 @@ class BaseStrategy(object):
         enqueued_object = job.get_enqueued_object()
         BaseStrategy._log.info('get_storage_directory: %s, %s:' % (
             base_storage_directory, str(enqueued_object.id)))
-        return os.path.join(base_storage_directory, str(enqueued_object.id))
+        return os.path.join(
+            base_storage_directory,
+            # str(job.enqueued_object_type),
+            str(job.enqueued_object_id))
 
     # override if needed
     # this is called when a job is transitioning from a previous queue

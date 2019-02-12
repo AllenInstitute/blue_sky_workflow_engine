@@ -53,7 +53,9 @@ class Workflow(models.Model):
         return self.name
 
     def get_head_workflow_nodes(self):
-        return self.workflownode_set.filter(is_head=True, workflow=self)
+        return self.workflownode_set.filter(
+            sources=None,
+            archived=False)
 
     def update(self, name, description, current_disabled):
         prev_disabled = self.disabled
