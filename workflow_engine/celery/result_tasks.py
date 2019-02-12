@@ -42,11 +42,22 @@ from workflow_engine.celery.signatures import (
     run_workflow_node_jobs_signature
 )
 from django.conf import settings
+from workflow_client.client_settings import configure_worker_app
 import logging
 import traceback
 
 
 _log = logging.getLogger('workflow_engine.celery.result_tasks')
+
+
+app = celery.Celery('workflow_engine.celery.result_tasks')
+configure_worker_app(app, settings.APP_PACKAGE, 'result')
+app.conf.imports = ()
+
+
+@celery.signals.after_setup_task_logger.connect
+def after_setup_celery_task_logger(logger, **kwargs):
+    logging.config.dictConfig(settings.LOGGING)
 
 
 def get_task_strategy_by_task_id(task_id):
@@ -147,4 +158,5 @@ def process_pbs_id(self, task_id, moab_id, chained=False):
 
 
 # circular imports
+import django; django.setup()
 from workflow_engine.models import Task

@@ -36,15 +36,13 @@
 import celery
 import django; django.setup()
 from django.conf import settings
-#from workflow_engine.views import workflow_view
-#from rest_framework.test import APIRequestFactory
 from workflow_engine.models import (
     WorkflowNode,
-    WorkflowEdge,
     RunState,
     Job
 )
 from workflow_engine.import_class import import_class
+from workflow_client.client_settings import configure_worker_app
 import pandas as pd
 import itertools as it
 from django_pandas.io import read_frame
@@ -52,6 +50,14 @@ from datetime import datetime
 import simplejson as json
 import logging
 import os
+
+
+app = celery.Celery('workflow_engine.celery.monitor_tasks')
+configure_worker_app(app, settings.APP_PACKAGE, 'broadcast')
+app.conf.imports = [
+    'workflow_engine.celery.monitor_tasks',
+]
+app.conf.imports.extend(settings.MONITOR_TASK_MODULES)
 
 
 _log = logging.getLogger('workflow_engine.celery.monitor_tasks')

@@ -2,7 +2,7 @@
 # license plus a third clause that prohibits redistribution for commercial
 # purposes without further permission.
 #
-# Copyright 2018. Allen Institute. All rights reserved.
+# Copyright 2018-2019. Allen Institute. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -33,18 +33,31 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
+import django; django.setup()
+from django.conf import settings
+from workflow_client.client_settings import configure_worker_app
+from workflow_engine.celery.signatures import (
+    process_pbs_id_signature,
+    process_running_signature,
+    process_failed_execution_signature,
+    process_finished_execution_signature
+)
 import celery
-from django.core.exceptions import ObjectDoesNotExist
 import logging
 import os
-from workflow_engine.celery.signatures \
-    import process_pbs_id_signature, \
-    process_running_signature, \
-    process_failed_execution_signature, \
-    process_finished_execution_signature
 
 
 _log = logging.getLogger('workflow_engine.celery.local_tasks')
+
+app = celery.Celery('workflow_engine.celery.local_tasks')
+configure_worker_app(app, settings.APP_PACKAGE, 'local')
+app.conf.imports = ()
+
+
+@celery.signals.after_setup_task_logger.connect
+def after_setup_celery_task_logger(logger, **kwargs):
+    """ This function sets the 'celery.task' logger handler and formatter """
+    logging.config.dictConfig(settings.LOGGING)
 
 
 SUCCESS_EXIT_CODE = 0

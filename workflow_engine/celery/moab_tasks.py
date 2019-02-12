@@ -33,21 +33,34 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-import celery
+import django; django.setup()
+from django.conf import settings
+from workflow_client.client_settings import configure_worker_app
 from workflow_client.nb_utils.moab_api import (
     submit_job,
     delete_moab_task
 )
-from django.core.exceptions import ObjectDoesNotExist
-import logging
 from workflow_engine.celery.signatures import (
     process_failed_execution_signature,
     process_pbs_id_signature
 )
+from django.core.exceptions import ObjectDoesNotExist
+import celery
+import logging
 
 
 _log = logging.getLogger('workflow_engine.celery.moab_tasks')
 
+
+app = celery.Celery('workflow_engine.celery.moab_tasks')
+configure_worker_app(app, settings.APP_PACKAGE, 'moab')
+app.conf.imports = ()
+
+
+@celery.signals.after_setup_task_logger.connect
+def after_setup_celery_task_logger(logger, **kwargs):
+    """ This function sets the 'celery.task' logger handler and formatter """
+    logging.config.dictConfig(settings.LOGGING)
 
 @celery.shared_task(bind=True, trail=True)
 def submit_moab_task(self, task_id):

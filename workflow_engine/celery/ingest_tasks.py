@@ -33,13 +33,26 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-import celery
+import django; django.setup()
+from django.conf import settings
+from workflow_client.client_settings import configure_worker_app
 from workflow_engine.import_class import import_class
+import celery
 import logging
 import traceback
 
 
 _log = logging.getLogger('workflow_engine.celery.ingest_tasks')
+
+
+app = celery.Celery('workflow_engine.celery.ingest_tasks')
+configure_worker_app(app, settings.APP_PACKAGE, 'ingest')
+
+
+@celery.signals.after_setup_task_logger.connect
+def after_setup_celery_task_logger(logger, **kwargs):
+    """ This function sets the 'celery.task' logger handler and formatter """
+    logging.config.dictConfig(settings.LOGGING)
 
 
 def load_workflow_config(yaml_file):

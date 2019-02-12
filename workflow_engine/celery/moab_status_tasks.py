@@ -33,23 +33,36 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-import celery
+import django; django.setup()
 from django.conf import settings
+from workflow_client.client_settings import configure_worker_app
 from workflow_client.nb_utils.moab_api import (
     query_and_combine_states
 )
+from workflow_engine.celery.signatures import (
+    process_running_signature,
+    process_finished_execution_signature,
+    process_failed_execution_signature,
+    process_failed_signature
+)
 import logging
+import celery
 from celery.canvas import group
 import pandas as pd
-from workflow_engine.celery.result_tasks import (
-    process_running,
-    process_finished_execution,
-    process_failed_execution,
-    process_failed
-)
 
 
 _log = logging.getLogger('workflow_engine.celery.moab_status_tasks')
+
+
+app = celery.Celery('workflow_engine.celery.moab_status_tasks')
+configure_worker_app(app, settings.APP_PACKAGE, 'moab_status')
+app.conf.imports = ()
+
+
+@celery.signals.after_setup_task_logger.connect
+def after_setup_celery_task_logger(logger, **kwargs):
+    """ This function sets the 'celery.task' logger handler and formatter """
+    logging.config.dictConfig(settings.LOGGING)
 
 
 def query_running_task_dicts():
@@ -70,18 +83,10 @@ result_queue = settings.RESULT_MESSAGE_QUEUE_NAME
 
 # Todo need to use moab id and task id in all cases
 result_actions = { 
-    'running_message':
-        lambda x: process_running.s(x).set(
-            queue=result_queue),
-    'finished_message':
-        lambda x: process_finished_execution.s(x).set(
-            queue=result_queue),
-    'failed_execution_message': 
-        lambda x: process_failed_execution.s(x).set(
-            queue=result_queue),
-    'failed_message':
-        lambda x: process_failed.s(x).set(
-            queue=result_queue)
+    'running_message': process_running_signature,
+    'finished_message': process_finished_execution_signature,
+    'failed_execution_message': process_failed_execution_signature,
+    'failed_message': process_failed_signature
 }
 
 
@@ -94,9 +99,9 @@ def check_moab_status(self):
     _log.info('combined_dataframe' + str(combined_workflow_moab_dataframe))
 
     grp = group(list(pd.concat(
-        combined_workflow_moab_dataframe.loc[
-            combined_workflow_moab_dataframe[col] == True]['task_id'].apply(fn)
-        for (col,fn) in result_actions.items())))
+        sig.clone((combined_workflow_moab_dataframe.loc[
+            combined_workflow_moab_dataframe[col] == True]['task_id'],))
+        for (col,sig) in result_actions.items())))
 
     grp.apply_async(
         broker_connection_timeout=10,
