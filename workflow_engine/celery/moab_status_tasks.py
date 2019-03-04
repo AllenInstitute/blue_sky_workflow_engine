@@ -45,10 +45,12 @@ from workflow_engine.celery.signatures import (
     process_failed_execution_signature,
     process_failed_signature
 )
+from celery.exceptions import SoftTimeLimitExceeded
 import logging
 import celery
 from celery.canvas import group
 import pandas as pd
+import itertools as it
 
 
 _log = logging.getLogger('workflow_engine.celery.moab_status_tasks')
@@ -89,27 +91,48 @@ result_actions = {
     'failed_message': process_failed_signature
 }
 
+def combined_df_response_group(combined_df):
+    return group(
+        it.chain.from_iterable(
+            combined_df.loc[
+                combined_df[col] == True
+            ]['task_id'].apply(
+                lambda x: sig.clone((x,))
+            )
+            for (col,sig)
+            in result_actions.items()
+        )
+    )
 
-@celery.shared_task(bind=True, trail=True)
+
+@celery.shared_task(
+    bind=True,
+    name='workflow_engine.celery.moab_status_tasks.check_moab_status',
+    trail=True)
 def check_moab_status(self):
-    combined_workflow_moab_dataframe = \
-        query_and_combine_states(
-            query_running_task_dicts())
+    try:
+        combined_workflow_moab_dataframe = \
+            query_and_combine_states(
+                query_running_task_dicts())
+    
+        _log.info('combined_dataframe' + str(combined_workflow_moab_dataframe))
+    
+#         grp = group(list(pd.concat(
+#             sig.clone((combined_workflow_moab_dataframe.loc[
+#                 combined_workflow_moab_dataframe[col] == True]['task_id'],))
+#             for (col,sig) in result_actions.items())))
+        grp = combined_df_response_group(
+            combined_workflow_moab_dataframe
+        )
 
-    _log.info('combined_dataframe' + str(combined_workflow_moab_dataframe))
-
-    grp = group(list(pd.concat(
-        sig.clone((combined_workflow_moab_dataframe.loc[
-            combined_workflow_moab_dataframe[col] == True]['task_id'],))
-        for (col,sig) in result_actions.items())))
-
-    grp.apply_async(
-        broker_connection_timeout=10,
-        broker_connection_retry=False,
-        queue=settings.RESULT_MESSAGE_QUEUE_NAME,
-        on_raw_message=lambda x: _log.info('group result {}', str(x)))
-
-    # _log.info('Result group:' + json.dumps(grp, indent=2))
+        grp.apply_async(
+            broker_connection_timeout=10,
+            broker_connection_retry=False,
+            queue=settings.RESULT_MESSAGE_QUEUE_NAME,
+            on_raw_message=lambda x: _log.info('group result {}', str(x)))
+    except SoftTimeLimitExceeded:
+        _log.warn('Soft Time Limit Exceeded')
+        return 'timeout'
 
     return 'OK'
 

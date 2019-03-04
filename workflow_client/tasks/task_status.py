@@ -65,18 +65,21 @@ class TaskStatus(object):
             state_dict,
             columns=['task_id', 'workflow_state', 'remote_id'])
 
-        TaskStatus._log.info('workflow_state_df: ' + str(workflow_state_df))
+        TaskStatus._log.info('workflow_state_df size: {}'.format(
+            len(workflow_state_df.index))
+        )
 
-        workflow_state_df['task_name'] = \
-            workflow_state_df['task_id'].map(
-                lambda s: 'task_%d' % (s))
+        workflow_state_df['task_name'] = workflow_state_df['task_id'].map(
+            'task_{}'.format
+        )
 
         return workflow_state_df
 
     def combined_df(self, blue_sky_job_df, remote_job_df):
         combined_df = blue_sky_job_df.merge(
             remote_job_df,
-            on=('remote_id','task_name')
+            on=('remote_id','task_name'),
+            how='left'
         )
 
         combined_df['remote_state'].fillna('Unknown', inplace=True)
@@ -122,17 +125,20 @@ class TaskStatus(object):
                 in TaskStatus.RESULT_ACTIONS.items()
             )
         )
-    
+
     def send_response_message_group(self, combined_df):
         self.combined_df_response_group(
             combined_df
         ).delay()
 
     def send_remote_status_results(self, running_task_dicts):
+        remote_job_df = self.query_remote_state(running_task_dicts)
+
         blue_sky_job_df = self.workflow_state_dataframe(
             running_task_dicts
         )
-        remote_job_df = self.query_remote_state(running_task_dicts)
         combined_df = self.combined_df(blue_sky_job_df, remote_job_df)
-        TaskStatus._log.info(combined_df)
+        TaskStatus._log.info("Combined dataframe size: {}".format(
+            len(combined_df.index))
+        )
         self.send_response_message_group(combined_df)

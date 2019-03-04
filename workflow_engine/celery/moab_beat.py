@@ -47,7 +47,7 @@ from workflow_engine.celery.signatures import (
 
 app = celery.Celery('workflow_engine.celery.moab_beat')
 configure_worker_app(app, settings.APP_PACKAGE)
-app.conf.imports = ('workflow_engine.celery.moab_tasks',)
+app.conf.imports = ()
 
 
 # see: https://github.com/celery/celery/issues/3589

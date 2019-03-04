@@ -33,9 +33,6 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-from kombu import Exchange, Queue, binding
-from kombu.common import Broadcast
-from django.conf import settings
 from workflow_client.simple_router import SimpleRouter
 import os
 import yaml
@@ -73,27 +70,41 @@ def get_message_broker_url(celery_settings):
         celery_settings.MESSAGE_QUEUE_PORT)
 
 
-def configure_worker_app(app, app_name, worker_name=None):
+def configure_worker_app(
+    app,
+    app_name,
+    worker_name=None,
+    worker_names=None
+):
+    if worker_names is None:
+        if worker_name is None:
+            worker_names = []
+        else:
+            worker_names = [ worker_name ]
+
     celery_settings = load_settings_yaml()
     router = SimpleRouter(app_name)
 
     app.config_from_object(config_object(
         celery_settings))
-    app.conf.task_queues = router.task_queues(worker_name)
+    app.conf.task_queue_max_priority = 10
+    app.conf.task_queues = router.task_queues(worker_names)
     app.conf.task_routes = (router.route_task,)
-
 
 def config_object(s):
     return settings_attr_dict({
         'broker_url': get_message_broker_url(s),
-        'result_backend': 'rpc://',
+        'result_backend': 'rpc',
+        'result_persistent': True,
         'task_serializer': 'json',
         'result_serializer': 'json',
+        'result_expires': 3600, # 1 hour in seconds
+        'broker_connection_timeout': 10,
+        'broker_connection_retry': False,
+        'soft_time_limit': 600,
+        'time_limit': 2400,
         'accept_content': ['json'],
+        'worker_prefetch_multiplier': 1,
         'timezone': 'US/Pacific',
-        'enable_utc': True,
-        #'task_queues': [ 'ingest' ],
-        'task_default_queue': s.DEFAULT_MESSAGE_QUEUE_NAME
+        'enable_utc': True
     })
-
-# settings = load_settings_yaml()

@@ -34,9 +34,12 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 import traceback
-from workflow_engine.import_class import import_class
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import (
+    IntegrityError,
+    transaction
+)
 import logging
 from workflow_engine.celery.signatures import (
     run_workflow_node_jobs_signature
@@ -102,24 +105,20 @@ class WorkflowController(object):
         WorkflowController.enqueue_next_queue(job)
 
     @classmethod
-    def enqueue_next_queue(cls, job):
-        WorkflowController._logger.info('enqueue_next_queue')
-        children = job.workflow_node.get_children()
+    def enqueue_next_queue(cls, source_job):
+        source_node = source_job.workflow_node
 
         # TODO: factor out this loop body
-        for child in children:
-            strategy = child.get_strategy()
+        for node in source_node.get_children():
+            strategy = node.get_strategy()
+            enqueued_objects = strategy.get_objects_for_queue(source_job)
 
-            child_enqueued_objects = strategy.get_objects_for_queue(job)
-
-            for enqueued_object in child_enqueued_objects:
-                if strategy.can_transition(
-                    enqueued_object, job.workflow_node):
-
+            for enqueued_object in enqueued_objects:
+                if strategy.can_transition(enqueued_object, source_node):
                     WorkflowController.start_workflow_helper(
-                        child,
+                        node,
                         enqueued_object,
-                        job.workflow_node.overwrite_previous_job)
+                        node.overwrite_previous_job)
 
     @classmethod
     def set_job_for_run_if_valid(cls, job):
@@ -152,47 +151,52 @@ class WorkflowController(object):
 
     @classmethod
     def create_tasks(cls, job):
-        reused_tasks = {}
+        #reused_tasks = {}
         strategy = job.get_strategy()
         pending_state = RunState.get_pending_state()
 
-        task_objects = \
-            strategy.get_task_objects_for_queue(job.enqueued_object)
+        task_objects = strategy.get_task_objects_for_queue(
+            job.enqueued_object
+        )
 
         for task_object in task_objects:
+            # TODO: deprecate
             enqueued_object_full_class = \
                 type(task_object).__module__ + '.' + type(task_object).__name__
 
-            if job.workflow_node.overwrite_previous_job:
+            default_options = {
+                'run_state': pending_state,
+                'archived': False,
+                'retry_count': ZERO
+            }
+
+            enqueued_task_object_type = ContentType.objects.get_for_model(
+                task_object
+            )
+
+            with transaction.atomic():
                 try:
-                    task = Task.objects.get(
+                    tsk, created = Task.objects.get_or_create(
+                        enqueued_task_object_type=enqueued_task_object_type,
                         enqueued_task_object_id=task_object.id,
-                        enqueued_task_object_class=enqueued_object_full_class,
-                        job=job)
-                    task.run_state = pending_state
-                    task.archived = False
-                    task.retry_count = ZERO
-                    task.save()
-                except:
-                    task = Task(
-                        enqueued_task_object=task_object,
-                        enqueued_task_object_class=enqueued_object_full_class,
-                        run_state=pending_state,
-                        job=job)
-                    task.save()
-            else:
-                WorkflowController._logger.info(
-                    'creating task with enqueued class: %s' % 
-                    (enqueued_object_full_class))
-                task = Task(
-                    enqueued_task_object=task_object,
-                    enqueued_task_object_class=enqueued_object_full_class,
-                    run_state=pending_state, job=job)
-                task.save()
+                        enqueued_task_object_class=enqueued_object_full_class, # TODO: deprecate
+                        job=job,
+                        defaults=default_options
+                    )
 
-            reused_tasks[task.id] = True
+                    if not created:
+                        tsk.run_state=pending_state
+                        tsk.archived=False
+                        tsk.retry_count=0
+                        tsk.save()
+                except Exception as e:
+                    raise(e)
 
-        return reused_tasks
+            WorkflowController._logger.info(
+                'creating task with enqueued type: {}'.format( 
+                    enqueued_task_object_type
+                )
+            )
 
     @classmethod
     def job_run(cls, job):
@@ -205,9 +209,9 @@ class WorkflowController(object):
 
             job.prep_job()
 
-            reused_tasks = WorkflowController.create_tasks(job)
+            WorkflowController.create_tasks(job)
 
-            job.remove_tasks(reused_tasks)
+            # job.remove_tasks(reused_tasks)
 
             for task in job.get_tasks():
                 task.run_task()
@@ -225,7 +229,9 @@ class WorkflowController(object):
         cls,
         workflow_name,
         start_node_name=None):
-        workflow = Workflow.objects.get(name=workflow_name)
+        workflow = Workflow.objects.get(
+            name=workflow_name,
+            archived=False)
         WorkflowController._logger.info(
             "starting %s at %s" % (
                 workflow_name, str(start_node_name)))
@@ -367,45 +373,6 @@ class WorkflowController(object):
     @classmethod
     def get_enqueued_object(cls, task):
         return task.enqueued_task_object
-
-    @classmethod
-    def get_enqueued_object_deprecated(cls, task):
-        WorkflowController._logger.info(
-            'WorkflowController.get_enqueued_object')
-        if task.enqueued_task_object_class == None:
-            WorkflowController._logger.info(
-                'enqueued_task_object_class is nil for task')
-            raise Exception(
-                'enqueued_task_object_class is nil for task: ' + str(task.id))
-
-        if task.enqueued_task_object_id == None:
-            WorkflowController._logger.info(
-                'enqueued_task_object_id is nil for task')
-            raise Exception(
-                'enqueued_task_object_id is nil for task: ' + str(task.id))
-
-        WorkflowController._logger.info(
-            'task enqueued object class: %s' % (
-                task.enqueued_task_object_class))
-        enqueued_object_class = import_class(
-            task.enqueued_task_object_class)
-        enqueued_object = enqueued_object_class.objects.get(
-            id=task.enqueued_task_object_id)
-
-        if enqueued_object == None:
-            WorkflowController._logger.info('enqueued_object is None')
-            msg = \
-                'enqueued_object does not exist for enqueued_object_class of ' + \
-                str(task.enqueued_task_object_class) + \
-                ' and id of ' + \
-                str(task.enqueued_task_object_id)
-            WorkflowController._logger.info(msg)
-            raise Exception(msg)  
-        
-        WorkflowController._logger.info(
-            'task enqueued object: %s' % (enqueued_object))
-
-        return enqueued_object
 
 
 # circular imports

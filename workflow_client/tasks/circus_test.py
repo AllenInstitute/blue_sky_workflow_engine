@@ -3,9 +3,10 @@ import celery
 from circus.process import Process
 from circus.client import CircusClient
 from workflow_client.tasks.circus_status import CircusStatus
+from celery.exceptions import SoftTimeLimitExceeded
 import traceback
 from workflow_client.simple_router import SimpleRouter
-import simplejson as json
+from datetime import datetime, timedelta
 import logging.config
 import jinja2
 import stat
@@ -75,7 +76,7 @@ def after_setup_celery_task_logger(logger, **kwargs):
             'level': 'INFO',
             'propagate': True,
         }
-    }
+    }   
 })
 
 
@@ -88,16 +89,20 @@ class CircusProcessTask(celery.Task):
 
 app = celery.Celery(
     app_name,
-    backend='rpc://',
-    broker=broker_url)
+    broker=broker_url,
+    backend='rpc')
 app.conf.imports = (
     'workflow_engine.celery.error_handler',
 )
 router = SimpleRouter("blue_sky")
-app.conf.task_queues = router.task_queues('circus')
-app.conf.task_routes = ( 
-    router.route_task,
+app.conf.task_queue_max_priority = 10
+app.conf.task_queues = router.task_queues(
+    [
+        'circus',
+        'circus_remote_status'
+    ]
 )
+app.conf.task_routes = (router.route_task,)
 
 #@celery.shared_task(
 #    name='workflow_engine.celery.circus_tasks.submit_worker_task',
@@ -247,9 +252,13 @@ def submit_circus_task(
     try:
         task_id = CircusProcessTask._PROC_ID
         p = Process(*call_args, **kwargs)
+
+        # TODO: factor into a function
         CircusProcessTask._PROCESS_DICT[
             str(CircusProcessTask._PROC_ID)
-        ] = p
+        ] = {
+            'process': p
+        }
         CircusProcessTask._PROC_ID = CircusProcessTask._PROC_ID + 1
 
         return str(task_id)
@@ -258,37 +267,14 @@ def submit_circus_task(
         return "Error {}".format(e)
 
 
-@celery.shared_task(
-    base=CircusProcessTask,
-    bind=True,
-    trail=True)
-def submit_task_orig(self, countdown):
-    try:
-        task_id = CircusProcessTask._PROC_ID
-        p = Process(
-            "Example",
-            "task_{}".format(CircusProcessTask._PROC_ID),
-            "/opt/conda/envs/circus/bin/python",
-            args=["-m", "example", str(countdown)]
-        )
-        CircusProcessTask._PROCESS_DICT[
-            str(CircusProcessTask._PROC_ID)
-        ] = p
-        CircusProcessTask._PROC_ID = CircusProcessTask._PROC_ID + 1
-    
-        return str(task_id)
-    except Exception as e:
-        return "Error {}".format(e)
-
-
-@celery.shared_task(
+celery.shared_task(
     base=CircusProcessTask,
     bind=True,
     trail=True)
 def kill_task(self, task_id):
     try:
-        _log.info(CircusProcessTask._PROCESS_DICT)
-        proc = CircusProcessTask._PROCESS_DICT[str(task_id)]
+        # _log.info(CircusProcessTask._PROCESS_DICT)
+        proc = CircusProcessTask._PROCESS_DICT[str(task_id)]['process']
         proc.stop()
 
         return 'OK'
@@ -303,7 +289,7 @@ def kill_task(self, task_id):
     trail=True)
 def task_stdout(self, task_id):
     try:
-        proc = CircusProcessTask._PROCESS_DICT[str(task_id)]
+        proc = CircusProcessTask._PROCESS_DICT[str(task_id)]['process']
 
         stdout_str = []
         for l in proc.stdout:
@@ -319,7 +305,7 @@ def task_stdout(self, task_id):
     trail=True)
 def task_stderr(self, task_id):
     try:
-        proc = CircusProcessTask._PROCESS_DICT[str(task_id)]
+        proc = CircusProcessTask._PROCESS_DICT[str(task_id)]['process']
 
         stderr_str = []
         for l in proc.stderr:
@@ -337,11 +323,14 @@ def task_stderr(self, task_id):
     trail=True
 )
 def check_remote_status(self, running_task_dicts):
-    CircusStatus('circus').send_remote_status_results(
-        running_task_dicts
-    )
-    #    'circus'
-    #).send_remote_status_results()
+    try:
+        CircusStatus('circus').send_remote_status_results(
+            running_task_dicts
+        )
+    except SoftTimeLimitExceeded:
+        return 'timeout'
+
+    return 'done'
 
 @celery.shared_task(
     base=CircusProcessTask,
@@ -349,35 +338,58 @@ def check_remote_status(self, running_task_dicts):
 )
 def check_status():
     statuses = {
-        i: p.info() for i,p in CircusProcessTask._PROCESS_DICT.items()
+        i: p['process'].info() for i,p in CircusProcessTask._PROCESS_DICT.items()
     }
-    for i,p in CircusProcessTask._PROCESS_DICT.items():
-        try:
-            statuses[i]['status'] = p.status
-        except:
-            pass
 
-    for i,p in CircusProcessTask._PROCESS_DICT.items():
+    for i,v in CircusProcessTask._PROCESS_DICT.items():
+        p = v['process']
+        stat = None
+
+        try:
+            stat = p.status
+            statuses[i]['status'] = stat
+            _log.info("STATUS: {}".format(stat))
+            if stat == 1:
+                if 'end_time' in CircusProcessTask._PROCESS_DICT[i]:
+                    done_for = datetime.now() - CircusProcessTask._PROCESS_DICT[i]['end_time']
+                    _log.info('done for: {}'.format(str(done_for)))
+                    if (done_for > timedelta(minutes=5)):
+                        del CircusProcessTask._PROCESS_DICT[i]
+                        del statuses[i]
+                        _log.info('deleted task {}'.format(i))
+                        continue
+                else:
+                    CircusProcessTask._PROCESS_DICT[i]['end_time'] = datetime.now()
+                    _log.info('set end time: {}'.format(
+                        str(CircusProcessTask._PROCESS_DICT[i]['end_time'])))
+        except Exception as e:
+            _log.error("Error handling end time " + str(e))
+
         try:
             statuses[i]['working_dir'] = p.working_dir
         except:
             pass
 
         try:
-            with open(
-                os.path.join(
-                    p.working_dir,
-                    'exit_code.txt'),
-                'r') as f:
-                exit_code = int(f.readline().strip())
-                statuses[i]['exit_code'] = exit_code
-        except:
-            try:
+            if stat == 1:
+                with open(
+                    os.path.join(
+                        p.working_dir,
+                        'exit_code.txt'),
+                    'r') as f:
+                    exit_code = int(f.readline().strip())
+                    statuses[i]['exit_code'] = exit_code
+            else:
                 statuses[i]['exit_code'] = None
-            except:
-                pass
+        except Exception as e:
+            try:
+                _log.error("E1: " + str(e))
+                statuses[i]['exit_code'] = None
+            except Exception as e:
+                _log.error("E2: " + str(e))
 
-    _log.info(json.dumps(statuses, indent=2))
+    _log.info("_PROCESS_DICT length: {}".format(
+        len(CircusProcessTask._PROCESS_DICT.keys())))
 
     return statuses
 
@@ -390,7 +402,7 @@ def check_status():
 )
 def inspect(self):
     infos = {
-        i: p.info() for i,p in CircusProcessTask._PROCESS_DICT.items()
+        i: p['process'].info() for i,p in CircusProcessTask._PROCESS_DICT.items()
     }
 
     return infos

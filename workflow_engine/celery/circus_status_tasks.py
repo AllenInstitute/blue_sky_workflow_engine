@@ -35,9 +35,11 @@
 #
 import celery
 import os
-from workflow_client.simple_router import SimpleRouter
+from workflow_client.client_settings import configure_worker_app
 import django; django.setup()
+from django.conf import settings
 from workflow_engine.models import Task
+from celery.exceptions import SoftTimeLimitExceeded
 from workflow_client.tasks.circus_signatures import ( 
     check_remote_status_signature
 )
@@ -116,27 +118,37 @@ app = celery.Celery(
 app.conf.imports = (
     'workflow_engine.celery.error_handler',
 )
-router = SimpleRouter(app_name)
-app.conf.task_queues = router.task_queues('circus_status')
-app.conf.task_routes = (
-    router.route_task,
-)
+configure_worker_app(app, settings.APP_PACKAGE, 'circus_status')
+app.conf.time_lmit=60
+app.conf.soft_time_limit=45
 
+
+def node_tasks_in_states(remote_queue, state_names):
+    return Task.objects.filter(
+        job__workflow_node__job_queue__executable__remote_queue=remote_queue,
+        run_state__name__in=state_names)
+
+def get_queued_and_running_task_dicts():
+    tasks = node_tasks_in_states(REMOTE_QUEUE, ['QUEUED', 'RUNNING'])
+
+    return [{
+        'task_id': t.id,
+        'workflow_state': t.run_state.name,  # TODO: run_state
+        'remote_id': t.pbs_id } for t in tasks]
 
 @celery.shared_task(
     name='workflow_engine.check_circus_task_status',
     bind=True,
     trail=True)
 def check_status(self):
-    tasks = Task.objects.filter(
-        job__workflow_node__job_queue__executable__remote_queue=REMOTE_QUEUE,
-        run_state__name__in=['QUEUED', 'RUNNING'])
+    try:
+        task_dicts = get_queued_and_running_task_dicts()
 
-    task_dicts = [{
-        'task_id': t.id,
-        'workflow_state': t.run_state.name,  # TODO: run_state
-        'remote_id': t.pbs_id } for t in tasks]
+        _log.info('task dicts: ' + str(task_dicts))
 
-    _log.info('task dicts: ' + str(task_dicts))
+        check_remote_status_signature.delay(task_dicts)
+    except SoftTimeLimitExceeded:
+        _log.warn('Soft Time Limit Exceeded')
+        return 'timeout'
 
-    check_remote_status_signature.delay(task_dicts)
+    return 'success'

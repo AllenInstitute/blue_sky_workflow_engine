@@ -42,15 +42,16 @@ from workflow_engine.models import (
 from workflow_engine.workflow_controller import WorkflowController
 from django.core.exceptions import ObjectDoesNotExist
 from workflow_client.client_settings import configure_worker_app
+from celery.exceptions import SoftTimeLimitExceeded
 import logging
 import traceback
 import celery
 
 
-_log = logging.getLogger('workflow_engine.celery.worker_tasks')
+_log = logging.getLogger('workflow_engine.celery.workflow_tasks')
 
 
-app = celery.Celery('workflow_engine.celery.worker_tasks')
+app = celery.Celery('workflow_engine.celery.workflow_tasks')
 configure_worker_app(app, settings.APP_PACKAGE, 'workflow')
 app.conf.imports = ()
 
@@ -73,27 +74,41 @@ def report_error(msg):
 # UI TASKS
 #
 
-@celery.shared_task(bind=True)
+@celery.shared_task(
+    bind=True,
+    name='workflow_engine.celery.workflow_tasks.create_job')
 def create_job(self, workflow_node_id, enqueued_object_id, priority):
     try:
         job = WorkflowController.create_job(
             workflow_node_id,
             enqueued_object_id,
             priority)
+    except SoftTimeLimitExceeded:
+        report_exception('Soft Time Limit Exceeded')
+        return -1
     except Exception as e:
         report_exception('Error creating job. ', e)
+        return(str(e))
+
+    if job is None:
         return -1
 
     return job.id
 
 
-@celery.shared_task(bind=True)
+@celery.shared_task(
+    bind=True,
+    name='workflow_engine.celery.workflow_tasks.run_workflow_node_jobs_by_id'
+)
 def run_workflow_node_jobs_by_id(self, workflow_node_id):
     try:
         workflow_node = WorkflowNode.objects.get(id=workflow_node_id)
         WorkflowController.run_workflow_node_jobs(workflow_node)
     except ObjectDoesNotExist as e:
         _log.error(str(e) + ' - ' + str(traceback.format_exc()))
+    except SoftTimeLimitExceeded:
+        report_exception('Soft Time Limit Exceeded')
+        return 'timeout'
 
     return 'done'
 
@@ -112,13 +127,18 @@ def enqueue_next_queue(self, job_id):
 # RESPONSES
 #
 def get_task_strategy_by_task_id(task_id):
+    task = -1
+    strategy = None
+
     try:
         task = Task.objects.get(id=task_id)
         strategy = task.get_strategy()
+    except SoftTimeLimitExceeded:
+        report_exception('Soft Time Limit Exceeded')
     except Exception as e:
         _log.error(
             'Something went wrong: ' + (traceback.print_exc(e)))
-    
+
     return (task, strategy)
 
 #

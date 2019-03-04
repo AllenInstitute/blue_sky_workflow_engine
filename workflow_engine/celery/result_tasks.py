@@ -72,31 +72,46 @@ def get_task_strategy_by_task_id(task_id):
     except Exception as e:
         _log.error(
             'Something went wrong: ' + (traceback.print_exc(e)))
-    
+
     return (task, strategy)
 
 
-@celery.shared_task(bind=True)
+@celery.shared_task(
+    bind=True,
+    name='workflow_engine.celery.result_tasks.process_running'
+)
 def process_running(self, task_id):
-    _log.info('processing running task %s', task_id)
-    (task, strategy) = get_task_strategy_by_task_id(task_id)
-    strategy.running_task(task)
+    try:
+        _log.info('processing running task %s', task_id)
+        task, strategy = get_task_strategy_by_task_id(task_id)
+        strategy.running_task(task)
 
-    return 'set running for task {}'.format(task_id)
+        return 'set running for task {}'.format(task_id)
+    except:
+        return "exception"
 
 
-@celery.shared_task(bind=True)
+@celery.shared_task(
+    bind=True,
+    name='workflow_engine.celery.result_tasks.process_finished_execution'
+)
 def process_finished_execution(self, task_id):
-    _log.info('processing finished task %s', task_id)
-    (task, strategy) = get_task_strategy_by_task_id(task_id)
-    strategy.finish_task(task)
-    run_workflow_node_jobs_signature.delay(
-        task.job.workflow_node.id)
+    try:
+        _log.info('processing finished task %s', task_id)
+        (task, strategy) = get_task_strategy_by_task_id(task_id)
+        strategy.finish_task(task)
+        run_workflow_node_jobs_signature.delay(
+            task.job.workflow_node.id)
 
-    return 'set finished for task {}'.format(task_id)
+        return 'set finished for task {}'.format(task_id)
+    except:
+        return 'exception'
 
 
-@celery.shared_task(bind=True)
+@celery.shared_task(
+    bind=True,
+    name='workflow_engine.celery.result_tasks.process_failed_execution'
+)
 def process_failed_execution(self, task_id, fail_now=False):
     _log.info('processing failed execution task %s', task_id)
     (task, strategy) = get_task_strategy_by_task_id(task_id)
@@ -120,7 +135,10 @@ def process_failed_execution(self, task_id, fail_now=False):
     return 'set failed execution for task {}'.format(task_id)
 
 
-@celery.shared_task(bind=True)
+@celery.shared_task(
+    bind=True,
+    name='workflow_engine.celery.result_tasks.process_failed'
+)
 def process_failed(self, task_id):
     _log.info('processing failed task %s', task_id)
     (task, strategy) = get_task_strategy_by_task_id(task_id)
@@ -134,7 +152,10 @@ def process_failed(self, task_id):
     return 'set failed for task {}'.format(task_id)
 
 
-@celery.shared_task(bind=True)
+@celery.shared_task(
+    bind=True,
+    name='workflow_engine.celery.result_tasks.process_pbs_id'
+)
 def process_pbs_id(self, task_id, moab_id, chained=False):
     if chained is True:
         moab_id, task_id = task_id, moab_id

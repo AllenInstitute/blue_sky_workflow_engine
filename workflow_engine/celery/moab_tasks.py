@@ -106,7 +106,7 @@ def submit_moab_task(self, task_id):
 # TODO: change name to something like process task state
 # Not sure if we still need name
 # Do need a UI task like this
-@celery.shared_task(bind=True, soft_time_limit=10, time_limit=30)
+@celery.shared_task(bind=True)
 def run_task(self, name, args):
     raise Exception("Removed/Unimplemented")
 

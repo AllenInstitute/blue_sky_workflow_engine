@@ -184,17 +184,6 @@ class Job(models.Model):
     def get_enqueued_object(self):
         return self.enqueued_object
 
-    def get_enqueued_object_deprecated(self):
-        _logger.info(
-            "importing %s" % (
-                self.workflow_node.job_queue.enqueued_object_class)) 
-
-        claz = import_class(
-            self.workflow_node.job_queue.enqueued_object_class)
-        enqueued_object = claz.objects.get(
-            id=self.enqueued_object_id)
-        return enqueued_object
-
     def get_strategy(self):
         return self.workflow_node.get_strategy()
 

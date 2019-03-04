@@ -26,9 +26,9 @@ try:
     blue_sky_settings = load_settings_yaml()
     app.config_from_object(config_object(blue_sky_settings))
     
-    configure_worker_app(app, settings.APP_PACKAGE)
+    configure_worker_app(app, settings.APP_PACKAGE, 'ui')
      
     # Load task modules from all registered Django app configs.
-    app.autodiscover_tasks()
+    # app.autodiscover_tasks()
 except:
-    print('Nope')
+    print('Not configuring Celery tasks in non-Django context')

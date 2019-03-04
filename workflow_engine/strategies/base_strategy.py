@@ -35,7 +35,6 @@
 #
 from workflow_engine.models import WellKnownFile
 from django.conf import settings
-import subprocess
 import logging
 import traceback
 import os
@@ -80,7 +79,8 @@ class BaseStrategy(object):
             base_storage_directory, str(enqueued_object.id)))
         return os.path.join(
             base_storage_directory,
-            # str(job.enqueued_object_type),
+            str(job.enqueued_object_type).replace(
+                ' ', '_'),
             str(job.enqueued_object_id))
 
     # override if needed

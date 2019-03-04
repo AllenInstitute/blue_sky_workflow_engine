@@ -285,21 +285,21 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
                             self.get_or_create_task_storage_directory(task),
                             env),
                         ).set(
-                            task_time_limit=15
+                            time_limit=11
                         ),
                         process_pbs_id_signature.clone(
                             (task.id, True)
                         ).set(
-                            task_time_limit=15
+                            time_limit=11
                         ),
                         process_running_signature.clone(
                             (task.id,)
                         ).set(
-                            task_time_limit=15,
+                            time_limit=11,
                             immutable=True
                         )
                     ).apply_async(
-                        task_time_limit=15
+                        time_limit=11
                         #link_error=failed_execution_handler_signature.clone(
                         #    (task.id,)
                         #)
