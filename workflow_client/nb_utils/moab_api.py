@@ -202,47 +202,51 @@ def query_moab_state(state_dicts):
 
 def combine_workflow_moab_states(workflow_dataframe,
                                  moab_dataframe):
-    combined_df = pd.DataFrame.merge(
-        workflow_dataframe,
-        moab_dataframe,
-        on=["task_name", 'moab_id'],
-        how="outer")
 
-    # work around pandas issues w/ NaN in int columns
-    # and merge promotion
-    combined_df.task_id.fillna(0, inplace=True)
-    combined_df.task_id = combined_df.task_id.astype(int)
-
-    combined_df['moab_state'] = \
-        combined_df['moab_state'].fillna('Unknown')
-
-    combined_df['running_message'] = False
-    combined_df['finished_message'] = False
-    combined_df['failed_message'] = False
-    combined_df['failed_execution_message'] = False
-
-    combined_df.loc[
-        combined_df.workflow_state.isin(["QUEUED"]) &
-        combined_df.moab_state.isin(["Running"]),
-        'running_message'] = True
-
-    combined_df.loc[
-        combined_df.workflow_state.isin(["QUEUED","RUNNING"]) &
-        combined_df.moab_state.isin(["Completed"]) &
-        (combined_df.exit_code == 0),
-        'finished_message'] = True
-
-    combined_df.loc[
-        combined_df.workflow_state.isin(["QUEUED","RUNNING"]) &
-        combined_df.moab_state.isin(["Completed"]) &
-        (combined_df.exit_code != 0),
-        'failed_message'] = True
-
-    combined_df.loc[
-        combined_df.workflow_state.isin(["QUEUED","RUNNING"]) &
-        combined_df.moab_state.isin(
-            ["Expired", "Removed", "Vacated", "Unknown"]),
-        'failed_execution_message'] = True
+    try:
+        combined_df = pd.DataFrame.merge(
+            workflow_dataframe,
+            moab_dataframe,
+            on=["task_name", 'moab_id'],
+            how="outer")
+    
+        # work around pandas issues w/ NaN in int columns
+        # and merge promotion
+        combined_df.task_id.fillna(0, inplace=True)
+        combined_df.task_id = combined_df.task_id.astype(int)
+    
+        combined_df['moab_state'] = \
+            combined_df['moab_state'].fillna('Unknown')
+    
+        combined_df['running_message'] = False
+        combined_df['finished_message'] = False
+        combined_df['failed_message'] = False
+        combined_df['failed_execution_message'] = False
+    
+        combined_df.loc[
+            combined_df.workflow_state.isin(["QUEUED"]) &
+            combined_df.moab_state.isin(["Running"]),
+            'running_message'] = True
+    
+        combined_df.loc[
+            combined_df.workflow_state.isin(["QUEUED","RUNNING"]) &
+            combined_df.moab_state.isin(["Completed"]) &
+            (combined_df.exit_code == 0),
+            'finished_message'] = True
+    
+        combined_df.loc[
+            combined_df.workflow_state.isin(["QUEUED","RUNNING"]) &
+            combined_df.moab_state.isin(["Completed"]) &
+            (combined_df.exit_code != 0),
+            'failed_message'] = True
+    
+        combined_df.loc[
+            combined_df.workflow_state.isin(["QUEUED","RUNNING"]) &
+            combined_df.moab_state.isin(
+                ["Expired", "Removed", "Vacated", "Unknown"]),
+            'failed_execution_message'] = True
+    except:
+        return pd.DataFrame()
 
     return combined_df
 
