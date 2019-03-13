@@ -111,10 +111,7 @@ def after_setup_celery_task_logger(logger, **kwargs):
 })
 
 REMOTE_QUEUE = 'circus'
-app = celery.Celery(
-    app_name,
-    backend='rpc://',
-    broker=broker_url)
+app = celery.Celery(app_name)
 app.conf.imports = (
     'workflow_engine.celery.error_handler',
 )

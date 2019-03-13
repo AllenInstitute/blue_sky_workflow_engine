@@ -9,8 +9,12 @@ pkill -9 -f "notebook"
 
 export MOAB_AUTH=':'
 
-export BASE_DIR=/blue_sky
-export PYTHONPATH=/blue_sky:/blue_sky_workflow_engine
+export BG=green
+export APP=$1
+export BG_CONDA_ENV=base
+export BG_CIRCUS_ENV=circus
+export BASE_DIR=/${BG}/$APP
+export PYTHONPATH=/blue_green:${BASE_DIR}:/${BG}/blue_sky_workflow_engine
 
 rm ${BASE_DIR}/logs/ingest.log
 rm ${BASE_DIR}/logs/ui.log
@@ -26,10 +30,12 @@ rm celerybeat.pid
 
 unset DJANGO_SETTINGS_MODULE
 
-source activate base
+source activate ${BG_CONDA_ENV}
 
 #echo 'STARTING CIRCUSD'
 #/bin/bash -c 'source activate circus; cd /blue_sky_workflow_engine/circus; /opt/conda/envs/circus/bin/circusd --daemon circus.ini'
 
-/bin/bash -c "source activate circus; python -m workflow_client.process_manager&"
+echo CONDA ENV: ${BG_CIRCUS_ENV}
+echo PYTHONPATH: ${PYTHONPATH}
+/bin/bash -c 'source activate ${BG_CIRCUS_ENV}; python -m process_manager'
 

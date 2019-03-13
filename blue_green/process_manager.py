@@ -7,7 +7,10 @@ _CELERY_PATH = '/opt/conda/bin/celery'
 _ACTIVATE_PATH = '/opt/conda/bin/activate'
 _FLOWER_DELAY = 1
 _FLOWER_PORT = 5557
-
+_MESSAGE_BROKER = (
+    'amqp://${MESSAGE_QUEUE_USER}:${MESSAGE_QUEUE_PASS}'
+    '@${MESSAGE_QUEUE_HOST}:${MESSAGE_QUEUE_PORT}'
+)
 
 def celery_command_string(worker_name, app_name):
     return " ".join((
@@ -31,20 +34,23 @@ def dmerge(d1, d2):
 
     return d
 
+_BASE_ENV = {
+    'WORKFLOW_CONFIG_YAML': '/blue_sky/config/workflow_config.yml',
+    'MESSAGE_QUEUE_USER': 'blue_sky_user',
+    'MESSAGE_QUEUE_PASS': 'blue_sky_user',
+    'MESSAGE_QUEUE_HOST': 'message_queue',
+    'MESSAGE_QUEUE_PORT': '5672',
+    'BLUE_SKY_SETTINGS': '/green/blue_sky_settings.yml',
+    'PATH': '/opt/conda/envs/circus/bin:/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
+}
 
-def get_arbiter_list(app_name, bg_conda_env, base_dir):
-    _BASE_ENV = {
-        'WORKFLOW_CONFIG_YAML': '/blue_sky/config/workflow_config.yml',
-        'APP_PACKAGE': app_name,
-        'MESSAGE_QUEUE_HOST': 'em-131db',
-        'MESSAGE_QUEUE_PORT': '9038',
-        'BLUE_SKY_SETTINGS': '/green/blue_sky_settings.yml',
-        'PATH': '/opt/conda/envs/circus/bin:/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
-        'PYTHONPATH': '/{}:{}:/{}/blue_sky_workflow_engine:/render_modules'.format(bg, base_dir, bg)
-        #    'PYTHONPATH': '/{}:/{}/blue_sky_workflow_engine:/render_modules'.format(bg,  bg)
-    }
-
-    django_env = dmerge(_BASE_ENV, {
+def get_arbiter_list(app_name, bg, base_dir):
+    bg_conda_env = 'base'
+    base_env = copy.deepcopy(_BASE_ENV)
+    base_env['APP_PACKAGE'] = app_name
+    base_env['PYTHONPATH'] = '/blue_green:/{}:{}:/{}/blue_sky_workflow_engine:/render_modules'.format(bg, base_dir, bg)
+    #    base_env['PYTHONPATH'] = '/{}:/{}/blue_sky_workflow_engine:/render_modules'.format(bg,  bg)
+    django_env = dmerge(base_env, {
         'DJANGO_SETTINGS_MODULE': 'settings' # in BG dir
     })
     
@@ -67,7 +73,7 @@ def get_arbiter_list(app_name, bg_conda_env, base_dir):
                 'sleep {};'.format(_FLOWER_DELAY),
                 'python -m celery flower',
                 '--url_prefix=flower --backend=rpc',
-                '--broker=amqp://blue_sky_user:blue_sky_user@${MESSAGE_QUEUE_HOST}:${MESSAGE_QUEUE_PORT}',
+                '--broker={}'.format(_MESSAGE_BROKER),
                 '-n flower@{} --port={}"'.format(app_name, _FLOWER_PORT)
             ]),
             "env": dmerge(django_env, {
@@ -82,9 +88,12 @@ def get_arbiter_list(app_name, bg_conda_env, base_dir):
                 'unset DJANGO_SETTINGS_MODULE; ',
                 'python -m celery ',
                 '-A workflow_client.tasks.circus_test worker ',
-                '--concurrency=1 --loglevel=info -n circus@{}"'
-            )).format(app_name),
-            "env": dmerge(_BASE_ENV, {
+                '--broker={}'.format(_MESSAGE_BROKER),
+                '--concurrency=1 --loglevel=info ',
+                '-n circus@{}'.format(app_name),
+                '"'
+            )),
+            "env": dmerge(base_env, {
                 'DEBUG_LOG': debug_log_path(base_dir, 'circus')
             }), 
             'numprocesses': 1
@@ -106,7 +115,7 @@ def get_arbiter_list(app_name, bg_conda_env, base_dir):
                 '"source {} {}; '.format(_ACTIVATE_PATH, bg_conda_env),
                 'python -m celery ',
                 '-A workflow_engine.celery.moab_beat beat ',
-                '--broker=amqp://blue_sky_user:blue_sky_user@${MESSAGE_QUEUE_HOST}:${MESSAGE_QUEUE_PORT}"')),
+                '--broker={}"'.format(_MESSAGE_BROKER))),
             "env": dmerge(django_env, {
                 'DEBUG_LOG': debug_log_path(base_dir, 'beat')
             }), 
@@ -128,8 +137,9 @@ def get_arbiter_list(app_name, bg_conda_env, base_dir):
             {
                 "cmd": (
                     '/bin/bash -c '
-                    '"source /opt/conda/bin/activate base; {}"'
+                    '"source /opt/conda/bin/activate {}; {}"'
                 ).format(
+                    bg_conda_env,
                     celery_command_string(worker_name, app_name)
                 ),
                 "env": dmerge(django_env, {

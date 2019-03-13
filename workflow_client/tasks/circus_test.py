@@ -13,7 +13,6 @@ import stat
 import os
 
 app_name = 'circus_test'
-broker_url='amqp://blue_sky_user:blue_sky_user@ibs-timf-ux1.corp.alleninstitute.org:9008'
 
 _log = logging.getLogger(
     'workflow_engine.celery.circus_worker'
@@ -87,10 +86,7 @@ class CircusProcessTask(celery.Task):
     _client = CircusClient(endpoint='tcp://127.0.0.1:5655')
 
 
-app = celery.Celery(
-    app_name,
-    broker=broker_url,
-    backend='rpc')
+app = celery.Celery(app_name)
 app.conf.imports = (
     'workflow_engine.celery.error_handler',
 )
