@@ -61,7 +61,7 @@ from workflow_engine.workflow_controller import WorkflowController
 
 class ExecutionStrategy(base_strategy.BaseStrategy):
     _log = logging.getLogger('workflow_engine.strategies.execution_strategy')
-    # ## ## everthing bellow this can be overriden# ## ##
+    # ## ## everthing below this can be overriden# ## ##
 
     # override if needed
     # get the data for the input file
@@ -146,7 +146,7 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
     def skip_execution(self, enqueued_object):
         return False
 
-    # ## ## everthing bellow this should not be overriden# ## ##
+    # ## ## everthing below this should not be overriden# ## ##
 
     # Do not override
     def set_error_message_from_log(self, task):

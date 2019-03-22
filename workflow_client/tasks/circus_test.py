@@ -85,12 +85,12 @@ class CircusProcessTask(celery.Task):
     _PROC_ID = 10000
     _client = CircusClient(endpoint='tcp://127.0.0.1:5655')
 
-
+app_name = os.environ.get('BLUE_SKY_APP_NAME')
 app = celery.Celery(app_name)
 app.conf.imports = (
     'workflow_engine.celery.error_handler',
 )
-router = SimpleRouter(os.environ.get('BLUE_SKY_APP_NAME', 'blue_sky')
+router = SimpleRouter(app_name)
 app.conf.task_queue_max_priority = 10
 app.conf.task_queues = router.task_queues(
     [

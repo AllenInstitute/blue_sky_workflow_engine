@@ -7,7 +7,7 @@ pkill -9 -f "beat"
 pkill -9 -f "manage"
 pkill -9 -f "notebook"
 
-export MOAB_AUTH=':'
+export MOAB_AUTH='svc_vol_assem:ToC$m3sc'
 
 export BG=green
 export APP=$1

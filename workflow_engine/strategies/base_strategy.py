@@ -174,6 +174,7 @@ class BaseStrategy(object):
         task.rerun()
 
     # Do not override
+    # TODO: deprecate
     def set_well_known_file(self, full_path, attachable_object,
                             well_known_file_type, task=None):
         # from workflow_engine.models import WellKnownFile
@@ -183,5 +184,6 @@ class BaseStrategy(object):
                           task)
 
     # Do not override
+    # TODO: deprecate
     def get_well_known_file(self, attachable_object, well_known_file_type):
         return WellKnownFile.get(attachable_object, well_known_file_type)

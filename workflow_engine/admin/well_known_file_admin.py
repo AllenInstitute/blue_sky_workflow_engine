@@ -1,11 +1,12 @@
 from django.contrib import admin
+from django.urls import reverse
+from django.utils.safestring import mark_safe
 
 
 class WellKnownFileAdmin(admin.ModelAdmin):
     list_display = (
         'id',
-        'attachable_type',
-        'attachable_id',
+        'attachable_link',
         'record_dir',
         'record_filename',
         'well_known_file_type',
@@ -40,8 +41,12 @@ class WellKnownFileAdmin(admin.ModelAdmin):
 
         return rfn
 
+    def attachable_link(self, well_known_file_object):
+        attachable_object = well_known_file_object.content_object
+        clz = attachable_object._meta.db_table
+        return mark_safe('<a href="{}">{}</a>'.format(
+            reverse("admin:{}_change".format(clz),
+                    args=(attachable_object.id,)),
+            str(attachable_object)))
 
-
-
-
-
+    attachable_link.short_description = "Attached Object"
