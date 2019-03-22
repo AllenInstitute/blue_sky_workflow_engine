@@ -38,6 +38,7 @@ from django.conf import settings
 from workflow_client.client_settings import configure_worker_app
 from workflow_client.nb_utils.moab_api import (
     submit_job,
+    submit_job_array,
     delete_moab_task
 )
 from workflow_engine.celery.signatures import (
@@ -80,11 +81,17 @@ def submit_moab_task(self, task_id):
                     configuration_type='moab_configuration').json_object
             except:
                 moab_cfg = None
-    
-            moab_id = submit_job(
-                the_task.id,
-                the_task.pbs_file,
-                moab_cfg=moab_cfg)
+
+            if the_task.get_executable().remote_queue == 'spark_moab':
+                moab_id = submit_job_array(
+                    the_task.id,
+                    the_task.pbs_file,
+                    moab_cfg=moab_cfg)
+            else:
+                moab_id = submit_job(
+                    the_task.id,
+                    the_task.pbs_file,
+                    moab_cfg=moab_cfg)
 
             if moab_id != 'ERROR':
                 # the_task.set_queued_state(moab_id)
@@ -92,7 +99,9 @@ def submit_moab_task(self, task_id):
                     task_id, moab_id)
             else:
                 process_failed_execution_signature.delay(
-                    task_id, fail_now=True)
+                    task_id,
+                    fail_now=True
+                )
 
             _log.info("MOAB ID: {}".format(moab_id))
     except Exception as e:
@@ -100,7 +109,9 @@ def submit_moab_task(self, task_id):
         msg = 'Error submitting task {}'.format(str(e))
         _log.error(msg)
         process_failed_execution_signature.delay(
-            task_id, fail_now=True)
+            task_id,
+            error_message=str(e),
+            fail_now=True)
 
 
 # TODO: change name to something like process task state

@@ -112,7 +112,8 @@ def process_finished_execution(self, task_id):
     bind=True,
     name='workflow_engine.celery.result_tasks.process_failed_execution'
 )
-def process_failed_execution(self, task_id, fail_now=False):
+def process_failed_execution(self, task_id,
+                             error_message='unknown', fail_now=False):
     _log.info('processing failed execution task %s', task_id)
     (task, strategy) = get_task_strategy_by_task_id(task_id)
 
@@ -125,6 +126,11 @@ def process_failed_execution(self, task_id, fail_now=False):
                 task_id)
     else:
         return 'Task {} not found'.format(task_id)
+
+    try:
+        task.job.set_error_message(error_message)
+    except:
+        pass
 
     if strategy:
         strategy.fail_execution_task(task)

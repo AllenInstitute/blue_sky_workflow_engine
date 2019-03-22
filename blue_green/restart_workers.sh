@@ -37,5 +37,5 @@ source activate ${BG_CONDA_ENV}
 
 echo CONDA ENV: ${BG_CIRCUS_ENV}
 echo PYTHONPATH: ${PYTHONPATH}
-/bin/bash -c 'source activate ${BG_CIRCUS_ENV}; python -m process_manager'
+/bin/bash -c 'source activate ${BG_CIRCUS_ENV}; python -m process_manager  ${APP} ${BG}'
 

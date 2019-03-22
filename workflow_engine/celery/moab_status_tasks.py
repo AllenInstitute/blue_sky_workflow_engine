@@ -111,12 +111,12 @@ def combined_df_response_group(combined_df):
     trail=True)
 def check_moab_status(self):
     try:
-        combined_workflow_moab_dataframe = \
-            query_and_combine_states(
-                query_running_task_dicts())
-    
+        combined_workflow_moab_dataframe = query_and_combine_states(
+            query_running_task_dicts()
+        )
+
         _log.info('combined_dataframe' + str(combined_workflow_moab_dataframe))
-    
+
 #         grp = group(list(pd.concat(
 #             sig.clone((combined_workflow_moab_dataframe.loc[
 #                 combined_workflow_moab_dataframe[col] == True]['task_id'],))

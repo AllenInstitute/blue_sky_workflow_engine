@@ -37,8 +37,11 @@ from .task_status import TaskStatus
 
 
 class MoabStatus(TaskStatus):
-    def __init__(self, remote_queue='pbs'):
-        super(MoabStatus, self).__init__(remote_queue)
+    def __init__(self, remote_queues=None):
+        if remote_queues is None:
+            remote_queues = ['pbs', 'spark_moab']
+
+        super(MoabStatus, self).__init__(remote_queues)
 
 #     def query_remote_state(self, state_dicts):
 #         """

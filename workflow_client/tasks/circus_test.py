@@ -90,7 +90,7 @@ app = celery.Celery(app_name)
 app.conf.imports = (
     'workflow_engine.celery.error_handler',
 )
-router = SimpleRouter("blue_sky")
+router = SimpleRouter(os.environ.get('BLUE_SKY_APP_NAME', 'blue_sky')
 app.conf.task_queue_max_priority = 10
 app.conf.task_queues = router.task_queues(
     [
@@ -152,6 +152,7 @@ def generate_task_script(
         input_file,
         output_file,
         working_dir,
+        conda_bin='/opt/conda/bin',
         conda_env='root',
         env_vars=None
     ):
@@ -162,6 +163,7 @@ def generate_task_script(
         static_args = ''
 
     template_args = {
+        'conda_bin': conda_bin,
         'conda_env': conda_env,
         'env_vars': env_vars,
         'python_executable': executable_file, # /opt/conda/envs/circus/bin/python
@@ -174,7 +176,7 @@ def generate_task_script(
     env = jinja2.Environment(
         loader=jinja2.DictLoader({
             'python_conda': """#!/bin/bash
-source /opt/conda/bin/activate {{ conda_env }}
+source {{ conda_bin }}/activate {{ conda_env }}
 
 {% for evar in env_vars %}
 export {{ evar }}
@@ -213,6 +215,10 @@ def submit_circus_task(
     environment
 ):
     conda_env = environment.get('CONDA_ENV', 'root')
+    conda_bin = environment.get(
+        'CONDA_BIN',
+        '/opt/conda/bin'
+    )
 
     env_vars = ['{}={}'.format(k,v) for k,v in environment.items()]
 
@@ -224,6 +230,7 @@ def submit_circus_task(
             input_file,
             output_file,
             working_dir,
+            conda_bin,
             conda_env,
             env_vars
         )

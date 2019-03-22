@@ -46,7 +46,7 @@ _log = logging.getLogger('workflow_client.nb_utils.moab_api')
 
 
 _MOAB_ENDPOINT = 'http://qmaster2.corp.alleninstitute.org:8080/mws/rest'
-
+_MOAB_TIMEOUT = 30
 
 def moab_url(
     table=None,
@@ -114,10 +114,12 @@ def moab_auth():
     if cred == ':':
         raise Exception('credentials not set')
 
-    (moab_user, moab_pass) = \
-        cred.split(':', 1)
+    (moab_user, moab_pass) = cred.split(':', 1)
 
-    return HTTPBasicAuth(moab_user, moab_pass)
+    auth = HTTPBasicAuth(moab_user, moab_pass)
+    _log.info('AUTH: {}'.format(auth))
+
+    return auth
 
 
 def moab_query(url):
@@ -136,15 +138,37 @@ def moab_query(url):
         raise e
 
 
-
 def moab_post(url, body_data):
-    s = requests.post(
-        url,
-        json=body_data,
-        auth=moab_auth()
-    ).text
+    try:
+        response = requests.post(
+            url,
+            json=body_data,
+            auth=moab_auth(),
+            timeout=_MOAB_TIMEOUT
+        )
 
-    result_data = json.loads(s)
+        if response.status_code == 401:
+            _log.warning('MOAB credential failure {}'.format(url))
+
+        _log.info('RESPONSE STATUS: ' + str(response.status_code))
+
+        s = response.text
+
+        _log.info('RESPONSE TEXT: ' + str(response))
+    except requests.exceptions.Timeout as e:
+        _log.error('Moab post timeout ' + str(e) + ', ' + ', ' + str(url) + '\n' + json.dumps(body_data, indent=2))
+        raise e
+    except Exception as e:
+        _log.error('Moab post 1 ' + str(e) + ', ' + ', ' + str(url))
+        raise e
+
+    _log.info('MOAB POST: ' + str(s))
+
+    try:
+        result_data = json.loads(s)
+    except Exception as e:
+        _log.error('Moab post 2 ' + str(e) + ', ' + ', ' + str(s))
+        raise e
 
     return result_data
 
@@ -186,6 +210,9 @@ def query_moab_state(state_dicts):
         moab_url(
             table='jobs',
             moab_ids=[d['moab_id'] for d in state_dicts]))
+
+    _log.info('moab dict: {}'.format(
+        json.dumps(moab_dict, indent=2)))
 
     moab_state_df = pd.DataFrame.from_records([
         (job['name'],
@@ -257,7 +284,9 @@ def query_and_combine_states(state_dict):
     """
     workflow_state_df = workflow_state_dataframe(state_dict)
     moab_state_df = query_moab_state(state_dict)
-    
+
+    _log.info('moab state df: {}'.format(str(moab_state_df)))
+
     combined_df = combine_workflow_moab_states(
         workflow_state_df, moab_state_df)
 
@@ -274,42 +303,103 @@ def submit_job(
     moab_cfg=None):
     url = moab_url(table='jobs')
 
+    payload = {
+        'customName': 'task_%d' % (task_id),
+        'commandFile': command_file,
+        'epilog': os.path.join(os.path.dirname(command_file), 'epilog'),
+        'group': 'em-connectome',
+        'user': user,
+        'requirements': [{
+            'requiredProcessorCountMinimum': processors,
+            'tasksPerNode': tasks,
+            'taskCount': 1,
+        }],
+        'durationRequested': duration_seconds
+    }
+
+    if moab_cfg:
+        if 'excluded_nodes' in moab_cfg:
+            payload['nodesExcluded'] = [
+                { 'name': n } for n in moab_cfg['excluded_nodes']
+            ]
+
+    _log.info('PAYLOAD: {}'.format(json.dumps(payload, indent=2)))
+
     try:
-        payload = {
-            'customName': 'task_%d' % (task_id),
-            'commandFile': command_file,
-            'group': 'em-connectome',
-            'user': user,
-            'requirements': [{
-                'requiredProcessorCountMinimum': processors,
-                'tasksPerNode': tasks,
-                'taskCount': 1,
-            }],
-            'durationRequested': duration_seconds
-        }
-
-        if moab_cfg:
-            if 'excluded_nodes' in moab_cfg:
-                payload['nodesExcluded'] = [
-                    { 'name': n } for n in moab_cfg['excluded_nodes']
-                ]
-
-
-        _log.info('MOAB excluded: {}'.format(moab_cfg))
-        _log.info('MOAB URL: %s', url)
-        _log.info('MOAB task_id: %d', task_id)
-        _log.info('MOAB commandFile: %s', command_file)
-        _log.info('MOAB user: %s', user)
-        _log.info('MOAB processors: %d', processors)
-        _log.info('MOAB tasks: %d', tasks)
-        _log.info('MOAB duration_seconds: %d', duration_seconds)
-
-        _log.info('body_data: ' + json.dumps(payload))
-    
         response_message = moab_post(
             url,
             body_data=payload)
 
+        if 'name' in response_message:
+            moab_id = response_message['name']
+            _log.info('MOAB ID: %s', moab_id)
+        else:
+            _log.info('MOAB response' + json.dumps(response_message))
+            moab_id = 'ERROR'
+    except Exception as e:
+        _log.error(e)
+        raise e
+        moab_id = 'ERROR'
+
+    return moab_id
+
+
+def submit_job_array(
+    task_id,
+    command_file,
+    duration_seconds=240,
+    processors=1,
+    tasks=1,
+    user='timf',
+    moab_cfg=None):
+    url = moab_url(table='job-arrays')
+
+    ppn = 32
+    n_nodes = 3
+    total_processors = ppn * n_nodes
+
+    try:
+        payload = {
+            'name': 'task_{}'.format(task_id),
+            'indexValues': list(range(0, n_nodes)),
+            'jobPrototype' : {
+                'customName': 'task_{}'.format(task_id),
+                'commandFile': command_file,
+                'group': 'em-connectome',
+                'user': user,
+                'requirements': [{
+                    'requiredProcessorCountMinimum': total_processors,
+                    'tasksPerNode': 1,
+                    'taskCount': n_nodes
+#                    'resourcesPerTask': {
+#                        'processors': { 'dedicated': ppn }
+ #                   }
+                }],
+                'durationRequested': duration_seconds
+            }
+        }
+
+        if moab_cfg and 'excluded_nodes' in moab_cfg:
+            payload['jobPrototype']['nodesExcluded'] = [
+                { 'name': n } for n in moab_cfg['excluded_nodes']
+            ]
+    except Exception as e:
+        _log.error(e)
+        moab_id = 'ERROR'
+        return moab_id
+
+    _log.info('payload: ' + str(json.dumps(payload, indent=2)))
+
+    try:
+        response_message = moab_post(
+            url,
+            body_data=payload)
+    except Exception as e:
+        _log.error(str(e))
+        moab_id = 'ERROR'
+        return moab_id
+
+    try:
         if 'name' in response_message:
             moab_id = response_message['name']
             _log.info('MOAB ID: %s', moab_id)

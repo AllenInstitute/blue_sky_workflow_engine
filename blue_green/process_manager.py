@@ -1,7 +1,9 @@
 from circus import get_arbiter
 from time import sleep
 import argparse
+import copy
 import os
+import sys
 
 _CELERY_PATH = '/opt/conda/bin/celery'
 _ACTIVATE_PATH = '/opt/conda/bin/activate'
@@ -94,7 +96,8 @@ def get_arbiter_list(app_name, bg, base_dir):
                 '"'
             )),
             "env": dmerge(base_env, {
-                'DEBUG_LOG': debug_log_path(base_dir, 'circus')
+                'DEBUG_LOG': debug_log_path(base_dir, 'circus'),
+                'BLUE_SKY_APP_NAME': app_name
             }), 
             'numprocesses': 1
         },
@@ -153,8 +156,8 @@ def get_arbiter_list(app_name, bg, base_dir):
 if __name__ == '__main__':
 
     # TODO: these should not just be docker paths
-    app_name = 'at_em_imaging_workflow'
-    bg = 'green'
+    app_name = sys.argv[-2]
+    bg = sys.argv[-1]
     bg_conda_env = bg
     base_dir = os.environ.get(
         'BASE_DIR', '/{}/{}'.format(bg, app_name))

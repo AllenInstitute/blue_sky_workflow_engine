@@ -46,8 +46,11 @@ class CircusStatus(TaskStatus):
         1: 'Completed'
     }
 
-    def __init__(self, remote_queue='circus'):
-        super(CircusStatus, self).__init__(remote_queue)
+    def __init__(self, remote_queues=None):
+        if remote_queues is None:
+            remote_queues = ['circus']
+
+        super(CircusStatus, self).__init__(remote_queues)
 
 
     def query_remote_state(self, status_dict):

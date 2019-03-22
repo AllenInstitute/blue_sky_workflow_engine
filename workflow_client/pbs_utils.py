@@ -39,16 +39,32 @@ class PbsUtils(object):
     def __init__(self):
         self.package = 'workflow_client'
         self.templates = 'templates'
-        self.script = 'script_template.pbs'
-
+        self.scripts = {
+            'spark_moab': 'spark_submit_cluster.pbs',
+            'spark': 'spark_submit_cluster.pbs',
+            'circus': 'script_template.pbs',
+            'pbs': 'script_template.pbs',
+            'default': 'script_template.pbs'
+        }
 
     def get_template(self, executable, task, settings):
         env = jinja2.Environment(
            loader=jinja2.PackageLoader(
                self.package, self.templates))
-        pbs_template = env.get_template(self.script)
+
+        script_key = executable.remote_queue
+        if not script_key in self.scripts:
+            script_key = 'default'
+
+        pbs_template = env.get_template(
+            self.scripts[script_key]
+        )
+
+        task_strategy = task.job.workflow_node.get_strategy()
+        task_storage_directory = task_strategy.get_task_storage_directory(task)
 
         return pbs_template.render(
             executable=executable,
             task=task,
-            settings=settings)
+            settings=settings,
+            task_storage_directory=task_storage_directory)
