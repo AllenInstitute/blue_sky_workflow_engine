@@ -1,17 +1,7 @@
 from django.contrib import admin
-from django.contrib.contenttypes.admin import GenericStackedInline
-from workflow_engine.models import (
-    Configuration,
-    WorkflowNode
-)
+from .configuration_inline import ConfigurationInline
+from workflow_engine.models import WorkflowNode
 
-
-class ConfigurationInline(GenericStackedInline):
-    model = Configuration
-    fields = (
-        'name', 'configuration_type', 'json_object'
-    )
-    extra = 0
 
 class SourcesInline(admin.TabularInline):
     model = WorkflowNode.sources.through

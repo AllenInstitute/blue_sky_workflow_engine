@@ -54,8 +54,8 @@ class TaskStatus(object):
         'failed_message': process_failed_signature
     }
     
-    def __init__(self, remote_queue):
-        self.remote_queue=remote_queue
+    def __init__(self, remote_queues):
+        self.remote_queues=remote_queues
 
     def workflow_state_dataframe(self, state_dict):
         """

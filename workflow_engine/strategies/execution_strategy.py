@@ -258,7 +258,7 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
             self.finish_task(task)
         else:
             queue_name = self.get_remote_queue(task)
-            if queue_name == 'pbs':
+            if queue_name in ['pbs', 'spark_moab']:
                 queue_name = settings.MOAB_MESSAGE_QUEUE_NAME
             elif queue_name == 'local':
                 queue_name = settings.LOCAL_MESSAGE_QUEUE_NAME

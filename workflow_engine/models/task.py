@@ -41,7 +41,6 @@ from django.contrib.contenttypes.models import ContentType
 from workflow_engine.models import ONE, ZERO, TWO, SECONDS_IN_MIN
 from workflow_client.pbs_utils import PbsUtils
 import logging
-import traceback
 
 
 _logger = logging.getLogger('workflow_engine.models.task')
@@ -49,31 +48,89 @@ _logger = logging.getLogger('workflow_engine.models.task')
 
 class Task(models.Model):
     enqueued_task_object_type = models.ForeignKey(
-        ContentType, default=None, null=True)
-    enqueued_task_object_id = models.IntegerField(null=True)
+        ContentType,
+        default=None,
+        null=True
+    )
+    enqueued_task_object_id = models.IntegerField(
+        null=True
+    )
     enqueued_task_object = GenericForeignKey(
         'enqueued_task_object_type',
         'enqueued_task_object_id')
-    enqueued_task_object_class = models.CharField(max_length=255, null=True)
+    enqueued_task_object_class = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True)
     job = models.ForeignKey(
-        'workflow_engine.Job')
-    archived = models.NullBooleanField(default=False)
+        'workflow_engine.Job'
+    )
+    archived = models.NullBooleanField(
+        default=False
+    )
     run_state = models.ForeignKey(
-        'workflow_engine.RunState')
-    full_executable = models.CharField(max_length=1000, null=True)
-    error_message = models.TextField(null=True)
-    log_file = models.CharField(max_length=255, null=True)
-    input_file = models.CharField(max_length=255, null=True)
-    output_file = models.CharField(max_length=255, null=True)
-    pbs_file = models.CharField(max_length=255, null=True)
-    start_run_time = models.DateTimeField(null=True)
-    end_run_time = models.DateTimeField(null=True)
-    duration = models.DurationField(null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    pbs_id = models.CharField(max_length=255, null=True)
-    retry_count = models.IntegerField(default=0)
-    tags = models.CharField(max_length=255, null=True)
+        'workflow_engine.RunState'
+    )
+    full_executable = models.CharField(
+        max_length=1000,
+        null=True
+    )
+    error_message = models.TextField(
+        null=True,
+        blank=True
+    )
+    log_file = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True
+    )
+    input_file = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True
+    )
+    output_file = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True
+    )
+    pbs_file = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True)
+    start_run_time = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+    end_run_time = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+    duration = models.DurationField(
+        null=True,
+        blank=True
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        blank=True
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        blank=True
+    )
+    pbs_id = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True
+    )
+    retry_count = models.IntegerField(
+        default=0
+    )
+    tags = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True
+    )
 
     def __str__(self):
         try:
@@ -86,10 +143,18 @@ class Task(models.Model):
             enqueued_object_name,
             self.id)
     def get_created_at(self):
-        return timezone.localtime(self.created_at).strftime('%m/%d/%Y %I:%M:%S')
+        return timezone.localtime(
+            self.created_at
+        ).strftime(
+            '%m/%d/%Y %I:%M:%S'
+        )
 
     def get_updated_at(self):
-        return timezone.localtime(self.updated_at).strftime('%m/%d/%Y %I:%M:%S')
+        return timezone.localtime(
+            self.updated_at
+        ).strftime(
+            '%m/%d/%Y %I:%M:%S'
+        )
 
     def set_error_message(self, error_message):
         self.error_message = str(error_message)
@@ -116,7 +181,7 @@ class Task(models.Model):
         self.job.workflow_node.workflow.use_pbs
 
     def has_pbs_executable(self):
-        return self.get_job_queue().executable.remote_queue == 'pbs'
+        return self.get_executable().remote_queue in ['pbs', 'spark_moab']
 
     def pbs_task(self):
         is_pbs = self.has_pbs_executable() or self.has_pbs_workflow() 

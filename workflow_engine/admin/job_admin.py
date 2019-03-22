@@ -77,8 +77,7 @@ class JobAdmin(admin.ModelAdmin):
     )
     list_display = (
         'id',
-        'enqueued_object_id',
-        'enqueued_object',
+        'enqueued_object_link',
         'enqueued_object_state',
         'start_run_time',
         'duration',
@@ -137,3 +136,13 @@ class JobAdmin(admin.ModelAdmin):
             str(job_object.workflow_node)))
 
     workflow_node_link.short_description = "Workflow Node"
+
+    def enqueued_object_link(self, job_object):
+        enqueued_object = job_object.enqueued_object
+        clz = enqueued_object._meta.db_table
+        return mark_safe('<a href="{}">{}</a>'.format(
+            reverse("admin:{}_change".format(clz),
+                    args=(enqueued_object.id,)),
+            str(enqueued_object)))
+
+    enqueued_object_link.short_description = "Enqueued Object"

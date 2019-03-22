@@ -35,28 +35,73 @@
 #
 from django.db import models
 from django.utils import timezone
+from workflow_engine.mixins import Configurable
 import logging
 _model_logger = logging.getLogger('workflow_engine.models')
 
 
-class Executable(models.Model):
-    name = models.CharField(max_length=255)
-    description = models.CharField(max_length=255, null=True, blank=True)
-    static_arguments = models.CharField(max_length=255,
-                                        null=True, blank=True)
-    environment = models.CharField(max_length=1000,
-                                   null=True, blank=True)
-    executable_path = models.CharField(max_length=1000)
-    pbs_executable_path = models.CharField(max_length=1000,
-                                           null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    remote_queue = models.CharField(max_length=255, default='pbs')
-    pbs_processor = models.CharField(max_length=255, default='vmem=6g')
-    pbs_walltime = models.CharField(max_length=255, default='walltime=5:00:00')
-    pbs_queue = models.CharField(max_length=255, default='lims')
-    version = models.CharField(max_length=255, default='0.1')
-    archived = models.NullBooleanField(default=False)
+class Executable(Configurable, models.Model):
+    name = models.CharField(
+        max_length=255
+    )
+    description = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True
+    )
+    static_arguments = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True
+    )
+    environment = models.CharField(
+        max_length=1000,
+        null=True,
+        blank=True
+    )
+    executable_path = models.CharField(
+        max_length=1000
+    )
+    pbs_executable_path = models.CharField(
+        max_length=1000,
+        null=True,
+        blank=True
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+    remote_queue = models.CharField(
+        max_length=255,
+        default='pbs',
+        blank=True
+    )
+    pbs_processor = models.CharField(
+        max_length=255,
+        default='vmem=6g',
+        blank=True
+    )
+    pbs_walltime = models.CharField(
+        max_length=255,
+        default='walltime=5:00:00',
+        blank=True
+    )
+    pbs_queue = models.CharField(
+        max_length=255,
+        default='lims',
+        blank=True
+    )
+    version = models.CharField(
+        max_length=255,
+        default='0.1',
+        blank=True
+    )
+    archived = models.NullBooleanField(
+        default=False,
+        blank=True
+    )
 
     def __str__(self):
         return self.name
