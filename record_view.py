@@ -397,7 +397,7 @@ def get_search_data(request):
             tasks = Task.objects.all()
             ids = {}
             enqueued_task_object_ids = {}
-            enqueued_task_object_classes = {}
+            enqueued_task_object_types = {}
             job_ids = {}
             run_state_ids = {}
 
@@ -405,9 +405,9 @@ def get_search_data(request):
                 ids[task.id] = task.id
                 enqueued_task_object_ids[task.enqueued_task_object_id] = \
                     task.enqueued_task_object_id
-                enqueued_task_object_classes[
-                    task.enqueued_task_object_class] = \
-                        task.enqueued_task_object_class
+                enqueued_task_object_types[
+                    task.enqueued_task_object_type] = \
+                        task.enqueued_task_object_type
                 job_ids[task.job.id] = task.job.id
 
             run_states = RunState.objects.all()
@@ -416,8 +416,8 @@ def get_search_data(request):
 
             payload['ids'] = ids
             payload['enqueued_task_object_ids'] = enqueued_task_object_ids
-            payload['enqueued_task_object_classes'] = \
-                enqueued_task_object_classes
+            payload['enqueued_task_object_types'] = \
+                enqueued_task_object_types
             payload['run_state_ids'] = run_state_ids
             payload['job_ids'] = job_ids
         elif(search_type == 'workflow'):

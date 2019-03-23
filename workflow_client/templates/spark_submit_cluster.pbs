@@ -1,0 +1,88 @@
+#!/bin/bash
+#PBS -q {{ executable.pbs_queue }}
+#PBS -l {{ executable.pbs_processor }}
+#PBS -l {{ executable.pbs_walltime }}
+#PBS -n
+#PBS -N {{ task.get_task_name() }}
+#PBS -V MOAB_JOBARRAYINDEX
+#PBS -V MOAB_JOBARRAYRANGE
+#PBS -r n
+#PBS -j oe
+#PBS -o {{ task.log_file }}
+#PBS -d {{ task_storage_directory }}
+
+set -x # echo on
+
+trap "touch term.out; exit" TERM
+trap "touch exit.out" EXIT
+
+#
+# submit using qsub -t 0-4 mindspark.qsub
+# see: https://wikis.nyu.edu/display/NYUHPC/Tutorial+-+Submitting+a+job+using+qsub
+#
+module load java
+
+export SPARK_HOME=/allen/programs/celltypes/workgroups/em-connectomics/gayathrim/nc-em2/spark/
+export SPARK_LOCAL_DIRS="/scratch/capacity/${MOAB_JOBARRAYINDEX}/"
+export TASK_DIR=`pwd`
+export SPARK_CONF_DIR=${TASK_DIR}/spark_conf
+
+{%
+  for evar in task.environment_vars()
+%}export {{ evar }}
+{%
+  endfor
+%}
+
+
+if [[ ${MOAB_JOBARRAYINDEX} == 0 ]]
+then
+  rm -rf spark_conf
+  cp -R ${SPARK_HOME}/conf spark_conf
+  rm spark_conf/slaves.template
+  export SPARK_MASTER_HOST=`hostname`
+
+  echo ${SPARK_MASTER_HOST} >> ${SPARK_CONF_DIR}/slaves
+  echo "export SPARK_MASTER_HOST=${SPARK_MASTER_HOST}" >> ${SPARK_CONF_DIR}/spark-env.sh
+  echo "export JAVA_HOME=${JAVA_HOME}" >> ${SPARK_CONF_DIR}/spark-env.sh
+  echo "export SPARK_LOG_DIR=${TASK_DIR}" >> ${SPARK_CONF_DIR}/spark-env.sh
+else
+  sleep ${MOAB_JOBARRAYINDEX}
+  echo `hostname` >> ${SPARK_CONF_DIR}/slaves
+fi
+
+export HOSTDIR=host_${MOAB_JOBARRAYINDEX}
+mkdir ${HOSTDIR}
+hostname >> ${HOSTDIR}/nodename
+
+sleep 10
+
+export SPARK_MASTER_HOST=`head -n 1 host_0/nodename`
+cd ${HOSTDIR}
+
+export PATH=${JAVA_HOME}/bin:${SPARK_HOME}/sbin:${SPARK_HOME}/bin:${PATH}
+
+if [[ ${MOAB_JOBARRAYINDEX} == 0 ]]
+then
+  export MASTER_FILE=master
+  echo ${SPARK_MASTER_HOST} > ${MASTER_FILE}
+  echo SPARK_MASTER_HOST ${SPARK_MASTER_HOST}
+
+  ${SPARK_HOME}/sbin/start-master.sh 2>&1 \
+    > master.log
+
+  ${SPARK_HOME}/sbin/start-slave.sh spark://${SPARK_MASTER_HOST}:7077 2>&1 \
+    > worker.log
+
+  sleep 10
+
+  MASTER=spark://${SPARK_MASTER_HOST}:7077 ${SPARK_HOME}/bin/spark-submit \
+    ${SPARK_HOME}/examples/src/main/python/pi.py 1000 \
+    > ../output_2.txt
+  cp ../input_2.json ../output_2.json
+  ${SPARK_HOME}/sbin/stop-all.sh
+else
+  ${SPARK_HOME}/sbin/start-slave.sh spark://${SPARK_MASTER_HOST}:7077 2>&1 > worker_${MOAB_JOBARRAYINDEX}.log
+fi
+
+sleep infinity

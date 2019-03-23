@@ -74,7 +74,7 @@ class BaseStrategy(object):
 
     # override if needed
     def get_storage_directory(self, base_storage_directory, job):
-        enqueued_object = job.get_enqueued_object()
+        enqueued_object = job.enqueued_object
         BaseStrategy._log.info('get_storage_directory: %s, %s:' % (
             base_storage_directory, str(enqueued_object.id)))
         return os.path.join(
@@ -89,7 +89,7 @@ class BaseStrategy(object):
     # for this queue
     def get_objects_for_queue(self, prev_queue_job):
         objects = []
-        objects.append(prev_queue_job.get_enqueued_object())
+        objects.append(prev_queue_job.enqueued_object)
         return objects
 
     # override if needed
@@ -135,7 +135,7 @@ class BaseStrategy(object):
             os.mkdir(path)
         except:
             pass
-        # os.chmod(path, mode)
+        os.chmod(path, mode)
         res += [path]
         return res
 

@@ -9,7 +9,7 @@ class JobQueueAdmin(admin.ModelAdmin):
         'name',
         'description',
         'job_strategy_class',
-        'enqueued_object_class',
+        'enqueued_object_type',
         'executable_link',
         'created_at',
         'updated_at',

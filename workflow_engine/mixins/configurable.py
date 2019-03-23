@@ -1,6 +1,8 @@
+from django.db import models
 from django.contrib.contenttypes.fields import GenericRelation
 
-class Configurable(object):
-    configurations = GenericRelation(
-        'workflow_engine.Configuration'
-    )
+class Configurable(models.Model):
+    configurations = GenericRelation('workflow_engine.Configuration')
+
+    class Meta:
+        abstract =True

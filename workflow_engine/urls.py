@@ -86,7 +86,6 @@ urlpatterns = [
     url(r'^job_queues/get_show_data/$', job_queue_view.get_job_queues_show_data, name='job_queues'),
     url(r'^job_queues$', job_queue_view.job_queues, name='job_queues'),
     url(r'^job_queues/([0-9]+)/$', job_queue_view.job_queues_page, name='job_queues'),
-    url(r'^job_queues/get_enqueued_object_classes$', job_queue_view.get_enqueued_object_classes, name='job_queues'),
 
     #executable
     url(r'^executables/([0-9]+)/$', executable_view.executables_page, name='executables'),

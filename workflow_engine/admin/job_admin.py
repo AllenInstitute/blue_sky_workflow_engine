@@ -115,7 +115,7 @@ class JobAdmin(admin.ModelAdmin):
 
     def enqueued_object_state(self, job_object):
         try:
-            enqueued_object = job_object.get_enqueued_object()
+            enqueued_object = job_object.enqueued_object
             object_state = enqueued_object.object_state
             return object_state
         except:

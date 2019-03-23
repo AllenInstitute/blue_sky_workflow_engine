@@ -33,10 +33,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-from django.http import JsonResponse
 from django.http import HttpResponse
 from django.template import loader
-from django.apps import apps
 from workflow_engine.views.decorators import object_json_response
 from workflow_engine.models import (
     JobQueue,
@@ -57,7 +55,7 @@ def get_job_queues_show_data(job_queue_object, request, result):
         ('name', job_queue_object.name),
         ('description', job_queue_object.description),
         ('job strategy class', job_queue_object.job_strategy_class),
-        ('enqueued object class', job_queue_object.enqueued_object_class),
+        ('enqueued object type', str(job_queue_object.enqueued_object_type.model_class().__name__)),
         ('executable name', job_queue_object.executable.name),  # except ''
         ('executable path', job_queue_object.executable.executable_path),  # except ''
         ('created at', job_queue_object.get_created_at()),
@@ -76,7 +74,6 @@ def add_sort_job_queues(context, sort, url, set_params):
     context['name_sort'] = shared.sort_helper('name', sort, url, set_params)
     context['description_sort'] = shared.sort_helper('description', sort, url, set_params)
     context['job_strategy_class_sort'] = shared.sort_helper('job_strategy_class', sort, url, set_params)
-    context['enqueued_object_class_sort'] = shared.sort_helper('enqueued_object_class', sort, url, set_params)
     context['executable_sort'] = shared.sort_helper('executable', sort, url, set_params)
     context['created_at_sort'] = shared.sort_helper('created_at', sort, url, set_params)
     context['updated_at_sort'] = shared.sort_helper('updated_at', sort, url, set_params)
@@ -86,7 +83,6 @@ def job_queues_page(request, page, url = None):
     job_queue_ids = request.GET.get('job_queue_ids')
     job_queue_names = request.GET.get('job_queue_names')
     job_strategy_classes = request.GET.get('job_strategy_classes')
-    enqueued_object_classes = request.GET.get('enqueued_object_classes')
     sort = request.GET.get('sort')
 
     if url is None:
@@ -107,10 +103,6 @@ def job_queues_page(request, page, url = None):
         records = records.filter(job_strategy_class__in=(job_strategy_classes.split(',')))
         set_params = True
 
-    if enqueued_object_classes != None:
-        records = records.filter(enqueued_object_class__in=(enqueued_object_classes.split(',')))
-        set_params = True
-
     if sort == None:
         sort = '-updated_at'
         
@@ -122,27 +114,3 @@ def job_queues_page(request, page, url = None):
     template = loader.get_template('job_queues.html')
     shared.add_settings_info_to_context(context)
     return HttpResponse(template.render(context, request))
-
-def get_enqueued_object_classes(request):
-    result = {}
-    success = True
-    payload = []
-    message = ''
-
-    try:
-        app_models = apps.get_app_config('development').get_models()
-        
-        for model in app_models:
-            payload.append(model.__name__)
-
-        payload.sort()  
-
-    except Exception as e:
-            success = False
-            message = str(e)
-        
-    result['success'] = success
-    result['message'] = message
-    result['payload'] = payload
-
-    return JsonResponse(result)

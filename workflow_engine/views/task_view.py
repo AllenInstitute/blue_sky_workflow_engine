@@ -56,7 +56,7 @@ def tasks_page(request, page, url = None):
     sort = request.GET.get('sort')
 
     enqueued_task_object_ids = request.GET.get('enqueued_task_object_ids')
-    enqueued_task_object_classes = request.GET.get('enqueued_task_object_classes')
+    enqueued_task_object_types = request.GET.get('enqueued_task_object_types')
     job_ids = request.GET.get('job_ids')
     run_state_ids = request.GET.get('run_state_ids')
 
@@ -78,8 +78,8 @@ def tasks_page(request, page, url = None):
     if enqueued_task_object_ids != None:
         records = records.filter(enqueued_task_object_id__in=(enqueued_task_object_ids.split(',')))
 
-    if enqueued_task_object_classes != None:
-        records = records.filter(enqueued_task_object_class__in=(enqueued_task_object_classes.split(',')))
+    if enqueued_task_object_types != None:
+        records = records.filter(enqueued_task_object_types__in=(enqueued_task_object_types.split(',')))
 
     if job_ids != None:
         records = records.filter(job_id__in=(job_ids.split(',')))
@@ -125,7 +125,7 @@ def get_tasks_show_data(task_object, request, result):
         ('id', task_object.id),
         ('job_id', task_object.job_id),
         ('enqueued_object_id', task_object.enqueued_task_object_id),
-        ('enqueued_object_class', task_object.enqueued_task_object_class),
+        ('enqueued_object_type', str(task_object.enqueued_task_object_type)),
         ('enqueued_object', task_object.get_enqueued_object_display()),
         ('run state', task_object.run_state.name),
         ('retry count', str(task_object.retry_count) + '/' + str(task_object.get_max_retries())),

@@ -58,10 +58,6 @@ class Task(models.Model):
     enqueued_task_object = GenericForeignKey(
         'enqueued_task_object_type',
         'enqueued_task_object_id')
-    enqueued_task_object_class = models.CharField(
-        max_length=255,
-        null=True,
-        blank=True)
     job = models.ForeignKey(
         'workflow_engine.Job'
     )
@@ -215,11 +211,11 @@ class Task(models.Model):
 
     def get_enqueued_object_display(self):
         result = None
+
         try:
-            enqueued_object = self.enqueued_task_object
-            result = str(enqueued_object)
+            result = str(self.enqueued_task_object)
         except:
-            result = None
+            result = str(None)
 
         return result
 
@@ -354,7 +350,7 @@ class Task(models.Model):
         return (self.run_state.name == RunState.get_success_state().name)
 
     def get_enqueued_job_object(self):
-        return self.job.get_enqueued_object()
+        return self.job.enqueued_object
 
     def get_job_queue(self):
         return self.job.workflow_node.job_queue

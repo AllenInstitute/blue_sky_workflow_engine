@@ -99,7 +99,7 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
         # populate the input file
         storage_dir = self.get_task_storage_directory(task)
 
-        enqueued_object = WorkflowController.get_enqueued_object(task)
+        enqueued_object = task.enqueued_task_object
         
         ExecutionStrategy._log.info(
             'enqueued_object: %s',
@@ -249,9 +249,7 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
     def run_asynchronous_task(self, task):
         task.clear_error_message()
 
-        enqueued_object = WorkflowController.get_enqueued_object(task)
-
-        if self.skip_execution(enqueued_object):
+        if self.skip_execution(task.enqueued_task_object):
             # TODO: make this a "skip" remote queue
             ExecutionStrategy._log.info('skipping execution')
             self.running_task(task)
@@ -407,12 +405,10 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
                 'Expected output file to be created at: ' + \
                 str(output_file) + ' but it was not')
 
-        with open(output_file) as json_data:  
+        with open(output_file) as json_data:
             results = json.load(json_data)
 
-        enqueued_object = WorkflowController.get_enqueued_object(task)
-
-        self.on_finishing(enqueued_object, results, task)
+        self.on_finishing(task.enqueued_task_object, results, task)
 
 
 from workflow_engine.workflow_controller import WorkflowController

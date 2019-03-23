@@ -35,7 +35,6 @@
 #
 from django.db import models
 from django.utils import timezone
-from workflow_engine.import_class import import_class
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from workflow_engine.models import TWO, SECONDS_IN_MIN
@@ -68,7 +67,7 @@ class Job(models.Model):
 
     def __str__(self):
         try:
-            enqueued_object_name = str(self.get_enqueued_object())
+            enqueued_object_name = str(self.enqueued_object)
         except:
             enqueued_object_name = "None"
 
@@ -100,15 +99,11 @@ class Job(models.Model):
     def get_enqueued_object_display(self):
         result = None
         try:
-            enqueued_object = self.get_enqueued_object()
-            result = str(enqueued_object)
+            result = str(self.enqueued_object)
         except:
             result = 'None'
 
         return result
-
-    def get_enqueued_object_class_type(self):
-        return self.workflow_node.job_queue.enqueued_object_class
 
     def set_error_message(self, error_message, task):
         if not task:
@@ -180,9 +175,6 @@ class Job(models.Model):
         _logger.info('set process_killed')
         self.run_state = RunState.get_process_killed_state()
         self.save()
-
-    def get_enqueued_object(self):
-        return self.enqueued_object
 
     def get_strategy(self):
         return self.workflow_node.get_strategy()

@@ -45,7 +45,6 @@ class JobQueue(models.Model):
     name = models.CharField(max_length=255)
     description = models.CharField(max_length=255, null=True, blank=True)
     job_strategy_class = models.CharField(max_length=255)
-    enqueued_object_class = models.CharField(max_length=255, null=True, blank=True)
     enqueued_object_type = models.ForeignKey(
         ContentType, default=None, null=True)
     executable = models.ForeignKey(

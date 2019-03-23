@@ -37,7 +37,6 @@ import traceback
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import (
-    IntegrityError,
     transaction
 )
 import logging
@@ -179,7 +178,6 @@ class WorkflowController(object):
                     tsk, created = Task.objects.get_or_create(
                         enqueued_task_object_type=enqueued_task_object_type,
                         enqueued_task_object_id=task_object.id,
-                        enqueued_task_object_class=enqueued_object_full_class, # TODO: deprecate
                         job=job,
                         defaults=default_options
                     )
@@ -369,10 +367,6 @@ class WorkflowController(object):
             enqueued_object,
             workflow_node.overwrite_previous_job,
             priority)
-
-    @classmethod
-    def get_enqueued_object(cls, task):
-        return task.enqueued_task_object
 
 
 # circular imports
