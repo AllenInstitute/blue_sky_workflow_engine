@@ -48,6 +48,7 @@ from workflow_engine.celery.signatures import (
 from django.core.exceptions import ObjectDoesNotExist
 import celery
 import logging
+import traceback
 
 
 _log = logging.getLogger('workflow_engine.celery.moab_tasks')
@@ -106,7 +107,7 @@ def submit_moab_task(self, task_id):
             _log.info("MOAB ID: {}".format(moab_id))
     except Exception as e:
         moab_id = None
-        msg = 'Error submitting task {}'.format(str(e))
+        msg = 'Error submitting task {}'.format(str(e) + str(traceback.format_exc()))
         _log.error(msg)
         process_failed_execution_signature.delay(
             task_id,

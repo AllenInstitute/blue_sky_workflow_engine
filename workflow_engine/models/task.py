@@ -40,6 +40,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from workflow_engine.models import ONE, ZERO, TWO, SECONDS_IN_MIN
 from workflow_client.pbs_utils import PbsUtils
+import os
 import logging
 
 
@@ -130,14 +131,14 @@ class Task(models.Model):
 
     def __str__(self):
         try:
-            enqueued_object_name = str(self.enqueued_task_object)
+            return "{} {} task {}".format(
+                str(self.job.workflow_node),
+                str(self.enqueued_task_object),
+                self.pk
+            )
         except:
-            enqueued_object_name = 'None'
+            return "task {}".format(self.pk)
 
-        return "%s %s task %d" % (
-            str(self.job.workflow_node),
-            enqueued_object_name,
-            self.id)
     def get_created_at(self):
         return timezone.localtime(
             self.created_at
@@ -166,12 +167,12 @@ class Task(models.Model):
         '''
             returns: environment variable list in form VAR=val
         '''
-        env = self.get_job_queue().executable.environment
+        env = self.get_job_queue().executable.environment_vars()
 
         if env is None:
             return []
 
-        return self.get_job_queue().executable.environment.split(';')
+        return env
 
     def has_pbs_workflow(self):
         self.job.workflow_node.workflow.use_pbs
@@ -265,6 +266,11 @@ class Task(models.Model):
 
     def get_strategy(self):
         return self.job.get_strategy()
+
+    def get_task_arguments(self):
+        return ' '.join(
+            self.get_strategy().get_task_arguments(self)
+        )
 
     def fail_task(self):
         strategy = self.get_strategy()
@@ -380,6 +386,8 @@ class Task(models.Model):
 
         with open(pbs_file, 'w') as file_handle:
             file_handle.write(pbs_file_contents)
+        os.chmod(pbs_file, 0o664)
+
 
         self.pbs_file = pbs_file
         self.save()

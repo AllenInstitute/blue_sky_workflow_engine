@@ -119,13 +119,44 @@ class Executable(Configurable, models.Model):
         self.archived = True
         self.save()
 
+    def spark_moab_environment(self):
+        # TODO: factor into a spark_moab helper class
+        spark_cfgs =  self.configurations.filter(
+            configuration_type='spark_moab_configuration'
+        )
+
+        num_spark_cfgs = spark_cfgs.count()
+
+        if num_spark_cfgs == 1:
+            spark_cfg = spark_cfgs.first()
+            return spark_cfg.json_object
+        elif num_spark_cfgs > 1:
+            self.set_error_message(
+                'Found {} not one spark configurations on {}'.format(
+                    num_spark_cfgs,
+                    self.name
+                )
+            )
+            self.fail_task()
+
+        return None
+
     def environment_vars(self):
         '''
             returns: environment variable list in form VAR=val
         '''
+        _model_logger.info('ENV')
         env = self.environment
 
         if env is None:
-            return []
+            env = []
 
-        return env.split(';')
+        env = env.split(';')
+
+        spark_env = self.spark_moab_environment()
+        _model_logger.info('SPARK ENV: {}'.format(spark_env))
+
+        if spark_env is not None:
+            env.extend(["{}={}".format(k,v) for k,v in spark_env.items()])
+
+        return env

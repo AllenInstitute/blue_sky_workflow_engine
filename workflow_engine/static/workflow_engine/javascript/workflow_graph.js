@@ -3,40 +3,35 @@ function draw_workflow1(workflow_nodes, workflow_edges) {
     alert(workflow_nodes);
 }
 
+function node_color(n, state_hash, run_states) {
+    reverse_run_states = {}
+    node_index = n.toString()
 
-var state_hash = {}
+    Object.keys(run_states).forEach(
+        s => {
+            reverse_run_states[run_states[s.toString()]] = s
+        }
+    )
 
-function node_number_string(n) {
-    try {
-        s = '(' + state_hash[n]['TOTAL'] + ') ' + 
-            (state_hash[n]['PENDING'] + 
-            state_hash[n]['QUEUED'] + 
-            state_hash[n]['RUNNING']) + ' / ' +
-            ' ' + state_hash[n]['BATCH_SIZE'];
-    } catch(e) {
-        s = e;
-    }
-
-    return s;
-}
-
-
-function node_color(n) {
-    if (!(n in state_hash)) {
-        return 'grey';
-    }
+    failed = '[' + node_index + ',' + reverse_run_states['FAILED'] + ']';
+    failed_execution = '[' + node_index + ',' + reverse_run_states['FAILED_EXECUTION'] + ']';
+    process_killed = '[' + node_index + ',' + reverse_run_states['PROCESS_KILLED'] + ']';
+    running = '[' + node_index + ',' + reverse_run_states['RUNNING'] + ']';
+    pending = '[' + node_index + ',' + reverse_run_states['PENDING'] + ']';
+    queued = '[' + node_index + ',' + reverse_run_states['QUEUED'] + ']';
 
     try {
-        if ((state_hash[n]['FAILED'] > 0) ||
-            (state_hash[n]['FAILED_EXECUTION']) > 0){
+        if ((state_hash[failed] > 0) ||
+            (state_hash[failed_execution] > 0) ||
+            (state_hash[process_killed] > 0)) {
             return 'red';
         } else if (
-            (state_hash[n]['RUNNING'] > 0) ||
-            (state_hash[n]['PENDING'] > 0) ||
-            (state_hash[n]['QUEUED'] > 0)) {
+            (state_hash[running] > 0) ||
+            (state_hash[pending] > 0) ||
+            (state_hash[queued] > 0)) {
             return 'green';
         } else if (
-            (state_hash[n]['FAILED'] > 0)) {
+            (state_hash[failed] > 0)) {
             return 'blue';
         } else {
             return 'blue';
@@ -46,42 +41,24 @@ function node_color(n) {
     }
 }
 
-function color_nodes(run_states) {
+
+function color_nodes(
+    job_queues, batch_size, run_states, counts, pending_queued_running, totals) {
     state_hash = {};
-
-    for (i in run_states) {
-        job_queue_name = run_states[i]['node'];
-
-        state_hash[job_queue_name] = {
-            'TOTAL': 0
-        }
-
-        if (run_states[i]['state'] == 'BATCH_SIZE') {
-            state_hash[job_queue_name]['BATCH_SIZE'] = run_states[i]['count']
-        }
-    }
-
-    for (i in run_states) {
-        job_queue_name = run_states[i]['node'];
-        state_name = run_states[i]['state']
-        if (state_name != 'BATCH_SIZE') {
-            queue_state_count = run_states[i]['count']
-            queue_entry = state_hash[job_queue_name]
-            queue_entry[state_name] = queue_state_count;
-            queue_entry['TOTAL'] = queue_entry['TOTAL'] + queue_state_count;
-        }
-    }
 
     var cy_nodes = window.cy.nodes()
 
     for (i = 0; i < cy_nodes.length; i++) {
-        job_queue_name = cy_nodes[i].data()['id'];
-        state_color = node_color(job_queue_name);
+        node_id = cy_nodes[i].data()['id'].toString();
+        job_queue_name = job_queues[node_id].replace(/ /g, '\n');
+        state_color = node_color(node_id, counts, run_states);
         cy_nodes[i].classes(state_color + 'Class');
+
+        node_number_string = '(' + totals[node_id] + ') ' + pending_queued_running[node_id] + ' / ' + batch_size[node_id]
         cy_nodes[i].data(
             'label',
-            job_queue_name.replace(
-                / /g, '\n') + '\n' + node_number_string(job_queue_name))
+            job_queue_name + '\n' + node_number_string
+        )
     }
 }
 
@@ -95,8 +72,11 @@ var cy = window.cy = cytoscape({
   layout: {
     name: 'dagre',
     fit: false,
+    transform: function( node, pos ) { return { x: pos['y'], y: pos['x'] }; },
     spacingFactor: 0.75
   },
+
+  zoom: 1,
 
   style: [
     {
@@ -159,25 +139,30 @@ var cy = window.cy = cytoscape({
     ],
 
   elements: {
-    nodes: workflow_nodes.map(
+    nodes: Object.keys(workflow_nodes).map(
         n => {
             return {
                 data: {
                     id: n,
-                    label: n
+                    label: workflow_nodes[n]
                 },
                 classes: 'multiline-manual'
             } }),
     edges: workflow_edges.map(
         e => {
-            return { data: e } }),
+            return {
+                data: {
+                    source: e[0],
+                    target: e[1]
+                }
+            } }),
   },
 });
 }
 
 
 function render_workflow_graph() {
-    graph_url = '/static/workflow_engine/javascript/monitor_out.js';
+    graph_url = '/workflow_engine/workflows/monitor_data';
 
     fetch(graph_url, {
         headers: {
@@ -187,8 +172,15 @@ function render_workflow_graph() {
     })
     .then((response) => {
         response.json().then(obj => {
-            draw_workflow(obj['nodes'], obj['edges']);
-            color_nodes(obj['run_states']);
+            draw_workflow(obj['job_queue_name'], obj['edges']);
+            color_nodes(
+                obj['job_queue_name'],
+                obj['batch_size'],
+                obj['run_state_name'],
+                obj['count'],
+                obj['pending_queued_running'],
+                obj['total']
+            );
         })
     })
 }
@@ -197,5 +189,5 @@ function render_workflow_graph() {
 var $ = django.jQuery;
 $(document).ready(function(){
     render_workflow_graph();
-    setInterval(render_workflow_graph, 60*1000);
+    setInterval(render_workflow_graph, 5000);
 })

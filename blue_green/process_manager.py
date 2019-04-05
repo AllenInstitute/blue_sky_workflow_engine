@@ -37,12 +37,31 @@ def dmerge(d1, d2):
     return d
 
 _BASE_ENV = {
-    'WORKFLOW_CONFIG_YAML': '/blue_sky/config/workflow_config.yml',
-    'MESSAGE_QUEUE_USER': 'blue_sky_user',
-    'MESSAGE_QUEUE_PASS': 'blue_sky_user',
-    'MESSAGE_QUEUE_HOST': 'message_queue',
-    'MESSAGE_QUEUE_PORT': '5672',
-    'BLUE_SKY_SETTINGS': '/green/blue_sky_settings.yml',
+    'WORKFLOW_CONFIG_YAML':
+        os.environ.get(
+            'WORKFLOW_CONFIG_YAML',
+            '/blue_sky/config/workflow_config.yml'),
+    'MESSAGE_QUEUE_USER':
+        os.environ.get(
+            'MESSAGE_QUEUE_USER',
+            'blue_sky_user'),
+    'MESSAGE_QUEUE_PASS':
+        os.environ.get(
+            'MESSAGE_QUEUE_PASS',
+            'blue_sky_user'),
+    'MESSAGE_QUEUE_HOST':
+        os.environ.get(
+            'MESSAGE_QUEUE_HOST',
+            'message_queue'),
+    'MESSAGE_QUEUE_PORT':
+        os.environ.get(
+            'MESSAGE_QUEUE_PORT',
+            str(5672)),
+    'BLUE_SKY_SETTINGS':
+        os.environ.get(
+            'BLUE_SKY_SETTINGS',
+            '/green/blue_sky_settings.yml'),
+    'MOAB_AUTH': os.environ.get('MOAB_AUTH', ':'),
     'PATH': '/opt/conda/envs/circus/bin:/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
 }
 
@@ -50,7 +69,7 @@ def get_arbiter_list(app_name, bg, base_dir):
     bg_conda_env = 'base'
     base_env = copy.deepcopy(_BASE_ENV)
     base_env['APP_PACKAGE'] = app_name
-    base_env['PYTHONPATH'] = '/blue_green:/{}:{}:/{}/blue_sky_workflow_engine:/render_modules'.format(bg, base_dir, bg)
+    base_env['PYTHONPATH'] = '/blue_green:/blue_sky_workflow_engine:/{}:{}:/{}/blue_sky_workflow_engine:/render_modules'.format(bg, base_dir, bg)
     #    base_env['PYTHONPATH'] = '/{}:/{}/blue_sky_workflow_engine:/render_modules'.format(bg,  bg)
     django_env = dmerge(base_env, {
         'DJANGO_SETTINGS_MODULE': 'settings' # in BG dir
@@ -133,8 +152,8 @@ def get_arbiter_list(app_name, bg, base_dir):
              'moab',
              'moab_status',
              'circus_status',
-             'local',
-             'monitor',
+             #'local',
+             #'monitor',
         ]:
         arbiter_list.extend([
             {
@@ -166,8 +185,6 @@ if __name__ == '__main__':
         app_name,
         bg,
         base_dir)
-
-    print(arbiter_list)
 
     arbiter = get_arbiter(
         arbiter_list, 

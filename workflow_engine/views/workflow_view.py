@@ -43,6 +43,7 @@ from workflow_engine.models import (
     RunState,
     Executable
 )
+from workflow_engine.workflow_status import WorkflowStatus
 from workflow_engine.import_class import import_class
 from workflow_engine.views   import shared, HEADER_PAGES
 from workflow_engine.workflow_controller import WorkflowController
@@ -280,28 +281,16 @@ def create_job(workflow_node_ids, request, result):
 
 @object_json_response('workflow_node_id', WorkflowNode)
 def get_node_info(workflow_node, request, result):
-    payload = result['payload']
+    result['payload'] = node_info_payload(workflow_node)
 
-    payload['job_queue'] = workflow_node.job_queue.name
-    payload['job_queue_link'] = \
-        'job_queues?job_queue_ids=' + \
-        str(workflow_node.job_queue.id)
+
+def node_info_payload(workflow_node):
     try:
-        payload['executable'] = workflow_node.job_queue.executable.name
-        payload['executable_link'] = \
-            'executables?executable_ids=' + \
-            str(workflow_node.job_queue.executable.id)
+        executable = workflow_node.job_queue.executable.name
+        executable_link = 'executables?executable_ids={}'.format(workflow_node.job_queue.executable.id)
     except:
-        payload['executable'] = ''
-        payload['executable_link'] = ''
-    
-    payload['enqueued_object_class'] = \
-        workflow_node.short_enqueued_object_class_name()
-    payload['disabled'] = workflow_node.disabled
-    payload['overwrite_previous_job'] = workflow_node.overwrite_previous_job
-    payload['max_retries'] = workflow_node.max_retries
-    payload['batch_size'] = workflow_node.batch_size
-    payload['priority'] = workflow_node.priority
+        executable = ""
+        executable_link = ""
 
     pending_state = RunState.get_pending_state()
     queued_state = RunState.get_queued_state()
@@ -314,35 +303,80 @@ def get_node_info(workflow_node, request, result):
 
     node_jobs = workflow_node.job_set.filter(archived=False)
 
-    payload['number_of_jobs'] = node_jobs.count()
-    payload['pending'] = node_jobs.filter(
-        run_state=pending_state).count()
-    payload['queued'] = node_jobs.filter(
-        run_state=queued_state).count()
-    payload['running'] = node_jobs.filter(
-        run_state=running_state).count()
-    payload['finished_execution'] = node_jobs.filter(
-        run_state=finished_execution_state).count()
-    payload['failed_execution'] = node_jobs.filter(
-        run_state=failed_execution_state).count()
-    payload['failed'] = node_jobs.filter(
-        run_state=failed_state).count()
-    payload['success_count'] = node_jobs.filter(
-        run_state=success_state).count()
-    payload['process_killed'] = node_jobs.filter(
-        run_state=process_killed_state).count()
+    payload = {
+        'job_queue': workflow_node.job_queue.name,
+        'job_queue_link':
+            'job_queues?job_queue_ids={}'.format(workflow_node.job_queue.id),
+        'executable': executable,
+        'executable_link': executable_link,
+        'enqueued_object_class': workflow_node.short_enqueued_object_class_name(),
+        'disabled': workflow_node.disabled,
+        'overwrite_previous_job': workflow_node.overwrite_previous_job,
+        'max_retries': workflow_node.max_retries,
+        'batch_size': workflow_node.batch_size,
+        'priority': workflow_node.priority,
+        'number_of_jobs': node_jobs.count(),
+        'pending': node_jobs.filter(
+            run_state=pending_state).count(),
+        'queued': node_jobs.filter(
+            run_state=queued_state).count(),
+        'running': node_jobs.filter(
+            run_state=running_state).count(),
+        'finished_execution': node_jobs.filter(
+            run_state=finished_execution_state).count(),
+        'failed_execution': node_jobs.filter(
+            run_state=failed_execution_state).count(),
+        'failed': node_jobs.filter(
+            run_state=failed_state).count(),
+        'success_count': node_jobs.filter(
+            run_state=success_state).count(),
+        'process_killed': node_jobs.filter(
+            run_state=process_killed_state).count(),
+        'number_of_jobs_link':
+            'jobs/1/?workflow_node_ids={}'.format(workflow_node.id),
+        'pending_link': 
+            'jobs/1/?run_state_ids={}&workflow_node_ids={}'.format(
+                pending_state.id,
+                workflow_node.id
+            ),
+        'queued_link':
+            'jobs/1/?run_state_ids={}&workflow_node_ids={}'.format(
+                queued_state.id,
+                workflow_node.id
+            ),
+        'running_link':
+            'jobs/1/?run_state_ids={}&workflow_node_ids={}'.format(
+                running_state.id,
+                workflow_node.id
+            ),
+        'finished_execution_link':
+            'jobs/1/?run_state_ids={}&workflow_node_ids={}'.format(
+                finished_execution_state.id,
+                workflow_node.id
+            ),
+        'failed_execution_link':
+            'jobs/1/?run_state_ids={}&workflow_node_ids={}'.format(
+                failed_execution_state.id,
+                workflow_node.id
+            ),
+        'failed_link':
+            'jobs/1/?run_state_ids={}&workflow_node_ids={}'.format(
+                failed_state.id,
+                workflow_node.id
+            ),
+        'success_count_link':
+            'jobs/1/?run_state_ids={}&workflow_node_ids={}'.format(
+                success_state.id,
+                workflow_node.id
+            ),
+        'process_killed_link':
+            'jobs/1/?run_state_ids={}&workflow_node_ids={}'.format(
+                process_killed_state.id,
+                workflow_node.id
+            )
+    }
 
-    payload['number_of_jobs_link'] = 'jobs/1/?workflow_node_ids=' + str(workflow_node.id)
-    payload['pending_link'] = 'jobs/1/?run_state_ids=' + str(pending_state.id) + '&workflow_node_ids=' + str(workflow_node.id)
-    payload['queued_link'] = 'jobs/1/?run_state_ids=' + str(queued_state.id) + '&workflow_node_ids=' + str(workflow_node.id)
-    payload['running_link'] = 'jobs/1/?run_state_ids=' + str(running_state.id) + '&workflow_node_ids=' + str(workflow_node.id)
-    payload['finished_execution_link'] = 'jobs/1/?run_state_ids=' + str(finished_execution_state.id) + '&workflow_node_ids=' + str(workflow_node.id)
-    payload['failed_execution_link'] = 'jobs/1/?run_state_ids=' + str(failed_execution_state.id) + '&workflow_node_ids=' + str(workflow_node.id)
-    payload['failed_link'] = 'jobs/1/?run_state_ids=' + str(failed_state.id) + '&workflow_node_ids=' + str(workflow_node.id)
-    payload['success_count_link'] = 'jobs/1/?run_state_ids=' + str(success_state.id) + '&workflow_node_ids=' + str(workflow_node.id)
-    payload['process_killed_link'] = 'jobs/1/?run_state_ids=' + str(process_killed_state.id) + '&workflow_node_ids=' + str(workflow_node.id)
-
-    result['payload'] = payload
+    return payload
 
 
 @object_json_response('workflow_node_id', WorkflowNode)
@@ -431,24 +465,14 @@ def workflow_summary(workflow_name):
     
     return summary
 
-@object_json_all_response(WorkflowNode)
-def monitor_workflow(nodes, request, result):
-    result['nodes'] = []
-    result['edges'] = []
+def monitor_workflow_data(request):
+    ws = WorkflowStatus(['em_2d_montage', 'rough_align_em_2d'])
 
-    for n in nodes:
-        result['nodes'].append(str(n))
+    return HttpResponse(
+        ws.status_as_json(),
+        content_type='application/json'
+    )
 
-        for s in n.sources.filter(archived=False):
-            result['edges'].append({
-                'source': str(s),
-                'target': str(n)
-            })
-
-    summary = workflow_summary(
-        nodes[0].workflow.name)
-
-    result.update(summary)
 
 def to_key(s):
     return s.lower().replace(' ', '_')

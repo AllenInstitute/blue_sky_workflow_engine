@@ -162,7 +162,7 @@ def get_job_show_data(job_object, request, result):
     result['payload'] = shared.order_payload([
         ('id', job_object.id),
         ('enqueued_object_id', job_object.enqueued_object_id),
-        ('enqueued_object_class', job_object.get_enqueued_object_class_type()),
+        ('enqueued_object_class', str(job_object.enqueued_object_type)),
         ('enqueued_object', job_object.get_enqueued_object_display()),
         ('run state', job_object.run_state.name),
         ('workflow', job_object.workflow_node.workflow.name),

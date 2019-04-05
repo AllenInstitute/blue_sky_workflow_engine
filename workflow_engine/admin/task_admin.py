@@ -13,7 +13,7 @@ class TaskAdmin(admin.ModelAdmin):
         'start_run_time',
         'end_run_time',
         'run_state',
-        )
+    )
     search_fields = (
         'id',
         'enqueued_task_object_id',
@@ -30,6 +30,15 @@ class TaskAdmin(admin.ModelAdmin):
         'job__workflow_node',
         'run_state',
         'archived',
+    )
+
+    def change_view(self, request, object_id, extra_context=None):
+        self.exclude = (
+            'job',  # not excluding job hangs the task admin change view
+        )
+
+        return super(TaskAdmin, self).change_view(
+            request, object_id, extra_context
         )
 
     def enqueued_task_object_link(self, task_object):
@@ -41,6 +50,7 @@ class TaskAdmin(admin.ModelAdmin):
             str(enqueued_object)))
 
     enqueued_task_object_link.short_description = "Enqueued Object"
+
 
     def workflow_link(self, job_object):
         return mark_safe('<a href="{}">{}</a>'.format(

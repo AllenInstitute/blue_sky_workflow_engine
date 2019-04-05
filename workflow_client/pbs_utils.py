@@ -41,7 +41,7 @@ class PbsUtils(object):
         self.templates = 'templates'
         self.scripts = {
             'spark_moab': 'spark_submit_cluster.pbs',
-            'spark': 'spark_submit_cluster.pbs',
+            # 'spark': 'spark_submit_cluster.pbs',
             'circus': 'script_template.pbs',
             'pbs': 'script_template.pbs',
             'default': 'script_template.pbs'

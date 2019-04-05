@@ -13,16 +13,11 @@
 
 set -x # echo on
 
-trap "touch term.out; exit" TERM
+trap "echo 127 > exit_code.txt; exit" TERM
 trap "touch exit.out" EXIT
 
-#
-# submit using qsub -t 0-4 mindspark.qsub
-# see: https://wikis.nyu.edu/display/NYUHPC/Tutorial+-+Submitting+a+job+using+qsub
-#
 module load java
 
-export SPARK_HOME=/allen/programs/celltypes/workgroups/em-connectomics/gayathrim/nc-em2/spark/
 export SPARK_LOCAL_DIRS="/scratch/capacity/${MOAB_JOBARRAYINDEX}/"
 export TASK_DIR=`pwd`
 export SPARK_CONF_DIR=${TASK_DIR}/spark_conf
@@ -34,6 +29,7 @@ export SPARK_CONF_DIR=${TASK_DIR}/spark_conf
   endfor
 %}
 
+rm -rf host_*
 
 if [[ ${MOAB_JOBARRAYINDEX} == 0 ]]
 then
@@ -44,6 +40,7 @@ then
 
   echo ${SPARK_MASTER_HOST} >> ${SPARK_CONF_DIR}/slaves
   echo "export SPARK_MASTER_HOST=${SPARK_MASTER_HOST}" >> ${SPARK_CONF_DIR}/spark-env.sh
+  echo "export MASTER=spark://${SPARK_MASTER_HOST}:7077" >> ${SPARK_CONF_DIR}/spark-env.sh
   echo "export JAVA_HOME=${JAVA_HOME}" >> ${SPARK_CONF_DIR}/spark-env.sh
   echo "export SPARK_LOG_DIR=${TASK_DIR}" >> ${SPARK_CONF_DIR}/spark-env.sh
 else
@@ -52,7 +49,7 @@ else
 fi
 
 export HOSTDIR=host_${MOAB_JOBARRAYINDEX}
-mkdir ${HOSTDIR}
+mkdir -p ${HOSTDIR}
 hostname >> ${HOSTDIR}/nodename
 
 sleep 10
@@ -68,21 +65,25 @@ then
   echo ${SPARK_MASTER_HOST} > ${MASTER_FILE}
   echo SPARK_MASTER_HOST ${SPARK_MASTER_HOST}
 
-  ${SPARK_HOME}/sbin/start-master.sh 2>&1 \
-    > master.log
-
+  ${SPARK_HOME}/sbin/start-master.sh 2>&1 > master.log
   ${SPARK_HOME}/sbin/start-slave.sh spark://${SPARK_MASTER_HOST}:7077 2>&1 \
     > worker.log
 
   sleep 10
 
-  MASTER=spark://${SPARK_MASTER_HOST}:7077 ${SPARK_HOME}/bin/spark-submit \
-    ${SPARK_HOME}/examples/src/main/python/pi.py 1000 \
-    > ../output_2.txt
-  cp ../input_2.json ../output_2.json
+  {{ executable.executable_path }} \
+  --master spark://${SPARK_MASTER_HOST}:7077 \
+  {{ executable.static_arguments }} \
+  --class ${sparkclass} ${sparkjar} \
+  {{ task.get_task_arguments() }}
+
+  echo $? > exit_code.txt
+  echo '{ "exit_code": $?, "pairCount": 0 }' > {{ task.output_file }}
+
   ${SPARK_HOME}/sbin/stop-all.sh
 else
-  ${SPARK_HOME}/sbin/start-slave.sh spark://${SPARK_MASTER_HOST}:7077 2>&1 > worker_${MOAB_JOBARRAYINDEX}.log
-fi
+  ${SPARK_HOME}/sbin/start-slave.sh spark://${SPARK_MASTER_HOST}:7077 2>&1 \
+    > worker_${MOAB_JOBARRAYINDEX}.log
 
-sleep infinity
+  sleep infinity
+fi

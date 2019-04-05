@@ -41,6 +41,7 @@ import traceback
 import logging
 import simplejson as json
 from celery import chain
+from celery.exceptions import SoftTimeLimitExceeded
 from workflow_engine.celery.signatures import (
     enqueue_next_queue_signature,
     kill_moab_task_signature,
@@ -56,7 +57,6 @@ from workflow_client.tasks.circus_signatures import (
     submit_task_signature,
     kill_task_signature
 )
-from workflow_engine.workflow_controller import WorkflowController 
 
 
 class ExecutionStrategy(base_strategy.BaseStrategy):
@@ -66,23 +66,65 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
     # override if needed
     # get the data for the input file
     def get_input(self, enqueued_object, storage_directory, task):
+        '''Override to populate and write input.
+
+        Parameters
+        ----------
+        enqueued_object : Enqueueable
+            primary database object to be manipulated
+        storage_directory : string
+            where to store input files
+        task : Task
+            to be run
+
+        Returns
+        -------
+        dict
+            strategy-specific input
+        '''
         input_data = {}
         input_data['input'] = str(enqueued_object)
 
         return input_data
 
-    # TODO: deprecate for task.get_executable()
-    def get_executable(self, task):
-        return task.job.workflow_node.job_queue.executable
-
     def get_remote_queue(self, task):
-        return self.get_executable(task).remote_queue
+        '''helper method to get the remote blue_sky worker queue name
+
+        Parameters
+        ----------
+        task : Task
+            used to access the executable
+
+        Returns
+        -------
+        string
+            well-known string used to choose which worker to submit task to
+        '''
+        return task.get_executable().remote_queue
+
+    def get_task_arguments(self, task, write_files=False):
+        '''Override to generate command-line arguments at run time.
+
+        Parameters
+        ----------
+        task : Task
+            to be run
+        write_files : boolean
+            generate files as a side effect
+
+        Returns
+        -------
+        list or None
+            argument strings
+        '''
+        return None
 
     # override if needed
-    # return the full executable path with all arguments and parameters
     def get_full_executable(self, task):
+        '''return the command with all arguments and parameters
+        '''
         try:
-            executable = self.get_executable(task)
+            executable = task.get_executable()
             ExecutionStrategy._log.info(
                 'executable %s' % (str(executable)))
         except Exception as e:
@@ -92,6 +134,8 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 
         arguments = executable.static_arguments
         ExecutionStrategy._log.info('static arguments %s' % (str(arguments)))
+
+        task_arguments = self.get_task_arguments(task)
 
         input_file = self.get_input_file(task)
         ExecutionStrategy._log.info('input file %s' % (str(input_file)))
@@ -104,11 +148,12 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
         ExecutionStrategy._log.info(
             'enqueued_object: %s',
             str(enqueued_object))
-        
-        self.create_input_file(input_file,
-                               enqueued_object,
-                               storage_dir,
-                               task)
+
+        if input_file is not None:
+            self.create_input_file(input_file,
+                                   enqueued_object,
+                                   storage_dir,
+                                   task)
 
         output_file = self.get_output_file(task)
 
@@ -123,14 +168,17 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
         else:
             executable_elements.append(executable.executable_path)
 
-        if arguments != None:
+        if arguments is not None:
             executable_elements.append(arguments)
 
-        if input_file != None:
+        if task_arguments is not None:
+            executable_elements.extend(task_arguments)
+
+        if input_file is not None:
             executable_elements.append('--input_json')
             executable_elements.append(input_file)
 
-        if output_file != None:
+        if output_file is not None:
             executable_elements.append('--output_json')
             executable_elements.append(output_file)
 
@@ -262,47 +310,65 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
                 queue_name = settings.LOCAL_MESSAGE_QUEUE_NAME
             elif queue_name == 'circus':
                 queue_name = 'circus'
+            else:
+                ExecutionStrategy._log.warn('Unknown queue: {}'.format(queue_name))
 
             if task.pbs_task():
                 submit_moab_task_signature.delay(task.id)
             else:
                 if queue_name == 'circus':
                     executable = task.get_executable()
+
                     env = {
                         k_v[0]: k_v[1] for k_v in (
-                            pair.split('=', 1) for pair in executable.environment_vars())
-                    }
-                    chain(
-                        submit_task_signature.clone((
-                            "task_{}".format(task.id),
-                            self.get_pbs_file(task),
-                            executable.executable_path,
-                            self.get_input_file(task),
-                            self.get_output_file(task),
-                            executable.static_arguments,
-                            self.get_or_create_task_storage_directory(task),
-                            env),
-                        ).set(
-                            time_limit=11
-                        ),
-                        process_pbs_id_signature.clone(
-                            (task.id, True)
-                        ).set(
-                            time_limit=11
-                        ),
-                        process_running_signature.clone(
-                            (task.id,)
-                        ).set(
-                            time_limit=11,
-                            immutable=True
+                            pair.split('=', 1)
+                            for pair in executable.environment_vars()
                         )
-                    ).apply_async(
-                        time_limit=11
-                        #link_error=failed_execution_handler_signature.clone(
-                        #    (task.id,)
-                        #)
-                    )
+                    }
 
+                    env.update({
+                        'BLUE_SKY_JOB_QUEUE':
+                            task.job.workflow_node.job_queue.name.replace(
+                                ' ', '\\ '
+                            )
+                    })
+
+                    try:
+                        chain(
+                            submit_task_signature.clone((
+                                "task_{}".format(task.id),
+                                self.get_pbs_file(task),
+                                executable.executable_path,
+                                self.get_input_file(task),
+                                self.get_output_file(task),
+                                executable.static_arguments,
+                                self.get_or_create_task_storage_directory(task),
+                                env),
+                            ).set(
+                                time_limit=11
+                            ),
+                            process_pbs_id_signature.clone(
+                                (task.id, True)
+                            ).set(
+                                time_limit=11
+                            ),
+                            process_running_signature.clone(
+                                (task.id,)
+                            ).set(
+                                time_limit=11,
+                                immutable=True
+                            )
+                        ).apply_async(
+                            time_limit=11,
+                            link_error=failed_execution_handler_signature.clone(
+                                (task.id,)
+                            )
+                        )
+                    except SoftTimeLimitExceeded:
+                        ExecutionStrategy._log.warning('Submit Task Timeout')
+
+    def get_dynamic_arguments(self, task):
+        return []
 
     # this method creates the input file
     # Do not override
@@ -319,7 +385,7 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 
         with open(input_file, 'w') as in_file:
             json.dump(input_data, in_file, indent=2)
-        #os.chmod(input_file, 0o664)
+        os.chmod(input_file, 0o664)
 
     # Do not override
     # TODO: this seems too rigid
@@ -400,15 +466,15 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
     def read_output(self, task):
         output_file = self.get_output_file(task)
 
-        if not os.path.isfile(output_file):
-            raise Exception(
-                'Expected output file to be created at: ' + \
-                str(output_file) + ' but it was not')
-
-        with open(output_file) as json_data:
-            results = json.load(json_data)
+        if output_file is None:
+            results = {}
+        else:
+            if not os.path.isfile(output_file):
+                raise Exception(
+                    'Expected output file to be created at: ' + \
+                    str(output_file) + ' but it was not')
+    
+            with open(output_file) as json_data:
+                results = json.load(json_data)
 
         self.on_finishing(task.enqueued_task_object, results, task)
-
-
-from workflow_engine.workflow_controller import WorkflowController

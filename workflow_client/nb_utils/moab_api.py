@@ -109,7 +109,7 @@ def moab_url(
 
 
 def moab_auth():
-    cred = os.environ.get('MOAB_AUTH', 'user:pass')
+    cred = os.environ.get('MOAB_AUTH', ':')
 
     if cred == ':':
         raise Exception('credentials not set')
@@ -218,11 +218,15 @@ def query_moab_state(state_dicts):
         (job['name'],
          job['customName'],
          job['states']['state'],
+         job['isActive'],
          job['credentials']['user'],
          job['completionCode']) for job in moab_dict],
         columns=[
-            'moab_id', 'task_name', 'moab_state', 'user', 'exit_code']
+            'moab_id', 'task_name', 'moab_state', 'active', 'user', 'exit_code']
     )
+
+    active_idx = moab_state_df.loc[moab_state_df.active == True].index
+    moab_state_df.loc[active_idx,['moab_state']] = 'Running'
 
     return moab_state_df
 

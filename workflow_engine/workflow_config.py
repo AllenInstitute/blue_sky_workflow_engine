@@ -215,7 +215,6 @@ class WorkflowConfig:
                         archived=False,
                         defaults={
                             'job_strategy_class': str(node['class']),
-                            'enqueued_object_class': node['enqueued_class'],
                             'enqueued_object_type': eo_content_type,
                             'executable': executables[node['executable']]})
     

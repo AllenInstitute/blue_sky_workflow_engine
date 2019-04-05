@@ -75,13 +75,22 @@ class BaseStrategy(object):
     # override if needed
     def get_storage_directory(self, base_storage_directory, job):
         enqueued_object = job.enqueued_object
+
+        try:
+            dirs = [
+                enqueued_object.get_storage_directory(base_storage_directory)
+            ]
+        except:
+            dirs = [
+                base_storage_directory,
+                str(job.enqueued_object_type).replace(' ', '_'),
+                str(job.enqueued_object_id)
+            ]
+
         BaseStrategy._log.info('get_storage_directory: %s, %s:' % (
             base_storage_directory, str(enqueued_object.id)))
-        return os.path.join(
-            base_storage_directory,
-            str(job.enqueued_object_type).replace(
-                ' ', '_'),
-            str(job.enqueued_object_id))
+
+        return os.path.join(*dirs)
 
     # override if needed
     # this is called when a job is transitioning from a previous queue

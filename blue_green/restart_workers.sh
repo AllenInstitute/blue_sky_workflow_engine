@@ -7,14 +7,14 @@ pkill -9 -f "beat"
 pkill -9 -f "manage"
 pkill -9 -f "notebook"
 
-export MOAB_AUTH='svc_vol_assem:ToC$m3sc'
+# make sure MOAB_AUTH is defined
 
 export BG=green
 export APP=$1
 export BG_CONDA_ENV=base
 export BG_CIRCUS_ENV=circus
 export BASE_DIR=/${BG}/$APP
-export PYTHONPATH=/blue_green:${BASE_DIR}:/${BG}/blue_sky_workflow_engine
+export PYTHONPATH=/blue_green:${BASE_DIR}:/${BG}/blue_sky_workflow_engine:$PYTHONPATH
 
 rm ${BASE_DIR}/logs/ingest.log
 rm ${BASE_DIR}/logs/ui.log

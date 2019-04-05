@@ -46,34 +46,68 @@ _logger = logging.getLogger('workflow_engine.models.job')
 
 class Job(models.Model):
     enqueued_object_type = models.ForeignKey(
-        ContentType, default=None, null=True)
-    enqueued_object_id = models.IntegerField(null=True)
+        ContentType,
+        default=None,
+        null=True,
+        blank=True
+    )
+    enqueued_object_id = models.IntegerField(
+        null=True,
+        blank=True
+    )
     enqueued_object = GenericForeignKey(
         'enqueued_object_type',
-        'enqueued_object_id')
+        'enqueued_object_id'
+    )
     workflow_node = models.ForeignKey(
-        'workflow_engine.WorkflowNode')
+        'workflow_engine.WorkflowNode'
+    )
     run_state = models.ForeignKey(
-        'workflow_engine.RunState')
-    duration = models.DurationField(null=True)
-    start_run_time = models.DateTimeField(null=True)
-    end_run_time = models.DateTimeField(null=True)
-    error_message = models.TextField(null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    priority = models.IntegerField(default=50)
-    archived = models.NullBooleanField(default=False)
-    tags = models.CharField(max_length=255, null=True)
+        'workflow_engine.RunState'
+    )
+    duration = models.DurationField(
+        null=True
+    )
+    start_run_time = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+    end_run_time = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+    error_message = models.TextField(
+        null=True,
+        blank=True
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+    priority = models.IntegerField(
+        default=50
+    )
+    archived = models.NullBooleanField(
+        default=False
+    )
+    tags = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True
+    )
 
     def __str__(self):
         try:
-            enqueued_object_name = str(self.enqueued_object)
+            return "{} {} job {}".format(
+                str(self.workflow_node),
+                str(self.enqueued_object),
+                self.pk
+            )
         except:
-            enqueued_object_name = "None"
+            return "job {}".format(self.pk)
 
-        return "%s %s job %d" % (str(self.workflow_node),
-                                 enqueued_object_name,
-                                 self.id)
 
     def archive_record(self):
         self.archived = True
@@ -205,7 +239,7 @@ class Job(models.Model):
 
     def get_start_run_time(self):
         result = None
-        if self.start_run_time != None:
+        if self.start_run_time is not None:
             result = timezone.localtime(
                 self.start_run_time).strftime('%m/%d/%Y %I:%M:%S')
 
@@ -213,7 +247,7 @@ class Job(models.Model):
 
     def get_end_run_time(self):
         result = None
-        if self.end_run_time != None:
+        if self.end_run_time is not None:
             result = timezone.localtime(
                 self.end_run_time).strftime('%m/%d/%Y %I:%M:%S')
 

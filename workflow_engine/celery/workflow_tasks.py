@@ -109,6 +109,9 @@ def run_workflow_node_jobs_by_id(self, workflow_node_id):
     except SoftTimeLimitExceeded:
         report_exception('Soft Time Limit Exceeded')
         return 'timeout'
+    except Exception as e:
+        _log.error(str(e) + ' - ' + str(traceback.format_exc()))
+        return 'error'
 
     return 'done'
 

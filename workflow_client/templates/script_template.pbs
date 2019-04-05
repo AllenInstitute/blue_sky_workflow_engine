@@ -22,4 +22,10 @@ umask 002
 source activate {{ settings.PBS_CONDA_ENV }}
 
 {{ task.full_executable }}
+#{{ executable.executable_path }} \
+#  {{ executable.static_arguments }} \
+#  --input_json \
+#  {{ task.input_file }}
+#  --output_json \
+#  {{ task.output_file }}
 

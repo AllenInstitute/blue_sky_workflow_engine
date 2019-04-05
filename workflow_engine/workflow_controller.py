@@ -111,6 +111,9 @@ class WorkflowController(object):
         for node in source_node.get_children():
             strategy = node.get_strategy()
             enqueued_objects = strategy.get_objects_for_queue(source_job)
+            WorkflowController._logger.info("Found {} enqueued objects".format(
+                len(enqueued_objects)
+            ))
 
             for enqueued_object in enqueued_objects:
                 if strategy.can_transition(enqueued_object, source_node):
@@ -201,15 +204,11 @@ class WorkflowController(object):
         WorkflowController._logger.info('run')
         try:
             job.set_queued_state()
-
             job.set_start_run_time()
             job.clear_error_message()
-
             job.prep_job()
 
             WorkflowController.create_tasks(job)
-
-            # job.remove_tasks(reused_tasks)
 
             for task in job.get_tasks():
                 task.run_task()

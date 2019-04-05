@@ -138,11 +138,18 @@ class JobAdmin(admin.ModelAdmin):
     workflow_node_link.short_description = "Workflow Node"
 
     def enqueued_object_link(self, job_object):
-        enqueued_object = job_object.enqueued_object
-        clz = enqueued_object._meta.db_table
-        return mark_safe('<a href="{}">{}</a>'.format(
-            reverse("admin:{}_change".format(clz),
-                    args=(enqueued_object.id,)),
-            str(enqueued_object)))
+        try:
+            enqueued_object_type = job_object.enqueued_object_type
+            enqueued_object = enqueued_object_type.get_object_for_this_type(
+                pk=job_object.enqueued_object_id
+            )
+            clz = enqueued_object._meta.db_table
+
+            return mark_safe('<a href="{}">{}</a>'.format(
+                reverse("admin:{}_change".format(clz),
+                        args=(enqueued_object.id,)),
+                str(enqueued_object)))
+        except:
+            return '-'
 
     enqueued_object_link.short_description = "Enqueued Object"

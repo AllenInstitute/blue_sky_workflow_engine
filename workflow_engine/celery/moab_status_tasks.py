@@ -49,7 +49,6 @@ from celery.exceptions import SoftTimeLimitExceeded
 import logging
 import celery
 from celery.canvas import group
-import pandas as pd
 import itertools as it
 
 
@@ -117,10 +116,6 @@ def check_moab_status(self):
 
         _log.info('combined_dataframe' + str(combined_workflow_moab_dataframe))
 
-#         grp = group(list(pd.concat(
-#             sig.clone((combined_workflow_moab_dataframe.loc[
-#                 combined_workflow_moab_dataframe[col] == True]['task_id'],))
-#             for (col,sig) in result_actions.items())))
         grp = combined_df_response_group(
             combined_workflow_moab_dataframe
         )
