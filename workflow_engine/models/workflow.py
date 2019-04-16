@@ -34,29 +34,23 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 from django.db import models
+from workflow_engine.mixins import Archivable, Nameable, Timestamped
 import logging
 _model_logger = logging.getLogger('workflow_engine.models')
 
 
-class Workflow(models.Model):
-    name = models.CharField(max_length=255)
-    description = models.CharField(max_length=255, null=True)
+class Workflow(Archivable, Nameable, Timestamped, models.Model):
     ingest_strategy_class = models.CharField(max_length=255, null=True)
     disabled = models.BooleanField(default=False)
     use_pbs = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    archived = models.NullBooleanField(default=False)
 
-
-    def __str__(self):
-        return self.name
-
+    # TODO: deprecate, different graph model
     def get_head_workflow_nodes(self):
         return self.workflownode_set.filter(
-            sources=None,
-            archived=False)
+            sources=None
+        )
 
+    # TODO: move this to the view
     def update(self, name, description, current_disabled):
         prev_disabled = self.disabled
     
@@ -69,7 +63,3 @@ class Workflow(models.Model):
         self.save()
 
         return prev_disabled
-
-    def archive(self):
-        self.archived = True
-        self.save()

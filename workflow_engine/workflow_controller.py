@@ -47,7 +47,7 @@ from builtins import classmethod
 
 
 class WorkflowController(object):
-    _logger = logging.getLogger('workflow_engine.workflow_controller')
+    _log = logging.getLogger('workflow_engine.workflow_controller')
 
     @classmethod
     def run_workflow_nodes(cls, workflow_object):
@@ -107,20 +107,31 @@ class WorkflowController(object):
     def enqueue_next_queue(cls, source_job):
         source_node = source_job.workflow_node
 
-        # TODO: factor out this loop body
-        for node in source_node.get_children():
-            strategy = node.get_strategy()
-            enqueued_objects = strategy.get_objects_for_queue(source_job)
-            WorkflowController._logger.info("Found {} enqueued objects".format(
-                len(enqueued_objects)
-            ))
+        for target_node in source_node.get_children():
+            cls.enqueue_in_target_node(source_node, target_node, source_job)
 
-            for enqueued_object in enqueued_objects:
-                if strategy.can_transition(enqueued_object, source_node):
-                    WorkflowController.start_workflow_helper(
-                        node,
-                        enqueued_object,
-                        node.overwrite_previous_job)
+    @classmethod
+    def enqueue_in_target_node(cls, source_node, target_node, source_job):
+        try:
+            strategy = target_node.get_strategy()
+        except:
+            WorkflowController._log.error(
+                'Error loading strategy for {}'.format(
+                    target_node
+                ))
+            return
+
+        enqueued_objects = strategy.get_objects_for_queue(source_job)
+        WorkflowController._log.info("Found {} enqueued objects".format(
+            len(enqueued_objects)
+        ))
+
+        for enqueued_object in enqueued_objects:
+            if strategy.can_transition(enqueued_object, source_node):
+                WorkflowController.start_workflow_helper(
+                    target_node,
+                    enqueued_object,
+                    target_node.overwrite_previous_job)
 
     @classmethod
     def set_job_for_run_if_valid(cls, job):
@@ -129,7 +140,7 @@ class WorkflowController(object):
 
     @classmethod
     def set_job_for_run(cls, job):
-        WorkflowController._logger.info('set for run')
+        WorkflowController._log.info('set for run')
         job.set_pending_state()
         run_workflow_node_jobs_signature.delay(job.workflow_node.id)
 
@@ -147,7 +158,7 @@ class WorkflowController(object):
             job.kill()
             run_workflow_node_jobs_signature.delay(job.workflow_node.id)
         except ObjectDoesNotExist:
-            WorkflowController._logger.warning(
+            WorkflowController._log.warning(
                 'Tried to kill job %d which does not exist',
                 job_id)
 
@@ -193,7 +204,7 @@ class WorkflowController(object):
                 except Exception as e:
                     raise(e)
 
-            WorkflowController._logger.info(
+            WorkflowController._log.info(
                 'creating task with enqueued type: {}'.format( 
                     enqueued_task_object_type
                 )
@@ -201,7 +212,7 @@ class WorkflowController(object):
 
     @classmethod
     def job_run(cls, job):
-        WorkflowController._logger.info('run')
+        WorkflowController._log.info('run')
         try:
             job.set_queued_state()
             job.set_start_run_time()
@@ -216,7 +227,7 @@ class WorkflowController(object):
         except Exception as e:
             job.set_error_message(
                 str(e) + ' - ' + str(traceback.format_exc()), None)
-            WorkflowController._logger.info(
+            WorkflowController._log.info(
                 "Job exception: %s" % (job.error_message))
             job.set_failed_state()
             run_workflow_node_jobs_signature.delay(job.workflow_node.id)
@@ -229,7 +240,7 @@ class WorkflowController(object):
         workflow = Workflow.objects.get(
             name=workflow_name,
             archived=False)
-        WorkflowController._logger.info(
+        WorkflowController._log.info(
             "starting %s at %s" % (
                 workflow_name, str(start_node_name)))
 
@@ -325,7 +336,7 @@ class WorkflowController(object):
             reuse_job
         )
 
-        WorkflowController._logger.info(
+        WorkflowController._log.info(
             "Start workflow job state: %s" % (str(job.run_state)))
 
         run_workflow_node_jobs_signature.delay(job.workflow_node.id)

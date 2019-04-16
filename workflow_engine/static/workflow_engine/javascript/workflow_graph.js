@@ -56,10 +56,64 @@ function color_nodes(
 
         node_number_string = '(' + totals[node_id] + ') ' + pending_queued_running[node_id] + ' / ' + batch_size[node_id]
         cy_nodes[i].data(
+            'job_queue_name',
+            job_queue_name
+        )
+        cy_nodes[i].data(
+            'node_id',
+            node_id
+        )
+        cy_nodes[i].data(
             'label',
             job_queue_name + '\n' + node_number_string
         )
     }
+}
+
+function node_summary_tables(
+    job_queues, batch_size, run_states, counts, pending_queued_running, totals) {
+
+    var reverse_run_states = {};
+    $.each(run_states, function(run_state_id, run_state_name) {
+        reverse_run_states[run_state_name] = run_state_id;
+    });
+
+    var run_state_order = [
+        "PENDING",
+        "QUEUED",
+        "RUNNING",
+        "FINISHED_EXECUTION",
+        "FAILED_EXECUTION",
+        "FAILED",
+        "SUCCESS",
+        "PROCESS_KILLED"
+    ];
+
+    $('div.info').empty();
+
+    $.each(job_queues, function(node_id, node_name) {
+        var node_tbl = $('<table>').attr('border', 1).width('300px');
+        node_tbl.data('node_id', node_id.toString());
+
+        var tr = $('<tr>').append(
+            $('<td>').text(node_name).attr('colspan', 2)
+        );
+        node_tbl.append(tr);
+
+        $.each(run_state_order, function(run_state_order, run_state_name) {
+            var run_state_index = reverse_run_states[run_state_name];
+            var count_index = '[' + node_id + ',' + run_state_index + ']';
+            var tr = $('<tr>').append(
+                $('<td>').text(run_state_name)
+            ).append(
+                $('<td>').text(counts[count_index])
+            );
+            node_tbl.append(tr);
+        });
+
+        node_tbl.addClass('node_info').css({'float': 'left'}).hide();
+        $('div.info').append(node_tbl);
+    });
 }
 
 function draw_workflow(workflow_nodes, workflow_edges) {
@@ -76,7 +130,7 @@ var cy = window.cy = cytoscape({
     spacingFactor: 0.75
   },
 
-  zoom: 1,
+  zoom: 0.5,
 
   style: [
     {
@@ -93,6 +147,13 @@ var cy = window.cy = cytoscape({
         //'text-max-width': 50,
         'width': 60,
         'height': 60,
+      }
+    },
+
+    {
+      selector: '.focused',
+      style: {
+        'border-color': 'red',
       }
     },
 
@@ -158,6 +219,25 @@ var cy = window.cy = cytoscape({
             } }),
   },
 });
+
+cy.on('click', 'node', function(e) {
+    tgt = e.cyTarget
+    
+    if (tgt === cy) {
+    } else {
+        node_id = e.target.data()['node_id'];
+        // url = 'http://ibs-timf-ux1.corp.alleninstitute.org:9001/admin/workflow_engine/job/?run_state__name=PROCESS_KILLED&workflow_node__job_queue__name=Load+Z+Mapping';
+        $('table.node_info').each(function(i, tbl) {
+           tbl = $(tbl)
+           if (tbl.data('node_id') == node_id) {
+               tbl.show();
+           } else {
+               tbl.hide();
+           }
+        });
+    }
+});
+
 }
 
 
@@ -173,6 +253,14 @@ function render_workflow_graph() {
     .then((response) => {
         response.json().then(obj => {
             draw_workflow(obj['job_queue_name'], obj['edges']);
+            node_summary_tables(
+                    obj['job_queue_name'],
+                    obj['batch_size'],
+                    obj['run_state_name'],
+                    obj['count'],
+                    obj['pending_queued_running'],
+                    obj['total']
+                );
             color_nodes(
                 obj['job_queue_name'],
                 obj['batch_size'],
@@ -189,5 +277,5 @@ function render_workflow_graph() {
 var $ = django.jQuery;
 $(document).ready(function(){
     render_workflow_graph();
-    setInterval(render_workflow_graph, 5000);
+    //setInterval(render_workflow_graph, 5000);
 })

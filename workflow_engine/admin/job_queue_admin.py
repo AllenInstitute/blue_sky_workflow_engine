@@ -25,6 +25,8 @@ class JobQueueAdmin(admin.ModelAdmin):
     actions = []
     inlines = []
 
+    def get_queryset(self, request):
+        return self.model.all_objects.get_queryset()
 
     def executable_link(self, job_queue_object):
         return mark_safe('<a href="{}">{}</a>'.format(

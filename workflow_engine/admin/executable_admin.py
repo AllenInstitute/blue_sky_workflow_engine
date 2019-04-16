@@ -21,3 +21,5 @@ class ExecutableAdmin(admin.ModelAdmin):
     actions = []
     inlines = (ConfigurationInline,)
 
+    def get_queryset(self, request):
+        return self.model.all_objects.get_queryset()

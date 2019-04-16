@@ -34,6 +34,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 from django.db import models
+from workflow_engine.mixins import Archivable, Tagable, Timestamped
 from django.utils import timezone
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -44,7 +45,7 @@ import logging
 _logger = logging.getLogger('workflow_engine.models.job')
 
 
-class Job(models.Model):
+class Job(Archivable, Tagable, Timestamped, models.Model):
     enqueued_object_type = models.ForeignKey(
         ContentType,
         default=None,
@@ -80,22 +81,8 @@ class Job(models.Model):
         null=True,
         blank=True
     )
-    created_at = models.DateTimeField(
-        auto_now_add=True
-    )
-    updated_at = models.DateTimeField(
-        auto_now=True
-    )
     priority = models.IntegerField(
         default=50
-    )
-    archived = models.NullBooleanField(
-        default=False
-    )
-    tags = models.CharField(
-        max_length=255,
-        null=True,
-        blank=True
     )
 
     def __str__(self):
@@ -107,11 +94,6 @@ class Job(models.Model):
             )
         except:
             return "job {}".format(self.pk)
-
-
-    def archive_record(self):
-        self.archived = True
-        self.save()
 
     def get_created_at(self):
         return timezone.localtime(self.created_at).strftime(
@@ -213,6 +195,7 @@ class Job(models.Model):
     def get_strategy(self):
         return self.workflow_node.get_strategy()
 
+    # TODO: deprecate/remove - reuse tasks doesn't do this anymore
     def remove_tasks(self, resused_tasks):
         # strategy = self.get_strategy()
         for task in self.get_tasks():
@@ -220,11 +203,13 @@ class Job(models.Model):
                 task.archived = False
                 task.save()
 
+    # TODO: deprecate for archive object manager
     def get_tasks(self):
-        return self.task_set.filter(archived=False)
+        return self.task_set.all()
 
+    # TODO: deprecate for archive object manager
     def tasks(self):
-        return self.task_set.filter(archived=False)
+        return self.task_set.all()
 
     def task_ids(self):
         return [t.id for t in self.tasks()]

@@ -309,7 +309,9 @@ def node_info_payload(workflow_node):
             'job_queues?job_queue_ids={}'.format(workflow_node.job_queue.id),
         'executable': executable,
         'executable_link': executable_link,
-        'enqueued_object_class': workflow_node.short_enqueued_object_class_name(),
+        'enqueued_object_class':
+            workflow_node.short_enqueued_object_class_name(),
+            #workflow_node.job_queue.job_strategy_class.split('.')[-1],
         'disabled': workflow_node.disabled,
         'overwrite_previous_job': workflow_node.overwrite_previous_job,
         'max_retries': workflow_node.max_retries,

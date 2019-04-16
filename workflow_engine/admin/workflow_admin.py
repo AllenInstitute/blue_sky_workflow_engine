@@ -16,6 +16,9 @@ class WorkflowAdmin(admin.ModelAdmin):
     actions = []
     inlines = []
 
+    def get_queryset(self, request):
+        return self.model.all_objects.get_queryset()
+
     def changelist_view(self, request, extra_context=None):
         response = super().changelist_view(request, extra_context)
 

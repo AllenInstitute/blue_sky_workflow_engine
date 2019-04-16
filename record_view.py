@@ -247,7 +247,7 @@ def delete_record(record, result, record_type, data):
             job_queue.delete()
     elif record_type == 'job':
         job = record
-        job.archive_record()
+        job.archive()
 
 
 def check_unique(request):

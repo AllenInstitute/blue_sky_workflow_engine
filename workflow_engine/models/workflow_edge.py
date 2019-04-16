@@ -34,10 +34,11 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 from django.db import models
+from workflow_engine.mixins import Archivable, Timestamped
 import logging
 
 
-class WorkflowEdge(models.Model):
+class WorkflowEdge(Archivable, Timestamped, models.Model):
     _log = logging.getLogger('workflow_engine.models.workflow_edge')
 
     workflow = models.ForeignKey(
@@ -51,13 +52,6 @@ class WorkflowEdge(models.Model):
         related_name='%(class)s_sink',
         null=True, blank=True)
     disabled = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    archived = models.NullBooleanField(default=False)
 
     def __str__(self):
         return "{} -> {}".format(str(self.source), str(self.sink))
-
-    def archive(self):
-        self.archived = True
-        self.save()

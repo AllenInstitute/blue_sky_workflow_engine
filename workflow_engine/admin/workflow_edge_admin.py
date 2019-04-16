@@ -18,3 +18,6 @@ class WorkflowEdgeAdmin(admin.ModelAdmin):
         'disabled',
         'archived']
     actions = []
+
+    def get_queryset(self, request):
+        return self.model.all_objects.get_queryset()

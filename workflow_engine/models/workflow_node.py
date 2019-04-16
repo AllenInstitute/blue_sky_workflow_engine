@@ -2,7 +2,7 @@
 # license plus a third clause that prohibits redistribution for commercial
 # purposes without further permission.
 #
-# Copyright 2017-2018. Allen Institute. All rights reserved.
+# Copyright 2017-2019. Allen Institute. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -34,11 +34,19 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 from django.db import models
+from workflow_engine.mixins import Archivable, Configurable, Timestamped
 import logging
-from django.contrib.contenttypes.fields import GenericRelation
 
 
-class WorkflowNode(models.Model):
+class SafeWorkflowNodeManager(models.Manager):
+    def get_queryset(self):
+        return super(SafeWorkflowNodeManager, self).get_queryset().filter(
+            workflow__archived=False,
+            archived=False
+        )
+
+
+class WorkflowNode(Archivable, Configurable, Timestamped, models.Model):
     _log = logging.getLogger('workflow_engine.models.workflow_node')
 
     job_queue = models.ForeignKey(
@@ -57,12 +65,10 @@ class WorkflowNode(models.Model):
     disabled = models.BooleanField(default=False)
     batch_size = models.IntegerField(default=50)
     priority = models.IntegerField(default=50)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    archived = models.NullBooleanField(default=False)
     overwrite_previous_job = models.BooleanField(default=True)
     max_retries = models.IntegerField(default=3)
-    configurations = GenericRelation('workflow_engine.Configuration')
+
+    safe_objects = SafeWorkflowNodeManager()
 
     def __str__(self):
         return self.get_node_short_name()
@@ -80,10 +86,10 @@ class WorkflowNode(models.Model):
         return self.job_queue.get_strategy()
 
     def get_children(self):
-        return self.sinks.filter(archived=False)
+        return self.sinks.all()
 
     def get_total_number_of_jobs(self):
-        return self.job_set.filter(archived=False).count()
+        return self.job_set.count()
 
     def get_number_of_queued_and_running_jobs(self):
         return self.get_queued_and_running_jobs().count()
@@ -92,15 +98,16 @@ class WorkflowNode(models.Model):
         return self.job_set.filter(
             run_state_id__in=[
                 RunState.get_queued_state().id,
-                RunState.get_running_state().id],
-            archived=False)
+                RunState.get_running_state().id]
+        )
 
     def get_n_pending_jobs(self, number_jobs_to_run):
         return self.job_set.filter(
             run_state=RunState.get_pending_state(),
-            archived=False).order_by(
-                'priority',
-                '-updated_at')[:number_jobs_to_run]
+        ).order_by(
+            'priority',
+            '-updated_at'
+        )[:number_jobs_to_run]
 
     def update(self,
                current_disabled,
@@ -132,7 +139,7 @@ class WorkflowNode(models.Model):
         failed_state = RunState.get_failed_state()
         killed_state = RunState.get_process_killed_state()
     
-        node_jobs = self.job_set.filter(archived=False)
+        node_jobs = self.job_set.all()
     
         success_count = node_jobs.filter(
             run_state_id__in=[success_state.id]).count()
@@ -162,11 +169,10 @@ class WorkflowNode(models.Model):
         return result
 
     def short_enqueued_object_class_name(self):
-        return self.job_queue.enqueued_object_type.model_class().__name__
-
-    def archive(self):
-        self.archived = True
-        self.save()
+        try:
+            return self.job_queue.enqueued_object_type.model_class().__name__
+        except:
+            return '-'
 
 
 # circular imports

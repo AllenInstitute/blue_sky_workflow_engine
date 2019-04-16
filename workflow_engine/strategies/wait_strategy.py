@@ -23,6 +23,10 @@ class WaitStrategy(ExecutionStrategy):
     def is_execution_strategy(self):
         return False
 
+    # TODO: execution strategy should inherit from wait strategy
+    def set_error_message_from_log(self, task):
+        pass
+
     def run_task(self, task):
         try:
             enqueued_object = task.enqueued_task_object

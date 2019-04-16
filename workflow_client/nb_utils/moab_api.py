@@ -303,7 +303,7 @@ def submit_job(
     duration_seconds=600,
     processors=1,
     tasks=1,
-    user='timf',
+    user='',
     moab_cfg=None):
     url = moab_url(table='jobs')
 
@@ -354,7 +354,7 @@ def submit_job_array(
     duration_seconds=240,
     processors=1,
     tasks=1,
-    user='timf',
+    user='',
     moab_cfg=None):
     url = moab_url(table='job-arrays')
 

@@ -39,6 +39,7 @@ class SimpleRouter(object):
         'result': { 
             'process_pbs_id',
             'process_running',
+            'process_failed',
             'process_finished_execution',
             'process_failed_execution'
         },

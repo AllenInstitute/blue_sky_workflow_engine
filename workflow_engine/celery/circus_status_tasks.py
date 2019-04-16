@@ -34,7 +34,6 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 import celery
-import os
 from workflow_client.client_settings import configure_worker_app
 import django; django.setup()
 from django.conf import settings
@@ -48,67 +47,10 @@ import logging
 _log = logging.getLogger('workflow_engine.celery.circus_status_tasks')
 app_name = 'blue_sky'
 worker_name = 'circus_status'
-broker_url='amqp://blue_sky_user:blue_sky_user@ibs-timf-ux1.corp.alleninstitute.org:9008'
 
 @celery.signals.after_setup_task_logger.connect
 def after_setup_celery_task_logger(logger, **kwargs):
-    logging.config.dictConfig({
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'detailed': {
-            'class': 'logging.Formatter',
-            'format': '%(asctime)s %(name)-15s %(levelname)-8s %(processName)-10s %(message)s'
-        }
-    },    
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'level': 'DEBUG',
-            'formatter': 'detailed',
-            'stream': 'ext://sys.stdout'
-        },
-        'file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'formatter': 'detailed',
-            'filename': os.environ.get('DEBUG_LOG',
-                                       'logs/debug.log'),
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console', 'file'],
-            'level': 'WARN',
-            'propagate': True,
-        },
-        'blue_sky': {
-            'handlers': ['console', 'file'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-        'workflow_engine': {
-            'handlers': ['console', 'file'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-        'workflow_client': {
-            'handlers': ['console', 'file'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-        'celery': {
-            'handlers': ['console', 'file'],
-            'level': 'INFO',
-            'propagate': True,
-        },
-        'celery.task': {
-            'handlers': ['console', 'file'],
-            'level': 'INFO',
-            'propagate': True,
-        }
-    }
-})
+    logging.config.dictConfig(settings.LOGGING)
 
 REMOTE_QUEUE = 'circus'
 app = celery.Celery(app_name)
@@ -147,5 +89,9 @@ def check_status(self):
     except SoftTimeLimitExceeded:
         _log.warn('Soft Time Limit Exceeded')
         return 'timeout'
+    except Exception as e:
+        _log.error(e)
+
+        return 'error'
 
     return 'success'

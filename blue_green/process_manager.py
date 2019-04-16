@@ -102,24 +102,24 @@ def get_arbiter_list(app_name, bg, base_dir):
             }), 
             'numprocesses': 1
         },
-        {
-            'cmd': ' '.join((
-                '/bin/bash -c',
-                '"source {} {}_circus; '.format(_ACTIVATE_PATH, bg),
-                'unset DJANGO_SETTINGS_MODULE; ',
-                'python -m celery ',
-                '-A workflow_client.tasks.circus_test worker ',
-                '--broker={}'.format(_MESSAGE_BROKER),
-                '--concurrency=1 --loglevel=info ',
-                '-n circus@{}'.format(app_name),
-                '"'
-            )),
-            "env": dmerge(base_env, {
-                'DEBUG_LOG': debug_log_path(base_dir, 'circus'),
-                'BLUE_SKY_APP_NAME': app_name
-            }), 
-            'numprocesses': 1
-        },
+#        {
+#            'cmd': ' '.join((
+#                '/bin/bash -c',
+#                '"source {} {}_circus; '.format(_ACTIVATE_PATH, bg),
+#                'unset DJANGO_SETTINGS_MODULE; ',
+#                'python -m celery ',
+#                '-A workflow_client.tasks.circus_test worker ',
+#                '--broker={}'.format(_MESSAGE_BROKER),
+#                '--concurrency=1 --loglevel=info ',
+#                '-n circus@{}'.format(app_name),
+#                '"'
+#            )),
+#            "env": dmerge(base_env, {
+#                'DEBUG_LOG': debug_log_path(base_dir, 'circus'),
+#                'BLUE_SKY_APP_NAME': app_name
+#            }), 
+#            'numprocesses': 1
+#        },
         {
             'cmd': ' '.join((
                 '/bin/bash -c ', '"source {} {}; '.format(_ACTIVATE_PATH, bg_conda_env),

@@ -252,7 +252,7 @@ def delete_record(record, request, result, record_type, data):
             job_queue.delete()
     elif record_type == 'job':
         job = record
-        job.archive_record()
+        job.archive()
     elif record_type == 'task':
         tsk = record
         tsk.delete()

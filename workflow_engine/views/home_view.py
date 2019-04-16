@@ -70,8 +70,6 @@ def index(request):
     context['message_queue_host']  = settings.MESSAGE_QUEUE_HOST
     context['admin_url'] = settings.ADMIN_URL
     context['notebook_url'] = settings.NOTEBOOK_URL
-    context['create_chunk_url'] = 'http://ibs-timf-ux1:9001/at_em/create_chunk'
-    context['gap_url'] = 'http://ibs-timf-ux1:9001/at_em/create_gap_section'
     try:
         context['stanbol_url'] = settings.STANBOL_URL
         context['marmotta_url'] = settings.MARMOTTA_URL

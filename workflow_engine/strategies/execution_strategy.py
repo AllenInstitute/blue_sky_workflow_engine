@@ -287,11 +287,12 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 
     def kill_pbs_task(self, task):
         if task.pbs_task():
-            if task.pbs_id != None:
+            if task.pbs_id is not None:
                 kill_moab_task_signature.delay(task.id)
         else:
             if self.get_remote_queue(task) == 'circus':
-                kill_task_signature.delay(int(task.pbs_id))
+                if task.pbs_id is not None:
+                    kill_task_signature.delay(int(task.pbs_id))
 
     # Do not override
     def run_asynchronous_task(self, task):
@@ -416,6 +417,7 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
         return input_path
 
     # Do not override
+    # TODO: the data flow in constructing this path is overly complex
     def get_task_storage_directory(self, task):
         task_storage_dir = os.path.join(
             self.get_job_storage_directory(

@@ -113,9 +113,14 @@ class JobAdmin(admin.ModelAdmin):
         reset_priority)
     inlines = (TaskInline,)
 
+    def get_queryset(self, request):
+        return self.model.all_objects.get_queryset()
+
     def enqueued_object_state(self, job_object):
         try:
-            enqueued_object = job_object.enqueued_object
+            #enqueued_object = job_object.enqueued_object
+            enqueued_object = job_object.enqueued_object_type.model_class(
+                ).objects.get(id=job_object.enqueued_object_id)
             object_state = enqueued_object.object_state
             return object_state
         except:
@@ -140,16 +145,26 @@ class JobAdmin(admin.ModelAdmin):
     def enqueued_object_link(self, job_object):
         try:
             enqueued_object_type = job_object.enqueued_object_type
-            enqueued_object = enqueued_object_type.get_object_for_this_type(
-                pk=job_object.enqueued_object_id
-            )
-            clz = enqueued_object._meta.db_table
+            enqueued_object = job_object.enqueued_object
 
             return mark_safe('<a href="{}">{}</a>'.format(
-                reverse("admin:{}_change".format(clz),
-                        args=(enqueued_object.id,)),
+                reverse("admin:{}_{}_change".format(
+                    enqueued_object_type.app_label,
+                    enqueued_object_type.model),
+                    args=(enqueued_object.id,)),
                 str(enqueued_object)))
         except:
             return '-'
 
     enqueued_object_link.short_description = "Enqueued Object"
+
+    def lookup_allowed(self, key, value):
+        if key in (
+            'id__in',
+            'run_state__name',
+            'workflow_node__job_queue__name',
+            'run_state__name__in',
+        ):
+            return True
+
+        return super(JobAdmin, self).lookup_allowed(key, value)

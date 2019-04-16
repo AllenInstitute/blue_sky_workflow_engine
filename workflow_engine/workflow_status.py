@@ -99,14 +99,12 @@ class WorkflowStatus(object):
 
     def query_nodes(self):
         nodes = read_frame(
-            WorkflowNode.objects.values(
+            WorkflowNode.safe_objects.values(
                 'id',
                 'job_queue__name',
                 'batch_size'
             ).filter(
-                workflow__name__in=self.workflow_names,
-                workflow__archived=False,
-                archived=False
+                workflow__name__in=self.workflow_names
             )
         )
         nodes.set_index(
@@ -134,10 +132,8 @@ class WorkflowStatus(object):
         return edges
 
     def query_run_state_counts(self):
-        qs = WorkflowNode.objects.filter(
+        qs = WorkflowNode.safe_objects.filter(
             workflow__name__in=self.workflow_names,
-            workflow__archived=False,
-            job__archived=False,
         ).values(
             'id',
             'job__run_state__id' # 'job_queue__name' for human-readable

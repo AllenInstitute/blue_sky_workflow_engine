@@ -34,12 +34,13 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 from django.db import models
+from workflow_engine.mixins import Timestamped
 import os
 import logging
 _model_logger = logging.getLogger('workflow_engine.models')
 
 
-class FileRecord(models.Model):
+class FileRecord(Timestamped, models.Model):
     filename = models.CharField(max_length=255)
     storage_directory = models.CharField(max_length=500)
     order = models.IntegerField(default=0)
@@ -47,8 +48,6 @@ class FileRecord(models.Model):
         'workflow_engine.WellKnownFile')
     task = models.ForeignKey(
         'workflow_engine.Task', null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.get_full_name() 

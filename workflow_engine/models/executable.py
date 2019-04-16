@@ -34,21 +34,17 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 from django.db import models
-from django.utils import timezone
-from workflow_engine.mixins import Configurable
+from workflow_engine.mixins import (
+    Archivable,
+    Configurable,
+    Nameable,
+    Timestamped
+)
 import logging
 _model_logger = logging.getLogger('workflow_engine.models')
 
 
-class Executable(Configurable, models.Model):
-    name = models.CharField(
-        max_length=255
-    )
-    description = models.CharField(
-        max_length=255,
-        null=True,
-        blank=True
-    )
+class Executable(Archivable, Configurable, Nameable, Timestamped, models.Model):
     static_arguments = models.CharField(
         max_length=255,
         null=True,
@@ -66,12 +62,6 @@ class Executable(Configurable, models.Model):
         max_length=1000,
         null=True,
         blank=True
-    )
-    created_at = models.DateTimeField(
-        auto_now_add=True
-    )
-    updated_at = models.DateTimeField(
-        auto_now=True
     )
     remote_queue = models.CharField(
         max_length=255,
@@ -98,26 +88,9 @@ class Executable(Configurable, models.Model):
         default='0.1',
         blank=True
     )
-    archived = models.NullBooleanField(
-        default=False,
-        blank=True
-    )
-
-    def __str__(self):
-        return self.name
-
-    def get_created_at(self):
-        return timezone.localtime(self.created_at).strftime('%m/%d/%Y %I:%M:%S')
-
-    def get_updated_at(self):
-        return timezone.localtime(self.updated_at).strftime('%m/%d/%Y %I:%M:%S')
 
     def get_job_queues(self):
         return self.jobqueue_set.all()
-
-    def archive(self):
-        self.archived = True
-        self.save()
 
     def spark_moab_environment(self):
         # TODO: factor into a spark_moab helper class
@@ -148,10 +121,10 @@ class Executable(Configurable, models.Model):
         _model_logger.info('ENV')
         env = self.environment
 
-        if env is None:
+        try:
+            env = env.split(';')
+        except:
             env = []
-
-        env = env.split(';')
 
         spark_env = self.spark_moab_environment()
         _model_logger.info('SPARK ENV: {}'.format(spark_env))

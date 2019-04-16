@@ -39,6 +39,7 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from workflow_engine.models import ONE, ZERO, TWO, SECONDS_IN_MIN
+from workflow_engine.mixins import Archivable, Tagable, Timestamped
 from workflow_client.pbs_utils import PbsUtils
 import os
 import logging
@@ -47,7 +48,7 @@ import logging
 _logger = logging.getLogger('workflow_engine.models.task')
 
 
-class Task(models.Model):
+class Task(Archivable, Tagable, Timestamped, models.Model):
     enqueued_task_object_type = models.ForeignKey(
         ContentType,
         default=None,
@@ -61,9 +62,6 @@ class Task(models.Model):
         'enqueued_task_object_id')
     job = models.ForeignKey(
         'workflow_engine.Job'
-    )
-    archived = models.NullBooleanField(
-        default=False
     )
     run_state = models.ForeignKey(
         'workflow_engine.RunState'
@@ -107,14 +105,6 @@ class Task(models.Model):
         null=True,
         blank=True
     )
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        blank=True
-    )
-    updated_at = models.DateTimeField(
-        auto_now=True,
-        blank=True
-    )
     pbs_id = models.CharField(
         max_length=255,
         null=True,
@@ -122,11 +112,6 @@ class Task(models.Model):
     )
     retry_count = models.IntegerField(
         default=0
-    )
-    tags = models.CharField(
-        max_length=255,
-        null=True,
-        blank=True
     )
 
     def __str__(self):

@@ -32,6 +32,9 @@ class TaskAdmin(admin.ModelAdmin):
         'archived',
     )
 
+    def get_queryset(self, request):
+        return self.model.all_objects.get_queryset()
+
     def change_view(self, request, object_id, extra_context=None):
         self.exclude = (
             'job',  # not excluding job hangs the task admin change view
@@ -42,12 +45,20 @@ class TaskAdmin(admin.ModelAdmin):
         )
 
     def enqueued_task_object_link(self, task_object):
-        enqueued_object = task_object.enqueued_task_object
-        clz = enqueued_object._meta.db_table
-        return mark_safe('<a href="{}">{}</a>'.format(
-            reverse("admin:{}_change".format(clz),
-                    args=(enqueued_object.id,)),
-            str(enqueued_object)))
+        try:
+            enqueued_object_type = task_object.enqueued_task_object_type
+            enqueued_object = task_object.enqueued_task_object
+
+            return mark_safe('<a href="{}">{}</a>'.format(
+                reverse("admin:{}_{}_change".format(
+                        enqueued_object_type.app_label,
+                        enqueued_object_type.model
+                    ),
+                    args=(enqueued_object.id,)
+                ),
+                str(enqueued_object)))
+        except:
+            return '-'
 
     enqueued_task_object_link.short_description = "Enqueued Object"
 
