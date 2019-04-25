@@ -68,7 +68,7 @@ class SimpleRouter(object):
     @classmethod
     def invert_route_dict(cls, routing_dict, app_name=None):
         if app_name is not None:
-            suffix = "_{}".format(app_name)
+            suffix = "@{}".format(app_name)
         else:
             suffix = ""
 
@@ -109,7 +109,7 @@ class SimpleRouter(object):
     def task_queues(self, worker_names):
         return [
             Queue(
-                "{}_{}".format(worker_name, self.app_name),
+                "{}@{}".format(worker_name, self.app_name),
                 self.exchange[self.blue_green],
                 routing_key=worker_name,
                 queue_arguments={'x-max-priority': 10}

@@ -1,4 +1,4 @@
-#from workflow_engine.celery.job_status.circus_status import CircusStatus
+# from workflow_engine.celery.job_status.circus_status import CircusStatus
 import celery
 from circus.process import Process
 from circus.client import CircusClient
@@ -18,6 +18,7 @@ _log = logging.getLogger(
     'workflow_engine.celery.circus_worker'
 )
 
+
 @celery.signals.after_setup_task_logger.connect
 def after_setup_celery_task_logger(logger, **kwargs):
     logging.config.dictConfig({
@@ -28,7 +29,7 @@ def after_setup_celery_task_logger(logger, **kwargs):
             'class': 'logging.Formatter',
             'format': '%(asctime)s %(name)-15s %(levelname)-8s %(processName)-10s %(message)s'
         }
-    },    
+    },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
@@ -85,6 +86,7 @@ class CircusProcessTask(celery.Task):
     _PROC_ID = 10000
     _client = CircusClient(endpoint='tcp://127.0.0.1:5655')
 
+
 app_name = os.environ.get('BLUE_SKY_APP_NAME')
 app = celery.Celery(app_name)
 app.conf.imports = (
@@ -100,7 +102,8 @@ app.conf.task_queues = router.task_queues(
 )
 app.conf.task_routes = (router.route_task,)
 
-#@celery.shared_task(
+
+# @celery.shared_task(
 #    name='workflow_engine.celery.circus_tasks.submit_worker_task',
 #    base=CircusProcessTask,
 #    bind=True,
@@ -145,6 +148,7 @@ def submit_circus_task_new(
         _log.error(e)
         return "Error {}".format(e)
 
+
 def generate_task_script(
         script_file,
         executable_file,
@@ -157,7 +161,7 @@ def generate_task_script(
         env_vars=None
     ):
     if env_vars is None:
-        env_vars=dict()
+        env_vars = dict()
 
     if static_args is None:
         static_args = ''
@@ -166,7 +170,7 @@ def generate_task_script(
         'conda_bin': conda_bin,
         'conda_env': conda_env,
         'env_vars': env_vars,
-        'python_executable': executable_file, # /opt/conda/envs/circus/bin/python
+        'python_executable': executable_file,  # /opt/conda/envs/circus/bin/python
         'static_args': static_args,
         'args': "--input_json {} --output_json {}".format(
             input_file, output_file
@@ -182,7 +186,7 @@ source {{ conda_bin }}/activate {{ conda_env }}
 export {{ evar }}
 {% endfor %}
 
-rm exit_code.txt
+rm -f exit_code.txt
 {{ python_executable }} {{ static_args }} {{ args }} 2>&1 > output.log
 echo $? > exit_code.txt
 """
@@ -220,7 +224,7 @@ def submit_circus_task(
         '/opt/conda/bin'
     )
 
-    env_vars = ['{}={}'.format(k,v) for k,v in environment.items()]
+    env_vars = ['{}={}'.format(k, v) for k, v in environment.items()]
 
     try:
         generate_task_script(
@@ -242,12 +246,12 @@ def submit_circus_task(
         name,
         '/bin/bash'
     ]
-    kwargs={
+    kwargs = {
         'args': [ script_file ],
         'working_dir': working_dir,
         'env': environment,
-        #'use_fds':True,
-        #'shell':True
+        # 'use_fds':True,
+        # 'shell':True
     }
 
     _log.info(str(call_args) + " " + str(kwargs))
@@ -274,6 +278,8 @@ celery.shared_task(
     base=CircusProcessTask,
     bind=True,
     trail=True)
+
+
 def kill_task(self, task_id):
     try:
         # _log.info(CircusProcessTask._PROCESS_DICT)
@@ -301,6 +307,7 @@ def task_stdout(self, task_id):
         return '\n'.join(stdout_str)
     except Exception as e:
         return "Error {}".format(e)
+
 
 @celery.shared_task(
     base=CircusProcessTask,
@@ -335,16 +342,17 @@ def check_remote_status(self, running_task_dicts):
 
     return 'done'
 
+
 @celery.shared_task(
     base=CircusProcessTask,
     name='workflow_engine.check_circus_status'
 )
 def check_status():
     statuses = {
-        i: p['process'].info() for i,p in CircusProcessTask._PROCESS_DICT.items()
+        i: p['process'].info() for i, p in CircusProcessTask._PROCESS_DICT.items()
     }
 
-    for i,v in CircusProcessTask._PROCESS_DICT.items():
+    for i, v in CircusProcessTask._PROCESS_DICT.items():
         p = v['process']
         stat = None
 
@@ -405,7 +413,7 @@ def check_status():
 )
 def inspect(self):
     infos = {
-        i: p['process'].info() for i,p in CircusProcessTask._PROCESS_DICT.items()
+        i: p['process'].info() for i, p in CircusProcessTask._PROCESS_DICT.items()
     }
 
     return infos
