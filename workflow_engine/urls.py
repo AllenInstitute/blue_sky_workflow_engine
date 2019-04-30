@@ -101,7 +101,10 @@ urlpatterns = [
     url(r'^get_record_info/$', record_view.get_record_info, name='info'),
     url(r'^check_unique/$', record_view.check_unique, name='info'),
     url(r'^get_search_data/$', record_view.get_search_data, name='info'),
-    url(r'^ingest/(?P<workflow_name>[0-9a-zA-z_]+)$', ingest_view.ingest, name='ingest'),
+    url(
+        r'^ingest/(?P<workflow_name>[0-9a-zA-Z_]+)/(?P<tag>[0-9a-zA-Z]+)$',
+        ingest_view.ingest, name='ingest'
+    ),
 
     url(r'^data', MonitorView.as_view()),
     url(r'^job_grid$', grid_view.index, name='grid'),

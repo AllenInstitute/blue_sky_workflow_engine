@@ -24,11 +24,14 @@ class ConfigurationAdmin(admin.ModelAdmin):
 
 
     def attachable_link(self, configuration_object):
-        attachable_object = configuration_object.content_object
-        clz = attachable_object._meta.db_table
-        return mark_safe('<a href="{}">{}</a>'.format(
-            reverse("admin:{}_change".format(clz),
-                    args=(attachable_object.id,)),
-            str(attachable_object)))
+        try:
+            attachable_object = configuration_object.content_object
+            clz = attachable_object._meta.db_table
+            return mark_safe('<a href="{}">{}</a>'.format(
+                reverse("admin:{}_change".format(clz),
+                        args=(attachable_object.id,)),
+                str(attachable_object)))
+        except:
+            return '-'
 
     attachable_link.short_description = "Attached Object"

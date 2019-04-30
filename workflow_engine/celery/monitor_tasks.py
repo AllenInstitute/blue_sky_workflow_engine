@@ -47,7 +47,7 @@ import pandas as pd
 import itertools as it
 from django_pandas.io import read_frame
 from datetime import datetime
-import simplejson as json
+import json
 import logging
 import os
 

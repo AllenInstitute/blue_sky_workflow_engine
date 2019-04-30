@@ -34,12 +34,11 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 from workflow_engine.strategies import base_strategy
-from django.conf import settings
 import os
 import subprocess
 import traceback
 import logging
-import simplejson as json
+import json
 from celery import chain
 from celery.exceptions import SoftTimeLimitExceeded
 from workflow_engine.celery.signatures import (
@@ -305,14 +304,6 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
             self.finish_task(task)
         else:
             queue_name = self.get_remote_queue(task)
-            if queue_name in ['pbs', 'spark_moab']:
-                queue_name = settings.MOAB_MESSAGE_QUEUE_NAME
-            elif queue_name == 'local':
-                queue_name = settings.LOCAL_MESSAGE_QUEUE_NAME
-            elif queue_name == 'circus':
-                queue_name = 'circus'
-            else:
-                ExecutionStrategy._log.warn('Unknown queue: {}'.format(queue_name))
 
             if task.pbs_task():
                 submit_moab_task_signature.delay(task.id)

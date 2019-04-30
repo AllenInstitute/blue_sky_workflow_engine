@@ -48,16 +48,21 @@ from workflow_engine.import_class import import_class
 from workflow_engine.views   import shared, HEADER_PAGES
 from workflow_engine.workflow_controller import WorkflowController
 from collections import deque
-from workflow_engine.celery.signatures \
-    import run_workflow_node_jobs_signature, create_job_signature
-from workflow_engine.views.decorators \
-    import object_json_response, object_json_response2, object_json_all_response,\
+from workflow_engine.celery.signatures import (
+    run_workflow_node_jobs_signature,
+    create_job_signature
+)
+from workflow_engine.views.decorators import (
+    object_json_response,
+    object_json_response2,
+    object_json_all_response,
     object_yaml_all_response
+)
 from django_pandas.io import read_frame
 import itertools as it
 import pandas as pd
 import logging
-import simplejson as json
+import json
 
 
 _log = logging.getLogger('workflow_engine.views.workflow_view')

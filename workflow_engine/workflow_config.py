@@ -55,9 +55,8 @@ class WorkflowConfig:
     def from_yaml(cls, y):
         definition = yaml.load(y)
         workflows = {
-            'run_states': definition['run_states'],
             'executables': definition['executables'],
-            'flows': []
+            'workflows': []
         }
 
         for e in workflows['executables'].values():
@@ -124,7 +123,7 @@ class WorkflowConfig:
 
             ingest = wf_def.get('ingest', None)
 
-            workflows['flows'].append(
+            workflows['workflows'].append(
                 cls(k, ingest, states, wf_def['graph'], state_list))
 
         return workflows
@@ -139,8 +138,7 @@ class WorkflowConfig:
     def create_workflow(cls, workflows_yml):
         workflow_config = cls.from_yaml_file(workflows_yml)
 
-        null_executable, created = \
-            Executable.objects.get_or_create(
+        null_executable, _ = Executable.objects.get_or_create(
                 name='Null Executable',
                 defaults={
                     'description': 'Error Case',
@@ -173,12 +171,8 @@ class WorkflowConfig:
                         'pbs_queue': e['pbs_queue'],
                         'pbs_processor': e['pbs_processor'],
                         'pbs_walltime': e['pbs_walltime']})
-        
-        for run_state_name in workflow_config['run_states']:
-            RunState.objects.update_or_create(
-                name=run_state_name)
-    
-        for workflow_spec in workflow_config['flows']:
+
+        for workflow_spec in workflow_config['workflows']:
             workflow_name = workflow_spec.name
     
             workflow, _ = \
@@ -267,17 +261,18 @@ class WorkflowConfig:
 
     @classmethod
     def archive_all_workflows(cls):
-        for queue in JobQueue.objects.filter(archived=False):
+        for queue in JobQueue.all_objects.filter(archived=False):
             queue.archive()
-        for node in WorkflowNode.objects.filter(archived=False):
+        for node in WorkflowNode.all_objects.filter(archived=False):
             node.archive()
-        for exe in Executable.objects.filter(archived=False):
+        for exe in Executable.all_objects.filter(archived=False):
             exe.archive()
-        for flow in Workflow.objects.filter(archived=False):
+        for flow in Workflow.all_objects.filter(archived=False):
             flow.archive()
-        for edge in WorkflowEdge.objects.filter(archived=False):
+        for edge in WorkflowEdge.all_objects.filter(archived=False):
             edge.archive()
         # RunState.objects.all().delete()  # TODO: runstates are in regular config.
+
 
 # circular imports?
 from workflow_engine.models import (
@@ -285,6 +280,5 @@ from workflow_engine.models import (
     Executable,
     WorkflowNode,
     WorkflowEdge,
-    Workflow,
-    RunState
+    Workflow
 )

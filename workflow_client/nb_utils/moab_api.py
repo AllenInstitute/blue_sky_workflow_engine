@@ -35,8 +35,9 @@
 #
 import requests
 from requests.auth import HTTPBasicAuth
-import simplejson as json
 import pandas as pd
+import json
+from json import JSONDecodeError
 import os
 import logging
 #
@@ -114,7 +115,10 @@ def moab_auth():
     if cred == ':':
         raise Exception('credentials not set')
 
-    (moab_user, moab_pass) = cred.split(':', 1)
+    try:
+        (moab_user, moab_pass) = cred.split(':', 1)
+    except ValueError:
+        _log.error('check MOAB_AUTH format')
 
     auth = HTTPBasicAuth(moab_user, moab_pass)
     _log.info('AUTH: {}'.format(auth))
@@ -124,15 +128,27 @@ def moab_auth():
 
 def moab_query(url):
     try:
-        result_data = requests.get(
+        response= requests.get(
             url,
-            auth=moab_auth()).json()
+            auth=moab_auth())
 
-        if 'results' in result_data:
-            result_data = result_data['results']
+        if response.status_code == 200:
+            result_data = response.json()
+
+            if 'results' in result_data:
+                result_data = result_data['results']
+        elif response.status_code == 401:
+            _log.error('Moab credentials: {}'.format(os.environ.get('MOAB_AUTH')))
+            result_data = "Error"
+        else:
+            _log.error('Moab response code: {}'.format(response.status_code))
+
+            result_data = "Error"
 
         return result_data
 
+    except JSONDecodeError as e:
+        _log.error('Moab JSON decode error')
     except Exception as e:
         _log.error('Moab query ' + str(e) + ', ' + ', ' + str(url))
         raise e

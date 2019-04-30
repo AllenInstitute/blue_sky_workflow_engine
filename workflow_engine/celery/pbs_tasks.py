@@ -48,7 +48,6 @@ from workflow_engine.celery.signatures \
     import process_pbs_id_signature, \
     process_failed_execution_signature, \
     process_pbs_id_signature
-#import simplejson as json
 
 
 _log = logging.getLogger('workflow_engine.celery.pbs_tasks')
@@ -68,24 +67,17 @@ def query_running_task_dicts():
     return task_dicts
 
 
-result_queue = settings.RESULT_MESSAGE_QUEUE_NAME
-_FINISHED_DELAY = 10
 
 # Todo need to use moab id and task id in all cases
 result_actions = { 
     'running_message':
-        lambda x: process_running.s(x).set(
-            queue=result_queue),
+        lambda x: process_running.s(x),
     'finished_message':
-        lambda x: process_finished_execution.s(x).set(
-            queue=result_queue),
-            #countdown=_FINISHED_DELAY),
+        lambda x: process_finished_execution.s(x),
     'failed_execution_message': 
-        lambda x: process_failed_execution.s(x).set(
-            queue=result_queue),
+        lambda x: process_failed_execution.s(x),
     'failed_message':
-        lambda x: process_failed.s(x).set(
-            queue=result_queue)
+        lambda x: process_failed.s(x)
 }
 
 
@@ -102,13 +94,7 @@ def check_moab_status(self):
             combined_workflow_moab_dataframe[col] == True]['task_id'].apply(fn)
         for (col,fn) in result_actions.items())))
 
-    grp.apply_async(
-        broker_connection_timeout=10,
-        broker_connection_retry=False,
-        queue=settings.RESULT_MESSAGE_QUEUE_NAME,
-        on_raw_message=lambda x: _log.info('group result {}', str(x)))
-
-    # _log.info('Result group:' + json.dumps(grp, indent=2))
+    grp.delay()
 
     return 'OK'
 

@@ -79,9 +79,6 @@ def query_running_task_dicts():
 
     return task_dicts
 
-
-result_queue = settings.RESULT_MESSAGE_QUEUE_NAME
-
 # Todo need to use moab id and task id in all cases
 result_actions = { 
     'running_message': process_running_signature,
@@ -120,11 +117,9 @@ def check_moab_status(self):
             combined_workflow_moab_dataframe
         )
 
-        grp.apply_async(
-            broker_connection_timeout=10,
-            broker_connection_retry=False,
-            queue=settings.RESULT_MESSAGE_QUEUE_NAME,
-            on_raw_message=lambda x: _log.info('group result {}', str(x)))
+        _log.info("Message group: " + str(grp))
+
+        grp.delay()
     except SoftTimeLimitExceeded:
         _log.warn('Soft Time Limit Exceeded')
         return 'timeout'

@@ -43,7 +43,7 @@ from workflow_engine.models import (
 )
 from workflow_engine.views import shared
 from workflow_engine.models.task import Task
-import simplejson as json
+import json
 import traceback
 from workflow_engine.models.workflow_node import WorkflowNode
 

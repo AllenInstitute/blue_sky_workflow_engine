@@ -67,7 +67,8 @@ class Job(Archivable, Tagable, Timestamped, models.Model):
         'workflow_engine.RunState'
     )
     duration = models.DurationField(
-        null=True
+        null=True,
+        blank=True
     )
     start_run_time = models.DateTimeField(
         null=True,

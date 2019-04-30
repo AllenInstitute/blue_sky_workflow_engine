@@ -7,7 +7,7 @@ import logging
 
 class WaitStrategy(ExecutionStrategy):
     _log = logging.getLogger(
-        'development.strategies.wait_strategy')
+        'workflow_engine.strategies.wait_strategy')
 
     def must_wait(self, enqueued_object):
         return True

@@ -41,11 +41,15 @@ from workflow_engine.models import (
     ONE
 )
 from workflow_engine.views import shared, HEADER_PAGES
-from workflow_engine.celery.signatures \
-    import queue_job_signature, kill_job_signature
+from workflow_engine.celery.signatures import (
+    queue_job_signature,
+    kill_job_signature
+)
 import logging
-from workflow_engine.views.decorators \
-    import object_json_response, object_json_response2
+from workflow_engine.views.decorators import (
+    object_json_response,
+    object_json_response2
+)
 
 
 #_TIMEOUT = 20

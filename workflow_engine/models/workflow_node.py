@@ -86,7 +86,7 @@ class WorkflowNode(Archivable, Configurable, Timestamped, models.Model):
         return self.job_queue.get_strategy()
 
     def get_children(self):
-        return self.sinks.all()
+        return self.sinks.all().order_by('sinks')
 
     def get_total_number_of_jobs(self):
         return self.job_set.count()

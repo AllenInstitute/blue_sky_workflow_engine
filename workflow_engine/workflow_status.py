@@ -69,7 +69,7 @@
 #
 from django.db.models import Count
 import pandas as pd
-import simplejson as json
+import json
 from django_pandas.io import read_frame
 from workflow_engine.models import (
     WorkflowNode,

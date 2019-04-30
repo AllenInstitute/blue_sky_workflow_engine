@@ -52,6 +52,13 @@ class WorkflowEdge(Archivable, Timestamped, models.Model):
         related_name='%(class)s_sink',
         null=True, blank=True)
     disabled = models.BooleanField(default=False)
+    priority = models.PositiveIntegerField(
+        default=1
+    )
+
+    class Meta:
+        ordering = ('priority',)
+
 
     def __str__(self):
         return "{} -> {}".format(str(self.source), str(self.sink))

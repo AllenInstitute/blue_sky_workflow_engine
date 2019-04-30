@@ -59,7 +59,10 @@ check_circus_task_status_signature.set(
 check_moab_status_signature = signature(
     'workflow_engine.celery.moab_status_tasks.check_moab_status')
 check_moab_status_signature.set(
-    delivery_mode='transient')
+    delivery_mode='transient',
+    soft_time_limit=30,
+    time_limit=60,
+    expires=45)
 
 
 submit_moab_task_signature = signature(
@@ -133,4 +136,7 @@ kill_job_signature = signature(
 update_dashboard_signature = signature(
     'workflow_engine.broadcast.update_dashboard')
 update_dashboard_signature.set(
-    delivery_mode='transient')
+    delivery_mode='transient',
+    soft_time_limit=30,
+    time_limit=60,
+    expires=45)
