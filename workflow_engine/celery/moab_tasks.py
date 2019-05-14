@@ -46,9 +46,11 @@ from workflow_engine.celery.signatures import (
     process_pbs_id_signature
 )
 from django.core.exceptions import ObjectDoesNotExist
+from workflow_client.pbs_utils import PbsUtils
 import celery
 import logging
 import traceback
+import os
 
 
 _log = logging.getLogger('workflow_engine.celery.moab_tasks')
@@ -71,7 +73,8 @@ def submit_moab_task(self, task_id):
     try:
         the_task = Task.objects.get(id=task_id)
 
-        pbs_file = the_task.get_strategy().get_pbs_file(the_task)
+        the_strategy = the_task.get_strategy()
+        pbs_file = the_strategy.get_pbs_file(the_task)
         the_task.create_pbs_file(pbs_file)
 
         if the_task.in_pending_state():
@@ -84,6 +87,17 @@ def submit_moab_task(self, task_id):
                 moab_cfg = None
 
             if the_task.get_executable().remote_queue == 'spark_moab':
+                #Log4j
+                log_dir = the_strategy.get_or_create_task_storage_directory(the_task)
+                log4j_properties_path = os.path.join(log_dir, 'log4j.properties')
+                # log4j_log_path = os.path.join(log_dir, 'spark.log')
+                log4j_log_path = 'spark.log'
+
+                PbsUtils().write_spark_log_files(
+                    log4j_properties_path,
+                    log4j_log_path
+                )
+
                 moab_id = submit_job_array(
                     the_task.id,
                     the_task.pbs_file,

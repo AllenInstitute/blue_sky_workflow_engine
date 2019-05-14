@@ -8,16 +8,18 @@
     {% load staticfiles %}
     <!--  >title>cytoscape-dagre.js demo</title>
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1" -->
-    <link href="{% static 'workflow_engine/css/dagre.css' %}" rel="stylesheet" />
-    <script src="{% static 'workflow_engine/javascript/cytoscape.min.js' %}"></script>
-
-    <!-- for testing with local version of cytoscape.js -->
-    <!--<script src="../cytoscape.js/build/cytoscape.js"></script>-->
 
     <script src="https://cdn.rawgit.com/cpettitt/dagre/v0.7.4/dist/dagre.min.js"></script>
     <script src="https://cdn.rawgit.com/cytoscape/cytoscape.js-dagre/1.5.0/cytoscape-dagre.js"></script>
-    <div class="info" style="float: left; z-index: 1;"></div>
-    <div id="cy"></div>
-    <script src="{% static 'workflow_engine/javascript/workflow_graph.js' %}"></script>
+    <!-- div class="info" style="float: left; z-index: 1;"></div -->
+    <table width="100%">
+        <tr>
+            <td width=300>
+                <div id="node_info_container"></div>
+            </td>
+            <td>
+                <div id="cy"></div>
+            </td>
+        </tr>
 
 {% endblock %}

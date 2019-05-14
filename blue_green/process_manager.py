@@ -11,7 +11,7 @@ _FLOWER_DELAY = 1
 _FLOWER_PORT = 5557
 _MESSAGE_BROKER = (
     'amqp://${MESSAGE_QUEUE_USER}:${MESSAGE_QUEUE_PASS}'
-    '@${MESSAGE_QUEUE_HOST}:${MESSAGE_QUEUE_PORT}'
+    '@${MESSAGE_QUEUE_HOST}:${MESSAGE_QUEUE_PORT}/${MESSAGE_QUEUE_VHOST}'
 )
 
 def celery_command_string(worker_name, app_name):
@@ -57,6 +57,10 @@ _BASE_ENV = {
         os.environ.get(
             'MESSAGE_QUEUE_PORT',
             str(5672)),
+    'MESSAGE_QUEUE_VHOST':
+        os.environ.get(
+            'MESSAGE_QUEUE_VHOST',
+            ''),
     'BLUE_SKY_SETTINGS':
         os.environ.get(
             'BLUE_SKY_SETTINGS',
@@ -69,7 +73,7 @@ def get_arbiter_list(app_name, bg, base_dir):
     bg_conda_env = 'base'
     base_env = copy.deepcopy(_BASE_ENV)
     base_env['APP_PACKAGE'] = app_name
-    base_env['PYTHONPATH'] = '/blue_green:/blue_sky_workflow_engine:/{}:{}:/{}/blue_sky_workflow_engine:/render_modules'.format(bg, base_dir, bg)
+    base_env['PYTHONPATH'] = '/blue_green:/blue_sky_workflow_engine:/{}:{}:/{}/blue_sky_workflow_engine:/render_modules:/EM_aligner_python'.format(bg, base_dir, bg)
     #    base_env['PYTHONPATH'] = '/{}:/{}/blue_sky_workflow_engine:/render_modules'.format(bg,  bg)
     django_env = dmerge(base_env, {
         'DJANGO_SETTINGS_MODULE': 'settings' # in BG dir

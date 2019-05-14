@@ -90,29 +90,48 @@ function node_summary_tables(
     ];
 
     $('div.info').empty();
-
     $.each(job_queues, function(node_id, node_name) {
         var node_tbl = $('<table>').attr('border', 1).width('300px');
+        node_tbl.addClass('node_info');
+        node_tbl.hide();
+        node_tbl.addClass('node_' + node_id.toString());
         node_tbl.data('node_id', node_id.toString());
 
-        var tr = $('<tr>').append(
-            $('<td>').text(node_name).attr('colspan', 2)
+        var tr = $('<tr>');
+        var td = $('<td>');
+        td.attr('colspan', 2);
+
+        var link = $('<a>');
+        link.attr(
+            'href',
+            '/admin/workflow_engine/workflownode/' +
+                node_id.toString() +
+                '/change'
         );
+        link.text(node_name)
+        td.append(link);
+        tr.append(td);
         node_tbl.append(tr);
 
         $.each(run_state_order, function(run_state_order, run_state_name) {
             var run_state_index = reverse_run_states[run_state_name];
             var count_index = '[' + node_id + ',' + run_state_index + ']';
-            var tr = $('<tr>').append(
-                $('<td>').text(run_state_name)
-            ).append(
-                $('<td>').text(counts[count_index])
-            );
+            var link_td = $('<td>');
+            var link = $('<a>');
+            link.attr(
+                'href',
+                '/admin/workflow_engine/job?run_state__id__exact=' +
+                    run_state_index + '&workflow_node__id__exact=' +
+                    node_id.toString());
+            link.text(run_state_name);
+            link_td.append(link);
+            var count_td = $('<td>').text(counts[count_index]);
+            var tr = $('<tr>');
+            tr.append(link_td);
+            tr.append(count_td);
             node_tbl.append(tr);
         });
-
-        node_tbl.addClass('node_info').css({'float': 'left'}).hide();
-        $('div.info').append(node_tbl);
+        $('#node_info_container').append(node_tbl);
     });
 }
 
@@ -126,11 +145,16 @@ var cy = window.cy = cytoscape({
   layout: {
     name: 'dagre',
     fit: false,
-    transform: function( node, pos ) { return { x: pos['y'], y: pos['x'] }; },
-    spacingFactor: 0.75
+    transform: function( node, pos ) {
+        return {
+            x: pos['y'] - 325,
+            y: pos['x'] + 100
+        };
+    },
+    spacingFactor: 0.7
   },
 
-  zoom: 0.5,
+  zoom: 1,
 
   style: [
     {

@@ -35,9 +35,9 @@ def ingest(request, workflow_name=None, tag=None, format=None):
             result['message'] = response_message
         else:
             result['message'] = 'please use POST'
-            return JsonResponse(result, 405)
+            return JsonResponse(result, status=405)
     except Exception as e:
             result['success'] = False
             result['message'] = str(e) + ' - ' + str(traceback.format_exc())
 
-    return JsonResponse(result, 200)
+    return JsonResponse(result, status=200)

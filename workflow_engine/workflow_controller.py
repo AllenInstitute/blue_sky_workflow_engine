@@ -111,6 +111,38 @@ class WorkflowController(object):
             cls.enqueue_in_target_node(source_node, target_node, source_job)
 
     @classmethod
+    def enqueue_from_admin_form(
+        cls,
+        workflow_name,
+        job_queue_name,
+        source_object
+    ):
+        target_node = WorkflowController.find_workflow_node(
+            workflow_name,
+            job_queue_name
+        )
+
+        try:
+            strategy = target_node.get_strategy()
+        except:
+            WorkflowController._log.error(
+                'Error loading strategy for {}'.format(
+                    target_node
+                ))
+            return
+
+        enqueued_objects = strategy.transform_objects_for_queue(source_object)
+
+        WorkflowController._log.info("enqueued_objects: {}".format(len(enqueued_objects)))
+
+        for enqueued_object in enqueued_objects:
+            if strategy.can_transition(enqueued_object):
+                WorkflowController.start_workflow_helper(
+                    target_node,
+                    enqueued_object,
+                    target_node.overwrite_previous_job)
+
+    @classmethod
     def enqueue_in_target_node(cls, source_node, target_node, source_job):
         try:
             strategy = target_node.get_strategy()
@@ -121,7 +153,9 @@ class WorkflowController(object):
                 ))
             return
 
-        enqueued_objects = strategy.get_objects_for_queue(source_job)
+        source_object = source_job.enqueued_object
+
+        enqueued_objects = strategy.transform_objects_for_queue(source_object)
         WorkflowController._log.info("Found {} enqueued objects".format(
             len(enqueued_objects)
         ))
@@ -236,31 +270,18 @@ class WorkflowController(object):
     def find_workflow_node(
         cls,
         workflow_name,
-        start_node_name=None):
-        workflow = Workflow.objects.get(
-            name=workflow_name,
-            archived=False)
-        WorkflowController._log.info(
-            "starting %s at %s" % (
-                workflow_name, str(start_node_name)))
-
+        start_node_name=None
+    ):
         if start_node_name is not None:
-            workflow_nodes = WorkflowNode.objects.filter(
-                workflow=workflow,
-                job_queue__name=start_node_name)
+            return WorkflowNode.objects.get(
+                workflow__name=workflow_name,
+                job_queue__name=start_node_name
+            )
         else:
-            workflow_nodes = WorkflowNode.objects.filter(
-                workflow=workflow, sources=None)
-
-        if len(workflow_nodes) != ONE:
-            raise Exception(
-                'Expected to find a single head workflow node but found: ' + \
-                str(len(workflow_nodes)) + ': ' + \
-                    ', '.join(str(wn) for wn in workflow_nodes))
-
-        workflow_node = workflow_nodes[ZERO]
-
-        return workflow_node
+            return WorkflowNode.objects.get(
+                workflow__name=workflow_name,
+                sources=None
+            )
 
     @classmethod
     def enqueue_next_queue_by_workflow_node(

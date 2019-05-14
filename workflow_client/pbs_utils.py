@@ -36,6 +36,10 @@
 import jinja2
 
 class PbsUtils(object):
+    _spark_template_package = 'workflow_client'
+    _spark_templates = 'templates'
+    _log_configuration_template = 'spark_log4j_template.properties'
+
     def __init__(self):
         self.package = 'workflow_client'
         self.templates = 'templates'
@@ -68,3 +72,18 @@ class PbsUtils(object):
             task=task,
             settings=settings,
             task_storage_directory=task_storage_directory)
+
+    def write_spark_log_files(self, log4j_properties_path, log4j_log_path):
+        with open(log4j_properties_path, 'w') as file_handle:
+            file_handle.write(
+                self.create_log_configuration(log4j_log_path))
+
+    def create_log_configuration(self, log_file_path):
+        env = jinja2.Environment(
+           loader=jinja2.PackageLoader(
+               PbsUtils._spark_template_package,
+               PbsUtils._spark_templates))
+        log4j_template = env.get_template(
+            PbsUtils._log_configuration_template)
+
+        return log4j_template.render(log_file_path=log_file_path)

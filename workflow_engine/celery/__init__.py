@@ -12,11 +12,12 @@ try:
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'proj.settings')
      
     app = Celery('workflow_engine.celery',
-                 broker_url='pyamqp://{}:{}@{}:{}//'.format(
+                 broker_url='pyamqp://{}:{}@{}:{}/vhost/{}/'.format(
                      settings.MESSAGE_QUEUE_USER,
                      settings.MESSAGE_QUEUE_PASSWORD,
                      settings.MESSAGE_QUEUE_HOST,
-                     settings.MESSAGE_QUEUE_PORT))
+                     settings.MESSAGE_QUEUE_PORT,
+                     settings.MESSAGE_QUEUE_VHOST))
      
     # Using a string here means the worker doesn't have to serialize
     # the configuration object to child processes.

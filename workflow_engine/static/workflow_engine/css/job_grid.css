@@ -10,6 +10,12 @@ td.run_state_queued {
     background-color: #FFEFD5;
 }
 
+td.outdated {
+    border-color: red;
+    border-width: 2px;
+    border-style: solid;
+}
+
 td.run_state_queued a:link, td.run_state_queued a:visited {
     color: black;
 }
@@ -60,6 +66,11 @@ td.run_state_unknown {
 
 td.run_state_unknown a:link, td.run_state_unknown a:visited {
     color: white;
+}
+
+td.processing {
+    background-color: LightGreen;
+    color: black;
 }
 
 td.montage_qc_passed {

@@ -55,7 +55,6 @@ class SimpleRouter(object):
             SimpleRouter.base_dict,
             app_name
         )
-        self.route_task = self.create_router_closure()
         self.exchange = {
             'blue': Exchange(
                 "{}__{}".format(app_name, 'blue'),
@@ -82,29 +81,26 @@ class SimpleRouter(object):
 
         return inverted_route_dict
 
-    def create_router_closure(self):
-        def router_fn(name, args, kwargs,
-                      options, task=None, **kw):
-            task_name = name.split('.')[-1]
+    def route_task(self, name, args, kwargs,
+                  options, task=None, **kw):
+        task_name = name.split('.')[-1]
 
-            try:
-                q = self.routing_dict.get(task_name)
-                SimpleRouter._log.info(
-                    'Routing task %s to %s', task_name, q
-                )
-            except:
-                SimpleRouter._log.error(
-                    'Unknown task {}'.format(task_name))
-                q = 'null'
+        try:
+            q = self.routing_dict.get(task_name)
+            SimpleRouter._log.info(
+                'Routing task %s to %s', task_name, q
+            )
+        except:
+            SimpleRouter._log.error(
+                'Unknown task {}'.format(task_name))
+            q = 'null'
 
-            return {
-                'exchange': '{}__{}'.format(
-                    self.app_name,
-                    self.blue_green),
-                'queue': q
-            }
-
-        return router_fn
+        return {
+            'exchange': '{}__{}'.format(
+                self.app_name,
+                self.blue_green),
+            'queue': q
+        }
 
     def task_queues(self, worker_names):
         return [

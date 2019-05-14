@@ -92,14 +92,17 @@ class BaseStrategy(object):
 
         return os.path.join(*dirs)
 
-    # override if needed
-    # this is called when a job is transitioning from a previous queue
-    # given the previous job, return an array of enqueued objects
-    # for this queue
-    def get_objects_for_queue(self, prev_queue_job):
-        objects = []
-        objects.append(prev_queue_job.enqueued_object)
-        return objects
+    def get_objects_for_queue(self, prev_queue):
+        '''
+        override if needed
+        this is called when a job transitions from a previous queue
+        given the previous job, return an array of enqueued objects
+        for this queue
+        '''
+        return self.transform_objects_for_queue(prev_queue.enqueued_object)
+
+    def transform_objects_for_queue(self, prev_queue_object):
+        return [ prev_queue_object ]
 
     # override if needed
     # return one or more task enqueued objects for a job enqueued object

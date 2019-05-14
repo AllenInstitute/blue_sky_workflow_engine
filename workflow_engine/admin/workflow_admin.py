@@ -2,6 +2,15 @@ from django.contrib import admin
 
 
 class WorkflowAdmin(admin.ModelAdmin):
+    class Media:
+        css = {
+            "all": ("workflow_engine/css/dagre.css", )
+        }
+        js = (
+            'workflow_engine/javascript/cytoscape.min.js',
+            'workflow_engine/javascript/workflow_graph.js',
+        )
+
     change_list_template = 'admin/workflow_change_list.html'
     list_display = [
         'id',
