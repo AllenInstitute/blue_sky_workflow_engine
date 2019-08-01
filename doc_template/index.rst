@@ -9,7 +9,7 @@ Welcome to the Blue Sky Workflow Engine
 =======================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 4
    :titlesonly:
    :hidden:
 
@@ -21,6 +21,7 @@ Welcome to the Blue Sky Workflow Engine
    configurations
    develop
    authors
+   glossary
    Source Documentation <workflow_engine>
    Client Documentation <workflow_client>
    Github Profile <https://github.com/AllenInstitute/BlueSkyWorkflowEngine>

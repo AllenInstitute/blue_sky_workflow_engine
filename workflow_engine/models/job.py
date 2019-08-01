@@ -34,54 +34,40 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 from django.db import models
-from workflow_engine.mixins import Archivable, Tagable, Timestamped
-from django.utils import timezone
+from workflow_engine.mixins import Archivable, Runnable, Tagable, Timestamped
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from workflow_engine.models import TWO, SECONDS_IN_MIN
 import logging
 
 
 _logger = logging.getLogger('workflow_engine.models.job')
 
 
-class Job(Archivable, Tagable, Timestamped, models.Model):
+class Job(Archivable, Runnable, Tagable, Timestamped, models.Model):
     enqueued_object_type = models.ForeignKey(
         ContentType,
         default=None,
         null=True,
         blank=True
     )
+    '''Generic relation type'''
+
     enqueued_object_id = models.IntegerField(
         null=True,
         blank=True
     )
+    '''Generic relation id'''
+
     enqueued_object = GenericForeignKey(
         'enqueued_object_type',
         'enqueued_object_id'
     )
+    '''Combined generic relation type and id'''
+
     workflow_node = models.ForeignKey(
         'workflow_engine.WorkflowNode'
     )
-    run_state = models.ForeignKey(
-        'workflow_engine.RunState'
-    )
-    duration = models.DurationField(
-        null=True,
-        blank=True
-    )
-    start_run_time = models.DateTimeField(
-        null=True,
-        blank=True
-    )
-    end_run_time = models.DateTimeField(
-        null=True,
-        blank=True
-    )
-    error_message = models.TextField(
-        null=True,
-        blank=True
-    )
+
     priority = models.IntegerField(
         default=50
     )
@@ -96,22 +82,10 @@ class Job(Archivable, Tagable, Timestamped, models.Model):
         except:
             return "job {}".format(self.pk)
 
-    def get_created_at(self):
-        return timezone.localtime(self.created_at).strftime(
-            '%m/%d/%Y %I:%M:%S')
-
-    def get_updated_at(self):
-        return timezone.localtime(self.updated_at).strftime(
-            '%m/%d/%Y %I:%M:%S')
-
     def get_color_class(self):
         color = 'color_' + self.run_state.name.lower()
 
         return color
-
-    def set_queued_state(self):
-        self.run_state = RunState.get_queued_state()
-        self.save()
 
     def get_enqueued_object_display(self):
         result = None
@@ -139,7 +113,6 @@ class Job(Archivable, Tagable, Timestamped, models.Model):
         self.save()
 
     def has_failed_tasks(self):
-        _logger.info('has failed tasks')
         has_failed = False
         tasks = self.get_tasks()
         for task in tasks:
@@ -149,49 +122,12 @@ class Job(Archivable, Tagable, Timestamped, models.Model):
         return has_failed
 
     def can_rerun(self):
-        _logger.info('can rerun')
         run_state_name = self.run_state.name
         return (run_state_name == 'PENDING' or
                 run_state_name == 'FAILED' or
                 run_state_name == 'SUCCESS' or
                 run_state_name == 'PROCESS_KILLED' or
                 run_state_name == 'FAILED_EXECUTION')
-
-    def set_pending_state(self):
-        _logger.info('set pending')
-        self.run_state = RunState.get_pending_state()
-        self.save()
-
-    def set_failed_state(self):
-        _logger.info('set failed')
-        self.run_state = RunState.get_failed_state()
-        self.save()
-
-
-    def set_failed_execution_state(self):
-        _logger.info('set failed execution')
-        self.run_state = RunState.get_failed_execution_state()
-        self.save()
-
-
-    def set_running_state_from_queued_or_pending(self):
-        if(self.run_state.name == 'QUEUED' or self.run_state.name == 'PENDING'):
-            self.set_running_state()
-
-    def set_running_state(self):
-        _logger.info('set running')
-        self.run_state = RunState.get_running_state()
-        self.save()
-
-    def set_success_state(self):
-        _logger.info('set success')
-        self.run_state = RunState.get_success_state()
-        self.save()
-
-    def set_process_killed_state(self):
-        _logger.info('set process_killed')
-        self.run_state = RunState.get_process_killed_state()
-        self.save()
 
     def get_strategy(self):
         return self.workflow_node.get_strategy()
@@ -204,11 +140,11 @@ class Job(Archivable, Tagable, Timestamped, models.Model):
                 task.archived = False
                 task.save()
 
-    # TODO: deprecate for archive object manager
+    # TODO: deprecate
     def get_tasks(self):
         return self.task_set.all()
 
-    # TODO: deprecate for archive object manager
+    # TODO: deprecate
     def tasks(self):
         return self.task_set.all()
 
@@ -223,49 +159,9 @@ class Job(Archivable, Tagable, Timestamped, models.Model):
         _logger.info("got strategy: " + str(strategy))
         strategy.prep_job(self)
 
-    def get_start_run_time(self):
-        result = None
-        if self.start_run_time is not None:
-            result = timezone.localtime(
-                self.start_run_time).strftime('%m/%d/%Y %I:%M:%S')
-
-        return result
-
-    def get_end_run_time(self):
-        result = None
-        if self.end_run_time is not None:
-            result = timezone.localtime(
-                self.end_run_time).strftime('%m/%d/%Y %I:%M:%S')
-
-        return result
-
-    def get_duration(self):
-        result = None
-        if self.duration != None:
-            total_seconds = self.duration.seconds
-            minutes = total_seconds / SECONDS_IN_MIN
-
-            result = str(round(minutes,TWO)) + ' min'
-
-        return result
-
-    def set_start_run_time(self):
-        self.start_run_time = timezone.now()
-        self.end_run_time = None
-        self.duration = None
-        self.save()
-
-    def set_end_run_time(self):
-        self.end_run_time = timezone.now()
-        try:
-            self.duration = self.end_run_time - self.start_run_time
-            self.save()
-        except:
-            pass
-
-    # check if all tasks have finished
     def all_tasks_finished(self):
-        _logger.info('check all tasks finished')
+        '''Check if all tasks have finished.
+        '''
         all_finished = True
 
         for task in self.get_tasks():
@@ -273,7 +169,6 @@ class Job(Archivable, Tagable, Timestamped, models.Model):
                 all_finished = task.in_success_state()
 
         return all_finished
-
 
     def kill(self):
         self.set_process_killed_state()
@@ -287,6 +182,3 @@ class Job(Archivable, Tagable, Timestamped, models.Model):
 
     def workflow(self):
         return self.workflow_node.workflow.name
-
-# circular imports
-from .run_state import RunState

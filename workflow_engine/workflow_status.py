@@ -71,15 +71,21 @@ from django.db.models import Count
 import pandas as pd
 import json
 from django_pandas.io import read_frame
+from workflow_engine.mixins import Runnable
 from workflow_engine.models import (
     WorkflowNode,
     WorkflowEdge,
-    RunState
+    Workflow,
 )
 
 class WorkflowStatus(object):
-    def __init__(self, workflow_names):
-        self.workflow_names = workflow_names
+    def __init__(self, workflow_names=None):
+        if workflow_names is not None:
+            self.workflow_names = workflow_names
+        else:
+            self.workflow_names = [
+                w.name for w in Workflow.objects.all()
+            ]
         self.run_states = self.query_run_states()
         self.nodes, self.batch_size = self.query_nodes()
         self.edges = self.query_edges()
@@ -89,13 +95,10 @@ class WorkflowStatus(object):
         self.run_state_totals = self.total_run_states()
 
     def query_run_states(self):
-        run_states = read_frame(
-            RunState.objects.values('id', 'name')
+        return pd.DataFrame(
+            Runnable.get_run_state_names(),
+            columns=['run_state_name']
         )
-        run_states.set_index(['id'], inplace=True)
-        run_states.columns = ['run_state_name']
-
-        return run_states
 
     def query_nodes(self):
         nodes = read_frame(
@@ -136,12 +139,12 @@ class WorkflowStatus(object):
             workflow__name__in=self.workflow_names,
         ).values(
             'id',
-            'job__run_state__id' # 'job_queue__name' for human-readable
+            'job__running_state'
         ).order_by(
             'id',
-            'job__run_state__id', # 'job__run_state__name' for human-readable
+            'job__running_state',
         ).annotate(
-            count=Count('job__run_state_id')
+            count=Count('job__running_state')
         ).all()
 
         run_state_counts = read_frame(qs)

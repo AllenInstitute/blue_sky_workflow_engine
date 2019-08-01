@@ -34,7 +34,12 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 from django.db import models
-from workflow_engine.mixins import Archivable, Configurable, Timestamped
+from workflow_engine.mixins import (
+    Archivable,
+    Configurable,
+    Runnable,
+    Timestamped
+)
 import logging
 
 
@@ -51,59 +56,108 @@ class WorkflowNode(Archivable, Configurable, Timestamped, models.Model):
 
     job_queue = models.ForeignKey(
         'workflow_engine.JobQueue')
+    '''Defines strategy code and a queue of object to be run'''
+
     parent = models.ForeignKey(
         'workflow_engine.WorkflowNode', null=True, blank=True)
+    '''Deprecated field from when workflows were implemented as trees.'''
+
     sinks = models.ManyToManyField(
         'self', through='workflow_engine.WorkflowEdge',
         related_name='sources',
         symmetrical=False,
         through_fields=('source', 'sink')
     )
+    '''Accessor to immediately downstream nodes'''
+
     is_head = models.BooleanField(default=False)
+    '''Deprecated field from when workflows were implemented as trees.'''
+
     workflow = models.ForeignKey(
         'workflow_engine.Workflow')
+    '''Accessor to the workflow collection of nodes and edges'''
+
     disabled = models.BooleanField(default=False)
+    '''Used to temporarily turn off the node.'''
+    
     batch_size = models.IntegerField(default=50)
+    '''How many enqueued objects to submit to the compute cluster at a time.'''
+
     priority = models.IntegerField(default=50)
+    '''Integer value to provide to the compute cluster (lower number is higher priority)'''
+
     overwrite_previous_job = models.BooleanField(default=True)
+    '''Whether to reuse a job records or archive them'''
+
     max_retries = models.IntegerField(default=3)
+    '''How many times to resubmit failed jobs automatically.'''
 
     safe_objects = SafeWorkflowNodeManager()
+    '''Used to filter archived workflow objects out of queries'''
 
     def __str__(self):
+        '''default human readable representation'''
         return self.get_node_short_name()
 
     def get_node_short_name(self):
-        return self.job_queue.name
+        '''Node name is defined by the job queue name'''
+        return self.job_queue.name  # TODO: this interacts poorly w/ unique restriction.
 
     def get_node_name(self):
+        '''Node name for use in the
+        :class:`WorkflowView <workflow_engine.views.workflow_view.WorkflowView>`
+        '''
         return self.job_queue.name + '(' + str(self.get_total_number_of_jobs()) + ') ' + str(self.get_number_of_queued_and_running_jobs()) + ' / '+ str(self.batch_size)
 
     def get_workflow_name(self):
+        '''Helper for the collection name'''
         return self.workflow.name
 
     def get_strategy(self):
+        '''Helper for accessing the implementation'''
         return self.job_queue.get_strategy()
 
     def get_children(self):
-        return self.sinks.all().order_by('sinks')
+        '''Access following nodes.
+
+        Returns
+        -------
+        QuerySet
+            nodes immediately downstream in priority order
+        '''
+        return self.sinks.all().order_by('sinks')  # TODO: priority order?
 
     def get_total_number_of_jobs(self):
+        '''Count all associated jobs regardless of state.
+
+        Returns
+        -------
+        Integer
+            number of unarchived jobs associated with the node
+        '''
         return self.job_set.count()
 
     def get_number_of_queued_and_running_jobs(self):
+        '''Count jobs that are queued or running.
+
+        Returns
+        -------
+        Integer
+            number of unarchived jobs associated with the node
+        '''
         return self.get_queued_and_running_jobs().count()
 
     def get_queued_and_running_jobs(self):
         return self.job_set.filter(
-            run_state_id__in=[
-                RunState.get_queued_state().id,
-                RunState.get_running_state().id]
+            running_state__in=[
+                Runnable.STATE.QUEUED,
+                Runnable.STATE.RUNNING
+            ]
         )
 
     def get_n_pending_jobs(self, number_jobs_to_run):
         return self.job_set.filter(
-            run_state=RunState.get_pending_state(),
+            running_state=Runnable.STATE.PENDING,
         ).order_by(
             'priority',
             '-updated_at'
@@ -129,42 +183,35 @@ class WorkflowNode(Archivable, Configurable, Timestamped, models.Model):
 
     def get_job_states(self):
         result = {}
-        
-        running_state = RunState.get_running_state()
-        pending_state = RunState.get_pending_state()
-        queued_state = RunState.get_queued_state()
-        finished_execution_state = RunState.get_finished_execution_state()
-        success_state = RunState.get_success_state()
-        failed_execution_state = RunState.get_failed_execution_state()
-        failed_state = RunState.get_failed_state()
-        killed_state = RunState.get_process_killed_state()
-    
+
         node_jobs = self.job_set.all()
     
         success_count = node_jobs.filter(
-            run_state_id__in=[success_state.id]).count()
+            running_state=Runnable.STATE.SUCCESS).count()
 
         failed_count = node_jobs.filter(
-            run_state_id__in=[
-                failed_execution_state.id,
-                failed_state.id,
-                killed_state.id]).count()
+            running_state__in=[
+                Runnable.STATE.FAILED_EXECUTION,
+                Runnable.STATE.FAILED,
+                Runnable.STATE.PROCESS_KILLED
+            ]).count()
                 
         running_count = node_jobs.filter(
-            run_state_id__in=[
-                running_state.id,
-                pending_state.id,
-                queued_state.id,
-                finished_execution_state.id]).count()
+            running_state__in=[
+                Runnable.STATE.RUNNING,
+                Runnable.STATE.PENDING,
+                Runnable.STATE.QUEUED,
+                Runnable.STATE.FINISHED_EXECUTION
+            ]).count()
 
         if success_count > 0:
-            result[success_state.name] = success_count
+            result[Runnable.STATE.SUCCESS] = success_count
 
         if failed_count > 0:
-            result[failed_state.name] = failed_count
+            result[Runnable.STATE.FAILED] = failed_count
 
         if running_count > 0:
-            result[running_state.name] = running_count
+            result[Runnable.STATE.RUNNING] = running_count
 
         return result
 
@@ -173,8 +220,4 @@ class WorkflowNode(Archivable, Configurable, Timestamped, models.Model):
             return self.job_queue.enqueued_object_type.model_class().__name__
         except:
             return '-'
-
-
-# circular imports
-from .run_state import RunState
 

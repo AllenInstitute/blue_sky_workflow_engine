@@ -9,8 +9,8 @@ pkill -9 -f "notebook"
 
 # make sure MOAB_AUTH is defined
 
-export BG=green
 export APP=$1
+export BG=$2
 export BG_CONDA_ENV=base
 export BG_CIRCUS_ENV=circus
 export BASE_DIR=/${BG}/$APP

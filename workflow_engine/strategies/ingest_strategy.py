@@ -116,18 +116,6 @@ class IngestStrategy(ExecutionStrategy):
 
         return ret
 
-    def run_task(self, task):
-        try:
-            self.prep_task(task)
-            task.save()
-            self.run_asynchronous_task(task)
-            task.set_queued_state()
-            self.finish_task(task)
-        except Exception as e:
-            task.set_error_message(
-                str(e) + ' - ' + str(traceback.format_exc()))
-            self.fail_task(task)
-
 
 from workflow_engine.workflow_controller import WorkflowController
 from workflow_engine.models import Workflow

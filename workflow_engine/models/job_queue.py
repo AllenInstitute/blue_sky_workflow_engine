@@ -38,10 +38,11 @@ from workflow_engine.import_class import import_class
 from workflow_engine.mixins import Archivable, Nameable, Timestamped
 from django.contrib.contenttypes.models import ContentType
 import logging
-_model_logger = logging.getLogger('workflow_engine.models')
 
 
 class JobQueue(Archivable, Nameable, Timestamped, models.Model):
+    _logger = logging.getLogger('workflow_engine.models.job_queue')
+
     job_strategy_class = models.CharField(max_length=255)
     enqueued_object_type = models.ForeignKey(
         ContentType, default=None, null=True)
@@ -49,7 +50,7 @@ class JobQueue(Archivable, Nameable, Timestamped, models.Model):
         'workflow_engine.Executable', null=True)
 
     def get_strategy(self):
-        _model_logger.info(
+        JobQueue._logger.info(
             "importing %s" % (self.job_strategy_class))
         claz = import_class(self.job_strategy_class)
         strategy_object = claz()

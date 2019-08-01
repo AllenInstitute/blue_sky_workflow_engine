@@ -100,8 +100,10 @@ def process_finished_execution(self, task_id):
         _log.info('processing finished task %s', task_id)
         (task, strategy) = get_task_strategy_by_task_id(task_id)
         strategy.finish_task(task)
-        run_workflow_node_jobs_signature.delay(
-            task.job.workflow_node.id)
+
+        _log.warn('Skipping unneeded run_workflow_node_jobs')
+        #run_workflow_node_jobs_signature.delay(
+        #    task.job.workflow_node.id)
 
         return 'set finished for task {}'.format(task_id)
     except:

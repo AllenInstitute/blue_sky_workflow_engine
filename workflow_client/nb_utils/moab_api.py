@@ -138,7 +138,7 @@ def moab_query(url):
             if 'results' in result_data:
                 result_data = result_data['results']
         elif response.status_code == 401:
-            _log.error('Moab credentials: {}'.format(os.environ.get('MOAB_AUTH')))
+            _log.error('Bad moab credentials')
             result_data = "Error"
         else:
             _log.error('Moab response code: {}'.format(response.status_code))
@@ -230,19 +230,25 @@ def query_moab_state(state_dicts):
     _log.info('moab dict: {}'.format(
         json.dumps(moab_dict, indent=2)))
 
-    moab_state_df = pd.DataFrame.from_records([
-        (job['name'],
-         job['customName'],
-         job['states']['state'],
-         job['isActive'],
-         job['credentials']['user'],
-         job['completionCode']) for job in moab_dict],
-        columns=[
-            'moab_id', 'task_name', 'moab_state', 'active', 'user', 'exit_code']
-    )
+    column_names = [
+        'moab_id', 'task_name', 'moab_state', 'active', 'user', 'exit_code'
+    ]
 
-    active_idx = moab_state_df.loc[moab_state_df.active == True].index
-    moab_state_df.loc[active_idx,['moab_state']] = 'Running'
+    try:
+        moab_state_df = pd.DataFrame.from_records([
+            (job['name'],
+             job['customName'],
+             job['states']['state'],
+             job['isActive'],
+             job['credentials']['user'],
+             job['completionCode']) for job in moab_dict],
+            columns=column_names
+        )
+
+        active_idx = moab_state_df.loc[moab_state_df.active == True].index
+        moab_state_df.loc[active_idx,['moab_state']] = 'Running'
+    except:
+        moab_state_df = pd.DataFrame(columns=column_names)
 
     return moab_state_df
 

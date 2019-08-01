@@ -35,6 +35,7 @@
 #
 from django.contrib.contenttypes.models import ContentType
 from workflow_engine.import_class import import_class
+from io import StringIO
 import yaml
 import logging
 
@@ -54,6 +55,16 @@ class WorkflowConfig:
     @classmethod
     def from_yaml(cls, y):
         definition = yaml.load(y)
+        return cls.parse_yaml_definition(definition)
+
+    @classmethod
+    def from_yaml_string(cls, y):
+        strm = StringIO(y)
+        definition = yaml.load(strm)
+        return cls.parse_yaml_definition(definition)
+
+    @classmethod
+    def parse_yaml_definition(cls, definition):
         workflows = {
             'executables': definition['executables'],
             'workflows': []
@@ -135,9 +146,19 @@ class WorkflowConfig:
 
 
     @classmethod
+    def create_workflow_from_string(cls, yml_string):
+        workflow_config = cls.from_yaml_string(yml_string)
+
+        cls.create_workflow_from_config(workflow_config)
+
+    @classmethod
     def create_workflow(cls, workflows_yml):
         workflow_config = cls.from_yaml_file(workflows_yml)
 
+        cls.create_workflow_from_config(workflow_config)
+
+    @classmethod
+    def create_workflow_from_config(cls, workflow_config):
         null_executable, _ = Executable.objects.get_or_create(
                 name='Null Executable',
                 defaults={
@@ -271,7 +292,6 @@ class WorkflowConfig:
             flow.archive()
         for edge in WorkflowEdge.all_objects.filter(archived=False):
             edge.archive()
-        # RunState.objects.all().delete()  # TODO: runstates are in regular config.
 
 
 # circular imports?

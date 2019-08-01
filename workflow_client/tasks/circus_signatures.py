@@ -7,13 +7,25 @@ _PRIORITY_LOW=4
 
 
 submit_task_signature = signature(
-    'workflow_engine.celery.circus_tasks.submit_worker_task')
+    'workflow_engine.celery.submit_worker_task')
 submit_task_signature.set(
     broker_connection_timeout=10,
     broker_connection_retry=False,
     priority=_PRIORITY_NORMAL,
     retry=False,
     ignore_result=False
+)
+
+
+submit_mock_signature = signature(
+    'workflow_engine.celery.submit_mock_task')
+submit_task_signature.set(
+    broker_connection_timeout=10,
+    broker_connection_retry=False,
+    priority=_PRIORITY_NORMAL,
+    retry=False,
+    ignore_result=False,
+    expires=60,
 )
 
 

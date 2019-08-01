@@ -72,6 +72,12 @@ class BaseStrategy(object):
     def on_finishing(self, enqueued_object, results, task):
         pass
 
+    # Do not override
+    def get_job_storage_directory(self, base_storage_directory, job):
+        return os.path.join(
+            self.get_storage_directory(base_storage_directory, job),
+            'jobs', 'job_' + str(job.id))
+
     # override if needed
     def get_storage_directory(self, base_storage_directory, job):
         enqueued_object = job.enqueued_object
@@ -86,9 +92,6 @@ class BaseStrategy(object):
                 str(job.enqueued_object_type).replace(' ', '_'),
                 str(job.enqueued_object_id)
             ]
-
-        BaseStrategy._log.info('get_storage_directory: %s, %s:' % (
-            base_storage_directory, str(enqueued_object.id)))
 
         return os.path.join(*dirs)
 
@@ -130,12 +133,6 @@ class BaseStrategy(object):
 
     def is_wait_strategy(self):
         return False
-
-    # Do not override
-    def get_job_storage_directory(self, base_storage_directory, job):
-        return os.path.join(
-            self.get_storage_directory(base_storage_directory, job),
-            'jobs', 'job_' + str(job.id))
 
     @classmethod
     def make_dirs_chmod(cls, path, mode):
@@ -179,11 +176,23 @@ class BaseStrategy(object):
             task.set_error_message(str(e) + ' - ' + \
                 str(traceback.format_exc()))
 
-        task.set_failed_state()
-        task.set_end_run_time()
-        task.job.set_failed_state()
-        task.job.set_end_run_time()
-        task.rerun()
+        task.set_failed_fields_and_rerun()
+
+
+    # Do not override
+    def fail_execution_task(self, task):
+        try:
+            self.set_error_message_from_log(task)
+            self.on_failure(task)
+        except Exception as e:
+            err_msg = '%s - %s' % (
+                str(e),
+                str(traceback.format_exc()))
+            BaskeStrategy._log.info(err_msg) 
+            task.set_error_message(err_msg)
+
+        task.set_failed_execution_fields_and_rerun()
+
 
     # Do not override
     # TODO: deprecate

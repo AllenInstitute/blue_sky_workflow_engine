@@ -58,6 +58,8 @@ class WorkflowController(object):
 
     @classmethod
     def run_workflow_node_jobs(cls, workflow_node):
+        WorkflowController._log.info("Node: {}".format(workflow_node))
+
         if (workflow_node.workflow.disabled or
             workflow_node.disabled):
             return
@@ -70,10 +72,21 @@ class WorkflowController(object):
             number_of_queued_and_running_jobs
         )
 
+        WorkflowController._log.info(
+            "{} jobs to run".format(number_jobs_to_run)
+        )
+
+        WorkflowController._log.info(
+            "Found {} jobs".format(Job.objects.count())
+        )
+
         # run more jobs
         if number_jobs_to_run > ZERO:
             for job_to_run in workflow_node.get_n_pending_jobs(
                 number_jobs_to_run):
+                WorkflowController._log.info(
+                    "running job {}".format(job_to_run)
+                )
                 WorkflowController.job_run(job_to_run)
 
     # TODO: this is the signal from an out-of-band job
@@ -89,10 +102,11 @@ class WorkflowController(object):
         '''
         jobs = Job.objects.filter(
             workflow_node__job_queue__name=queue_name,
-            run_state__in=[
-                RunState.get_pending_state(),
-                RunState.get_queued_state()],
-            archived=False)
+            running_state__in=[
+                Runnable.STATE.PENDING,
+                Runnable.STATE.QUEUED
+            ]
+         )
 
         for job in jobs:
             job.set_pending_state()
@@ -198,21 +212,17 @@ class WorkflowController(object):
 
     @classmethod
     def create_tasks(cls, job):
-        #reused_tasks = {}
         strategy = job.get_strategy()
-        pending_state = RunState.get_pending_state()
 
         task_objects = strategy.get_task_objects_for_queue(
             job.enqueued_object
         )
 
         for task_object in task_objects:
-            # TODO: deprecate
-            enqueued_object_full_class = \
-                type(task_object).__module__ + '.' + type(task_object).__name__
-
             default_options = {
-                'run_state': pending_state,
+                'run_state_id': Runnable.get_run_state_id_for(
+                    Runnable.STATE.PENDING),
+                'running_state': Runnable.STATE.PENDING,
                 'archived': False,
                 'retry_count': ZERO
             }
@@ -231,22 +241,14 @@ class WorkflowController(object):
                     )
 
                     if not created:
-                        tsk.run_state=pending_state
                         tsk.archived=False
                         tsk.retry_count=0
-                        tsk.save()
+                        tsk.set_pending_state()
                 except Exception as e:
                     raise(e)
 
-            WorkflowController._log.info(
-                'creating task with enqueued type: {}'.format( 
-                    enqueued_task_object_type
-                )
-            )
-
     @classmethod
     def job_run(cls, job):
-        WorkflowController._log.info('run')
         try:
             job.set_queued_state()
             job.set_start_run_time()
@@ -257,7 +259,6 @@ class WorkflowController(object):
 
             for task in job.get_tasks():
                 task.run_task()
-
         except Exception as e:
             job.set_error_message(
                 str(e) + ' - ' + str(traceback.format_exc()), None)
@@ -299,8 +300,8 @@ class WorkflowController(object):
             archived=False)
 
         if set_success:
-            job.run_state = RunState.get_success_state()
-            job.save()
+            job.set_success_state()
+
         cls.enqueue_next_queue(job)
 
     @classmethod
@@ -315,7 +316,9 @@ class WorkflowController(object):
 
         if reuse_job:
             default_options = {
-                'run_state': RunState.get_pending_state(),
+                'run_state_id': Runnable.get_run_state_id_for(
+                    Runnable.STATE.PENDING),
+                'running_state': Runnable.STATE.PENDING,
                 'priority': priority
             }
 
@@ -332,9 +335,9 @@ class WorkflowController(object):
             job = Job()
             job.enqueued_object = enqueued_object
             job.workflow_node = workflow_node
-            job.run_state = RunState.get_pending_state()
             job.priority = workflow_node.priority
-            job.save()
+
+        job.set_pending_state() # does save and keeps run_state/running_state in sync
 
         return job
 
@@ -362,6 +365,8 @@ class WorkflowController(object):
 
         run_workflow_node_jobs_signature.delay(job.workflow_node.id)
 
+        return job.id
+
     @classmethod
     def start_workflow(
         cls,
@@ -387,6 +392,7 @@ class WorkflowController(object):
         workflow_node_id,
         enqueued_object_id,
         priority):
+
         workflow_node = WorkflowNode.objects.get(
             id=workflow_node_id)
         enqueued_object_type = workflow_node.job_queue.enqueued_object_type
@@ -401,13 +407,11 @@ class WorkflowController(object):
 
 
 # circular imports
+from workflow_engine.mixins import Runnable
 from workflow_engine.models import (
     ZERO,
-    ONE,
     Job,
     Task,
-    RunState,
-    WorkflowNode,
-    Workflow
+    WorkflowNode
 )
 

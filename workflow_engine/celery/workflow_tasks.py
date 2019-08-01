@@ -79,7 +79,7 @@ def report_error(msg):
     name='workflow_engine.celery.workflow_tasks.create_job')
 def create_job(self, workflow_node_id, enqueued_object_id, priority):
     try:
-        job = WorkflowController.create_job(
+        job_id = WorkflowController.create_job(
             workflow_node_id,
             enqueued_object_id,
             priority)
@@ -90,10 +90,10 @@ def create_job(self, workflow_node_id, enqueued_object_id, priority):
         report_exception('Error creating job. ', e)
         return(str(e))
 
-    if job is None:
-        return -1
+    if job_id is None:
+        job_id = -1
 
-    return job.id
+    return job_id
 
 
 @celery.shared_task(
@@ -101,6 +101,7 @@ def create_job(self, workflow_node_id, enqueued_object_id, priority):
     name='workflow_engine.celery.workflow_tasks.run_workflow_node_jobs_by_id'
 )
 def run_workflow_node_jobs_by_id(self, workflow_node_id):
+    _log.info('REQUEST: {}'.format(self.request))
     try:
         workflow_node = WorkflowNode.objects.get(id=workflow_node_id)
         WorkflowController.run_workflow_node_jobs(workflow_node)

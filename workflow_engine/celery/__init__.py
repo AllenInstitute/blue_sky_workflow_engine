@@ -12,7 +12,7 @@ try:
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'proj.settings')
      
     app = Celery('workflow_engine.celery',
-                 broker_url='pyamqp://{}:{}@{}:{}/vhost/{}/'.format(
+                 broker_url='pyamqp://{}:{}@{}:{}/vhost/{}'.format(
                      settings.MESSAGE_QUEUE_USER,
                      settings.MESSAGE_QUEUE_PASSWORD,
                      settings.MESSAGE_QUEUE_HOST,

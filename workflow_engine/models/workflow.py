@@ -36,10 +36,11 @@
 from django.db import models
 from workflow_engine.mixins import Archivable, Nameable, Timestamped
 import logging
-_model_logger = logging.getLogger('workflow_engine.models')
 
 
 class Workflow(Archivable, Nameable, Timestamped, models.Model):
+    _logger = logging.getLogger('workflow_engine.models.workflow')
+
     ingest_strategy_class = models.CharField(max_length=255, null=True)
     disabled = models.BooleanField(default=False)
     use_pbs = models.BooleanField(default=False)
@@ -56,7 +57,7 @@ class Workflow(Archivable, Nameable, Timestamped, models.Model):
     
         if description == '':
             description = None
-    
+
         self.name = name
         self.description = description
         self.disabled = current_disabled

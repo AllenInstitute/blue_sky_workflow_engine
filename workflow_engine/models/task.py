@@ -34,82 +34,76 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 from django.db import models
-from django.utils import timezone
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from workflow_engine.models import ONE, ZERO, TWO, SECONDS_IN_MIN
-from workflow_engine.mixins import Archivable, Tagable, Timestamped
+from workflow_engine.models import ONE, ZERO
+from workflow_engine.mixins import Archivable, Runnable, Tagable, Timestamped
 from workflow_client.pbs_utils import PbsUtils
 import os
 import logging
+from django_fsm import can_proceed
 
 
 _logger = logging.getLogger('workflow_engine.models.task')
 
 
-class Task(Archivable, Tagable, Timestamped, models.Model):
+class Task(Archivable, Runnable, Tagable, Timestamped, models.Model):
     enqueued_task_object_type = models.ForeignKey(
         ContentType,
         default=None,
         null=True
     )
+    '''Generic relation type'''
+
     enqueued_task_object_id = models.IntegerField(
         null=True
     )
+    '''Generic relation id'''
+
     enqueued_task_object = GenericForeignKey(
         'enqueued_task_object_type',
         'enqueued_task_object_id')
+    '''Combined generic relation type and id'''
+
     job = models.ForeignKey(
         'workflow_engine.Job'
     )
-    run_state = models.ForeignKey(
-        'workflow_engine.RunState'
-    )
+
     full_executable = models.CharField(
         max_length=1000,
         null=True
     )
-    error_message = models.TextField(
-        null=True,
-        blank=True
-    )
+
     log_file = models.CharField(
         max_length=255,
         null=True,
         blank=True
     )
+
     input_file = models.CharField(
         max_length=255,
         null=True,
         blank=True
     )
+
     output_file = models.CharField(
         max_length=255,
         null=True,
         blank=True
     )
+
     pbs_file = models.CharField(
         max_length=255,
         null=True,
         blank=True)
-    start_run_time = models.DateTimeField(
-        null=True,
-        blank=True
-    )
-    end_run_time = models.DateTimeField(
-        null=True,
-        blank=True
-    )
-    duration = models.DurationField(
-        null=True,
-        blank=True
-    )
+
     pbs_id = models.CharField(
         max_length=255,
         null=True,
         blank=True
     )
+
     retry_count = models.IntegerField(
         default=0
     )
@@ -123,20 +117,6 @@ class Task(Archivable, Tagable, Timestamped, models.Model):
             )
         except:
             return "task {}".format(self.pk)
-
-    def get_created_at(self):
-        return timezone.localtime(
-            self.created_at
-        ).strftime(
-            '%m/%d/%Y %I:%M:%S'
-        )
-
-    def get_updated_at(self):
-        return timezone.localtime(
-            self.updated_at
-        ).strftime(
-            '%m/%d/%Y %I:%M:%S'
-        )
 
     def set_error_message(self, error_message):
         self.error_message = str(error_message)
@@ -179,22 +159,6 @@ class Task(Archivable, Tagable, Timestamped, models.Model):
 
         self.set_end_run_time()
 
-    def get_start_run_time(self):
-        result = None
-        if self.start_run_time != None:
-            result = timezone.localtime(
-                self.start_run_time).strftime('%m/%d/%Y %I:%M:%S')
-
-        return result
-
-    def get_end_run_time(self):
-        result = None
-        if self.end_run_time != None:
-            result = timezone.localtime(
-                self.end_run_time).strftime('%m/%d/%Y %I:%M:%S')
-
-        return result
-
     def get_enqueued_object_display(self):
         result = None
 
@@ -204,27 +168,6 @@ class Task(Archivable, Tagable, Timestamped, models.Model):
             result = str(None)
 
         return result
-
-    def get_duration(self):
-        result = None
-        if self.duration != None:
-            total_seconds = self.duration.seconds
-            minutes = total_seconds / SECONDS_IN_MIN
-
-            result = str(round(minutes,TWO)) + ' min'
-
-        return result
-
-    def set_start_run_time(self):
-        self.start_run_time = timezone.now()
-        self.end_run_time = None
-        self.duration = None
-        self.save()
-
-    def set_end_run_time(self):
-        self.end_run_time = timezone.now()
-        self.duration = self.end_run_time - self.start_run_time
-        self.save()
 
     def in_failed_state(self):
         run_state_name = self.run_state.name
@@ -257,16 +200,28 @@ class Task(Archivable, Tagable, Timestamped, models.Model):
             self.get_strategy().get_task_arguments(self)
         )
 
-    def fail_task(self):
-        strategy = self.get_strategy()
-        strategy.fail_task(self)
+#     def fail_task(self):
+#         strategy = self.get_strategy()
+#         strategy.fail_task(self)
 
-    def set_failed_execution_fields_and_rerun(self):
+    def set_failed_fields_and_rerun(self, rerun=True):
+        self.set_failed_state()
+        self.set_end_run_time()
+        self.job.set_failed_state()
+        self.job.set_end_run_time()
+
+        if rerun is True:
+            self.rerun()
+
+
+    def set_failed_execution_fields_and_rerun(self, rerun=True):
         self.set_failed_execution_state()
         self.set_end_run_time()
         self.job.set_failed_execution_state()
         self.job.set_end_run_time()
-        self.rerun()
+
+        if rerun is True:
+            self.rerun()
 
     def get_max_retries(self):
         return self.job.workflow_node.max_retries
@@ -291,54 +246,21 @@ class Task(Archivable, Tagable, Timestamped, models.Model):
         strategy.run_task(self)
 
     def set_pending_state(self):
-        _logger.info("set pending state")
         strategy = self.get_strategy()
         strategy.run_task(self)
-        self.run_state = RunState.get_pending_state()
-        self.save()
+        Runnable.set_pending_state()
 
-    def set_process_killed_state(self):
-        _logger.info("set process killed state")
-        self.run_state = RunState.get_process_killed_state()
-        self.save()
-
-    def set_running_state(self):
-        _logger.info("set running state")
-        self.run_state = RunState.get_running_state()
-        self.save()
-
-    def set_finished_execution_state(self):
-        _logger.info("finished execution state")
-        self.run_state = RunState.get_finished_execution_state()
-        self.save()
-
-    def set_failed_state(self):
-        _logger.info("set failed state")
-        self.run_state = RunState.get_failed_state()
-        self.save()
-
-    def set_failed_execution_state(self):
-        _logger.info("set failed execution state")
-        self.run_state = RunState.get_failed_execution_state()
-        self.save()
-
-    def set_success_state(self):
-        _logger.info("set success state")
-        self.run_state = RunState.get_success_state()
-        self.save()
-
-    def set_queued_state(self, pbs_id=None):
-        _logger.info("set queued state: %s", str(pbs_id))
-        self.run_state = RunState.get_queued_state()
+    def set_queued_state(self, pbs_id=None, quiet=False):
+        _logger.info("set queued state: {}".format(pbs_id))
         if pbs_id is not None:
             self.pbs_id = pbs_id
-        self.save()
+        Runnable.set_queued_state(self, pbs_id, quiet)
 
     def in_pending_state(self):
-        return (self.run_state.name == 'PENDING')
+        return (self.run_state.name == Runnable.STATE.PENDING)
 
     def in_success_state(self):
-        return (self.run_state.name == RunState.get_success_state().name)
+        return (self.run_state.name == Runnable.STATE.SUCCESS)
 
     def get_enqueued_job_object(self):
         return self.job.enqueued_object
@@ -379,7 +301,3 @@ class Task(Archivable, Tagable, Timestamped, models.Model):
 
     def get_file_records(self):
         return list(self.filerecord_set.all())
-
-
-# circular imports
-from .run_state import RunState

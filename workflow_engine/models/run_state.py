@@ -33,13 +33,13 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-from django.db import models
+from django.db.models import Model, CharField
 import logging
 _model_logger = logging.getLogger('workflow_engine.models')
 
 
-class RunState(models.Model):
-    name = models.CharField(max_length=255, unique=True)
+class RunState(Model):
+    name = CharField(max_length=255, unique=True)
 
     def __str__(self):
         return self.name

@@ -39,26 +39,40 @@ import logging
 
 
 class WorkflowEdge(Archivable, Timestamped, models.Model):
+    '''Links workflow nodes together to define :ref:`workflows`.
+    Provides a through table for many-to-many relation between workflow nodes.
+    '''
+
     _log = logging.getLogger('workflow_engine.models.workflow_edge')
 
     workflow = models.ForeignKey(
         'workflow_engine.Workflow')
+    '''The workflow graph containing this edge and related nodes'''
+
     source = models.ForeignKey(
         'workflow_engine.WorkflowNode',
         related_name='%(class)s_source',
         null=True, blank=True)
+    '''Association to the workflow node leading into the edge (or null)'''
+
     sink = models.ForeignKey(
         'workflow_engine.WorkflowNode',
         related_name='%(class)s_sink',
         null=True, blank=True)
+    '''Association to the workflow node leading out of the edge (or null)'''
+
     disabled = models.BooleanField(default=False)
+    '''Mark an edge that is not to be used temporarily.'''
+
     priority = models.PositiveIntegerField(
         default=1
     )
+    '''Used for sort order'''
 
     class Meta:
         ordering = ('priority',)
 
 
     def __str__(self):
+        '''Human readable name in terms of the source and sink nodes'''
         return "{} -> {}".format(str(self.source), str(self.sink))

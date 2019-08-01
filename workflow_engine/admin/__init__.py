@@ -2,7 +2,6 @@ from django.contrib import admin
 from workflow_engine.models import (
     Executable,
     JobQueue,
-    RunState,
     WellKnownFile,
     FileRecord,
     Workflow,
@@ -30,7 +29,6 @@ admin.site.register(FileRecord)
 admin.site.register(Job, JobAdmin)
 admin.site.register(JobQueue, JobQueueAdmin)
 admin.site.register(WellKnownFile, WellKnownFileAdmin)
-admin.site.register(RunState)
 admin.site.register(Task, TaskAdmin)
 admin.site.register(Workflow, WorkflowAdmin)
 admin.site.register(WorkflowNode, WorkflowNodeAdmin)

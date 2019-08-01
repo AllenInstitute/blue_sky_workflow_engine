@@ -38,14 +38,12 @@ import django; django.setup()
 from django.conf import settings
 from workflow_engine.models import (
     WorkflowNode,
-    RunState,
     Job
 )
 from workflow_engine.import_class import import_class
 from workflow_client.client_settings import configure_worker_app
 import pandas as pd
 import itertools as it
-from django_pandas.io import read_frame
 from datetime import datetime
 import json
 import logging
@@ -91,11 +89,6 @@ def count_node_jobs_in_state(node, run_state):
 def workflow_summary(workflow_object):
     wns = workflow_object.workflownode_set.filter(
         archived=False)
-    rs = RunState.objects.all()
-
-    jobs = Job.objects.filter(
-        archived=False)
-    jobs_df = read_frame(jobs)
 
     counts = [{
         'node': node,
@@ -103,7 +96,7 @@ def workflow_summary(workflow_object):
         'count':  count_node_jobs_in_state(node, run_state) } 
         for (node, run_state) in it.product(
             (str(n) for n in wns),
-            (s.name for s in rs)) ]
+            Job.get_run_state_names()) ]
 
     counts.extend([{
         'node': str(n),

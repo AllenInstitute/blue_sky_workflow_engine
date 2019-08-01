@@ -203,7 +203,7 @@ echo $? > exit_code.txt
 
 
 @celery.shared_task(
-    name='workflow_engine.celery.circus_tasks.submit_worker_task',
+    name='workflow_engine.celery.submit_worker_task',
     base=CircusProcessTask,
     bind=True,
     trail=True)

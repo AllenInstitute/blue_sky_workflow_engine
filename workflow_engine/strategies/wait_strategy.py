@@ -33,7 +33,6 @@ class WaitStrategy(ExecutionStrategy):
 
             if self.must_wait(enqueued_object):
                 task.set_queued_state()
-                task.job.set_queued_state()
             else:
                 self.prep_task(task)
                 self.finish_task(task)

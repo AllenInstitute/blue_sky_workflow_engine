@@ -3,6 +3,7 @@ import logging
 
 class SimpleRouter(object):
     _log = logging.getLogger('workflow_client.simple_router')
+    # Note the values are sets, not dicts
     base_dict = {
         'ingest': {
             'ingest_task',
@@ -25,6 +26,9 @@ class SimpleRouter(object):
             'submit_worker_task',
             'check_circus_status'
         },
+        'mock': {
+            'submit_mock_task',
+        },
         'workflow': {
             'create_job',
             'queue_job',
@@ -32,9 +36,6 @@ class SimpleRouter(object):
             'enqueue_next_queue',
             'run_workflow_node_jobs_by_id',
             'failed_execution_handler'
-        },
-        'ingest': {
-            'ingest_task'
         },
         'result': { 
             'process_pbs_id',
@@ -84,8 +85,16 @@ class SimpleRouter(object):
     def route_task(self, name, args, kwargs,
                   options, task=None, **kw):
         task_name = name.split('.')[-1]
+        SimpleRouter._log.info('ROUTING: {}'.format(options))
 
         try:
+#             if task_name == 'submit_worker_task' and 'queue' in options:
+#                 q = '{}@{}'.format(
+#                     options['queue'].name,
+#                     self.app_name
+#                 )
+#                 SimpleRouter._log.debug("QQ{}:".format(q))
+#             else:
             q = self.routing_dict.get(task_name)
             SimpleRouter._log.info(
                 'Routing task %s to %s', task_name, q
@@ -95,6 +104,8 @@ class SimpleRouter(object):
                 'Unknown task {}'.format(task_name))
             q = 'null'
 
+        SimpleRouter._log.info('q: {}'.format(q))
+
         return {
             'exchange': '{}__{}'.format(
                 self.app_name,
@@ -103,7 +114,7 @@ class SimpleRouter(object):
         }
 
     def task_queues(self, worker_names):
-        return [
+        queues =  [
             Queue(
                 "{}@{}".format(worker_name, self.app_name),
                 self.exchange[self.blue_green],
@@ -112,4 +123,19 @@ class SimpleRouter(object):
             )
             for worker_name in worker_names
         ]
+        node_exchange = Exchange(
+            'workflow_nodes',
+            routing_key='at_em.#',
+            type='topic')
+        if 'workflow' in worker_names:
+            queues.append(
+                Queue(
+                    'at_em.#',
+                    node_exchange,
+                    routing_key='at_em.#',
+                    queue_arguments={'x-max-priority': 10}
+                )
+            )
+
+        return queues
 

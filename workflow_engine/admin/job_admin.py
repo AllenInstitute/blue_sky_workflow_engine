@@ -2,7 +2,6 @@ from django.contrib import admin
 from workflow_engine.workflow_controller import WorkflowController
 from workflow_engine.models import (
     Task,
-    RunState
 )
 from django.urls import reverse
 from django.utils.safestring import mark_safe
@@ -21,8 +20,7 @@ def set_killed(modeladmin, request, queryset):
         "Set job state to killed"
 
     for job in queryset:
-        job.run_state = RunState.objects.get(name='PROCESS_KILLED')
-        job.save()
+        job.set_process_killed_state()
 
 
 def start_jobs(modeladmin, request, queryset):

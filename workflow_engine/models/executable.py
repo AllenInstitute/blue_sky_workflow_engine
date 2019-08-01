@@ -41,7 +41,7 @@ from workflow_engine.mixins import (
     Timestamped
 )
 import logging
-_model_logger = logging.getLogger('workflow_engine.models')
+_model_logger = logging.getLogger('workflow_engine.models.executable')
 
 
 class Executable(Archivable, Configurable, Nameable, Timestamped, models.Model):
@@ -120,18 +120,23 @@ class Executable(Archivable, Configurable, Nameable, Timestamped, models.Model):
         '''
             returns: environment variable list in form VAR=val
         '''
-        _model_logger.info('ENV')
         env = self.environment
+        _model_logger.info('ENV :{}'.format(env))
 
-        try:
-            env = env.split(';')
-        except:
+        if env is None or len(env) == 0:
             env = []
+        else:
+            try:
+                env = env.split(';')
+            except:
+                env = []
 
         spark_env = self.spark_moab_environment()
         _model_logger.info('SPARK ENV: {}'.format(spark_env))
 
         if spark_env is not None:
             env.extend(["{}={}".format(k,v) for k,v in spark_env.items()])
+
+        _model_logger.info("ENV: {}".format(env))
 
         return env

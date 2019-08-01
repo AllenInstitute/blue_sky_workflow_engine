@@ -34,17 +34,11 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 import celery
-from django.core.exceptions import ObjectDoesNotExist
 import logging
-import os
-from workflow_engine.celery.signatures \
-    import process_pbs_id_signature, \
-    process_running_signature, \
-    process_failed_execution_signature, \
-    process_finished_execution_signature
+from workflow_engine.celery import signatures
 
 
-_log = logging.getLogger('workflow_engine.celery.local_tasks')
+_log = logging.getLogger('workflow_engine.celery.mock_tasks')
 
 
 SUCCESS_EXIT_CODE = 0
@@ -74,33 +68,37 @@ def check_status(self):
     return 'OK'
 
 
-@celery.shared_task(bind=True, trail=True)
-def submit_worker_task(self, task_id):
-    _log.info('Submitting task %d', task_id)
+@celery.shared_task(
+    name='workflow_engine.celery.submit_mock_task',
+    bind=True,
+    trail=True
+)
+def submit_mock_task(self, task_id):
+    _log.info('Submitting task {}'.format(task_id))
 
     try:
         the_task = Task.objects.get(id=task_id)
 
         if the_task.in_pending_state():
             mock_moab_id = task_id
-            process_pbs_id_signature.delay(task_id, mock_moab_id)
-            process_running_signature.delay(task_id)
+            signatures.process_pbs_id_signature.delay(task_id, mock_moab_id)
+            signatures.process_running_signature.delay(task_id)
 
-            exit_code = os.system(the_task.full_executable)
+            exit_code = SUCCESS_EXIT_CODE
 
             if exit_code == SUCCESS_EXIT_CODE:
-                process_finished_execution_signature.delay(task_id)
+                signatures.process_finished_execution_signature.delay(task_id)
 
                 # with open(logfile, "a") as log:
                 #     log.write("SUCCESS - execution finished successfully for task " +
                 #     str(task_id))
             else:
-                process_failed_execution_signature.delay(task_id)
+                signatures.process_failed_execution_signature.delay(task_id)
 
                 # with open(logfile, "a") as log:
                 #    log.write("FAILURE - execution failed for task " + str(task_id))
     except:
-        process_failed_execution_signature.delay(task_id)
+        signatures.process_failed_execution_signature.delay(task_id)
 
     return None
 
