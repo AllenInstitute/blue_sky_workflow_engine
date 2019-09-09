@@ -1,0 +1,573 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>workflow_engine.workflow_controller &#8212; Blue Sky Workflow Engine  documentation</title>
+    <link rel="stylesheet" href="../../_static/aibs_sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head>
+  <body>
+<link href="http://www.brain-map.org/assets/stylesheets/portal.css" media="screen" rel="stylesheet" type="text/css" />
+<script src="http://www.brain-map.org/assets/javascripts/portal.js" type="text/javascript"></script>
+<script src="http://www.brain-map.org/assets/javascripts/ga.js" type="text/javascript"></script>
+<script type="text/javascript">
+    var _pSupressBrowserFlashWarning = true;
+    var _pTabId = "pHome";
+    var _pMoreProjectsId = "pMoreProjects";
+    var _pImagePath = "http://www.brain-map.org/assets/images/";
+    var _pSiteWarnings = function() {
+        this.show_warning() = {};
+    }
+</script>
+<script type="text/javascript">
+    function initialize() {
+        /*** do your stuff, then initialize the portal plugin ***/
+        _pPortalOnLoad();
+    }
+</script>
+<style>
+  #header_content > a {
+  display: inline-block;
+  width: 250px;
+  height: 75px;
+  background-image:url("/_static/external_assets/images/Brain_Atlas_Logotype_SDK.png") !important;
+  background-size: 235px 37px;
+  background-position: 0px 20px;
+  background-repeat: no-repeat;
+  }
+</style>
+
+<script type="text/javascript" src="http://www.brain-map.org/external_assets/javascripts/portalHeader.js"></script>
+<link rel="stylesheet" type="text/css" href="/_static/external_assets/stylesheets/common_layout.css" />
+
+
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for workflow_engine.workflow_controller</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Allen Institute Software License - This software license is the 2-clause BSD</span>
+<span class="c1"># license plus a third clause that prohibits redistribution for commercial</span>
+<span class="c1"># purposes without further permission.</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright 2017. Allen Institute. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Redistribution and use in source and binary forms, with or without</span>
+<span class="c1"># modification, are permitted provided that the following conditions are met:</span>
+<span class="c1">#</span>
+<span class="c1"># 1. Redistributions of source code must retain the above copyright notice,</span>
+<span class="c1"># this list of conditions and the following disclaimer.</span>
+<span class="c1">#</span>
+<span class="c1"># 2. Redistributions in binary form must reproduce the above copyright notice,</span>
+<span class="c1"># this list of conditions and the following disclaimer in the documentation</span>
+<span class="c1"># and/or other materials provided with the distribution.</span>
+<span class="c1">#</span>
+<span class="c1"># 3. Redistributions for commercial purposes are not permitted without the</span>
+<span class="c1"># Allen Institute&#39;s written permission.</span>
+<span class="c1"># For purposes of this license, commercial purposes is the incorporation of the</span>
+<span class="c1"># Allen Institute&#39;s software into anything for which you will charge fees or</span>
+<span class="c1"># other compensation. Contact terms@alleninstitute.org for commercial licensing</span>
+<span class="c1"># opportunities.</span>
+<span class="c1">#</span>
+<span class="c1"># THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;</span>
+<span class="c1"># AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</span>
+<span class="c1"># IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</span>
+<span class="c1"># ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE</span>
+<span class="c1"># LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR</span>
+<span class="c1"># CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF</span>
+<span class="c1"># SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS</span>
+<span class="c1"># INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN</span>
+<span class="c1"># CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)</span>
+<span class="c1"># ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</span>
+<span class="c1"># POSSIBILITY OF SUCH DAMAGE.</span>
+<span class="c1">#</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">from</span> <span class="nn">django.contrib.contenttypes.models</span> <span class="k">import</span> <span class="n">ContentType</span>
+<span class="kn">from</span> <span class="nn">django.core.exceptions</span> <span class="k">import</span> <span class="n">ObjectDoesNotExist</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">transaction</span>
+<span class="p">)</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">workflow_engine.celery.signatures</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">run_workflow_node_jobs_signature</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">builtins</span> <span class="k">import</span> <span class="nb">classmethod</span>
+
+
+<div class="viewcode-block" id="WorkflowController"><a class="viewcode-back" href="../../workflow_engine.html#workflow_engine.workflow_controller.WorkflowController">[docs]</a><span class="k">class</span> <span class="nc">WorkflowController</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">_log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;workflow_engine.workflow_controller&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="WorkflowController.run_workflow_nodes"><a class="viewcode-back" href="../../workflow_engine.html#workflow_engine.workflow_controller.WorkflowController.run_workflow_nodes">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">run_workflow_nodes</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">workflow_object</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">workflow_node</span> <span class="ow">in</span> <span class="n">WorkflowNode</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+            <span class="n">workflow</span><span class="o">=</span><span class="n">workflow_object</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">workflow_node</span><span class="o">.</span><span class="n">disabled</span><span class="p">:</span>
+                <span class="n">run_workflow_node_jobs_signature</span><span class="o">.</span><span class="n">delay</span><span class="p">(</span><span class="n">workflow_node</span><span class="o">.</span><span class="n">id</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WorkflowController.run_workflow_node_jobs"><a class="viewcode-back" href="../../workflow_engine.html#workflow_engine.workflow_controller.WorkflowController.run_workflow_node_jobs">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">run_workflow_node_jobs</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">workflow_node</span><span class="p">):</span>
+        <span class="n">WorkflowController</span><span class="o">.</span><span class="n">_log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Node: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">workflow_node</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">workflow_node</span><span class="o">.</span><span class="n">workflow</span><span class="o">.</span><span class="n">disabled</span> <span class="ow">or</span>
+            <span class="n">workflow_node</span><span class="o">.</span><span class="n">disabled</span><span class="p">):</span>
+            <span class="k">return</span>
+
+        <span class="n">number_of_queued_and_running_jobs</span> <span class="o">=</span> \
+            <span class="n">workflow_node</span><span class="o">.</span><span class="n">get_number_of_queued_and_running_jobs</span><span class="p">()</span>
+
+        <span class="n">number_jobs_to_run</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">workflow_node</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">-</span> 
+            <span class="n">number_of_queued_and_running_jobs</span>
+        <span class="p">)</span>
+
+        <span class="n">WorkflowController</span><span class="o">.</span><span class="n">_log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;</span><span class="si">%d</span><span class="s2"> jobs to run&quot;</span><span class="p">,</span>
+            <span class="n">number_jobs_to_run</span>
+        <span class="p">)</span>
+
+        <span class="n">WorkflowController</span><span class="o">.</span><span class="n">_log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Found </span><span class="si">%d</span><span class="s2"> jobs&quot;</span><span class="p">,</span>
+            <span class="n">Job</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+        <span class="p">)</span>
+
+        <span class="c1"># run more jobs</span>
+        <span class="k">if</span> <span class="n">number_jobs_to_run</span> <span class="o">&gt;</span> <span class="n">ZERO</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">job_to_run</span> <span class="ow">in</span> <span class="n">workflow_node</span><span class="o">.</span><span class="n">get_n_pending_jobs</span><span class="p">(</span>
+                <span class="n">number_jobs_to_run</span><span class="p">):</span>
+                <span class="n">WorkflowController</span><span class="o">.</span><span class="n">_log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s2">&quot;running job </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">job_to_run</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">WorkflowController</span><span class="o">.</span><span class="n">job_run</span><span class="p">(</span><span class="n">job_to_run</span><span class="p">)</span></div>
+
+    <span class="c1"># TODO: this is the signal from an out-of-band job</span>
+<div class="viewcode-block" id="WorkflowController.set_jobs_for_run"><a class="viewcode-back" href="../../workflow_engine.html#workflow_engine.workflow_controller.WorkflowController.set_jobs_for_run">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">set_jobs_for_run</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">queue_name</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Use workflow node or job queue name to run jobs.</span>
+<span class="sd">        Useful for triggering wait strategy job queues.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        wait_queue_name : String</span>
+<span class="sd">            human readable name to look up the associated jobs</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">jobs</span> <span class="o">=</span> <span class="n">Job</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+            <span class="n">workflow_node__job_queue__name</span><span class="o">=</span><span class="n">queue_name</span><span class="p">,</span>
+            <span class="n">running_state__in</span><span class="o">=</span><span class="p">[</span>
+                <span class="n">Runnable</span><span class="o">.</span><span class="n">STATE</span><span class="o">.</span><span class="n">PENDING</span><span class="p">,</span>
+                <span class="n">Runnable</span><span class="o">.</span><span class="n">STATE</span><span class="o">.</span><span class="n">QUEUED</span>
+            <span class="p">]</span>
+         <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">job</span> <span class="ow">in</span> <span class="n">jobs</span><span class="p">:</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">set_pending_state</span><span class="p">()</span>
+            <span class="n">run_workflow_node_jobs_signature</span><span class="o">.</span><span class="n">delay</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">workflow_node</span><span class="o">.</span><span class="n">id</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WorkflowController.enqueue_next_queue_by_job_id"><a class="viewcode-back" href="../../workflow_engine.html#workflow_engine.workflow_controller.WorkflowController.enqueue_next_queue_by_job_id">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">enqueue_next_queue_by_job_id</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">job_id</span><span class="p">):</span>
+        <span class="n">job</span> <span class="o">=</span> <span class="n">Job</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">job_id</span><span class="p">)</span>
+        <span class="n">WorkflowController</span><span class="o">.</span><span class="n">enqueue_next_queue</span><span class="p">(</span><span class="n">job</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WorkflowController.enqueue_next_queue"><a class="viewcode-back" href="../../workflow_engine.html#workflow_engine.workflow_controller.WorkflowController.enqueue_next_queue">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">enqueue_next_queue</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">source_job</span><span class="p">):</span>
+        <span class="n">source_node</span> <span class="o">=</span> <span class="n">source_job</span><span class="o">.</span><span class="n">workflow_node</span>
+
+        <span class="k">for</span> <span class="n">target_node</span> <span class="ow">in</span> <span class="n">source_node</span><span class="o">.</span><span class="n">get_children</span><span class="p">():</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">enqueue_in_target_node</span><span class="p">(</span><span class="n">source_node</span><span class="p">,</span> <span class="n">target_node</span><span class="p">,</span> <span class="n">source_job</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WorkflowController.enqueue_from_admin_form"><a class="viewcode-back" href="../../workflow_engine.html#workflow_engine.workflow_controller.WorkflowController.enqueue_from_admin_form">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">enqueue_from_admin_form</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">workflow_name</span><span class="p">,</span>
+        <span class="n">job_queue_name</span><span class="p">,</span>
+        <span class="n">source_object</span>
+    <span class="p">):</span>
+        <span class="n">target_node</span> <span class="o">=</span> <span class="n">WorkflowController</span><span class="o">.</span><span class="n">find_workflow_node</span><span class="p">(</span>
+            <span class="n">workflow_name</span><span class="p">,</span>
+            <span class="n">job_queue_name</span>
+        <span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">strategy</span> <span class="o">=</span> <span class="n">target_node</span><span class="o">.</span><span class="n">get_strategy</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">WorkflowController</span><span class="o">.</span><span class="n">_log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s1">&#39;Error loading strategy for </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">target_node</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">enqueued_objects</span> <span class="o">=</span> <span class="n">strategy</span><span class="o">.</span><span class="n">transform_objects_for_queue</span><span class="p">(</span><span class="n">source_object</span><span class="p">)</span>
+
+        <span class="n">WorkflowController</span><span class="o">.</span><span class="n">_log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;enqueued_objects: </span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">enqueued_objects</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">enqueued_object</span> <span class="ow">in</span> <span class="n">enqueued_objects</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">strategy</span><span class="o">.</span><span class="n">can_transition</span><span class="p">(</span><span class="n">enqueued_object</span><span class="p">):</span>
+                <span class="n">WorkflowController</span><span class="o">.</span><span class="n">start_workflow_helper</span><span class="p">(</span>
+                    <span class="n">target_node</span><span class="p">,</span>
+                    <span class="n">enqueued_object</span><span class="p">,</span>
+                    <span class="n">target_node</span><span class="o">.</span><span class="n">overwrite_previous_job</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WorkflowController.enqueue_in_target_node"><a class="viewcode-back" href="../../workflow_engine.html#workflow_engine.workflow_controller.WorkflowController.enqueue_in_target_node">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">enqueue_in_target_node</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">source_node</span><span class="p">,</span> <span class="n">target_node</span><span class="p">,</span> <span class="n">source_job</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">strategy</span> <span class="o">=</span> <span class="n">target_node</span><span class="o">.</span><span class="n">get_strategy</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">WorkflowController</span><span class="o">.</span><span class="n">_log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s1">&#39;Error loading strategy for </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">target_node</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">source_object</span> <span class="o">=</span> <span class="n">source_job</span><span class="o">.</span><span class="n">enqueued_object</span>
+
+        <span class="n">enqueued_objects</span> <span class="o">=</span> <span class="n">strategy</span><span class="o">.</span><span class="n">transform_objects_for_queue</span><span class="p">(</span><span class="n">source_object</span><span class="p">)</span>
+        <span class="n">WorkflowController</span><span class="o">.</span><span class="n">_log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Found </span><span class="si">%d</span><span class="s2"> enqueued objects&quot;</span><span class="p">,</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">enqueued_objects</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">enqueued_object</span> <span class="ow">in</span> <span class="n">enqueued_objects</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">strategy</span><span class="o">.</span><span class="n">can_transition</span><span class="p">(</span><span class="n">enqueued_object</span><span class="p">,</span> <span class="n">source_node</span><span class="p">):</span>
+                <span class="n">WorkflowController</span><span class="o">.</span><span class="n">start_workflow_helper</span><span class="p">(</span>
+                    <span class="n">target_node</span><span class="p">,</span>
+                    <span class="n">enqueued_object</span><span class="p">,</span>
+                    <span class="n">target_node</span><span class="o">.</span><span class="n">overwrite_previous_job</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WorkflowController.set_job_for_run_if_valid"><a class="viewcode-back" href="../../workflow_engine.html#workflow_engine.workflow_controller.WorkflowController.set_job_for_run_if_valid">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">set_job_for_run_if_valid</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">job</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">job</span><span class="o">.</span><span class="n">can_rerun</span><span class="p">():</span>
+            <span class="n">WorkflowController</span><span class="o">.</span><span class="n">set_job_for_run</span><span class="p">(</span><span class="n">job</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WorkflowController.set_job_for_run"><a class="viewcode-back" href="../../workflow_engine.html#workflow_engine.workflow_controller.WorkflowController.set_job_for_run">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">set_job_for_run</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">job</span><span class="p">):</span>
+        <span class="n">WorkflowController</span><span class="o">.</span><span class="n">_log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;set for run&#39;</span><span class="p">)</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">set_pending_state</span><span class="p">()</span>
+        <span class="n">run_workflow_node_jobs_signature</span><span class="o">.</span><span class="n">delay</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">workflow_node</span><span class="o">.</span><span class="n">id</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WorkflowController.set_jobs_for_run_by_id"><a class="viewcode-back" href="../../workflow_engine.html#workflow_engine.workflow_controller.WorkflowController.set_jobs_for_run_by_id">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">set_jobs_for_run_by_id</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">job_ids</span><span class="p">):</span>
+        <span class="n">records</span> <span class="o">=</span> <span class="n">Job</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">id__in</span><span class="o">=</span><span class="n">job_ids</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">job_object</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
+            <span class="n">WorkflowController</span><span class="o">.</span><span class="n">set_job_for_run_if_valid</span><span class="p">(</span><span class="n">job_object</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WorkflowController.kill_job"><a class="viewcode-back" href="../../workflow_engine.html#workflow_engine.workflow_controller.WorkflowController.kill_job">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">kill_job</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">job_id</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">job</span> <span class="o">=</span> <span class="n">Job</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">job_id</span><span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">kill</span><span class="p">()</span>
+            <span class="n">run_workflow_node_jobs_signature</span><span class="o">.</span><span class="n">delay</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">workflow_node</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">ObjectDoesNotExist</span><span class="p">:</span>
+            <span class="n">WorkflowController</span><span class="o">.</span><span class="n">_log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s1">&#39;Tried to kill job </span><span class="si">%d</span><span class="s1"> which does not exist&#39;</span><span class="p">,</span>
+                <span class="n">job_id</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WorkflowController.create_tasks"><a class="viewcode-back" href="../../workflow_engine.html#workflow_engine.workflow_controller.WorkflowController.create_tasks">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">create_tasks</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">job</span><span class="p">):</span>
+        <span class="n">strategy</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">get_strategy</span><span class="p">()</span>
+
+        <span class="n">task_objects</span> <span class="o">=</span> <span class="n">strategy</span><span class="o">.</span><span class="n">get_task_objects_for_queue</span><span class="p">(</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">enqueued_object</span>
+        <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">task_object</span> <span class="ow">in</span> <span class="n">task_objects</span><span class="p">:</span>
+            <span class="n">default_options</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;run_state_id&#39;</span><span class="p">:</span> <span class="n">Runnable</span><span class="o">.</span><span class="n">get_run_state_id_for</span><span class="p">(</span>
+                    <span class="n">Runnable</span><span class="o">.</span><span class="n">STATE</span><span class="o">.</span><span class="n">PENDING</span><span class="p">),</span>
+                <span class="s1">&#39;running_state&#39;</span><span class="p">:</span> <span class="n">Runnable</span><span class="o">.</span><span class="n">STATE</span><span class="o">.</span><span class="n">PENDING</span><span class="p">,</span>
+                <span class="s1">&#39;archived&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="s1">&#39;retry_count&#39;</span><span class="p">:</span> <span class="n">ZERO</span>
+            <span class="p">}</span>
+
+            <span class="n">enqueued_task_object_type</span> <span class="o">=</span> <span class="n">ContentType</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_for_model</span><span class="p">(</span>
+                <span class="n">task_object</span>
+            <span class="p">)</span>
+
+            <span class="k">with</span> <span class="n">transaction</span><span class="o">.</span><span class="n">atomic</span><span class="p">():</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">tsk</span><span class="p">,</span> <span class="n">created</span> <span class="o">=</span> <span class="n">Task</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+                        <span class="n">enqueued_task_object_type</span><span class="o">=</span><span class="n">enqueued_task_object_type</span><span class="p">,</span>
+                        <span class="n">enqueued_task_object_id</span><span class="o">=</span><span class="n">task_object</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                        <span class="n">job</span><span class="o">=</span><span class="n">job</span><span class="p">,</span>
+                        <span class="n">defaults</span><span class="o">=</span><span class="n">default_options</span>
+                    <span class="p">)</span>
+
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">created</span><span class="p">:</span>
+                        <span class="n">tsk</span><span class="o">.</span><span class="n">archived</span><span class="o">=</span><span class="kc">False</span>
+                        <span class="n">tsk</span><span class="o">.</span><span class="n">retry_count</span><span class="o">=</span><span class="mi">0</span>
+                        <span class="n">tsk</span><span class="o">.</span><span class="n">set_pending_state</span><span class="p">()</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="k">raise</span><span class="p">(</span><span class="n">e</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WorkflowController.job_run"><a class="viewcode-back" href="../../workflow_engine.html#workflow_engine.workflow_controller.WorkflowController.job_run">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">job_run</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">job</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">set_queued_state</span><span class="p">()</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">set_start_run_time</span><span class="p">()</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">clear_error_message</span><span class="p">()</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">prep_job</span><span class="p">()</span>
+
+            <span class="n">WorkflowController</span><span class="o">.</span><span class="n">create_tasks</span><span class="p">(</span><span class="n">job</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">job</span><span class="o">.</span><span class="n">get_tasks</span><span class="p">():</span>
+                <span class="n">task</span><span class="o">.</span><span class="n">run_task</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">set_error_message</span><span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; - &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()),</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">WorkflowController</span><span class="o">.</span><span class="n">_log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s2">&quot;Job exception: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">error_message</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">set_failed_state</span><span class="p">()</span>
+            <span class="n">run_workflow_node_jobs_signature</span><span class="o">.</span><span class="n">delay</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">workflow_node</span><span class="o">.</span><span class="n">id</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WorkflowController.find_workflow_node"><a class="viewcode-back" href="../../workflow_engine.html#workflow_engine.workflow_controller.WorkflowController.find_workflow_node">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">find_workflow_node</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">workflow_name</span><span class="p">,</span>
+        <span class="n">start_node_name</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">start_node_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">WorkflowNode</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="n">workflow__name</span><span class="o">=</span><span class="n">workflow_name</span><span class="p">,</span>
+                <span class="n">job_queue__name</span><span class="o">=</span><span class="n">start_node_name</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">WorkflowNode</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="n">workflow__name</span><span class="o">=</span><span class="n">workflow_name</span><span class="p">,</span>
+                <span class="n">sources</span><span class="o">=</span><span class="kc">None</span>
+            <span class="p">)</span></div>
+
+<div class="viewcode-block" id="WorkflowController.enqueue_next_queue_by_workflow_node"><a class="viewcode-back" href="../../workflow_engine.html#workflow_engine.workflow_controller.WorkflowController.enqueue_next_queue_by_workflow_node">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">enqueue_next_queue_by_workflow_node</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">workflow_name</span><span class="p">,</span>
+        <span class="n">enqueued_object</span><span class="p">,</span>
+        <span class="n">start_node_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">set_success</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">workflow_node</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">find_workflow_node</span><span class="p">(</span>
+            <span class="n">workflow_name</span><span class="p">,</span>
+            <span class="n">start_node_name</span><span class="p">)</span>
+
+        <span class="n">job</span> <span class="o">=</span> <span class="n">workflow_node</span><span class="o">.</span><span class="n">job_set</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="n">enqueued_object</span><span class="o">=</span><span class="n">enqueued_object</span><span class="p">,</span>
+            <span class="n">archived</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">set_success</span><span class="p">:</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">set_success_state</span><span class="p">()</span>
+
+        <span class="bp">cls</span><span class="o">.</span><span class="n">enqueue_next_queue</span><span class="p">(</span><span class="n">job</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WorkflowController.enqueue_object"><a class="viewcode-back" href="../../workflow_engine.html#workflow_engine.workflow_controller.WorkflowController.enqueue_object">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">enqueue_object</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">workflow_node</span><span class="p">,</span>
+        <span class="n">enqueued_object</span><span class="p">,</span>
+        <span class="n">priority</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">reuse_job</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">priority</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">priority</span> <span class="o">=</span> <span class="n">workflow_node</span><span class="o">.</span><span class="n">priority</span>
+
+        <span class="k">if</span> <span class="n">reuse_job</span><span class="p">:</span>
+            <span class="n">default_options</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;run_state_id&#39;</span><span class="p">:</span> <span class="n">Runnable</span><span class="o">.</span><span class="n">get_run_state_id_for</span><span class="p">(</span>
+                    <span class="n">Runnable</span><span class="o">.</span><span class="n">STATE</span><span class="o">.</span><span class="n">PENDING</span><span class="p">),</span>
+                <span class="s1">&#39;running_state&#39;</span><span class="p">:</span> <span class="n">Runnable</span><span class="o">.</span><span class="n">STATE</span><span class="o">.</span><span class="n">PENDING</span><span class="p">,</span>
+                <span class="s1">&#39;priority&#39;</span><span class="p">:</span> <span class="n">priority</span>
+            <span class="p">}</span>
+
+            <span class="n">enqueued_object_type</span> <span class="o">=</span> <span class="n">ContentType</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_for_model</span><span class="p">(</span>
+                <span class="n">enqueued_object</span>
+            <span class="p">)</span>
+
+            <span class="n">job</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">Job</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">update_or_create</span><span class="p">(</span>
+                <span class="n">enqueued_object_type</span><span class="o">=</span><span class="n">enqueued_object_type</span><span class="p">,</span>
+                <span class="n">enqueued_object_id</span><span class="o">=</span><span class="n">enqueued_object</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                <span class="n">workflow_node</span><span class="o">=</span><span class="n">workflow_node</span><span class="p">,</span>
+                <span class="n">defaults</span><span class="o">=</span><span class="n">default_options</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">job</span> <span class="o">=</span> <span class="n">Job</span><span class="p">()</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">enqueued_object</span> <span class="o">=</span> <span class="n">enqueued_object</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">workflow_node</span> <span class="o">=</span> <span class="n">workflow_node</span>
+            <span class="n">job</span><span class="o">.</span><span class="n">priority</span> <span class="o">=</span> <span class="n">workflow_node</span><span class="o">.</span><span class="n">priority</span>
+
+        <span class="n">job</span><span class="o">.</span><span class="n">set_pending_state</span><span class="p">()</span> <span class="c1"># does save and keeps run_state/running_state in sync</span>
+
+        <span class="k">return</span> <span class="n">job</span></div>
+
+<div class="viewcode-block" id="WorkflowController.start_workflow_helper"><a class="viewcode-back" href="../../workflow_engine.html#workflow_engine.workflow_controller.WorkflowController.start_workflow_helper">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">start_workflow_helper</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">workflow_node</span><span class="p">,</span>
+        <span class="n">enqueued_object</span><span class="p">,</span>
+        <span class="n">reuse_job</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">raise_priority</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">raise_priority</span><span class="p">:</span>
+            <span class="n">priority</span> <span class="o">=</span> <span class="n">workflow_node</span><span class="o">.</span><span class="n">priority</span> <span class="o">-</span> <span class="mi">10</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">priority</span> <span class="o">=</span> <span class="n">workflow_node</span><span class="o">.</span><span class="n">priority</span>
+
+        <span class="n">job</span> <span class="o">=</span> <span class="n">WorkflowController</span><span class="o">.</span><span class="n">enqueue_object</span><span class="p">(</span>
+            <span class="n">workflow_node</span><span class="p">,</span>
+            <span class="n">enqueued_object</span><span class="p">,</span>
+            <span class="n">priority</span><span class="p">,</span>
+            <span class="n">reuse_job</span>
+        <span class="p">)</span>
+
+        <span class="n">WorkflowController</span><span class="o">.</span><span class="n">_log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Start workflow job state: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">run_state</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">run_workflow_node_jobs_signature</span><span class="o">.</span><span class="n">delay</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">workflow_node</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">job</span><span class="o">.</span><span class="n">id</span></div>
+
+<div class="viewcode-block" id="WorkflowController.start_workflow"><a class="viewcode-back" href="../../workflow_engine.html#workflow_engine.workflow_controller.WorkflowController.start_workflow">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">start_workflow</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">workflow_name</span><span class="p">,</span>
+        <span class="n">enqueued_object</span><span class="p">,</span>
+        <span class="n">start_node_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">reuse_job</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">raise_priority</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">workflow_node</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">find_workflow_node</span><span class="p">(</span>
+            <span class="n">workflow_name</span><span class="p">,</span>
+            <span class="n">start_node_name</span><span class="p">)</span>
+
+        <span class="n">WorkflowController</span><span class="o">.</span><span class="n">start_workflow_helper</span><span class="p">(</span>
+            <span class="n">workflow_node</span><span class="p">,</span>
+            <span class="n">enqueued_object</span><span class="p">,</span>
+            <span class="n">reuse_job</span><span class="p">,</span>
+            <span class="n">raise_priority</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="WorkflowController.create_job"><a class="viewcode-back" href="../../workflow_engine.html#workflow_engine.workflow_controller.WorkflowController.create_job">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">create_job</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">workflow_node_id</span><span class="p">,</span>
+        <span class="n">enqueued_object_id</span><span class="p">,</span>
+        <span class="n">priority</span><span class="p">):</span>
+
+        <span class="n">workflow_node</span> <span class="o">=</span> <span class="n">WorkflowNode</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="nb">id</span><span class="o">=</span><span class="n">workflow_node_id</span><span class="p">)</span>
+        <span class="n">enqueued_object_type</span> <span class="o">=</span> <span class="n">workflow_node</span><span class="o">.</span><span class="n">job_queue</span><span class="o">.</span><span class="n">enqueued_object_type</span>
+        <span class="n">enqueued_object</span> <span class="o">=</span> <span class="n">enqueued_object_type</span><span class="o">.</span><span class="n">get_object_for_this_type</span><span class="p">(</span>
+            <span class="n">pk</span><span class="o">=</span><span class="n">enqueued_object_id</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">WorkflowController</span><span class="o">.</span><span class="n">start_workflow_helper</span><span class="p">(</span>
+            <span class="n">workflow_node</span><span class="p">,</span>
+            <span class="n">enqueued_object</span><span class="p">,</span>
+            <span class="n">workflow_node</span><span class="o">.</span><span class="n">overwrite_previous_job</span><span class="p">,</span>
+            <span class="n">priority</span><span class="p">)</span></div></div>
+
+
+<span class="c1"># circular imports</span>
+<span class="kn">from</span> <span class="nn">workflow_engine.mixins</span> <span class="k">import</span> <span class="n">Runnable</span>
+<span class="kn">from</span> <span class="nn">workflow_engine.models</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">ZERO</span><span class="p">,</span>
+    <span class="n">Job</span><span class="p">,</span>
+    <span class="n">Task</span><span class="p">,</span>
+    <span class="n">WorkflowNode</span>
+<span class="p">)</span>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="../../index.html">Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Install Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../settings.html">Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../customizing.html">Customization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../workflows.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../strategies.html">Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../configurations.html">Configuration Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../develop.html">Developers Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../authors.html">Authors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../workflow_engine.html">Source Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../workflow_engine.admin.html">workflow_engine.admin package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../workflow_engine.celery.html">workflow_engine.celery package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../workflow_engine.migrations.html">workflow_engine.migrations package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../workflow_engine.mixins.html">workflow_engine.mixins package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../workflow_engine.models.html">workflow_engine.models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../workflow_engine.serializers.html">workflow_engine.serializers package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../workflow_engine.strategies.html">workflow_engine.strategies package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../workflow_engine.views.html">workflow_engine.views package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../workflow_engine.worker.html">workflow_engine.worker package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../workflow_engine.worker.qsub.html">workflow_engine.worker.qsub package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../workflow_client.html">Client Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../workflow_client.ingest.html">workflow_client.ingest package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../workflow_client.nb_utils.html">workflow_client.nb_utils package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../workflow_client.tasks.html">workflow_client.tasks package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/AllenInstitute/BlueSkyWorkflowEngine">Github Profile</a></li>
+</ul>
+
+<h3> Questions </h3>
+<p class="questions">
+  Send any questions using the <a href="http://alleninstitute.org/contact_us/index.html">Send Us a Message</a> link below, 
+  or submit your question to <a href="http://stackoverflow.com/">StackOverflow</a> using with the 'allen-sdk' tag.
+</p>
+
+<p class="questions">
+  If you encounter any problems using the AllenSDK, please create an issue on <a href="http://github.com/alleninstitute/allensdk/issues/">Github's issue tracker</a>.
+</p>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+    <div class="footer" role="contentinfo">
+    </div>
+<script type="text/javascript" src="http://www.brain-map.org/external_assets/javascripts/portalFooter.js"></script>
+
+
+  </body>
+</html>

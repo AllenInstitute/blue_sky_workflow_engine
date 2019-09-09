@@ -1,0 +1,92 @@
+workflow\_engine\.admin package
+===============================
+
+.. automodule:: workflow_engine.admin
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Submodules
+----------
+
+workflow\_engine\.admin\.configuration\_admin module
+----------------------------------------------------
+
+.. automodule:: workflow_engine.admin.configuration_admin
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+workflow\_engine\.admin\.configuration\_inline module
+-----------------------------------------------------
+
+.. automodule:: workflow_engine.admin.configuration_inline
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+workflow\_engine\.admin\.executable\_admin module
+-------------------------------------------------
+
+.. automodule:: workflow_engine.admin.executable_admin
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+workflow\_engine\.admin\.job\_admin module
+------------------------------------------
+
+.. automodule:: workflow_engine.admin.job_admin
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+workflow\_engine\.admin\.job\_queue\_admin module
+-------------------------------------------------
+
+.. automodule:: workflow_engine.admin.job_queue_admin
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+workflow\_engine\.admin\.task\_admin module
+-------------------------------------------
+
+.. automodule:: workflow_engine.admin.task_admin
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+workflow\_engine\.admin\.well\_known\_file\_admin module
+--------------------------------------------------------
+
+.. automodule:: workflow_engine.admin.well_known_file_admin
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+workflow\_engine\.admin\.workflow\_admin module
+-----------------------------------------------
+
+.. automodule:: workflow_engine.admin.workflow_admin
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+workflow\_engine\.admin\.workflow\_edge\_admin module
+-----------------------------------------------------
+
+.. automodule:: workflow_engine.admin.workflow_edge_admin
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+workflow\_engine\.admin\.workflow\_node\_admin module
+-----------------------------------------------------
+
+.. automodule:: workflow_engine.admin.workflow_node_admin
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+

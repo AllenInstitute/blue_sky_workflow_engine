@@ -1,0 +1,52 @@
+workflow\_client\.tasks package
+===============================
+
+.. automodule:: workflow_client.tasks
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Submodules
+----------
+
+workflow\_client\.tasks\.circus\_signatures module
+--------------------------------------------------
+
+.. automodule:: workflow_client.tasks.circus_signatures
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+workflow\_client\.tasks\.circus\_status module
+----------------------------------------------
+
+.. automodule:: workflow_client.tasks.circus_status
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+workflow\_client\.tasks\.circus\_test module
+--------------------------------------------
+
+.. automodule:: workflow_client.tasks.circus_test
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+workflow\_client\.tasks\.moab\_status module
+--------------------------------------------
+
+.. automodule:: workflow_client.tasks.moab_status
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+workflow\_client\.tasks\.task\_status module
+--------------------------------------------
+
+.. automodule:: workflow_client.tasks.task_status
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+

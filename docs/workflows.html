@@ -1,0 +1,264 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Workflows &#8212; Blue Sky Workflow Engine  documentation</title>
+    <link rel="stylesheet" href="_static/aibs_sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Strategies" href="strategies.html" />
+    <link rel="prev" title="Customization" href="customizing.html" /> 
+  </head>
+  <body>
+<link href="http://www.brain-map.org/assets/stylesheets/portal.css" media="screen" rel="stylesheet" type="text/css" />
+<script src="http://www.brain-map.org/assets/javascripts/portal.js" type="text/javascript"></script>
+<script src="http://www.brain-map.org/assets/javascripts/ga.js" type="text/javascript"></script>
+<script type="text/javascript">
+    var _pSupressBrowserFlashWarning = true;
+    var _pTabId = "pHome";
+    var _pMoreProjectsId = "pMoreProjects";
+    var _pImagePath = "http://www.brain-map.org/assets/images/";
+    var _pSiteWarnings = function() {
+        this.show_warning() = {};
+    }
+</script>
+<script type="text/javascript">
+    function initialize() {
+        /*** do your stuff, then initialize the portal plugin ***/
+        _pPortalOnLoad();
+    }
+</script>
+<style>
+  #header_content > a {
+  display: inline-block;
+  width: 250px;
+  height: 75px;
+  background-image:url("/_static/external_assets/images/Brain_Atlas_Logotype_SDK.png") !important;
+  background-size: 235px 37px;
+  background-position: 0px 20px;
+  background-repeat: no-repeat;
+  }
+</style>
+
+<script type="text/javascript" src="http://www.brain-map.org/external_assets/javascripts/portalHeader.js"></script>
+<link rel="stylesheet" type="text/css" href="/_static/external_assets/stylesheets/common_layout.css" />
+
+
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="workflows">
+<span id="id1"></span><h1>Workflows<a class="headerlink" href="#workflows" title="Permalink to this headline">¶</a></h1>
+<p>This guide is a resource for using the Blue Sky Workflow Engine package.
+It is maintained by the <a class="reference external" href="http://www.alleninstitute.org/">Allen Institute for Brain Science</a>.</p>
+<p>The Blue Sky Workflow Engine is designed for creating new workflows
+to manage and orchestrate projects.</p>
+<div class="section" id="workflow-yaml-format">
+<h2>Workflow YAML Format<a class="headerlink" href="#workflow-yaml-format" title="Permalink to this headline">¶</a></h2>
+<p>Workflows can be specified in a
+<a class="reference external" href="http://yaml.org/start.html">YAML</a> syntax document.
+A workflow file has three top-level sections: executables, run_states (deprecated) and workflows.</p>
+<div class="section" id="executables">
+<h3>Executables<a class="headerlink" href="#executables" title="Permalink to this headline">¶</a></h3>
+<p>The pbs_processor and pbs_walltime entries are directives that are used in creating a <a class="reference external" href="http://docs.adaptivecomputing.com/torque/3-0-5/commands/qsub.php">qsub</a> script.</p>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="nt">executables</span><span class="p">:</span>
+
+    <span class="nt">mock</span><span class="p">:</span>
+        <span class="nt">name</span><span class="p">:</span> <span class="s">&#39;Mock</span><span class="nv"> </span><span class="s">Executable&#39;</span>
+        <span class="nt">path</span><span class="p">:</span> <span class="s">&#39;/path/to/bin/on/hpc/cluster/mock_executable&#39;</span>
+        <span class="nt">remote_queue</span><span class="p">:</span> <span class="s">&#39;pbs&#39;</span>
+        <span class="nt">pbs_queue</span><span class="p">:</span> <span class="s">&#39;project_queue_name&#39;</span>
+        <span class="nt">pbs_processor</span><span class="p">:</span> <span class="s">&#39;nodes=1:ppn=1&#39;</span>
+        <span class="nt">pbs_walltime</span><span class="p">:</span> <span class="s">&#39;walltime=0:10:00&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="run-states">
+<h3>Run States<a class="headerlink" href="#run-states" title="Permalink to this headline">¶</a></h3>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The run_states section is deprecated. Leave it verbatim as below for now.</p>
+</div>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="nt">run_states</span><span class="p">:</span>
+    <span class="p p-Indicator">-</span> <span class="s">&quot;PENDING&quot;</span>
+    <span class="p p-Indicator">-</span> <span class="s">&quot;QUEUED&quot;</span>
+    <span class="p p-Indicator">-</span> <span class="s">&quot;RUNNING&quot;</span>
+    <span class="p p-Indicator">-</span> <span class="s">&quot;FINISHED_EXECUTION&quot;</span>
+    <span class="p p-Indicator">-</span> <span class="s">&quot;FAILED_EXECUTION&quot;</span>
+    <span class="p p-Indicator">-</span> <span class="s">&quot;FAILED&quot;</span>
+    <span class="p p-Indicator">-</span> <span class="s">&quot;SUCCESS&quot;</span>
+    <span class="p p-Indicator">-</span> <span class="s">&quot;PROCESS_KILLED&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id2">
+<h3>Workflows<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>The workflows section describes the JobQueue objects and their corresponding
+WorkflowNode objects arranged in a Workflow object.</p>
+<p>The workflows element has a sub element with a key for each workflow (in this case ‘mock_workflow’ is the only one). Under the workflow key is an optional ‘ingest’ strategy, a list of ‘states’ and a ‘graph’ of the relation between the states.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The ‘states’ roughly correspond to the JobQueue and WorkflowNode objects
+in the Django model. The graph represents the parent relationship between
+WorkflowNodes.</p>
+</div>
+<p>Each workflow has an ‘ingest’ element with the name of an ingest strategy.
+The ingest strategy accepts a JSON message from an upstream client external to
+the workflow and creates <a class="reference external" href="https://docs.djangoproject.com/en/1.11/topics/db/">Django model objects</a>. For workflows that process objects that have already been created by another workflow or via the admin UI an ingest strategy is not needed.</p>
+<p>The ‘states’ element contains a list of entries for JobQueues and WorkflowNodes. For each entry, a JobQueue will be created with the specified ‘class’, ‘executable’ and ‘enqueued_class’</p>
+<p>The ‘graph’ element contains a list of lists to specify the parent child relationship.  The ‘key’ of the parent node is followed by a list for the children.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">There are known issues with the graph representation.
+It is currently best to list the nodes roughly in order.
+Multiple parents cannot currently be represented,
+but the import code may not log an error.</p>
+</div>
+<div class="highlight-yaml"><div class="highlight"><pre><span></span><span class="nt">workflows</span><span class="p">:</span>
+    <span class="nt">mock_workflow</span><span class="p">:</span>
+        <span class="nt">ingest</span><span class="p">:</span> <span class="s">&quot;blue_sky.strategies.mock_ingest.MockIngest&quot;</span>
+
+        <span class="nt">states</span><span class="p">:</span>
+            <span class="p p-Indicator">-</span> <span class="nt">key</span><span class="p">:</span> <span class="s">&quot;ingest_mock&quot;</span>
+              <span class="nt">label</span><span class="p">:</span> <span class="s">&quot;Ingest</span><span class="nv"> </span><span class="s">Mock&quot;</span>
+              <span class="nt">class</span><span class="p">:</span> <span class="s">&quot;blue_sky.strategies.mock_ingest.MockIngest&quot;</span>
+              <span class="nt">enqueued_class</span><span class="p">:</span> <span class="s">&quot;blue_sky.models.observation.Observation&quot;</span>
+              <span class="nt">executable</span><span class="p">:</span> <span class="s">&quot;mock&quot;</span>
+
+            <span class="p p-Indicator">-</span> <span class="nt">key</span><span class="p">:</span> <span class="s">&quot;mock_analyze&quot;</span>
+              <span class="nt">label</span><span class="p">:</span> <span class="s">&quot;Mock</span><span class="nv"> </span><span class="s">Analyze&quot;</span>
+              <span class="nt">class</span><span class="p">:</span> <span class="s">&quot;blue_sky.strategies.mock_analyze.MockAnalyze&quot;</span>
+              <span class="nt">enqueued_class</span><span class="p">:</span> <span class="s">&quot;blue_sky.models.observation.Observation&quot;</span>
+              <span class="nt">executable</span><span class="p">:</span> <span class="s">&quot;mock&quot;</span>
+
+        <span class="nt">graph</span><span class="p">:</span>
+            <span class="p p-Indicator">-</span> <span class="p p-Indicator">[</span> <span class="s">&quot;ingest_mock&quot;</span><span class="p p-Indicator">,</span> <span class="p p-Indicator">[</span> <span class="s">&quot;mock_analyze&quot;</span> <span class="p p-Indicator">]</span> <span class="p p-Indicator">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="reloading-the-workflow">
+<h2>Reloading the Workflow<a class="headerlink" href="#reloading-the-workflow" title="Permalink to this headline">¶</a></h2>
+<p>There is a
+<a class="reference external" href="https://docs.djangoproject.com/en/2.0/howto/custom-management-commands/">custom Django management command</a>
+for reloading the workflows from a yaml file.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ python -m manage import_workflows path/to/workflow_file.yml
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Reloading the workflows currently does a cascading delete on all
+job records.</p>
+</div>
+</div>
+<div class="section" id="editing-a-workflow-in-the-admin-ui">
+<h2>Editing a Workflow in the Admin UI<a class="headerlink" href="#editing-a-workflow-in-the-admin-ui" title="Permalink to this headline">¶</a></h2>
+<p>A job queue may be added to a workflow or modified using the Django Admin UI.
+Under the workflow_engine section, first add  an executable.
+Then add a job_queue that references the executable.
+Finally add a workflow node. Assign it to a workflow and set the parent node.
+You can then access the new node in the workflow view
+or on the workflow admin page.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">There is currently no way to export a yaml file when the workflow
+has been edited using the admin UI.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="customizing.html">Customization</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="strategies.html">Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configurations.html">Configuration Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop.html">Developers Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">Authors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflow_engine.html">Source Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.admin.html">workflow_engine.admin package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.celery.html">workflow_engine.celery package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.migrations.html">workflow_engine.migrations package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.mixins.html">workflow_engine.mixins package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.models.html">workflow_engine.models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.serializers.html">workflow_engine.serializers package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.strategies.html">workflow_engine.strategies package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.views.html">workflow_engine.views package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.worker.html">workflow_engine.worker package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="workflow_engine.worker.qsub.html">workflow_engine.worker.qsub package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workflow_client.html">Client Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="workflow_client.ingest.html">workflow_client.ingest package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_client.nb_utils.html">workflow_client.nb_utils package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_client.tasks.html">workflow_client.tasks package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/AllenInstitute/BlueSkyWorkflowEngine">Github Profile</a></li>
+</ul>
+
+<h3> Questions </h3>
+<p class="questions">
+  Send any questions using the <a href="http://alleninstitute.org/contact_us/index.html">Send Us a Message</a> link below, 
+  or submit your question to <a href="http://stackoverflow.com/">StackOverflow</a> using with the 'allen-sdk' tag.
+</p>
+
+<p class="questions">
+  If you encounter any problems using the AllenSDK, please create an issue on <a href="http://github.com/alleninstitute/allensdk/issues/">Github's issue tracker</a>.
+</p>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+    <div class="footer" role="contentinfo">
+    </div>
+<script type="text/javascript" src="http://www.brain-map.org/external_assets/javascripts/portalFooter.js"></script>
+
+
+  </body>
+</html>

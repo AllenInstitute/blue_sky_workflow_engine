@@ -1,0 +1,20 @@
+workflow\_engine\.worker\.qsub package
+======================================
+
+.. automodule:: workflow_engine.worker.qsub
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Submodules
+----------
+
+workflow\_engine\.worker\.qsub\.qsub\_api module
+------------------------------------------------
+
+.. automodule:: workflow_engine.worker.qsub.qsub_api
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+

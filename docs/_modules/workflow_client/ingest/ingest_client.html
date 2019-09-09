@@ -1,0 +1,238 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>workflow_client.ingest.ingest_client &#8212; Blue Sky Workflow Engine  documentation</title>
+    <link rel="stylesheet" href="../../../_static/aibs_sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body>
+<link href="http://www.brain-map.org/assets/stylesheets/portal.css" media="screen" rel="stylesheet" type="text/css" />
+<script src="http://www.brain-map.org/assets/javascripts/portal.js" type="text/javascript"></script>
+<script src="http://www.brain-map.org/assets/javascripts/ga.js" type="text/javascript"></script>
+<script type="text/javascript">
+    var _pSupressBrowserFlashWarning = true;
+    var _pTabId = "pHome";
+    var _pMoreProjectsId = "pMoreProjects";
+    var _pImagePath = "http://www.brain-map.org/assets/images/";
+    var _pSiteWarnings = function() {
+        this.show_warning() = {};
+    }
+</script>
+<script type="text/javascript">
+    function initialize() {
+        /*** do your stuff, then initialize the portal plugin ***/
+        _pPortalOnLoad();
+    }
+</script>
+<style>
+  #header_content > a {
+  display: inline-block;
+  width: 250px;
+  height: 75px;
+  background-image:url("/_static/external_assets/images/Brain_Atlas_Logotype_SDK.png") !important;
+  background-size: 235px 37px;
+  background-position: 0px 20px;
+  background-repeat: no-repeat;
+  }
+</style>
+
+<script type="text/javascript" src="http://www.brain-map.org/external_assets/javascripts/portalHeader.js"></script>
+<link rel="stylesheet" type="text/css" href="/_static/external_assets/stylesheets/common_layout.css" />
+
+
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for workflow_client.ingest.ingest_client</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Ingest EM tile directory</span>
+
+<span class="sd">Send EM tileset data using blue sky&#39;s celery ingest call</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">import</span> <span class="nn">celery</span>
+<span class="kn">from</span> <span class="nn">celery</span> <span class="k">import</span> <span class="n">Celery</span><span class="p">,</span> <span class="n">signature</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">pytz</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<div class="viewcode-block" id="after_setup_celery_task_logger"><a class="viewcode-back" href="../../../workflow_client.ingest.html#workflow_client.ingest.ingest_client.after_setup_celery_task_logger">[docs]</a><span class="nd">@celery</span><span class="o">.</span><span class="n">signals</span><span class="o">.</span><span class="n">after_setup_task_logger</span><span class="o">.</span><span class="n">connect</span>
+<span class="k">def</span> <span class="nf">after_setup_celery_task_logger</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;BLUE_SKY_LOGGING_CONFIG&#39;</span><span class="p">],</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">logging_config</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="n">logging_config</span><span class="p">[</span><span class="s1">&#39;handlers&#39;</span><span class="p">][</span><span class="s1">&#39;file&#39;</span><span class="p">][</span><span class="s1">&#39;filename&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;DEBUG_LOG&#39;</span><span class="p">]</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">dictConfig</span><span class="p">(</span><span class="n">logging_config</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="settings_attr_dict"><a class="viewcode-back" href="../../../workflow_client.ingest.html#workflow_client.ingest.ingest_client.settings_attr_dict">[docs]</a><span class="k">class</span> <span class="nc">settings_attr_dict</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+    <span class="fm">__getattr__</span> <span class="o">=</span> <span class="nb">dict</span><span class="o">.</span><span class="n">get</span></div>
+
+<span class="n">ingest_signature</span> <span class="o">=</span> <span class="n">signature</span><span class="p">(</span>
+    <span class="s1">&#39;workflow_engine.celery.ingest_tasks.ingest_task&#39;</span><span class="p">)</span>
+<span class="n">ingest_signature</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">time_limit</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<div class="viewcode-block" id="IngestClient"><a class="viewcode-back" href="../../../workflow_client.ingest.html#workflow_client.ingest.ingest_client.IngestClient">[docs]</a><span class="k">class</span> <span class="nc">IngestClient</span><span class="p">():</span>
+    <span class="n">_log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;workflow_client.ingest.ingest_client&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app_key</span><span class="p">,</span> <span class="n">workflow_name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">app_key</span> <span class="o">=</span> <span class="n">app_key</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workflow_name</span> <span class="o">=</span> <span class="n">workflow_name</span>
+
+<div class="viewcode-block" id="IngestClient.send"><a class="viewcode-back" href="../../../workflow_client.ingest.html#workflow_client.ingest.ingest_client.IngestClient.send">[docs]</a>    <span class="k">def</span> <span class="nf">send</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">body_data</span><span class="p">,</span> <span class="n">fix_option</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">ingest_signature</span><span class="o">.</span><span class="n">delay</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">workflow_name</span><span class="p">,</span> <span class="n">body_data</span><span class="p">,</span> <span class="n">fix_option</span>
+        <span class="p">)</span>
+
+        <span class="n">response_message</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">response_message</span></div>
+
+
+<div class="viewcode-block" id="IngestClient.gen_datetime"><a class="viewcode-back" href="../../../workflow_client.ingest.html#workflow_client.ingest.ingest_client.IngestClient.gen_datetime">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">gen_datetime</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">timestr</span><span class="p">,</span> <span class="n">tz</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">tz</span> <span class="o">=</span> <span class="p">(</span><span class="n">tz</span> <span class="k">if</span> <span class="n">tz</span> <span class="k">else</span> <span class="bp">cls</span><span class="o">.</span><span class="n">timezone</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pytz</span><span class="o">.</span><span class="n">timezone</span><span class="p">(</span><span class="n">tz</span><span class="p">)</span><span class="o">.</span><span class="n">localize</span><span class="p">(</span>
+            <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">timestr</span><span class="p">,</span> <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">%H%M%S&#39;</span><span class="p">))</span></div>
+
+    <span class="c1"># FIXME just passthrough right now -- see tim&#39;s integration</span>
+<div class="viewcode-block" id="IngestClient.gen_timestring"><a class="viewcode-back" href="../../../workflow_client.ingest.html#workflow_client.ingest.ingest_client.IngestClient.gen_timestring">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">gen_timestring</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">timestr</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">gen_datetime</span><span class="p">(</span><span class="n">timestr</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="IngestClient.run"><a class="viewcode-back" href="../../../workflow_client.ingest.html#workflow_client.ingest.ingest_client.IngestClient.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_data</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">input_data</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">body</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+
+        <span class="n">IngestClient</span><span class="o">.</span><span class="n">_log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;celery ingest returned </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">response</span><span class="p">))</span>
+        <span class="c1"># TODO return this or have it set in order to facilitate RefSet</span>
+        <span class="n">IngestClient</span><span class="o">.</span><span class="n">_log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;enqueued object: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="IngestClient.configure_celery_app"><a class="viewcode-back" href="../../../workflow_client.ingest.html#workflow_client.ingest.ingest_client.IngestClient.configure_celery_app">[docs]</a>    <span class="k">def</span> <span class="nf">configure_celery_app</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;DJANGO_SETTINGS_MODULE&#39;</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="n">blue_sky_settings</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;BLUE_SKY_SETTINGS_JSON&#39;</span><span class="p">]</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">blue_sky_settings</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">settings</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+        <span class="n">app</span> <span class="o">=</span> <span class="n">Celery</span><span class="p">(</span><span class="s1">&#39;workflow_engine.celery&#39;</span><span class="p">)</span>
+        <span class="n">blue_sky_settings</span> <span class="o">=</span> <span class="n">settings_attr_dict</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">config_from_object</span><span class="p">(</span><span class="n">blue_sky_settings</span><span class="p">)</span></div></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">IngestClient</span><span class="o">.</span><span class="n">_log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;RUNNING&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;RUNNING&#39;</span><span class="p">)</span>
+    <span class="n">mod</span> <span class="o">=</span> <span class="n">IngestClient</span><span class="p">(</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">],</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">mod</span><span class="o">.</span><span class="n">configure_celery_app</span><span class="p">()</span>
+    <span class="n">mod</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="../../../index.html">Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Install Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../settings.html">Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../customizing.html">Customization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../workflows.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../strategies.html">Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../configurations.html">Configuration Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../develop.html">Developers Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../authors.html">Authors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../workflow_engine.html">Source Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_engine.admin.html">workflow_engine.admin package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_engine.celery.html">workflow_engine.celery package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_engine.migrations.html">workflow_engine.migrations package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_engine.mixins.html">workflow_engine.mixins package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_engine.models.html">workflow_engine.models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_engine.serializers.html">workflow_engine.serializers package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_engine.strategies.html">workflow_engine.strategies package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_engine.views.html">workflow_engine.views package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_engine.worker.html">workflow_engine.worker package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../workflow_engine.worker.qsub.html">workflow_engine.worker.qsub package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../workflow_client.html">Client Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_client.ingest.html">workflow_client.ingest package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_client.nb_utils.html">workflow_client.nb_utils package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_client.tasks.html">workflow_client.tasks package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/AllenInstitute/BlueSkyWorkflowEngine">Github Profile</a></li>
+</ul>
+
+<h3> Questions </h3>
+<p class="questions">
+  Send any questions using the <a href="http://alleninstitute.org/contact_us/index.html">Send Us a Message</a> link below, 
+  or submit your question to <a href="http://stackoverflow.com/">StackOverflow</a> using with the 'allen-sdk' tag.
+</p>
+
+<p class="questions">
+  If you encounter any problems using the AllenSDK, please create an issue on <a href="http://github.com/alleninstitute/allensdk/issues/">Github's issue tracker</a>.
+</p>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+    <div class="footer" role="contentinfo">
+    </div>
+<script type="text/javascript" src="http://www.brain-map.org/external_assets/javascripts/portalFooter.js"></script>
+
+
+  </body>
+</html>
