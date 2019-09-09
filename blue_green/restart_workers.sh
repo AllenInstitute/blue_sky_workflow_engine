@@ -11,8 +11,8 @@ pkill -9 -f "notebook"
 
 export APP=$1
 export BG=$2
-export BG_CONDA_ENV=base
-export BG_CIRCUS_ENV=circus
+export BG_CONDA_ENV=/conda_envs/py_37
+export BG_CIRCUS_ENV=/conda_envs/circus
 export BASE_DIR=/${BG}/$APP
 export PYTHONPATH=/blue_green:${BASE_DIR}:/${BG}/blue_sky_workflow_engine:$PYTHONPATH
 
@@ -22,7 +22,7 @@ rm ${BASE_DIR}/logs/moab.log
 rm ${BASE_DIR}/logs/moab_status.log
 rm ${BASE_DIR}/logs/monitor.log
 rm ${BASE_DIR}/logs/workflow.log
-rm ${BASE_DIR}/logs/local.log
+rm ${BASE_DIR}/logs/mock.log
 rm ${BASE_DIR}/logs/circus.log
 rm ${BASE_DIR}/logs/result.log
 rm ${BASE_DIR}/logs/beat.log

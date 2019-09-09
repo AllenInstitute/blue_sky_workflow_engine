@@ -33,6 +33,9 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
+import django; django.setup()
+from django.conf import settings
+from workflow_client.client_settings import configure_worker_app
 import celery
 import logging
 from workflow_engine.celery import signatures
@@ -43,6 +46,18 @@ _log = logging.getLogger('workflow_engine.celery.mock_tasks')
 
 SUCCESS_EXIT_CODE = 0
 ERROR_EXIT_CODE = 1
+
+
+app = celery.Celery('workflow_engine.celery.mock_tasks')
+configure_worker_app(app, settings.APP_PACKAGE, 'mock')
+app.conf.imports = ()
+
+
+@celery.signals.after_setup_task_logger.connect
+def after_setup_celery_task_logger(logger, **kwargs):
+    """ This function sets the 'celery.task' logger handler and formatter """
+    logging.config.dictConfig(settings.LOGGING)
+
 
 def query_running_task_dicts():
     tasks = Task.objects.filter(
@@ -74,7 +89,10 @@ def check_status(self):
     trail=True
 )
 def submit_mock_task(self, task_id):
-    _log.info('Submitting task {}'.format(task_id))
+    _log.info(
+        'Submitting task %d',
+        task_id
+    )
 
     try:
         the_task = Task.objects.get(id=task_id)

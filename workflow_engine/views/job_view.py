@@ -133,25 +133,32 @@ def add_sort_jobs(context, sort, url, set_params):
 
 @object_json_response2('job_id')
 def queue_job(job_id, request, result):
-    r = queue_job_signature.delay(job_id)
+    del request  # not used
+    del result  # not used
+    queue_job_signature.delay(job_id)
     #outp = r.wait(_TIMEOUT)
     #_log.info('QUEUE_JOB ' + str(outp))
 
 
 @object_json_response2('job_id')
 def kill_job(job_id, request, result):
-    r = kill_job_signature.delay(job_id[0])
+    del request  # not used
+    del result  # not used
+    kill_job_signature.delay(job_id[0])
     #outp = r.wait(_TIMEOUT)
     #_log.info('QUEUE_JOB ' + str(outp))
 
 
 @object_json_response2('job_id')
 def run_all_jobs(job_id, request, response):
+    del request  # not used
+    del response  # not used
     queue_job_signature.delay(job_id)
 
 
 @object_json_response(id_name='job_id', clazz=Job)
 def get_job_status(job_object, request, result):
+    del request  # not used
     job_data = {}
     job_data['run_state_name'] = job_object.run_state.name
     job_data['start_run_time'] = job_object.get_start_run_time()
@@ -163,6 +170,7 @@ def get_job_status(job_object, request, result):
 
 @object_json_response(id_name='job_id', clazz=Job)
 def get_job_show_data(job_object, request, result):
+    del request  # not used
     result['payload'] = shared.order_payload([
         ('id', job_object.id),
         ('enqueued_object_id', job_object.enqueued_object_id),

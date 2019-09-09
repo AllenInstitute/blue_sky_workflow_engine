@@ -1,4 +1,5 @@
 {% include "home.html" %}
+{% load admin_urls %}
 
 <div id='index_info'>
 <p><span class="bold">Blue Sky Workflow Engine Version:</span> {{workflow_version}}</p>
@@ -13,7 +14,7 @@
 <br />
 <p><span class="bold"><a href="{{ flower_monitor_url }}">Flower Monitor</a></span></p>
 <p><span class="bold"><a href="{{ rabbit_monitor_url }}">Rabbit Monitor</a></span></p>
-<p><span class="bold"><a href="{{ admin_url }}">Admin Console</a></span></p>
+<p><span class="bold"><a href="{% url 'admin:index' %}">Admin Console</a></span></p>
 <p><span class="bold"><a href="{{ notebook_url }}">Jupyter</a></span></p>
 <p><span class="bold"><a href="{{ create_chunk_url }}">Create Chunk</a></span></p>
 <p><span class="bold"><a href="{{ gap_url }}">Create Gap Section</a></span></p>

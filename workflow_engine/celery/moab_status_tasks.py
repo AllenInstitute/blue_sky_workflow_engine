@@ -121,7 +121,7 @@ def check_moab_status(self):
 
         grp.delay()
     except SoftTimeLimitExceeded:
-        _log.warn('Soft Time Limit Exceeded')
+        _log.warning('Soft Time Limit Exceeded')
         return 'timeout'
 
     return 'OK'

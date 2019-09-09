@@ -5,8 +5,8 @@ import copy
 import os
 import sys
 
-_CELERY_PATH = '/opt/conda/bin/celery'
-_ACTIVATE_PATH = '/opt/conda/bin/activate'
+_CELERY_PATH = '/conda_envs/py_37/bin/celery'
+_ACTIVATE_PATH = '/conda_envs/py_37/bin/activate'
 _FLOWER_DELAY = 1
 _FLOWER_PORT = 5557
 _MESSAGE_BROKER = (
@@ -66,11 +66,11 @@ _BASE_ENV = {
             'BLUE_SKY_SETTINGS',
             '/green/blue_sky_settings.yml'),
     'MOAB_AUTH': os.environ.get('MOAB_AUTH', ':'),
-    'PATH': '/opt/conda/envs/circus/bin:/opt/conda/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
+    'PATH': '/conda_envs/circus/bin:/conda_envs/circus/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
 }
 
 def get_arbiter_list(app_name, bg, base_dir):
-    bg_conda_env = 'base'
+    bg_conda_env = '/conda_envs/py_37'
     base_env = copy.deepcopy(_BASE_ENV)
     base_env['APP_PACKAGE'] = app_name
     base_env['PYTHONPATH'] = '/blue_green:/blue_sky_workflow_engine:/{}:{}:/{}/blue_sky_workflow_engine:/render_modules:/EM_aligner_python'.format(bg, base_dir, bg)
@@ -149,21 +149,22 @@ def get_arbiter_list(app_name, bg, base_dir):
         }
     ]
     
-    for worker_name in [
+    for worker_name in (
              'result',
              'ingest',
              'workflow',
              'moab',
              'moab_status',
+             'mock',
              'circus_status',
              #'local',
              #'monitor',
-        ]:
+        ):
         arbiter_list.extend([
             {
                 "cmd": (
                     '/bin/bash -c '
-                    '"source /opt/conda/bin/activate {}; {}"'
+                    '"source /conda_envs/py_37/bin/activate {}; {}"'
                 ).format(
                     bg_conda_env,
                     celery_command_string(worker_name, app_name)

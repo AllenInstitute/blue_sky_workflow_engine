@@ -58,7 +58,10 @@ class WorkflowController(object):
 
     @classmethod
     def run_workflow_node_jobs(cls, workflow_node):
-        WorkflowController._log.info("Node: {}".format(workflow_node))
+        WorkflowController._log.info(
+            "Node: %s",
+            str(workflow_node)
+        )
 
         if (workflow_node.workflow.disabled or
             workflow_node.disabled):
@@ -73,11 +76,13 @@ class WorkflowController(object):
         )
 
         WorkflowController._log.info(
-            "{} jobs to run".format(number_jobs_to_run)
+            "%d jobs to run",
+            number_jobs_to_run
         )
 
         WorkflowController._log.info(
-            "Found {} jobs".format(Job.objects.count())
+            "Found %d jobs",
+            Job.objects.count()
         )
 
         # run more jobs
@@ -85,7 +90,8 @@ class WorkflowController(object):
             for job_to_run in workflow_node.get_n_pending_jobs(
                 number_jobs_to_run):
                 WorkflowController._log.info(
-                    "running job {}".format(job_to_run)
+                    "running job %s",
+                    str(job_to_run)
                 )
                 WorkflowController.job_run(job_to_run)
 
@@ -140,14 +146,16 @@ class WorkflowController(object):
             strategy = target_node.get_strategy()
         except:
             WorkflowController._log.error(
-                'Error loading strategy for {}'.format(
-                    target_node
-                ))
-            return
+                'Error loading strategy for %s',
+                str(target_node)
+            )
 
         enqueued_objects = strategy.transform_objects_for_queue(source_object)
 
-        WorkflowController._log.info("enqueued_objects: {}".format(len(enqueued_objects)))
+        WorkflowController._log.info(
+            "enqueued_objects: %d",
+            len(enqueued_objects)
+        )
 
         for enqueued_object in enqueued_objects:
             if strategy.can_transition(enqueued_object):
@@ -162,17 +170,17 @@ class WorkflowController(object):
             strategy = target_node.get_strategy()
         except:
             WorkflowController._log.error(
-                'Error loading strategy for {}'.format(
-                    target_node
-                ))
-            return
+                'Error loading strategy for %s',
+                str(target_node)
+            )
 
         source_object = source_job.enqueued_object
 
         enqueued_objects = strategy.transform_objects_for_queue(source_object)
-        WorkflowController._log.info("Found {} enqueued objects".format(
+        WorkflowController._log.info(
+            "Found %d enqueued objects",
             len(enqueued_objects)
-        ))
+        )
 
         for enqueued_object in enqueued_objects:
             if strategy.can_transition(enqueued_object, source_node):
@@ -263,7 +271,9 @@ class WorkflowController(object):
             job.set_error_message(
                 str(e) + ' - ' + str(traceback.format_exc()), None)
             WorkflowController._log.info(
-                "Job exception: %s" % (job.error_message))
+                "Job exception: %s",
+                str(job.error_message)
+            )
             job.set_failed_state()
             run_workflow_node_jobs_signature.delay(job.workflow_node.id)
 
@@ -361,7 +371,9 @@ class WorkflowController(object):
         )
 
         WorkflowController._log.info(
-            "Start workflow job state: %s" % (str(job.run_state)))
+            "Start workflow job state: %s",
+            str(job.run_state)
+        )
 
         run_workflow_node_jobs_signature.delay(job.workflow_node.id)
 

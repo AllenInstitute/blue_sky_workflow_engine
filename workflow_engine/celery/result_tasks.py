@@ -101,7 +101,7 @@ def process_finished_execution(self, task_id):
         (task, strategy) = get_task_strategy_by_task_id(task_id)
         strategy.finish_task(task)
 
-        _log.warn('Skipping unneeded run_workflow_node_jobs')
+        _log.warning('Skipping unneeded run_workflow_node_jobs')
         #run_workflow_node_jobs_signature.delay(
         #    task.job.workflow_node.id)
 
@@ -132,7 +132,11 @@ def process_failed_execution(self, task_id,
     try:
         task.job.set_error_message(error_message)
     except:
-        pass
+        _log.warning('could not set task error message:')
+
+    if task.retry_count < task.job.max_retries - 1:
+        task.retry_count=task.retry_count + 1
+        task.set_pending_state()
 
     if strategy:
         strategy.fail_execution_task(task)
@@ -175,10 +179,10 @@ def process_pbs_id(self, task_id, moab_id, chained=False):
             task.set_queued_state(moab_id)
         else:
             # TODO: this message is coming in wrong order for local
-            # _log.warn('Got None for moab id: %s', str(task_id))
+            # _log.warning('Got None for moab id: %s', str(task_id))
             pass
     except ObjectDoesNotExist:
-        _log.warn(
+        _log.warning(
             "Task {} for PBS id {} does not exist",
             task_id,
             moab_id)

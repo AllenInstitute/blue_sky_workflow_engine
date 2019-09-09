@@ -33,22 +33,16 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-from django.conf import settings
 from workflow_engine.strategies import base_strategy
 import os
-import subprocess
 import traceback
 import logging
 import json
-from celery import chain
 from celery.exceptions import SoftTimeLimitExceeded
 from workflow_engine.celery.signatures import (
     enqueue_next_queue_signature,
     kill_moab_task_signature,
-    process_pbs_id_signature,
-    process_running_signature,
     submit_moab_task_signature,
-    failed_execution_handler_signature,
 )
 from workflow_client.tasks.circus_signatures import (
     submit_task_signature,
@@ -80,6 +74,8 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
         dict
             strategy-specific input
         '''
+        del storage_directory, task  # unused
+
         input_data = {}
         input_data['input'] = str(enqueued_object)
 
@@ -115,6 +111,8 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
         list or None
             argument strings
         '''
+        del task, write_files  # unused
+
         return None
 
     # override if needed
@@ -130,20 +128,30 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 
         arguments = executable.static_arguments
 
-        task_arguments = self.get_task_arguments(task)
+        task_arguments = self.get_task_arguments(task)  # pylint: disable= E1128
 
-        input_file = self.get_input_file(task)
+        input_file = self.get_input_file(task, create_dir=False)
 
         # populate the input file
         storage_dir = self.get_task_storage_directory(task)
 
         enqueued_object = task.enqueued_task_object
 
+        input_data = self.get_input(
+            enqueued_object,
+            storage_dir,
+            task
+        )
+        ExecutionStrategy._log.info(json.dumps(input_data))
+
         if input_file is not None:
-            self.create_input_file(input_file,
-                                   enqueued_object,
-                                   storage_dir,
-                                   task)
+            self.create_input_file(
+                input_file,
+                enqueued_object,
+                storage_dir,
+                task,
+                input_data
+            )
 
         output_file = self.get_output_file(task)
 
@@ -179,20 +187,11 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 
     # override if needed
     def skip_execution(self, enqueued_object):
+        del enqueued_object  # unused
+
         return False
 
     # ## ## everthing below this should not be overriden# ## ##
-
-    # Do not override
-    def set_error_message_from_log(self, task):
-        try:
-            if os.path.isfile(task.log_file):
-                result = subprocess.run(
-                    ['tail', task.log_file], stdout=subprocess.PIPE)
-                task.set_error_message(result.stdout.decode("utf-8"))
-        except Exception as e:
-            ExecutionStrategy._log.error('Something went wrong: ' + str(e))
-            print('Something went wrong: ' + str(e)) # TODO: remove?
 
     # Do not override
     def running_task(self, task):
@@ -235,15 +234,21 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
     # Do not override
     def run_task(self, task):
         try:
-            self.prep_task(task)
+            enqueued_object = task.enqueued_task_object
 
-            if not self.skip_execution(task.enqueued_task_object):
-                task.full_executable = self.get_full_executable(task)
-                task.log_file = self.get_log_file(task)
-                task.pbs_id = None
-                task.save()
-
-            self.run_asynchronous_task(task)
+            if self.must_wait(enqueued_object):
+                task.set_queued_state()
+            else:
+                self.prep_task(task)
+    
+                if self.skip_execution(enqueued_object):
+                    self.finish_task(task)
+                else:
+                    task.full_executable = self.get_full_executable(task)
+                    task.log_file = self.get_log_file(task)
+                    task.pbs_id = None
+                    task.save()
+                    self.run_asynchronous_task(task)
         except Exception as e:
             task.set_error_message(
                 str(e) + ' - ' + str(traceback.format_exc()))
@@ -305,10 +310,10 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
                            )
                     })
 
-                    queue_name_with_app = '{}@{}'.format(
-                        queue_name,
-                        settings.APP_PACKAGE
-                    )
+#                     queue_name_with_app = '{}@{}'.format(
+#                         queue_name,
+#                         settings.APP_PACKAGE
+#                     )
 
                     try:
                         if queue_name == 'circus':
@@ -324,30 +329,6 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
                             )
                         elif queue_name == 'mock':
                             result = submit_mock_signature.delay(task.id)
-
-#                         result = chain(
-#                             submit_signature.clone(
-#                                 submit_args
-#                             ).set(
-#                                 time_limit=11
-#                             ),
-#                             process_pbs_id_signature.clone(
-#                                 (task.id, True)
-#                             ).set(
-#                                 time_limit=11
-#                             ),
-#                             process_running_signature.clone(
-#                                 (task.id,)
-#                             ).set(
-#                                 time_limit=11,
-#                                 immutable=True
-#                             )
-#                         ).apply_async(
-#                             time_limit=11,
-#                             link_error=failed_execution_handler_signature.clone(
-#                                 (task.id,)
-#                             )
-#                         )
                     except SoftTimeLimitExceeded:
                         ExecutionStrategy._log.warning('Submit Task Timeout')
                         task.set_failed_execution_fields_and_rerun()
@@ -358,6 +339,8 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
         return result
 
     def get_dynamic_arguments(self, task):
+        del task  # unused
+
         return []
 
     # this method creates the input file
@@ -366,13 +349,8 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
                           input_file,
                           enqueued_object,
                           storage_directory,
-                          task):
-        ExecutionStrategy._log.info("input data")
-
-        input_data = self.get_input(enqueued_object, storage_directory, task)
-
-        ExecutionStrategy._log.info(json.dumps(input_data))
-
+                          task,
+                          input_data):
         with open(input_file, 'w') as in_file:
             json.dump(input_data, in_file, indent=2)
         os.chmod(input_file, 0o664)
@@ -394,40 +372,19 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
         return os.path.join(storage_directory, 'pbs_' + str(task.id) + '.pbs')
 
     # Do not override
-    def get_input_file(self, task):
-        storage_directory = self.get_or_create_task_storage_directory(task)
+    def get_input_file(self, task, create_dir=True):
+        if create_dir is True:
+            storage_directory = self.get_or_create_task_storage_directory(task)
+        else:
+            storage_directory = self.get_task_storage_directory(task)
 
         input_path = os.path.join(
             storage_directory,
+            
             'input_' + str(task.id) + '.json')
 
         return input_path
 
-    # Do not override
-    # TODO: the data flow in constructing this path is overly complex
-    def get_task_storage_directory(self, task):
-        task_storage_dir = os.path.join(
-            self.get_job_storage_directory(
-                self.get_base_storage_directory(), task.job),
-            'tasks',
-            'task_' + str(task.id))
-
-        return task_storage_dir
-
-    # Do not override
-    def get_or_create_task_storage_directory(self, task):
-        storage_directory = self.get_task_storage_directory(task)
-
-        # create directory if needed
-        #try:
-        ExecutionStrategy.make_dirs_chmod(storage_directory, 0o777)
-#         except Exception as e:
-#             mess = str(e) + ' - ' + str(traceback.format_exc())
-#             ExecutionStrategy._log.error(mess)
-#             task.set_error_message(mess)
-#             task.set_failed_execution_fields_and_rerun()
-
-        return storage_directory
 
     # Do not override
     def get_log_file(self, task):

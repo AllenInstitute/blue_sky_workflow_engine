@@ -42,7 +42,6 @@ from workflow_engine.mixins import Archivable, Runnable, Tagable, Timestamped
 from workflow_client.pbs_utils import PbsUtils
 import os
 import logging
-from django_fsm import can_proceed
 
 
 _logger = logging.getLogger('workflow_engine.models.task')
@@ -52,7 +51,8 @@ class Task(Archivable, Runnable, Tagable, Timestamped, models.Model):
     enqueued_task_object_type = models.ForeignKey(
         ContentType,
         default=None,
-        null=True
+        null=True,
+        on_delete=models.CASCADE
     )
     '''Generic relation type'''
 
@@ -67,7 +67,8 @@ class Task(Archivable, Runnable, Tagable, Timestamped, models.Model):
     '''Combined generic relation type and id'''
 
     job = models.ForeignKey(
-        'workflow_engine.Job'
+        'workflow_engine.Job',
+        on_delete=models.CASCADE
     )
 
     full_executable = models.CharField(
@@ -242,16 +243,22 @@ class Task(Archivable, Runnable, Tagable, Timestamped, models.Model):
         self.increment_retry_count()
         self.set_start_run_time()
         strategy = self.get_strategy()
-        _logger.info("Running task with strategy %s" % (str(strategy)))
+        _logger.info(
+            "Running task with strategy %s",
+            str(strategy)
+        )
         strategy.run_task(self)
 
-    def set_pending_state(self):
+    def set_pending_state(self, quiet=False):
         strategy = self.get_strategy()
         strategy.run_task(self)
-        Runnable.set_pending_state()
+        Runnable.set_pending_state(self, quiet)
 
     def set_queued_state(self, pbs_id=None, quiet=False):
-        _logger.info("set queued state: {}".format(pbs_id))
+        _logger.info(
+            "set queued state: %s",
+            str(pbs_id)
+        )
         if pbs_id is not None:
             self.pbs_id = pbs_id
         Runnable.set_queued_state(self, pbs_id, quiet)

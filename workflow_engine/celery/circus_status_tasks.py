@@ -87,7 +87,7 @@ def check_status(self):
 
         check_remote_status_signature.delay(task_dicts)
     except SoftTimeLimitExceeded:
-        _log.warn('Soft Time Limit Exceeded')
+        _log.warning('Soft Time Limit Exceeded')
         return 'timeout'
     except Exception as e:
         _log.error(e)

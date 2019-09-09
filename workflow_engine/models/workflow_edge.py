@@ -46,19 +46,27 @@ class WorkflowEdge(Archivable, Timestamped, models.Model):
     _log = logging.getLogger('workflow_engine.models.workflow_edge')
 
     workflow = models.ForeignKey(
-        'workflow_engine.Workflow')
+        'workflow_engine.Workflow',
+        on_delete=models.CASCADE
+    )
     '''The workflow graph containing this edge and related nodes'''
 
     source = models.ForeignKey(
         'workflow_engine.WorkflowNode',
         related_name='%(class)s_source',
-        null=True, blank=True)
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE
+    )
     '''Association to the workflow node leading into the edge (or null)'''
 
     sink = models.ForeignKey(
         'workflow_engine.WorkflowNode',
         related_name='%(class)s_sink',
-        null=True, blank=True)
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE
+    )
     '''Association to the workflow node leading out of the edge (or null)'''
 
     disabled = models.BooleanField(default=False)

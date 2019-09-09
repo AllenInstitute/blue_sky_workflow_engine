@@ -1,7 +1,7 @@
 import os
 from setuptools import find_packages, setup
 
-VERSION = '0.120.0.dev0'
+VERSION = '0.121.0'
 
 
 with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
@@ -47,15 +47,13 @@ setup(
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',
-        'Framework :: Django :: 1.11',
+        'Framework :: Django :: 2.2',
         'Intended Audience :: Developers',
         'License :: Allen Institute Software License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Topic :: Internet :: WWW/HTTP'
     ]
 )

@@ -147,7 +147,7 @@ var cy = window.cy = cytoscape({
     fit: false,
     transform: function( node, pos ) {
         return {
-            x: pos['y'] - 325,
+            x: pos['y'],
             y: pos['x'] + 100
         };
     },

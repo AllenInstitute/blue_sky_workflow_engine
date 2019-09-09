@@ -55,7 +55,9 @@ def load_settings_yaml():
                            'blue_sky_settings.yml')
 
         with open(blue_sky_settings_json) as f:
-            settings_dict = settings_attr_dict(yaml.load(f))
+            settings_dict = settings_attr_dict(
+                yaml.load(f, Loader=yaml.SafeLoader)
+            )
     except Exception as e:
         raise Exception('need to set BLUE_SKY_SETTINGS' + str(e))
 
@@ -90,7 +92,15 @@ def configure_worker_app(
         celery_settings))
     app.conf.task_queue_max_priority = 10
     app.conf.task_queues = router.task_queues(worker_names)
-    app.conf.task_routes = (router.route_task,)
+    app.conf.task_routes = (
+        router.route_task,
+        {
+            'workflow_engine.celery.workflow_tasks.run_workflow_node_jobs_by_id':
+            {
+                'routing_key': 'at_em.#'
+            }
+        }
+    )
 
 def config_object(s):
     return settings_attr_dict({

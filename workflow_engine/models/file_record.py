@@ -45,9 +45,14 @@ class FileRecord(Timestamped, models.Model):
     storage_directory = models.CharField(max_length=500)
     order = models.IntegerField(default=0)
     well_known_file = models.ForeignKey(
-        'workflow_engine.WellKnownFile')
+        'workflow_engine.WellKnownFile',
+        on_delete=models.CASCADE
+    )
     task = models.ForeignKey(
-        'workflow_engine.Task', null=True)
+        'workflow_engine.Task',
+        null=True,
+        on_delete=models.CASCADE
+    )
 
     def __str__(self):
         return self.get_full_name() 

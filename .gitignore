@@ -16,3 +16,4 @@ htmlcov/
 test-reports/
 build/
 /.pytest_cache/
+/record_view.py

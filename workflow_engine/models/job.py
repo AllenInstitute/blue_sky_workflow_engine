@@ -48,7 +48,8 @@ class Job(Archivable, Runnable, Tagable, Timestamped, models.Model):
         ContentType,
         default=None,
         null=True,
-        blank=True
+        blank=True,
+        on_delete=models.CASCADE
     )
     '''Generic relation type'''
 
@@ -65,7 +66,8 @@ class Job(Archivable, Runnable, Tagable, Timestamped, models.Model):
     '''Combined generic relation type and id'''
 
     workflow_node = models.ForeignKey(
-        'workflow_engine.WorkflowNode'
+        'workflow_engine.WorkflowNode',
+        on_delete=models.CASCADE
     )
 
     priority = models.IntegerField(

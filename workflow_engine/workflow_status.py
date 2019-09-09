@@ -87,18 +87,21 @@ class WorkflowStatus(object):
                 w.name for w in Workflow.objects.all()
             ]
         self.run_states = self.query_run_states()
-        self.nodes, self.batch_size = self.query_nodes()
+        self.nodes = self.query_nodes()
         self.edges = self.query_edges()
         self.run_state_counts = self.query_run_state_counts()
-        self.reindex_run_state_counts()
+        self.run_state_counts = self.reindex_run_state_counts()
         self.pending_queued_running = self.sum_pending_queued_running()
         self.run_state_totals = self.total_run_states()
 
     def query_run_states(self):
-        return pd.DataFrame(
+        run_state_df = pd.DataFrame(
             Runnable.get_run_state_names(),
             columns=['run_state_name']
         )
+        run_state_df.index.name = 'run_state'
+
+        return run_state_df
 
     def query_nodes(self):
         nodes = read_frame(
@@ -108,15 +111,13 @@ class WorkflowStatus(object):
                 'batch_size'
             ).filter(
                 workflow__name__in=self.workflow_names
-            )
-        )
-        nodes.set_index(
-            ['id'],
-            inplace=True
+            ),
+            index_col='id',
+            fieldnames=('job_queue__name', 'batch_size')
         )
         nodes.columns = ['job_queue_name', 'batch_size']
 
-        return nodes.loc[:,['job_queue_name']], nodes.loc[:,['batch_size']]
+        return nodes
 
     def query_edges(self):
         edges = read_frame(
@@ -134,23 +135,39 @@ class WorkflowStatus(object):
 
         return edges
 
-    def query_run_state_counts(self):
-        qs = WorkflowNode.safe_objects.filter(
-            workflow__name__in=self.workflow_names,
-        ).values(
-            'id',
-            'job__running_state'
-        ).order_by(
-            'id',
-            'job__running_state',
-        ).annotate(
-            count=Count('job__running_state')
-        ).all()
+    def query_run_state_counts(self, verbose=False):
+        if verbose is True:
+            job_queue_column = 'job_queue__name'
+        else:
+            job_queue_column = 'id'
 
-        run_state_counts = read_frame(qs)
-        run_state_counts.columns=['job_queue', 'run_state', 'count']
+        run_state_counts = read_frame( 
+            WorkflowNode.safe_objects.filter(
+                workflow__name__in=self.workflow_names,
+            ).values(
+                job_queue_column,
+                'job__running_state'
+            ).order_by(
+                job_queue_column,
+                'job__running_state',
+            ).annotate(
+                count=Count('job__running_state')
+            ),
+            fieldnames=(job_queue_column, 'job__running_state', 'count')
+        ).dropna()
+
+
+        if verbose is True:
+            run_state_counts.columns=['job_queue', 'run_state', 'count']
+        else:
+            run_state_counts.columns=['job_queue', 'run_state_name', 'count']
+            run_state_counts = run_state_counts.merge(
+                self.run_states.reset_index(inplace=False),
+                on='run_state_name'
+            ).loc[:, ['job_queue', 'run_state', 'count']]
+
         run_state_counts.set_index(['job_queue', 'run_state'], inplace=True)
-
+ 
         return run_state_counts
 
     def pending_queued_running_index(self, df):
@@ -178,10 +195,10 @@ class WorkflowStatus(object):
     
         idx = pd.MultiIndex.from_product(
             (node_names,run_state_names),
-            names=['job_queue', 'run_state']
+            names=('job_queue', 'run_state')
         )
 
-        self.run_state_counts = self.run_state_counts.reindex(idx, fill_value=0)
+        return self.run_state_counts.reindex(idx, fill_value=0)
 
     def total_run_states(self):
         totals = self.run_state_counts.sum(level='job_queue')
@@ -200,9 +217,6 @@ class WorkflowStatus(object):
         )
         out_dict.update(
             self.nodes.to_dict(orient='dict')
-        )
-        out_dict.update(
-            self.batch_size.to_dict(orient='dict')
         )
         out_dict.update(
             self.edges.groupby(
@@ -234,9 +248,6 @@ class WorkflowStatus(object):
         )
         out_dict.update(
             self.nodes.to_dict(orient='dict')
-        )
-        out_dict.update(
-            self.batch_size.to_dict(orient='dict')
         )
         out_dict.update(
             json.loads(self.run_state_counts.to_json(orient='columns'))

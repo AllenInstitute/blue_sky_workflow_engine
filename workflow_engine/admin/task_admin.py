@@ -7,28 +7,31 @@ class TaskAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'enqueued_task_object_link',
+        'pbs_id',
         'storage_link',
         'duration',
         'retry_count',
         'start_run_time',
         'end_run_time',
-        'run_state',
+        'running_state',
     )
     search_fields = (
         'id',
         'enqueued_task_object_id',
+        'pbs_id'
     )
     read_only_fields = (
         'start_run_time',
         'end_run_time',
         )
     list_select_related = (
-        'run_state',
+            'job__workflow_node',
+            'job__workflow_node__workflow'
         )
     list_filter = (
         'job__workflow_node__workflow',
         'job__workflow_node',
-        'run_state',
+        'running_state',
         'archived',
     )
 

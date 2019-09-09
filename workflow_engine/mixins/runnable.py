@@ -23,7 +23,8 @@ class Runnable(models.Model):
     _log = logging.getLogger('workflow_engine.mixins.runnable')
 
     run_state = models.ForeignKey(
-        'workflow_engine.RunState'
+        'workflow_engine.RunState',
+        on_delete=models.CASCADE
     )
     '''deprecated for running state'''
 
@@ -85,20 +86,6 @@ class Runnable(models.Model):
             job_state_name == Runnable.STATE.QUEUED or
             job_state_name == Runnable.STATE.FINISHED_EXECUTION)
 
-    def get_created_at(self):
-        return timezone.localtime(
-            self.created_at
-        ).strftime(
-            '%m/%d/%Y %I:%M:%S'
-        )
-
-    def get_updated_at(self):
-        return timezone.localtime(
-            self.updated_at
-        ).strftime(
-            '%m/%d/%Y %I:%M:%S'
-        )
-
     def get_start_run_time(self):
         result = None
         if self.start_run_time != None:
@@ -149,8 +136,10 @@ class Runnable(models.Model):
             self.reset_pending()
         else:
             if not quiet:
-                Runnable._log.warn(
-                    'Forced transition to PENDING from {} for'.format(self.running_state, self))
+                Runnable._log.warning(
+                    'Forced transition to PENDING from %s for %s',
+                    self.running_state,
+                    str(self))
             self.running_state = Runnable.STATE.PENDING
 
         Runnable._log.info('state is now QUEUED')
@@ -163,8 +152,11 @@ class Runnable(models.Model):
             self.finish()
         elif self.running_state != Runnable.STATE.FAILED_EXECUTION:
             if not quiet:
-                Runnable._log.warn(
-                    'Forced transition to FINISHED_EXECUTION from {} for {}'.format(self.running_state, self))
+                Runnable._log.warning(
+                    'Forced transition to FINISHED_EXECUTION from %s for %s',
+                    str(self.running_state),
+                    str(self)
+                )
             self.running_state = Runnable.STATE.FINISHED_EXECUTION
         else:
             self.finish()  # trigger exception
@@ -178,12 +170,18 @@ class Runnable(models.Model):
             self.submit_to_queue()
         elif self.running_state != Runnable.STATE.FAILED_EXECUTION:
             if not quiet:
-                Runnable._log.warn(
-                    'Forced transition to QUEUED from {} for {}'.format(self.running_state, self))
+                Runnable._log.warning(
+                    'Forced transition to QUEUED from %s for %s',
+                    str(self.running_state),
+                    str(self)
+                )
                 Runnable._log.info(''.join(format_stack()))
             self.running_state = Runnable.STATE.QUEUED
         else:
-            Runnable.log.info("transition to QUEUED state for {}".format(self))
+            Runnable._log.info(
+                "transition to QUEUED state for %s",
+                str(self)
+            )
             self.submit_to_queue()  # trigger exception
 
         self.save()
@@ -194,8 +192,11 @@ class Runnable(models.Model):
         if can_proceed(self.fail):
             self.fail()
         elif self.running_state != Runnable.STATE.FAILED_EXECUTION:
-            Runnable._log.warn(
-                'Forced transition to FAILED from {} for {}'.format(self.running_state, self))
+            Runnable._log.warning(
+                'Forced transition to FAILED from %s for %s',
+                str(self.running_state),
+                str(self)
+            )
             self.running_state = Runnable.STATE.FAILED
         else:
             self.fail()  # trigger exception
@@ -206,13 +207,17 @@ class Runnable(models.Model):
         self.run_state = RunState.get_failed_execution_state()
 
         if can_proceed(self.fail_execution):
-            Runnable._log("transition to FAILED_EXECUTION from {}".format(
-                self.running_state))
+            Runnable._log.warning(
+                "transition to FAILED_EXECUTION from %s",
+                str(self.running_state)
+            )
             self.fail_execution()
         else:
-            Runnable._log.warn(
-                'Forced transition to FAILED_EXECUTION from {} for {}'.format(
-                    self.running_state, self))
+            Runnable._log.warning(
+                'Forced transition to FAILED_EXECUTION from %s for %s',
+                str(self.running_state),
+                str(self)
+            )
             self.running_state = Runnable.STATE.FAILED_EXECUTION
 
         self.save()
@@ -224,10 +229,11 @@ class Runnable(models.Model):
             self.start_running()
         elif self.running_state != Runnable.STATE.FAILED_EXECUTION:
             if not quiet:
-                Runnable._log.warn(
-                    'Forced transition to RUNNING from {} for {}'.format(
-                        self.running_state,
-                        self))
+                Runnable._log.warning(
+                    'Forced transition to RUNNING from {} for {}',
+                    str(self.running_state),
+                    str(self)
+                )
                 Runnable._log.info(''.join(format_stack()))
             self.running_state = Runnable.STATE.RUNNING
         else:
@@ -241,9 +247,11 @@ class Runnable(models.Model):
         if can_proceed(self.succeed):
             self.succeed()
         elif self.running_state != Runnable.STATE.FAILED_EXECUTION:
-            Runnable._log.warn(
-                'Forced transition to SUCCESS from {} for {}'.format(
-                    self.running_state, self))
+            Runnable._log.warning(
+                'Forced transition to SUCCESS from %s for %s',
+                str(self.running_state),
+                str(self)
+            )
             self.running_state = Runnable.STATE.SUCCESS
         else:
             self.succeed()  # trigger exception
@@ -255,10 +263,11 @@ class Runnable(models.Model):
         if can_proceed(self.kill_process):
             self.kill_process()
         else:
-            Runnable._log.warn(
-                'Forced transition to PROCESS_KILLED from {} for {}'.format(
-                    self.running_state,
-                    self))
+            Runnable._log.warning(
+                'Forced transition to PROCESS_KILLED from %s for %s',
+                str(self.running_state),
+                str(self)
+            )
             self.running_state = Runnable.STATE.PROCESS_KILLED
 
         self.save()

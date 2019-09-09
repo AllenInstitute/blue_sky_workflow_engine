@@ -81,7 +81,7 @@ class JobAdmin(admin.ModelAdmin):
         'duration',
         'workflow_link',
         'workflow_node_link',
-        'run_state',
+        'running_state',
         'task_ids',
         'archived',
         )
@@ -93,12 +93,11 @@ class JobAdmin(admin.ModelAdmin):
     list_select_related = (
         'workflow_node',
         'workflow_node__workflow',
-        'run_state',
         )
     list_filter = (
         'workflow_node__workflow',
         'workflow_node',
-        'run_state',
+        'running_state',
         'archived',
         )
     actions = (
@@ -159,9 +158,9 @@ class JobAdmin(admin.ModelAdmin):
     def lookup_allowed(self, key, value):
         if key in (
             'id__in',
-            'run_state__name',
+            'running_state',
             'workflow_node__job_queue__name',
-            'run_state__name__in',
+            'running_state__in',
         ):
             return True
 

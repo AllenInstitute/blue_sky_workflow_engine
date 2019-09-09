@@ -54,13 +54,13 @@ class WorkflowConfig:
 
     @classmethod
     def from_yaml(cls, y):
-        definition = yaml.load(y)
+        definition = yaml.load(y, Loader=yaml.SafeLoader)
         return cls.parse_yaml_definition(definition)
 
     @classmethod
     def from_yaml_string(cls, y):
         strm = StringIO(y)
-        definition = yaml.load(strm)
+        definition = yaml.load(strm, Loader=yaml.SafeLoader)
         return cls.parse_yaml_definition(definition)
 
     @classmethod
@@ -128,6 +128,11 @@ class WorkflowConfig:
                     state['batch_size'] = s['batch_size']
                 else:
                     state['batch_size'] = 1
+
+                if 'max_retries' in s:
+                    state['max_retries'] = s['max_retries']
+                else:
+                    state['max_retries'] = 1
 
                 states[s['key']] = state
                 state_list.append(s['key'])
@@ -234,7 +239,8 @@ class WorkflowConfig:
                             'executable': executables[node['executable']]})
     
                 batch_size = node['batch_size']
-                max_retries = 1
+                max_retries = node['max_retries'] if 'max_retries' in node else 1
+                max_retries = max_retries
 
                 nodes[node['key']], _ = \
                     WorkflowNode.objects.update_or_create(

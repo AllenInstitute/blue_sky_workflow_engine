@@ -37,6 +37,7 @@ from workflow_engine.models import WellKnownFile
 from django.conf import settings
 import logging
 import traceback
+import subprocess
 import os
 
 
@@ -60,6 +61,9 @@ class BaseStrategy(object):
     # called if the task fails
     def on_failure(self, task):
         pass
+
+    def on_fail_execution(self, task):
+        self.on_failure(task)
 
     # override if needed
     # called when the task starts running
@@ -131,8 +135,15 @@ class BaseStrategy(object):
     def is_execution_strategy(self):
         return False
 
-    def is_wait_strategy(self):
+    def must_wait(self, enqueued_object):
+        del enqueued_object  # unused arg
+
         return False
+
+    def skip_execution(self, enqueued_object):
+        del enqueued_object  # unused arg
+
+        return True
 
     @classmethod
     def make_dirs_chmod(cls, path, mode):
@@ -147,6 +158,17 @@ class BaseStrategy(object):
         os.chmod(path, mode)
         res += [path]
         return res
+
+    # Do not override
+    # TODO: the data flow in constructing this path is overly complex
+    def get_task_storage_directory(self, task):
+        task_storage_dir = os.path.join(
+            self.get_job_storage_directory(
+                self.get_base_storage_directory(), task.job),
+            'tasks',
+            'task_' + str(task.id))
+
+        return task_storage_dir
 
     # Do not override
     def get_or_create_task_storage_directory(self, task):
@@ -179,16 +201,30 @@ class BaseStrategy(object):
         task.set_failed_fields_and_rerun()
 
 
+   # Do not override
+    def set_error_message_from_log(self, task):
+        try:
+            if os.path.isfile(task.log_file):
+                result = subprocess.run(
+                    ['tail', task.log_file], stdout=subprocess.PIPE)
+                task.set_error_message(result.stdout.decode("utf-8"))
+        except Exception as e:
+            BaseStrategy._log.error(
+                'Something went wrong: %s\n%s',
+                str(e),
+                traceback.format_exc()
+            )
+
     # Do not override
     def fail_execution_task(self, task):
         try:
             self.set_error_message_from_log(task)
-            self.on_failure(task)
+            self.on_fail_execution(task)
         except Exception as e:
             err_msg = '%s - %s' % (
                 str(e),
                 str(traceback.format_exc()))
-            BaskeStrategy._log.info(err_msg) 
+            BaseStrategy._log.info(err_msg) 
             task.set_error_message(err_msg)
 
         task.set_failed_execution_fields_and_rerun()

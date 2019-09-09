@@ -35,7 +35,6 @@
 #
 import os.path
 import datetime
-from django.utils import timezone
 from django.conf import settings
 import pytz
 import re
@@ -65,25 +64,25 @@ class FileHolder(object):
     def add_color_highlighting(cls, html):
         if html != None:
             html = re.sub(r"[^( |\)|\(|\n)]*(success)[^( |\)|\(|\n)]*",
-                          "<span class = log_s>\g<0></span>",
+                          r"<span class = log_s>\g<0></span>",
                           html,
-                          flags=re.IGNORECASE)
+                          flags=re.RegexFlag.IGNORECASE)
             html = re.sub(r"[^( |\)|\(|\n)]*(warnings)[^( |\)|\(|\n)]*",
-                          "<span class = log_warn>\g<0></span>",
+                          r"<span class = log_warn>\g<0></span>",
                           html,
-                          flags=re.IGNORECASE)
+                          flags=re.RegexFlag.IGNORECASE)
             html = re.sub(r"[^( |\)|\(|\n|:)]*(error)[^( |\)|\(|\n|:)]*",
-                          "<span class = log_er>\g<0></span>",
+                          r"<span class = log_er>\g<0></span>",
                           html,
-                          flags=re.IGNORECASE)
+                          flags=re.RegexFlag.IGNORECASE)
             html = re.sub(r"[^( |\)|\(|\n)]*(exception)[^( |\)|\(\n)]*",
-                          "<span class = log_er>\g<0></span>",
+                          r"<span class = log_er>\g<0></span>",
                           html,
-                          flags=re.IGNORECASE)
+                          flags=re.RegexFlag.IGNORECASE)
             html = re.sub(r"[^( |\)|\(|\n|:)]*(failure)[^( |\)|\(|\n|:)]*",
-                          "<span class = log_er>\g<0></span>",
+                          r"<span class = log_er>\g<0></span>",
                           html,
-                          flags=re.IGNORECASE)
+                          flags=re.RegexFlag.IGNORECASE)
 
         return html
 

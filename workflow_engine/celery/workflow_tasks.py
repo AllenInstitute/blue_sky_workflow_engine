@@ -122,7 +122,7 @@ def queue_job(self, job_ids):
     WorkflowController.set_jobs_for_run_by_id(job_ids)
 
 
-@celery.shared_task(bind=True)
+@celery.shared_task(bind=True, rate_limit='24000/m')
 def enqueue_next_queue(self, job_id):
     WorkflowController.enqueue_next_queue_by_job_id(job_id)
 

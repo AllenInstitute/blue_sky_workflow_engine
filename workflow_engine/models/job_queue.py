@@ -45,9 +45,16 @@ class JobQueue(Archivable, Nameable, Timestamped, models.Model):
 
     job_strategy_class = models.CharField(max_length=255)
     enqueued_object_type = models.ForeignKey(
-        ContentType, default=None, null=True)
+        ContentType,
+        default=None,
+        null=True,
+        on_delete=models.CASCADE
+    )
     executable = models.ForeignKey(
-        'workflow_engine.Executable', null=True)
+        'workflow_engine.Executable',
+        null=True,
+        on_delete=models.CASCADE
+    )
 
     def get_strategy(self):
         JobQueue._logger.info(

@@ -55,11 +55,17 @@ class WorkflowNode(Archivable, Configurable, Timestamped, models.Model):
     _log = logging.getLogger('workflow_engine.models.workflow_node')
 
     job_queue = models.ForeignKey(
-        'workflow_engine.JobQueue')
+        'workflow_engine.JobQueue',
+        on_delete=models.CASCADE
+    )
     '''Defines strategy code and a queue of object to be run'''
 
     parent = models.ForeignKey(
-        'workflow_engine.WorkflowNode', null=True, blank=True)
+        'workflow_engine.WorkflowNode',
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE
+    )
     '''Deprecated field from when workflows were implemented as trees.'''
 
     sinks = models.ManyToManyField(
@@ -74,7 +80,9 @@ class WorkflowNode(Archivable, Configurable, Timestamped, models.Model):
     '''Deprecated field from when workflows were implemented as trees.'''
 
     workflow = models.ForeignKey(
-        'workflow_engine.Workflow')
+        'workflow_engine.Workflow',
+        on_delete=models.CASCADE
+    )
     '''Accessor to the workflow collection of nodes and edges'''
 
     disabled = models.BooleanField(default=False)

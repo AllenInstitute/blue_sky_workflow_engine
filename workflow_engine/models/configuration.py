@@ -16,7 +16,8 @@ class Configuration(models.Model):
     content_type = models.ForeignKey(
         ContentType,
         default=None,
-        null=True
+        null=True,
+        on_delete=models.CASCADE
     )
     '''Generic relation type'''
 

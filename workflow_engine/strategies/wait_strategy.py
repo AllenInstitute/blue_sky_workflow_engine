@@ -5,6 +5,7 @@ import traceback
 import logging
 
 
+# DEPRECATED
 class WaitStrategy(ExecutionStrategy):
     _log = logging.getLogger(
         'workflow_engine.strategies.wait_strategy')

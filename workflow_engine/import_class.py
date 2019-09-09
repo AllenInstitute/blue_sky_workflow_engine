@@ -46,8 +46,10 @@ def import_class(class_full_name):
         _log.info('importing module "%s"' % (module_name))
         mdl = importlib.import_module(module_name)
     except Exception as e:
-        _log.warn('could not import module "%s"' % (
-                  module_name))
+        _log.warning(
+            'could not import module "%s"',
+            str(module_name)
+        )
         raise(e)
 
     claz = getattr(mdl,class_name)

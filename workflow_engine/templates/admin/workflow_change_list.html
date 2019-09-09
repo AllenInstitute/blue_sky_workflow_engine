@@ -11,15 +11,15 @@
 
     <script src="https://cdn.rawgit.com/cpettitt/dagre/v0.7.4/dist/dagre.min.js"></script>
     <script src="https://cdn.rawgit.com/cytoscape/cytoscape.js-dagre/1.5.0/cytoscape-dagre.js"></script>
-    <!-- div class="info" style="float: left; z-index: 1;"></div -->
+    <div style="position: relative">
+        <div id='node_info_container' class="info" style="position: absolute; left: 0; z-index: 1;" ></div>
+    </div>
     <table width="100%">
         <tr>
-            <td width=300>
-                <div id="node_info_container"></div>
-            </td>
-            <td>
-                <div id="cy"></div>
-            </td>
+        <td width="100%">
+        <div id='cy'></div>
+        </td>
         </tr>
+    </table>
 
 {% endblock %}
