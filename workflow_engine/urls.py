@@ -33,8 +33,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-from django.conf.urls import url, include
-from django.urls import path, re_path
+from django.urls import include, path, re_path
 from django.contrib import admin, auth
 from workflow_engine.views import executable_view
 from workflow_engine.views import job_queue_view

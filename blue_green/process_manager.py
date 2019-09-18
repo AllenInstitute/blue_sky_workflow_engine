@@ -24,10 +24,9 @@ def celery_command_string(worker_name, app_name):
     )
 
 
-def debug_log_path(base_dir, worker_name):
+def debug_log_path(log_dir, worker_name):
     return os.path.join(
-        base_dir,
-        'logs',
+        log_dir,
         '{}.log'.format(worker_name))
 
 def dmerge(d1, d2):
@@ -69,7 +68,7 @@ _BASE_ENV = {
     'PATH': '/conda_envs/circus/bin:/conda_envs/circus/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
 }
 
-def get_arbiter_list(app_name, bg, base_dir):
+def get_arbiter_list(app_name, bg, base_dir, log_dir='/logs'):
     bg_conda_env = '/conda_envs/py_37'
     base_env = copy.deepcopy(_BASE_ENV)
     base_env['APP_PACKAGE'] = app_name
@@ -87,7 +86,7 @@ def get_arbiter_list(app_name, bg, base_dir):
                 "python -m workflow_engine.ui_server'"
             )),
             "env": dmerge(django_env, {
-                'DEBUG_LOG': debug_log_path(base_dir, 'ui')
+                'DEBUG_LOG': debug_log_path(log_dir, 'ui')
             }), 
             'numprocesses': 1
         },
@@ -102,7 +101,7 @@ def get_arbiter_list(app_name, bg, base_dir):
                 '-n flower@{} --port={}"'.format(app_name, _FLOWER_PORT)
             ]),
             "env": dmerge(django_env, {
-                'DEBUG_LOG': debug_log_path(base_dir, 'flower')
+                'DEBUG_LOG': debug_log_path(log_dir, 'flower')
             }), 
             'numprocesses': 1
         },
@@ -119,7 +118,7 @@ def get_arbiter_list(app_name, bg, base_dir):
 #                '"'
 #            )),
 #            "env": dmerge(base_env, {
-#                'DEBUG_LOG': debug_log_path(base_dir, 'circus'),
+#                'DEBUG_LOG': debug_log_path(log_dir, 'circus'),
 #                'BLUE_SKY_APP_NAME': app_name
 #            }), 
 #            'numprocesses': 1
@@ -131,7 +130,7 @@ def get_arbiter_list(app_name, bg, base_dir):
                 'python -m manage shell_plus --notebook"'
             )),
             "env": dmerge(django_env, {
-                'DEBUG_LOG': debug_log_path(base_dir, 'nb')
+                'DEBUG_LOG': debug_log_path(log_dir, 'nb')
             }), 
             'numprocesses': 1
         },
@@ -143,7 +142,7 @@ def get_arbiter_list(app_name, bg, base_dir):
                 '-A workflow_engine.celery.moab_beat beat ',
                 '--broker={}"'.format(_MESSAGE_BROKER))),
             "env": dmerge(django_env, {
-                'DEBUG_LOG': debug_log_path(base_dir, 'beat')
+                'DEBUG_LOG': debug_log_path(log_dir, 'beat')
             }), 
             'numprocesses': 1
         }
@@ -185,11 +184,13 @@ if __name__ == '__main__':
     bg_conda_env = bg
     base_dir = os.environ.get(
         'BASE_DIR', '/{}/{}'.format(bg, app_name))
+    log_dir = '/logs'
 
     arbiter_list = get_arbiter_list(
         app_name,
         bg,
-        base_dir)
+        base_dir,
+        log_dir)
 
     arbiter = get_arbiter(
         arbiter_list, 

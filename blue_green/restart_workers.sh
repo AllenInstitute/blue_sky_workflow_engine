@@ -15,17 +15,18 @@ export BG_CONDA_ENV=/conda_envs/py_37
 export BG_CIRCUS_ENV=/conda_envs/circus
 export BASE_DIR=/${BG}/$APP
 export PYTHONPATH=/blue_green:${BASE_DIR}:/${BG}/blue_sky_workflow_engine:$PYTHONPATH
+export LOG_DIR=/logs
 
-rm ${BASE_DIR}/logs/ingest.log
-rm ${BASE_DIR}/logs/ui.log
-rm ${BASE_DIR}/logs/moab.log
-rm ${BASE_DIR}/logs/moab_status.log
-rm ${BASE_DIR}/logs/monitor.log
-rm ${BASE_DIR}/logs/workflow.log
-rm ${BASE_DIR}/logs/mock.log
-rm ${BASE_DIR}/logs/circus.log
-rm ${BASE_DIR}/logs/result.log
-rm ${BASE_DIR}/logs/beat.log
+rm ${LOG_DIR}/ingest.log
+rm ${LOG_DIR}/ui.log
+rm ${LOG_DIR}/moab.log
+rm ${LOG_DIR}/moab_status.log
+rm ${LOG_DIR}/monitor.log
+rm ${LOG_DIR}/workflow.log
+rm ${LOG_DIR}/mock.log
+rm ${LOG_DIR}/circus.log
+rm ${LOG_DIR}/result.log
+rm ${LOG_DIR}/beat.log
 rm celerybeat.pid
 
 unset DJANGO_SETTINGS_MODULE
