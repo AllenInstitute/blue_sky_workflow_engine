@@ -23,7 +23,6 @@ from workflow_engine.admin.configuration_admin import ConfigurationAdmin
 
 
 # Register your models here.
-# admin.site.register(Datafix)
 admin.site.register(Executable, ExecutableAdmin)
 admin.site.register(FileRecord)
 admin.site.register(Job, JobAdmin)

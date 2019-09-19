@@ -6,6 +6,28 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
+def populate_database(apps, schema_editor):
+    RunState = apps.get_model(
+        'workflow_engine',
+        'RunState'
+    )
+
+    run_states = [
+        'PENDING',
+        'QUEUED',
+        'RUNNING',
+        'FINISHED_EXECUTION',
+        'FAILED_EXECUTION',
+        'FAILED',
+        'SUCCESS',
+        'PROCESS_KILLED'
+    ]
+
+    for run_state_name in run_states:
+        run_state = RunState(name=run_state_name)
+        run_state.save()
+
+
 class Migration(migrations.Migration):
 
     initial = True
@@ -178,4 +200,8 @@ class Migration(migrations.Migration):
             name='well_known_file',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='workflow_engine.WellKnownFile'),
         ),
+        migrations.RunPython(
+            populate_database,
+            reverse_code=migrations.RunPython.noop
+        )
     ]

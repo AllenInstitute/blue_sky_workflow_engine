@@ -170,25 +170,6 @@ class Task(Archivable, Runnable, Tagable, Timestamped, models.Model):
 
         return result
 
-    def in_failed_state(self):
-        run_state_name = self.run_state.name
-        return (run_state_name == 'FAILED' or
-                run_state_name == 'PROCESS_KILLED' or
-                run_state_name == 'FAILED_EXECUTION')
-
-    def can_rerun(self):
-        run_state_name = self.run_state.name
-        return (run_state_name == 'PENDING' or
-                run_state_name == 'FAILED' or
-                run_state_name == 'SUCCESS' or
-                run_state_name == 'PROCESS_KILLED' or
-                run_state_name == 'FAILED_EXECUTION')
-
-    def get_color_class(self):
-        color = 'color_' + self.run_state.name.lower()
-
-        return color
-
     def clear_error_message(self):
         self.error_message = None
         self.save()
@@ -201,10 +182,6 @@ class Task(Archivable, Runnable, Tagable, Timestamped, models.Model):
             self.get_strategy().get_task_arguments(self)
         )
 
-#     def fail_task(self):
-#         strategy = self.get_strategy()
-#         strategy.fail_task(self)
-
     def set_failed_fields_and_rerun(self, rerun=True):
         self.set_failed_state()
         self.set_end_run_time()
@@ -213,7 +190,6 @@ class Task(Archivable, Runnable, Tagable, Timestamped, models.Model):
 
         if rerun is True:
             self.rerun()
-
 
     def set_failed_execution_fields_and_rerun(self, rerun=True):
         self.set_failed_execution_state()
@@ -262,12 +238,6 @@ class Task(Archivable, Runnable, Tagable, Timestamped, models.Model):
         if pbs_id is not None:
             self.pbs_id = pbs_id
         Runnable.set_queued_state(self, pbs_id, quiet)
-
-    def in_pending_state(self):
-        return (self.run_state.name == Runnable.STATE.PENDING)
-
-    def in_success_state(self):
-        return (self.run_state.name == Runnable.STATE.SUCCESS)
 
     def get_enqueued_job_object(self):
         return self.job.enqueued_object

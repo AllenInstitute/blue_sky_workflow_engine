@@ -121,7 +121,7 @@ def process_failed_execution(self, task_id,
 
     if task:
         if not fail_now and \
-            (task.run_state.name != 'QUEUED') and \
+            (task.running_state != 'QUEUED') and \
             (timezone.now() - task.start_run_time) < timedelta(
                 seconds=settings.MOAB_CHECK_SECONDS):
             return 'Not failing execution for task {} in moab check window'.format(

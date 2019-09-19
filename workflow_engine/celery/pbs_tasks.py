@@ -55,11 +55,11 @@ _log = logging.getLogger('workflow_engine.celery.pbs_tasks')
 
 def query_running_task_dicts():
     tasks = Task.objects.filter(
-        run_state__name__in=['QUEUED', 'RUNNING'])
+        running_state__in=['QUEUED', 'RUNNING'])
 
     task_dicts = [{
         'task_id': t.id,
-        'workflow_state': t.run_state.name,  # TODO: run_state
+        'workflow_state': t.running_state,
         'moab_id': t.pbs_id } for t in tasks if t.pbs_task()]
 
     _log.info('task dicts: ' + str(task_dicts))

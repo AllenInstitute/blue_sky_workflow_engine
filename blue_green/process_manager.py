@@ -68,7 +68,7 @@ _BASE_ENV = {
     'PATH': '/conda_envs/circus/bin:/conda_envs/circus/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
 }
 
-def get_arbiter_list(app_name, bg, base_dir, log_dir='/logs'):
+def get_arbiter_list(app_name, bg, base_dir, log_dir='/green/logs'):
     bg_conda_env = '/conda_envs/py_37'
     base_env = copy.deepcopy(_BASE_ENV)
     base_env['APP_PACKAGE'] = app_name
@@ -184,7 +184,7 @@ if __name__ == '__main__':
     bg_conda_env = bg
     base_dir = os.environ.get(
         'BASE_DIR', '/{}/{}'.format(bg, app_name))
-    log_dir = '/logs'
+    log_dir = '/green/logs'
 
     arbiter_list = get_arbiter_list(
         app_name,

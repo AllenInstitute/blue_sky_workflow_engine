@@ -84,11 +84,6 @@ class Job(Archivable, Runnable, Tagable, Timestamped, models.Model):
         except:
             return "job {}".format(self.pk)
 
-    def get_color_class(self):
-        color = 'color_' + self.run_state.name.lower()
-
-        return color
-
     def get_enqueued_object_display(self):
         result = None
         try:
@@ -122,14 +117,6 @@ class Job(Archivable, Runnable, Tagable, Timestamped, models.Model):
                 has_failed = True
 
         return has_failed
-
-    def can_rerun(self):
-        run_state_name = self.run_state.name
-        return (run_state_name == 'PENDING' or
-                run_state_name == 'FAILED' or
-                run_state_name == 'SUCCESS' or
-                run_state_name == 'PROCESS_KILLED' or
-                run_state_name == 'FAILED_EXECUTION')
 
     def get_strategy(self):
         return self.workflow_node.get_strategy()

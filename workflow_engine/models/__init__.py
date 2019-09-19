@@ -3,7 +3,6 @@ ONE = 1
 SECONDS_IN_MIN = 60
 TWO = 2
 
-from .run_state import RunState
 from .configuration import Configuration
 from .executable import Executable
 from .job_queue import JobQueue

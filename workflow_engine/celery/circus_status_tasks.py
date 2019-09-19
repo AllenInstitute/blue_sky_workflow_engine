@@ -65,14 +65,14 @@ app.conf.soft_time_limit=45
 def node_tasks_in_states(remote_queue, state_names):
     return Task.objects.filter(
         job__workflow_node__job_queue__executable__remote_queue=remote_queue,
-        run_state__name__in=state_names)
+        running_state__in=state_names)
 
 def get_queued_and_running_task_dicts():
     tasks = node_tasks_in_states(REMOTE_QUEUE, ['QUEUED', 'RUNNING'])
 
     return [{
         'task_id': t.id,
-        'workflow_state': t.run_state.name,  # TODO: run_state
+        'workflow_state': t.running_state,
         'remote_id': t.pbs_id } for t in tasks]
 
 @celery.shared_task(

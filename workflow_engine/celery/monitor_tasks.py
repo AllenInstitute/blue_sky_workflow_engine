@@ -81,7 +81,7 @@ def update_dashboard(self):
 def count_node_jobs_in_state(node, run_state):
     return Job.objects.filter(
         workflow_node__job_queue__name=node,
-        run_state__name=run_state,
+        running_state=run_state,
         archived=False).count()
 
 

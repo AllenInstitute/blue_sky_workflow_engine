@@ -228,8 +228,6 @@ class WorkflowController(object):
 
         for task_object in task_objects:
             default_options = {
-                'run_state_id': Runnable.get_run_state_id_for(
-                    Runnable.STATE.PENDING),
                 'running_state': Runnable.STATE.PENDING,
                 'archived': False,
                 'retry_count': ZERO
@@ -326,8 +324,6 @@ class WorkflowController(object):
 
         if reuse_job:
             default_options = {
-                'run_state_id': Runnable.get_run_state_id_for(
-                    Runnable.STATE.PENDING),
                 'running_state': Runnable.STATE.PENDING,
                 'priority': priority
             }
@@ -372,7 +368,7 @@ class WorkflowController(object):
 
         WorkflowController._log.info(
             "Start workflow job state: %s",
-            str(job.run_state)
+            str(job.running_state)
         )
 
         run_workflow_node_jobs_signature.delay(job.workflow_node.id)

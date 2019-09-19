@@ -22,12 +22,6 @@ class Runnable(models.Model):
 
     _log = logging.getLogger('workflow_engine.mixins.runnable')
 
-    run_state = models.ForeignKey(
-        'workflow_engine.RunState',
-        on_delete=models.CASCADE
-    )
-    '''deprecated for running state'''
-
     running_state = FSMField(default=STATE.PENDING)
     '''runnable objects automatically get a database field added'''
 
@@ -54,22 +48,16 @@ class Runnable(models.Model):
     class Meta:
         abstract = True
 
-    @classmethod
-    def get_run_state_names(cls):
-        return [
-            Runnable.STATE.PENDING,
-            Runnable.STATE.QUEUED,
-            Runnable.STATE.RUNNING,
-            Runnable.STATE.FINISHED_EXECUTION,
-            Runnable.STATE.SUCCESS,
-            Runnable.STATE.FAILED,
-            Runnable.STATE.FAILED_EXECUTION,
-            Runnable.STATE.PROCESS_KILLED,
-        ]
+    def in_failed_state(self):
+        run_state_name = self.running_state
+        return (run_state_name == Runnable.STATE.FAILED or
+                run_state_name == Runnable.STATE.PROCESS_KILLED or
+                run_state_name == Runnable.STATE.FAILED_EXECUTION)
 
-    @classmethod
-    def get_run_state_id_for(cls, name):
-        return RunState.objects.get(name=name).id
+    def get_color_class(self):
+        color = 'color_' + self.running_state.lower()
+
+        return color
 
     @classmethod
     def is_failed_type_state(cls, job_state_name):
@@ -85,6 +73,21 @@ class Runnable(models.Model):
             job_state_name == Runnable.STATE.RUNNING or
             job_state_name == Runnable.STATE.QUEUED or
             job_state_name == Runnable.STATE.FINISHED_EXECUTION)
+
+    def can_rerun(self):
+        run_state_name = self.running_state
+
+        return (run_state_name == Runnable.STATE.PENDING or
+                run_state_name == Runnable.STATE.FAILED or
+                run_state_name == Runnable.STATE.SUCCESS or
+                run_state_name == Runnable.STATE.PROCESS_KILLED or
+                run_state_name == Runnable.STATE.FAILED_EXECUTION)
+
+    def in_pending_state(self):
+        return (self.running_state == Runnable.STATE.PENDING)
+
+    def in_success_state(self):
+        return (self.running_state == Runnable.STATE.SUCCESS)
 
     def get_start_run_time(self):
         result = None
@@ -130,8 +133,6 @@ class Runnable(models.Model):
 
 
     def set_pending_state(self, quiet=False):
-        self.run_state = RunState.get_pending_state()
-
         if can_proceed(self.reset_pending):
             self.reset_pending()
         else:
@@ -146,8 +147,6 @@ class Runnable(models.Model):
         self.save()
 
     def set_finished_execution_state(self, quiet=False):
-        self.run_state = RunState.get_finished_execution_state()
-
         if can_proceed(self.finish):
             self.finish()
         elif self.running_state != Runnable.STATE.FAILED_EXECUTION:
@@ -164,8 +163,6 @@ class Runnable(models.Model):
         self.save()
 
     def set_queued_state(self, pbs_id=None, quiet=False):
-        self.run_state = RunState.get_queued_state()
-
         if can_proceed(self.submit_to_queue):
             self.submit_to_queue()
         elif self.running_state != Runnable.STATE.FAILED_EXECUTION:
@@ -187,8 +184,6 @@ class Runnable(models.Model):
         self.save()
 
     def set_failed_state(self):
-        self.run_state = RunState.get_failed_state()
-
         if can_proceed(self.fail):
             self.fail()
         elif self.running_state != Runnable.STATE.FAILED_EXECUTION:
@@ -204,8 +199,6 @@ class Runnable(models.Model):
         self.save()
 
     def set_failed_execution_state(self):
-        self.run_state = RunState.get_failed_execution_state()
-
         if can_proceed(self.fail_execution):
             Runnable._log.warning(
                 "transition to FAILED_EXECUTION from %s",
@@ -223,8 +216,6 @@ class Runnable(models.Model):
         self.save()
 
     def set_running_state(self, quiet=False):
-        self.run_state = RunState.get_running_state()
-
         if can_proceed(self.start_running):
             self.start_running()
         elif self.running_state != Runnable.STATE.FAILED_EXECUTION:
@@ -242,8 +233,6 @@ class Runnable(models.Model):
         self.save()
 
     def set_success_state(self):
-        self.run_state = RunState.get_success_state()
-
         if can_proceed(self.succeed):
             self.succeed()
         elif self.running_state != Runnable.STATE.FAILED_EXECUTION:
@@ -259,7 +248,6 @@ class Runnable(models.Model):
         self.save()
 
     def set_process_killed_state(self):
-        self.run_state = RunState.get_process_killed_state()
         if can_proceed(self.kill_process):
             self.kill_process()
         else:
@@ -344,4 +332,3 @@ class Runnable(models.Model):
         '''Force transition into an offline state'''
         pass
 
-from workflow_engine.models import RunState

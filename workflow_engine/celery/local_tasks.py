@@ -66,7 +66,7 @@ ERROR_EXIT_CODE = 1
 
 def query_running_task_dicts():
     #tasks = Task.objects.filter(
-    #    run_state__name__in=['QUEUED', 'RUNNING'])
+    #    running_state__in=['QUEUED', 'RUNNING'])
 
     task_dicts = []
 
