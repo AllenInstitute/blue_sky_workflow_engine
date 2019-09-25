@@ -89,11 +89,7 @@ workflow_engine/celery/pbs_tasks.py
 workflow_engine/celery/result_tasks.py
 workflow_engine/celery/signatures.py
 workflow_engine/celery/workflow_tasks.py
-workflow_engine/datafixes/workflow_engine_init_14985955051399932.py
-workflow_engine/management/commands/generate_datafix.py
 workflow_engine/management/commands/import_workflows.py
-workflow_engine/management/commands/run_all_datafixes.py
-workflow_engine/management/commands/run_datafix.py
 workflow_engine/migrations/0001_initial.py
 workflow_engine/migrations/0002_configuration.py
 workflow_engine/migrations/0003_improved_json_configuration.py
@@ -112,6 +108,7 @@ workflow_engine/migrations/0015_more_optional_admin_fields.py
 workflow_engine/migrations/0016_archive_false_manager.py
 workflow_engine/migrations/0017_edge_order.py
 workflow_engine/migrations/0018_running_state.py
+workflow_engine/migrations/0019_drop_run_state_model.py
 workflow_engine/migrations/__init__.py
 workflow_engine/migrations/__pycache__/0001_initial.cpython-36.pyc
 workflow_engine/migrations/__pycache__/0002_configuration.cpython-36.pyc
@@ -134,13 +131,11 @@ workflow_engine/mixins/tagable.py
 workflow_engine/mixins/timestamped.py
 workflow_engine/models/__init__.py
 workflow_engine/models/configuration.py
-workflow_engine/models/datafix.py
 workflow_engine/models/enqueued_proxy.py
 workflow_engine/models/executable.py
 workflow_engine/models/file_record.py
 workflow_engine/models/job.py
 workflow_engine/models/job_queue.py
-workflow_engine/models/run_state.py
 workflow_engine/models/task.py
 workflow_engine/models/well_known_file.py
 workflow_engine/models/workflow.py
@@ -222,6 +217,7 @@ workflow_engine/templates/workflows.html
 workflow_engine/templates/admin/workflow_change_list.html
 workflow_engine/views/__init__.py
 workflow_engine/views/decorators.py
+workflow_engine/views/enqueueable_job_grid.py
 workflow_engine/views/executable_view.py
 workflow_engine/views/grid_view.py
 workflow_engine/views/home_view.py

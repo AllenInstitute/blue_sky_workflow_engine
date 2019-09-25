@@ -72,7 +72,7 @@ def get_arbiter_list(app_name, bg, base_dir, log_dir='/green/logs'):
     bg_conda_env = '/conda_envs/py_37'
     base_env = copy.deepcopy(_BASE_ENV)
     base_env['APP_PACKAGE'] = app_name
-    base_env['PYTHONPATH'] = '/blue_green:/blue_sky_workflow_engine:/{}:{}:/{}/blue_sky_workflow_engine:/render_modules:/EM_aligner_python'.format(bg, base_dir, bg)
+    base_env['PYTHONPATH'] = '/{}:/source/blue_sky:/source/blue_sky_workflow_engine:/app_dirs:/render_modules:/EM_aligner_python'.format(bg)
     #    base_env['PYTHONPATH'] = '/{}:/{}/blue_sky_workflow_engine:/render_modules'.format(bg,  bg)
     django_env = dmerge(base_env, {
         'DJANGO_SETTINGS_MODULE': 'settings' # in BG dir
@@ -134,18 +134,18 @@ def get_arbiter_list(app_name, bg, base_dir, log_dir='/green/logs'):
             }), 
             'numprocesses': 1
         },
-        {
-            'cmd': ' '.join((
-                '/bin/bash -c ',
-                '"source {} {}; '.format(_ACTIVATE_PATH, bg_conda_env),
-                'python -m celery ',
-                '-A workflow_engine.celery.moab_beat beat ',
-                '--broker={}"'.format(_MESSAGE_BROKER))),
-            "env": dmerge(django_env, {
-                'DEBUG_LOG': debug_log_path(log_dir, 'beat')
-            }), 
-            'numprocesses': 1
-        }
+#        {
+#            'cmd': ' '.join((
+#                '/bin/bash -c ',
+#                '"source {} {}; '.format(_ACTIVATE_PATH, bg_conda_env),
+#                'python -m celery ',
+#                '-A workflow_engine.celery.moab_beat beat ',
+#                '--broker={}"'.format(_MESSAGE_BROKER))),
+#            "env": dmerge(django_env, {
+#                'DEBUG_LOG': debug_log_path(log_dir, 'beat')
+#            }), 
+#            'numprocesses': 1
+#        }
     ]
     
     for worker_name in (
@@ -169,7 +169,7 @@ def get_arbiter_list(app_name, bg, base_dir, log_dir='/green/logs'):
                     celery_command_string(worker_name, app_name)
                 ),
                 "env": dmerge(django_env, {
-                    'DEBUG_LOG': debug_log_path(base_dir, worker_name),
+                    'DEBUG_LOG': debug_log_path(log_dir, worker_name),
                 }),
                 "numprocesses": 1
             }])

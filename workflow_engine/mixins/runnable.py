@@ -48,6 +48,19 @@ class Runnable(models.Model):
     class Meta:
         abstract = True
 
+    @classmethod
+    def get_run_state_names(cls):
+        return [
+            Runnable.STATE.PENDING,
+            Runnable.STATE.QUEUED,
+            Runnable.STATE.RUNNING,
+            Runnable.STATE.FINISHED_EXECUTION,
+            Runnable.STATE.SUCCESS,
+            Runnable.STATE.FAILED,
+            Runnable.STATE.FAILED_EXECUTION,
+            Runnable.STATE.PROCESS_KILLED,
+        ]
+
     def in_failed_state(self):
         run_state_name = self.running_state
         return (run_state_name == Runnable.STATE.FAILED or

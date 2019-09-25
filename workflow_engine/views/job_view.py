@@ -160,7 +160,7 @@ def run_all_jobs(job_id, request, response):
 def get_job_status(job_object, request, result):
     del request  # not used
     job_data = {}
-    job_data['run_state_name'] = job_object.run_state.name
+    job_data['run_state_name'] = job_object.running_state
     job_data['start_run_time'] = job_object.get_start_run_time()
     job_data['end_run_time'] = job_object.get_end_run_time()
     job_data['duration'] = job_object.get_duration()
@@ -176,7 +176,7 @@ def get_job_show_data(job_object, request, result):
         ('enqueued_object_id', job_object.enqueued_object_id),
         ('enqueued_object_class', str(job_object.enqueued_object_type)),
         ('enqueued_object', job_object.get_enqueued_object_display()),
-        ('run state', job_object.run_state.name),
+        ('run state', job_object.running_state),
         ('workflow', job_object.workflow_node.workflow.name),
         ('job queue', job_object.workflow_node.job_queue.name),
         ('start', job_object.get_start_run_time()),
