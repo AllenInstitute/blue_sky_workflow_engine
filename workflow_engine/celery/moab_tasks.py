@@ -41,7 +41,7 @@ from workflow_client.nb_utils.moab_api import (
     submit_job_array,
     delete_moab_task
 )
-from workflow_engine.celery.signatures import (
+from workflow_client.signatures import (
     process_failed_execution_signature,
     process_pbs_id_signature
 )
