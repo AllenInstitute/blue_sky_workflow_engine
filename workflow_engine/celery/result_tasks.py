@@ -38,9 +38,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from datetime import timedelta
 from builtins import ModuleNotFoundError
-from workflow_engine.celery.signatures import (
-    run_workflow_node_jobs_signature
-)
+from workflow_client.signatures import run_workflow_node_jobs_signature
 from django.conf import settings
 from workflow_client.client_settings import configure_worker_app
 import logging

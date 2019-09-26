@@ -38,7 +38,7 @@ from django.conf import settings
 from workflow_client.client_settings import configure_worker_app
 import celery
 import logging
-from workflow_engine.celery import signatures
+from workflow_client import signatures
 
 
 _log = logging.getLogger('workflow_engine.celery.mock_tasks')

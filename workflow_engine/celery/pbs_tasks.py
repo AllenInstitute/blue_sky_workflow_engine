@@ -34,20 +34,22 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 import celery
-from django.conf import settings
-from workflow_client.nb_utils.moab_api import query_and_combine_states,\
-    submit_job, delete_moab_task
+from workflow_client.nb_utils.moab_api import (
+    query_and_combine_states,
+    submit_job,
+    delete_moab_task
+)
 from django.core.exceptions import ObjectDoesNotExist
 import logging
 from celery.canvas import group
 import pandas as pd
-from workflow_engine.celery.result_tasks \
-    import process_running, process_finished_execution, \
-    process_failed_execution, process_failed
-from workflow_engine.celery.signatures \
-    import process_pbs_id_signature, \
-    process_failed_execution_signature, \
+from workflow_client.signatures import (
+    process_running_signature,
+    process_finished_execution_signature,
+    process_failed_execution_signature,
+    process_failed_signature,
     process_pbs_id_signature
+)
 
 
 _log = logging.getLogger('workflow_engine.celery.pbs_tasks')
@@ -71,13 +73,13 @@ def query_running_task_dicts():
 # Todo need to use moab id and task id in all cases
 result_actions = { 
     'running_message':
-        lambda x: process_running.s(x),
+        lambda x: process_running_signature(x),
     'finished_message':
-        lambda x: process_finished_execution.s(x),
+        lambda x: process_finished_execution_signature(x),
     'failed_execution_message': 
-        lambda x: process_failed_execution.s(x),
+        lambda x: process_failed_execution_signature(x),
     'failed_message':
-        lambda x: process_failed.s(x)
+        lambda x: process_failed_signature(x)
 }
 
 

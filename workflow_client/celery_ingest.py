@@ -33,7 +33,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-from workflow_engine.celery.signatures import ingest_signature
+from workflow_client.signatures import ingest_signature
 from workflow_engine.celery import settings
 import celery
 import logging

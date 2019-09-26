@@ -39,7 +39,7 @@ import traceback
 import logging
 import json
 from celery.exceptions import SoftTimeLimitExceeded
-from workflow_engine.celery.signatures import (
+from workflow_client.signatures import (
     enqueue_next_queue_signature,
     kill_moab_task_signature,
     submit_moab_task_signature,

@@ -84,17 +84,15 @@ class SimpleRouter(object):
 
     def route_task(self, name, args, kwargs,
                   options, task=None, **kw):
+        del args    # unused
+        del kwargs  # unused
+        del task    # unused
+        del kw      # unused
+
         task_name = name.split('.')[-1]
         SimpleRouter._log.info('ROUTING: {}'.format(options))
 
         try:
-#             if task_name == 'submit_worker_task' and 'queue' in options:
-#                 q = '{}@{}'.format(
-#                     options['queue'].name,
-#                     self.app_name
-#                 )
-#                 SimpleRouter._log.debug("QQ{}:".format(q))
-#             else:
             q = self.routing_dict.get(task_name)
             SimpleRouter._log.info(
                 'Routing task %s to %s', task_name, q

@@ -41,7 +41,7 @@ from workflow_engine.models import (
     ONE
 )
 from workflow_engine.views import shared, HEADER_PAGES
-from workflow_engine.celery.signatures import (
+from workflow_client.signatures import (
     queue_job_signature,
     kill_job_signature
 )

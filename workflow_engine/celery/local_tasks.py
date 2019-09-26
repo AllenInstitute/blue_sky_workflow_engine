@@ -36,7 +36,7 @@
 import django; django.setup()
 from django.conf import settings
 from workflow_client.client_settings import configure_worker_app
-from workflow_engine.celery.signatures import (
+from workflow_client.signatures import (
     process_pbs_id_signature,
     process_running_signature,
     process_failed_execution_signature,

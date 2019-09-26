@@ -33,12 +33,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-from workflow_engine.celery.signatures import (
-    process_running_signature,
-    process_failed_signature,
-    process_failed_execution_signature,
-    process_finished_execution_signature
-)
+from workflow_client import signatures
 from celery.canvas import group
 import itertools as it
 import pandas as pd
@@ -48,10 +43,10 @@ class TaskStatus(object):
     _log = logging.getLogger('workflow_engine.celery.task_status')
     
     RESULT_ACTIONS = { 
-        'running_message': process_running_signature,
-        'finished_message': process_finished_execution_signature,
-        'failed_execution_message': process_failed_execution_signature,
-        'failed_message': process_failed_signature
+        'running_message': signatures.process_running_signature,
+        'finished_message': signatures.process_finished_execution_signature,
+        'failed_execution_message': signatures.process_failed_execution_signature,
+        'failed_message': signatures.process_failed_signature
     }
     
     def __init__(self, remote_queues):

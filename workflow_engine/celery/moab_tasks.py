@@ -140,13 +140,20 @@ def run_task(self, name, args):
 
 @celery.shared_task(bind=True, trail=True)
 def kill_moab_task(self, task_id):
+    response_message = 'killed'
+
     try:
         the_task = Task.objects.get(id=task_id)
         delete_moab_task(the_task.pbs_id)
+        the_task.set_process_killed_state()  # TODO: rename for task/process
+        response_message = str(the_task.pbs_id)
     except ObjectDoesNotExist as e:
         _log.warning("Cannot kill task %s, does not exist. %s",
                      task_id,
                      str(e))
+        response_message = 'str(e)'
+
+    return response_message
 
 # circular imports
 from workflow_engine.models import (

@@ -46,24 +46,41 @@ class settings_attr_dict(dict):
     __getattr__ = dict.get
 
 
+_DEFAULT_SETTINGS_DICT = {
+    'broker_url': 'pyamqp://blue_sky_user:blue_sky_user@message_queue:5672/',
+    'result_backend': 'rpc://',
+    'result_persistent': True,
+    'task_serializer': 'json',
+    'result_serializer': 'json',
+    'result_expires': 3600, # 1 hour in seconds
+    'broker_connection_timeout': 10,
+    'broker_connection_retry': False,
+    'soft_time_limit': 600,
+    'time_limit': 2400,
+    'accept_content': ['json'],
+    'worker_prefetch_multiplier': 1,
+    'timezone': 'US/Pacific',
+    'enable_utc': True
+} 
+
 def load_settings_yaml():
-    settings_dict = {}
+    settings_dict = _DEFAULT_SETTINGS_DICT
 
     try: 
-        blue_sky_settings_json = \
-            os.environ.get('BLUE_SKY_SETTINGS',
-                           'blue_sky_settings.yml')
+        blue_sky_settings = os.environ.get(
+            'BLUE_SKY_SETTINGS',
+            'blue_sky_settings.yml'
+        )
 
-        with open(blue_sky_settings_json) as f:
-            settings_dict = settings_attr_dict(
-                yaml.load(f, Loader=yaml.SafeLoader)
-            )
+        with open(blue_sky_settings) as f:
+            settings_dict = yaml.load(f, Loader=yaml.SafeLoader)
     except Exception as e:
         raise Exception('need to set BLUE_SKY_SETTINGS' + str(e))
 
-    return settings_dict
+    return settings_attr_dict(settings_dict)
 
 
+# TODO: deprecate
 def get_message_broker_url(celery_settings):
     return 'pyamqp://%s:%s@%s:%s/%s' % (
         celery_settings.MESSAGE_QUEUE_USER,
@@ -85,11 +102,9 @@ def configure_worker_app(
         else:
             worker_names = [ worker_name ]
 
-    celery_settings = load_settings_yaml()
     router = SimpleRouter(app_name)
 
-    app.config_from_object(config_object(
-        celery_settings))
+    app.config_from_object(load_settings_yaml())
     app.conf.task_queue_max_priority = 10
     app.conf.task_queues = router.task_queues(worker_names)
     app.conf.task_routes = (
@@ -101,21 +116,3 @@ def configure_worker_app(
             }
         }
     )
-
-def config_object(s):
-    return settings_attr_dict({
-        'broker_url': get_message_broker_url(s),
-        'result_backend': 'rpc',
-        'result_persistent': True,
-        'task_serializer': 'json',
-        'result_serializer': 'json',
-        'result_expires': 3600, # 1 hour in seconds
-        'broker_connection_timeout': 10,
-        'broker_connection_retry': False,
-        'soft_time_limit': 600,
-        'time_limit': 2400,
-        'accept_content': ['json'],
-        'worker_prefetch_multiplier': 1,
-        'timezone': 'US/Pacific',
-        'enable_utc': True
-    })
