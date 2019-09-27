@@ -33,6 +33,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
+from django.conf import settings
 import requests
 from requests.auth import HTTPBasicAuth
 import pandas as pd
@@ -46,9 +47,6 @@ import logging
 _log = logging.getLogger('workflow_client.nb_utils.moab_api')
 
 
-_MOAB_ENDPOINT = 'http://qmaster2.corp.alleninstitute.org:8080/mws/rest'
-_MOAB_TIMEOUT = 30
-
 def moab_url(
     table=None,
     oid=None,
@@ -56,7 +54,7 @@ def moab_url(
     jobs=None,
     tasks=None,
     moab_ids=None):
-    url_list = [ _MOAB_ENDPOINT ]
+    url_list = [ settings.MOAB_ENDPOINT ]
     
     if table is not None:
         url_list.append('/{}'.format(table))
@@ -110,7 +108,7 @@ def moab_url(
 
 
 def moab_auth():
-    cred = os.environ.get('MOAB_AUTH', ':')
+    cred = settings.MOAB_AUTH
 
     if cred == ':':
         raise Exception('credentials not set')
@@ -160,7 +158,7 @@ def moab_post(url, body_data):
             url,
             json=body_data,
             auth=moab_auth(),
-            timeout=_MOAB_TIMEOUT
+            timeout=settings.MOAB_TIMEOUT
         )
 
         if response.status_code == 401:
@@ -333,7 +331,7 @@ def submit_job(
         'customName': 'task_%d' % (task_id),
         'commandFile': command_file,
         'epilog': os.path.join(os.path.dirname(command_file), 'epilog'),
-        'group': 'em-connectome',
+        'group': settings.MOAB_GROUP,
         'user': user,
         'requirements': [{
             'requiredProcessorCountMinimum': processors,

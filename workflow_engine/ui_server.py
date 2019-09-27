@@ -1,5 +1,7 @@
 import cherrypy
 from django.conf import settings
+from celery import Celery
+from workflow_client.client_settings import configure_worker_app
 import django; django.setup()
 from django.core.handlers.wsgi import WSGIHandler
 
@@ -33,6 +35,16 @@ class DjangoApplication(object):
         cherrypy.engine.start()
         cherrypy.engine.block()
 
+def _route_task(name, args, kwargs,
+              options, task=None, **kw):
+    return {
+        'queue': 'workflow@at_em_imaging_workflow',
+    }
+
 
 if __name__ == "__main__":
+    app = Celery('workflow_engine_ui')
+    configure_worker_app(app, 'workflow_engine_ui')
+    app.conf.task_routes = (_route_task,)
+
     DjangoApplication().run()

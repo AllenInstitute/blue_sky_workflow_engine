@@ -225,20 +225,6 @@ class Task(Archivable, Runnable, Tagable, Timestamped, models.Model):
         )
         strategy.run_task(self)
 
-    def set_pending_state(self, quiet=False):
-        strategy = self.get_strategy()
-        strategy.run_task(self)
-        Runnable.set_pending_state(self, quiet)
-
-    def set_queued_state(self, pbs_id=None, quiet=False):
-        _logger.info(
-            "set queued state: %s",
-            str(pbs_id)
-        )
-        if pbs_id is not None:
-            self.pbs_id = pbs_id
-        Runnable.set_queued_state(self, pbs_id, quiet)
-
     def get_enqueued_job_object(self):
         return self.job.enqueued_object
 

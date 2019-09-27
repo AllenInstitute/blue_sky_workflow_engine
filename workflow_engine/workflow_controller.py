@@ -2,7 +2,7 @@
 # license plus a third clause that prohibits redistribution for commercial
 # purposes without further permission.
 #
-# Copyright 2017. Allen Institute. All rights reserved.
+# Copyright 2017-2019. Allen Institute. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -36,6 +36,7 @@
 import traceback
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
+from django_fsm import can_proceed
 from django.db import (
     transaction
 )
@@ -76,13 +77,8 @@ class WorkflowController(object):
         )
 
         WorkflowController._log.info(
-            "%d jobs to run",
+            "%d available jobs slots (batch size - queued and running)",
             number_jobs_to_run
-        )
-
-        WorkflowController._log.info(
-            "Found %d jobs",
-            Job.objects.count()
         )
 
         # run more jobs
@@ -255,11 +251,14 @@ class WorkflowController(object):
 
     @classmethod
     def job_run(cls, job):
+        if not can_proceed(job.submit_to_queue):
+            return
+
         try:
-            job.set_queued_state()
             job.set_start_run_time()
             job.clear_error_message()
             job.prep_job()
+            job.submit_to_queue()
 
             WorkflowController.create_tasks(job)
 

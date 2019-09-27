@@ -132,7 +132,7 @@ def process_failed_execution(self, task_id,
     except:
         _log.warning('could not set task error message:')
 
-    if task.retry_count < task.job.max_retries - 1:
+    if task.retry_count < task.get_max_retries() - 1:
         task.retry_count=task.retry_count + 1
         task.set_pending_state()
 
@@ -174,11 +174,11 @@ def process_pbs_id(self, task_id, moab_id, chained=False):
     try:
         task = Task.objects.get(id=task_id)
         if (moab_id is not None):
+            task.pbs_id = moab_id
             task.set_queued_state(moab_id)
+            task.job.set_queued_state()
         else:
-            # TODO: this message is coming in wrong order for local
-            # _log.warning('Got None for moab id: %s', str(task_id))
-            pass
+            _log.warning('Got None for moab id: %s', str(task_id))
     except ObjectDoesNotExist:
         _log.warning(
             "Task {} for PBS id {} does not exist",

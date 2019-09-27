@@ -39,6 +39,7 @@ from workflow_engine.models import (
     Task,
     WorkflowNode
 )
+from workflow_client.signatures import METHODS
 from workflow_engine.workflow_controller import WorkflowController
 from django.core.exceptions import ObjectDoesNotExist
 from workflow_client.client_settings import configure_worker_app
@@ -76,7 +77,8 @@ def report_error(msg):
 
 @celery.shared_task(
     bind=True,
-    name='workflow_engine.celery.workflow_tasks.create_job')
+    name=METHODS.CREATE_JOB
+)
 def create_job(self, workflow_node_id, enqueued_object_id, priority):
     try:
         job_id = WorkflowController.create_job(
@@ -98,10 +100,18 @@ def create_job(self, workflow_node_id, enqueued_object_id, priority):
 
 @celery.shared_task(
     bind=True,
-    name='workflow_engine.celery.workflow_tasks.run_workflow_node_jobs_by_id'
+    name=METHODS.RUN_JOBS_BY_ID
+)
+def set_jobs_for_run_by_id(self, job_ids):
+    WorkflowController.set_jobs_for_run_by_id(job_ids)
+
+    return 'ok'
+
+@celery.shared_task(
+    bind=True,
+    name=METHODS.RUN_WORKFLOW_NODE_JOBS
 )
 def run_workflow_node_jobs_by_id(self, workflow_node_id):
-    _log.info('REQUEST: {}'.format(self.request))
     try:
         workflow_node = WorkflowNode.objects.get(id=workflow_node_id)
         WorkflowController.run_workflow_node_jobs(workflow_node)
@@ -148,6 +158,9 @@ def get_task_strategy_by_task_id(task_id):
 #
 # REQUESTS
 #
-@celery.shared_task(bind=True)
+@celery.shared_task(
+    bind=True,
+    name=METHODS.KILL_JOB
+)
 def kill_job(self, job_id):
     WorkflowController.kill_job(job_id)

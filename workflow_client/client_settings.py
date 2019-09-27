@@ -60,7 +60,13 @@ _DEFAULT_SETTINGS_DICT = {
     'accept_content': ['json'],
     'worker_prefetch_multiplier': 1,
     'timezone': 'US/Pacific',
-    'enable_utc': True
+    'enable_utc': True,
+    'broker_transport_options': {
+        'max_retries': 3,
+        'interval_start': 0,
+        'interval_step': 10,
+        'interval_max': 30
+    }
 } 
 
 def load_settings_yaml():

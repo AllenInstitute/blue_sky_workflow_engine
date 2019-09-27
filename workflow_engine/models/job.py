@@ -145,7 +145,10 @@ class Job(Archivable, Runnable, Tagable, Timestamped, models.Model):
 
     def prep_job(self):
         strategy = self.get_strategy()
-        _logger.info("got strategy: " + str(strategy))
+        _logger.info(
+            "got strategy: %s",
+            str(strategy)
+        )
         strategy.prep_job(self)
 
     def all_tasks_finished(self):

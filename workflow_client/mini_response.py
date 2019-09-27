@@ -1,7 +1,6 @@
 import argparse
 from workflow_client.client_settings import configure_worker_app
 from celery import Celery
-from kombu import Exchange, Queue
 from workflow_client.signatures import (
     process_pbs_id_signature,
     process_running_signature,

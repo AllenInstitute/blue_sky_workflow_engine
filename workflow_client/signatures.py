@@ -38,6 +38,12 @@ from celery import signature
 _DEFAULT_TIME_LIMIT = 60
 
 class METHODS:
+    '''Explicitly used in the name parameter of celery.shared task
+       and in the celery signatures to decouple the task name from
+       the module it is defined in and to allow small client processes
+       to import signatures without needing to import the task module
+       and all dependencies.
+    '''
     INGEST = 'workflow_engine.celery.ingest_tasks.ingest_task'
     CHECK_CIRCUS_STATUS = 'workflow_engine.check_circus_status'
     CHECK_CIRCUS_TASK_STATUS = 'workflow_engine.check_circus_task_status'
@@ -57,6 +63,7 @@ class METHODS:
     CREATE_JOB = 'workflow_engine.celery.workflow_tasks.create_job'
     QUEUE_JOB = 'workflow_engine.celery.workflow_tasks.queue_job'
     RUN_WORKFLOW_NODE_JOBS = 'workflow_engine.celery.workflow_tasks.run_workflow_node_jobs_by_id'
+    RUN_JOBS_BY_ID = 'workflow_engine.celery.workflow_tasks.set_jobs_for_run_by_id'
     ENQUEUE_NEXT = 'workflow_engine.celery.workflow_tasks.enqueue_next_queue'
     KILL_JOB = 'workflow_engine.celery.workflow_tasks.kill_job'
 
@@ -135,6 +142,7 @@ failed_execution_handler_signature = signature(
 # WORKFLOW / UI TASKS
 #
 run_workflow_node_jobs_signature = signature(METHODS.RUN_WORKFLOW_NODE_JOBS)
+run_jobs_by_id_signature = signature(METHODS.RUN_JOBS_BY_ID)
 
 
 # TODO: unimplemented?

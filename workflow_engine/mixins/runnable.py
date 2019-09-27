@@ -175,7 +175,7 @@ class Runnable(models.Model):
 
         self.save()
 
-    def set_queued_state(self, pbs_id=None, quiet=False):
+    def set_queued_state(self, quiet=False):
         if can_proceed(self.submit_to_queue):
             self.submit_to_queue()
         elif self.running_state != Runnable.STATE.FAILED_EXECUTION:

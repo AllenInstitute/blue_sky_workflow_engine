@@ -1,5 +1,5 @@
 from django.contrib import admin
-from workflow_engine.workflow_controller import WorkflowController
+from workflow_client import signatures
 from workflow_engine.models import (
     Task,
 )
@@ -12,7 +12,7 @@ def kill_jobs(modeladmin, request, queryset):
         "Kill jobs"
 
     for job in queryset:
-        job.kill()
+        signatures.kill_job_signature.delay(job.id)
 
 
 def set_killed(modeladmin, request, queryset):
@@ -24,19 +24,17 @@ def set_killed(modeladmin, request, queryset):
 
 
 def start_jobs(modeladmin, request, queryset):
-    start_jobs.short_description = \
-        "Start jobs"
+    start_jobs.short_description = "Start jobs"
 
     job_ids = [item.id for item in queryset]
-    WorkflowController.set_jobs_for_run_by_id(job_ids)
+    signatures.run_jobs_by_id_signature.delay(job_ids)
 
 
 def enqueue_next(modeladmin, request, queryset):
-    enqueue_next.short_description = \
-        "Enqueue next queue"
+    enqueue_next.short_description = "Enqueue next queue"
 
     for job_item in queryset:
-        WorkflowController.enqueue_next_queue_by_job_id(job_item.id)
+        signatures.enqueue_next_queue_signature.delay(job_item.id)
 
 
 def raise_priority(modeladmin, request, queryset):
