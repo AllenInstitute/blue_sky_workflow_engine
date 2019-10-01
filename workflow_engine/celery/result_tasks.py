@@ -35,12 +35,11 @@
 #
 import celery
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils import timezone
-from datetime import timedelta
 from builtins import ModuleNotFoundError
 from workflow_client.signatures import run_workflow_node_jobs_signature
 from django.conf import settings
 from workflow_client.client_settings import configure_worker_app
+from workflow_client.signatures import METHODS
 import logging
 import traceback
 
@@ -76,7 +75,7 @@ def get_task_strategy_by_task_id(task_id):
 
 @celery.shared_task(
     bind=True,
-    name='workflow_engine.celery.result_tasks.process_running'
+    name=METHODS.PROCESS_RUNNING
 )
 def process_running(self, task_id):
     try:
@@ -91,41 +90,26 @@ def process_running(self, task_id):
 
 @celery.shared_task(
     bind=True,
-    name='workflow_engine.celery.result_tasks.process_finished_execution'
+    name=METHODS.PROCESS_FINISHED_EXECUTION
 )
 def process_finished_execution(self, task_id):
     try:
-        _log.info('processing finished task %s', task_id)
         (task, strategy) = get_task_strategy_by_task_id(task_id)
-        strategy.finish_task(task)
 
-        _log.warning('Skipping unneeded run_workflow_node_jobs')
-        #run_workflow_node_jobs_signature.delay(
-        #    task.job.workflow_node.id)
+        finish_state = strategy.finish_task(task)
 
-        return 'set finished for task {}'.format(task_id)
+        return 'finished task {} set state {}'.format(task_id, finish_state)
     except:
         return 'exception'
 
 
 @celery.shared_task(
     bind=True,
-    name='workflow_engine.celery.result_tasks.process_failed_execution'
+    name=METHODS.PROCESS_FAILED_EXECUTION
 )
 def process_failed_execution(self, task_id,
                              error_message='unknown', fail_now=False):
-    _log.info('processing failed execution task %s', task_id)
-    (task, strategy) = get_task_strategy_by_task_id(task_id)
-
-    if task:
-        if not fail_now and \
-            (task.running_state != 'QUEUED') and \
-            (timezone.now() - task.start_run_time) < timedelta(
-                seconds=settings.MOAB_CHECK_SECONDS):
-            return 'Not failing execution for task {} in moab check window'.format(
-                task_id)
-    else:
-        return 'Task {} not found'.format(task_id)
+    task, strategy = get_task_strategy_by_task_id(task_id)
 
     try:
         task.job.set_error_message(error_message)
@@ -147,7 +131,7 @@ def process_failed_execution(self, task_id,
 
 @celery.shared_task(
     bind=True,
-    name='workflow_engine.celery.result_tasks.process_failed'
+    name=METHODS.PROCESS_FAILED
 )
 def process_failed(self, task_id):
     _log.info('processing failed task %s', task_id)
@@ -164,7 +148,7 @@ def process_failed(self, task_id):
 
 @celery.shared_task(
     bind=True,
-    name='workflow_engine.celery.result_tasks.process_pbs_id'
+    name=METHODS.PROCESS_PBS_ID
 )
 def process_pbs_id(self, task_id, moab_id, chained=False):
     if chained is True:

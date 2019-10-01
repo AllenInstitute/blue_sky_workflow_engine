@@ -201,7 +201,7 @@ class BaseStrategy(object):
         task.set_failed_fields_and_rerun()
 
 
-   # Do not override
+    # Do not override
     def set_error_message_from_log(self, task):
         try:
             if os.path.isfile(task.log_file):

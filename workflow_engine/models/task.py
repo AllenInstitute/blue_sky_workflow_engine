@@ -240,9 +240,6 @@ class Task(Archivable, Runnable, Tagable, Timestamped, models.Model):
     def get_task_name(self):
         return ('task_' + str(self.id))
 
-    def get_umask(self):
-        return '022'
-
     def get_pbs_commands(self):
         executable = self.get_executable()
 

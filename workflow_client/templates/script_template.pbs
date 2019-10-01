@@ -21,16 +21,17 @@ export TMPDIR="/scratch/capacity/${PBS_JOBID}/"
 export SPARK_LOCAL_DIRS="/scratch/capacity/${PBS_JOBID}/"
 export PYTHONNOUSERSITE=1
 export BLUE_SKY_SETTINGS={{ settings.BLUE_SKY_SETTINGS_HPC_RESPONSE }}
-export PYTHONPATH=${PYTHONPATH}:{{ settings.HPC_RESPONSE_PYTHONPATH }}
 
 {%for evar in task.environment_vars()
 %}export {{ evar }}
 {% endfor %}
+
+export PYTHONPATH=${PYTHONPATH}:{{ settings.HPC_RESPONSE_PYTHONPATH }}
+
 umask 002
 
 source activate {{ settings.PBS_RESPONSE_CONDA_ENV }}
 python -m workflow_client.mini_response --action running {{ task.id }}
 
 source activate {{ settings.PBS_CONDA_ENV }}
-sleep $SLEEP_TIME
-#{{ task.full_executable }}
+{{ task.full_executable }}

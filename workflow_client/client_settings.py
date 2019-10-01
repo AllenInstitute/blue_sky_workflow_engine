@@ -86,16 +86,6 @@ def load_settings_yaml():
     return settings_attr_dict(settings_dict)
 
 
-# TODO: deprecate
-def get_message_broker_url(celery_settings):
-    return 'pyamqp://%s:%s@%s:%s/%s' % (
-        celery_settings.MESSAGE_QUEUE_USER,
-        celery_settings.MESSAGE_QUEUE_PASSWORD,
-        celery_settings.MESSAGE_QUEUE_HOST,
-        celery_settings.MESSAGE_QUEUE_PORT,
-        celery_settings.MESSAGE_QUEUE_VHOST)
-
-
 def configure_worker_app(
     app,
     app_name,

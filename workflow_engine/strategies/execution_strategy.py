@@ -223,6 +223,7 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
                 task.job.set_end_run_time()
 
                 enqueue_next_queue_signature.delay(task.job.id)
+
         except Exception as e:
             ExecutionStrategy._log.error(
                 str(e) + ' - ' + str(traceback.format_exc()))
@@ -230,6 +231,8 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
             task.set_error_message(
                 str(e) + ' - ' + str(traceback.format_exc()))
             self.fail_execution_task(task)
+
+        return task.running_state
 
     # Do not override
     def run_task(self, task):
@@ -242,6 +245,9 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
                 self.prep_task(task)
     
                 if self.skip_execution(enqueued_object):
+                    task.set_queued_state()
+                    task.set_running_state()
+                    task.job.set_running_state()
                     self.finish_task(task)
                 else:
                     task.full_executable = self.get_full_executable(task)
@@ -309,11 +315,6 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
                                 ' ', '\\ '
                            )
                     })
-
-#                     queue_name_with_app = '{}@{}'.format(
-#                         queue_name,
-#                         settings.APP_PACKAGE
-#                     )
 
                     try:
                         if queue_name == 'circus':
