@@ -7,9 +7,6 @@ VERSION = '0.121.0'
 with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
     README = readme.read()
 
-# allow setup.py to be run from any path
-#os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
-
 with open('requirements.txt', 'r') as f:
     required = f.read().splitlines()
 
@@ -30,6 +27,10 @@ def prepend_find_packages(*roots):
 setup(
     name='django-blue-sky-workflow-engine',
     version='%s' % (VERSION),
+    scripts=[
+        os.path.join('bin', 'restart_workers.sh'),
+        os.path.join('bin', 'setup_blue_green.sh')
+    ],
     packages=prepend_find_packages('workflow_engine', 'workflow_client'),
     package_data={'': ['*.conf', '*.cfg', '*.json', '*.env', '*.sh', '*.txt', '*.pbs', 'Makefile'] },
     include_package_data=True,

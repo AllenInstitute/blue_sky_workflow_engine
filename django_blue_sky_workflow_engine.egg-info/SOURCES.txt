@@ -9,6 +9,8 @@ requirements.txt
 semantic_requirements.txt
 setup.py
 test_requirements.txt
+bin/restart_workers.sh
+bin/setup_blue_green.sh
 django_blue_sky_workflow_engine.egg-info/PKG-INFO
 django_blue_sky_workflow_engine.egg-info/SOURCES.txt
 django_blue_sky_workflow_engine.egg-info/dependency_links.txt
@@ -90,6 +92,8 @@ workflow_engine/celery/monitor_tasks.py
 workflow_engine/celery/pbs_tasks.py
 workflow_engine/celery/result_tasks.py
 workflow_engine/celery/workflow_tasks.py
+workflow_engine/management/__init__.py
+workflow_engine/management/manage.py
 workflow_engine/management/commands/import_workflows.py
 workflow_engine/migrations/0001_initial.py
 workflow_engine/migrations/0002_configuration.py
@@ -142,6 +146,9 @@ workflow_engine/models/well_known_file.py
 workflow_engine/models/workflow.py
 workflow_engine/models/workflow_edge.py
 workflow_engine/models/workflow_node.py
+workflow_engine/process/__init__.py
+workflow_engine/process/example.py
+workflow_engine/process/process_manager.py
 workflow_engine/serializers/__init__.py
 workflow_engine/serializers/ingest_serializer.py
 workflow_engine/serializers/task_monitor_serializer.py

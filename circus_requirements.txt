@@ -7,5 +7,6 @@ Jinja2==2.10
 papa==1.0.6
 setproctitle==1.1.10
 pandas==0.23.4
+pyaml>=19.4
 pyzmq<17
 tornado<5

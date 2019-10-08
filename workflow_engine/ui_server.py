@@ -27,7 +27,7 @@ class DjangoApplication(object):
             'log.screen': True
         })
 
-        # use python -m manage collectstatic to populate static files
+        # use python -m workflow_engine.management.manage collectstatic to populate static files
         self.mount_static(
             settings.STATIC_URL,
             settings.STATIC_ROOT)

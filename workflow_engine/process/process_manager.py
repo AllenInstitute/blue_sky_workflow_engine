@@ -1,18 +1,21 @@
 from circus import get_arbiter
-from time import sleep
-import argparse
 import copy
 import os
 import sys
+import yaml
 
-_CELERY_PATH = '/conda_envs/py_37/bin/celery'
-_ACTIVATE_PATH = '/conda_envs/py_37/bin/activate'
+_APP_NAME='at_em_imaging_workflow'
+_CONDA_ENVS = '/conda_envs'
+_CELERY_PATH = os.path.join(
+    _CONDA_ENVS,
+    'py_37/bin/celery'
+)
+_ACTIVATE_PATH = os.path.join(
+    _CONDA_ENVS,
+    'py_37/bin/activate'
+)
 _FLOWER_DELAY = 1
 _FLOWER_PORT = 5557
-_MESSAGE_BROKER = (
-    'amqp://${MESSAGE_QUEUE_USER}:${MESSAGE_QUEUE_PASS}'
-    '@${MESSAGE_QUEUE_HOST}:${MESSAGE_QUEUE_PORT}/${MESSAGE_QUEUE_VHOST}'
-)
 
 def celery_command_string(worker_name, app_name):
     return " ".join((
@@ -36,46 +39,35 @@ def dmerge(d1, d2):
     return d
 
 _BASE_ENV = {
-    'WORKFLOW_CONFIG_YAML':
-        os.environ.get(
-            'WORKFLOW_CONFIG_YAML',
-            '/blue_sky/config/workflow_config.yml'),
-    'MESSAGE_QUEUE_USER':
-        os.environ.get(
-            'MESSAGE_QUEUE_USER',
-            'blue_sky_user'),
-    'MESSAGE_QUEUE_PASS':
-        os.environ.get(
-            'MESSAGE_QUEUE_PASS',
-            'blue_sky_user'),
-    'MESSAGE_QUEUE_HOST':
-        os.environ.get(
-            'MESSAGE_QUEUE_HOST',
-            'message_queue'),
-    'MESSAGE_QUEUE_PORT':
-        os.environ.get(
-            'MESSAGE_QUEUE_PORT',
-            str(5672)),
-    'MESSAGE_QUEUE_VHOST':
-        os.environ.get(
-            'MESSAGE_QUEUE_VHOST',
-            ''),
     'BLUE_SKY_SETTINGS':
         os.environ.get(
             'BLUE_SKY_SETTINGS',
-            '/green/blue_sky_settings.yml'),
+            '/home/blue_sky_user/work/blue_sky_settings.yml'),
     'MOAB_AUTH': os.environ.get('MOAB_AUTH', ':'),
-    'PATH': '/conda_envs/circus/bin:/conda_envs/circus/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
+    'PATH': '{}/circus/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'.format(_CONDA_ENVS),
 }
 
-def get_arbiter_list(app_name, bg, base_dir, log_dir='/green/logs'):
-    bg_conda_env = '/conda_envs/py_37'
+
+try:
+    with open(_BASE_ENV['BLUE_SKY_SETTINGS']) as f:
+        settings_dict = yaml.load(f, Loader=yaml.SafeLoader)
+        _MESSAGE_BROKER = settings_dict['broker_url']
+except:
+    _MESSAGE_BROKER = 'pyamqp://blue_sky_user:blue_sky_user@message_queue:5672/'
+
+
+
+def get_arbiter_list(app_name, workdir, log_dir=None):
+    if log_dir is None:
+        log_dir = os.path.join(workdir, 'logs')
+
+    bg_conda_env = os.path.join(_CONDA_ENVS, 'py_37')
     base_env = copy.deepcopy(_BASE_ENV)
     base_env['APP_PACKAGE'] = app_name
-    base_env['PYTHONPATH'] = '/{}:/source/blue_sky:/source/blue_sky_workflow_engine:/app_dirs:/render_modules:/EM_aligner_python'.format(bg)
-    #    base_env['PYTHONPATH'] = '/{}:/{}/blue_sky_workflow_engine:/render_modules'.format(bg,  bg)
+    base_env['PYTHONPATH'] = workdir
+
     django_env = dmerge(base_env, {
-        'DJANGO_SETTINGS_MODULE': 'settings' # in BG dir
+        'DJANGO_SETTINGS_MODULE': 'settings' # in workdir
     })
     
     arbiter_list = [
@@ -126,8 +118,8 @@ def get_arbiter_list(app_name, bg, base_dir, log_dir='/green/logs'):
         {
             'cmd': ' '.join((
                 '/bin/bash -c ', '"source {} {}; '.format(_ACTIVATE_PATH, bg_conda_env),
-                'cd /{}/notebooks; '.format(bg),
-                'python -m manage shell_plus --notebook"'
+                'cd /{}/notebooks; '.format(workdir),
+                'python -m workflow_engine.management.manage shell_plus --notebook"'
             )),
             "env": dmerge(django_env, {
                 'DEBUG_LOG': debug_log_path(log_dir, 'nb')
@@ -163,8 +155,9 @@ def get_arbiter_list(app_name, bg, base_dir, log_dir='/green/logs'):
             {
                 "cmd": (
                     '/bin/bash -c '
-                    '"source /conda_envs/py_37/bin/activate {}; {}"'
+                    '"source {} {}; {}"'
                 ).format(
+                    _ACTIVATE_PATH,
                     bg_conda_env,
                     celery_command_string(worker_name, app_name)
                 ),
@@ -180,16 +173,12 @@ if __name__ == '__main__':
 
     # TODO: these should not just be docker paths
     app_name = sys.argv[-2]
-    bg = sys.argv[-1]
-    bg_conda_env = bg
-    base_dir = os.environ.get(
-        'BASE_DIR', '/{}/{}'.format(bg, app_name))
-    log_dir = '/green/logs'
+    workdir = sys.argv[-1]
+    log_dir = '/home/blue_sky_user/work/logs'
 
     arbiter_list = get_arbiter_list(
         app_name,
-        bg,
-        base_dir,
+        workdir,
         log_dir)
 
     arbiter = get_arbiter(
