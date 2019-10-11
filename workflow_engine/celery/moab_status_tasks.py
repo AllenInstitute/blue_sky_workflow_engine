@@ -60,12 +60,6 @@ configure_worker_app(app, settings.APP_PACKAGE, 'moab_status')
 app.conf.imports = ()
 
 
-@celery.signals.after_setup_task_logger.connect
-def after_setup_celery_task_logger(logger, **kwargs):
-    """ This function sets the 'celery.task' logger handler and formatter """
-    logging.config.dictConfig(settings.LOGGING)
-
-
 def query_running_task_dicts():
     tasks = Task.objects.filter(
         running_state__in=['QUEUED', 'RUNNING'])

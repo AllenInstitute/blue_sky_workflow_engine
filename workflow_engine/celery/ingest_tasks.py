@@ -49,12 +49,6 @@ app = celery.Celery('workflow_engine.celery.ingest_tasks')
 configure_worker_app(app, settings.APP_PACKAGE, 'ingest')
 
 
-@celery.signals.after_setup_task_logger.connect
-def after_setup_celery_task_logger(logger, **kwargs):
-    """ This function sets the 'celery.task' logger handler and formatter """
-    logging.config.dictConfig(settings.LOGGING)
-
-
 def load_workflow_config(yaml_file):
     from workflow_engine.workflow_config import WorkflowConfig
 

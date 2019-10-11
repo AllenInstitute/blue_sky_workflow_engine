@@ -145,7 +145,7 @@ def get_arbiter_list(app_name, workdir, log_dir=None):
              'ingest',
              'workflow',
              'moab',
-             'moab_status',
+             #'moab_status',
              'mock',
              'circus_status',
              #'local',

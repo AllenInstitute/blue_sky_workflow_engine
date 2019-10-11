@@ -50,13 +50,6 @@ ERROR_EXIT_CODE = 1
 
 app = celery.Celery('workflow_engine.celery.mock_tasks')
 configure_worker_app(app, settings.APP_PACKAGE, 'mock')
-app.conf.imports = ()
-
-
-@celery.signals.after_setup_task_logger.connect
-def after_setup_celery_task_logger(logger, **kwargs):
-    """ This function sets the 'celery.task' logger handler and formatter """
-    logging.config.dictConfig(settings.LOGGING)
 
 
 def query_running_task_dicts():

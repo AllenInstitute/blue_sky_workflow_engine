@@ -48,10 +48,6 @@ _log = logging.getLogger('workflow_engine.celery.circus_status_tasks')
 app_name = 'blue_sky'
 worker_name = 'circus_status'
 
-@celery.signals.after_setup_task_logger.connect
-def after_setup_celery_task_logger(logger, **kwargs):
-    logging.config.dictConfig(settings.LOGGING)
-
 REMOTE_QUEUE = 'circus'
 app = celery.Celery(app_name)
 app.conf.imports = (

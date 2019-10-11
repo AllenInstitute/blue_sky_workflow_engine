@@ -27,10 +27,9 @@ def prepend_find_packages(*roots):
 setup(
     name='django-blue-sky-workflow-engine',
     version='%s' % (VERSION),
-    scripts=[
+    scripts=(
         os.path.join('bin', 'restart_workers.sh'),
-        os.path.join('bin', 'setup_blue_green.sh')
-    ],
+    ),
     packages=prepend_find_packages('workflow_engine', 'workflow_client'),
     package_data={'': ['*.conf', '*.cfg', '*.json', '*.env', '*.sh', '*.txt', '*.pbs', 'Makefile'] },
     include_package_data=True,
@@ -42,9 +41,7 @@ setup(
     author_email='nathans@alleninstitute.org',
     install_requires=required,
     tests_require=test_required,
-    setup_requires=[
-        'flake8'
-    ],
+    setup_requires=[],
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',

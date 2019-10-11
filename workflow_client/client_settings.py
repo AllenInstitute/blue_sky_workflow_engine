@@ -61,6 +61,7 @@ _DEFAULT_SETTINGS_DICT = {
     'worker_prefetch_multiplier': 1,
     'timezone': 'US/Pacific',
     'enable_utc': True,
+    'worker_hijack_root_logger': False,
     'broker_transport_options': {
         'max_retries': 3,
         'interval_start': 0,
@@ -100,6 +101,9 @@ def configure_worker_app(
 
     router = SimpleRouter(app_name)
 
+    app.conf.imports = (
+        'workflow_engine.celery.setup_logging_handler',
+    )
     app.config_from_object(load_settings_yaml())
     app.conf.task_queue_max_priority = 10
     app.conf.task_queues = router.task_queues(worker_names)

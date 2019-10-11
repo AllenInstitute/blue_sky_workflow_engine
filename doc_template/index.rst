@@ -16,10 +16,13 @@ Welcome to the Blue Sky Workflow Engine
    install
    settings
    customizing
+   deployment
    workflows
    strategies
    configurations
    develop
+   migrations
+   logging
    authors
    glossary
    Source Documentation <workflow_engine>

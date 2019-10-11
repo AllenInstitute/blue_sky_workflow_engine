@@ -61,12 +61,6 @@ configure_worker_app(app, settings.APP_PACKAGE, 'moab')
 app.conf.imports = ()
 
 
-@celery.signals.after_setup_task_logger.connect
-def after_setup_celery_task_logger(logger, **kwargs):
-    """ This function sets the 'celery.task' logger handler and formatter """
-    logging.config.dictConfig(settings.LOGGING)
-
-
 @celery.shared_task(bind=True, trail=True)
 def submit_moab_task(self, task_id):
     _log.info('Submitting task %d', task_id)

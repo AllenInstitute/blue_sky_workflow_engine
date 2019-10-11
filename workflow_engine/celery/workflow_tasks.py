@@ -54,12 +54,6 @@ _log = logging.getLogger('workflow_engine.celery.workflow_tasks')
 
 app = celery.Celery('workflow_engine.celery.workflow_tasks')
 configure_worker_app(app, settings.APP_PACKAGE, 'workflow')
-app.conf.imports = ()
-
-
-@celery.signals.after_setup_task_logger.connect
-def after_setup_celery_task_logger(logger, **kwargs):
-    logging.config.dictConfig(settings.LOGGING)
 
 
 # TODO: move this somewhere more general
