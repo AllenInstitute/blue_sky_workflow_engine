@@ -35,11 +35,11 @@
 #
 import django; django.setup()
 from django.conf import settings
-from workflow_client.client_settings import configure_worker_app
-from workflow_client.nb_utils.moab_api import (
+from workflow_engine.client_settings import configure_worker_app
+from workflow_engine.nb_utils.moab_api import (
     query_and_combine_states
 )
-from workflow_client.signatures import (
+from workflow_engine.signatures import (
     process_running_signature,
     process_finished_execution_signature,
     process_failed_execution_signature,

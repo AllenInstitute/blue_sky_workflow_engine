@@ -30,7 +30,7 @@ setup(
     scripts=(
         os.path.join('bin', 'restart_workers.sh'),
     ),
-    packages=prepend_find_packages('workflow_engine', 'workflow_client'),
+    packages=prepend_find_packages('workflow_engine', 'workflow_engine'),
     package_data={'': ['*.conf', '*.cfg', '*.json', '*.env', '*.sh', '*.txt', '*.pbs', 'Makefile'] },
     include_package_data=True,
     license='Allen Institute Software License',

@@ -41,7 +41,7 @@ from django.db import (
     transaction
 )
 import logging
-from workflow_client.signatures import (
+from workflow_engine.signatures import (
     run_workflow_node_jobs_signature
 )
 from builtins import classmethod

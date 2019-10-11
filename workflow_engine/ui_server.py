@@ -1,7 +1,7 @@
 import cherrypy
 from django.conf import settings
 from celery import Celery
-from workflow_client.client_settings import configure_worker_app
+from workflow_engine.client_settings import configure_worker_app
 import django; django.setup()
 from django.core.handlers.wsgi import WSGIHandler
 

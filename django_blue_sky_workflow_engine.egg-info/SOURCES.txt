@@ -10,7 +10,6 @@ semantic_requirements.txt
 setup.py
 test_requirements.txt
 bin/restart_workers.sh
-bin/setup_blue_green.sh
 django_blue_sky_workflow_engine.egg-info/PKG-INFO
 django_blue_sky_workflow_engine.egg-info/SOURCES.txt
 django_blue_sky_workflow_engine.egg-info/dependency_links.txt
@@ -91,6 +90,7 @@ workflow_engine/celery/mock_tasks.py
 workflow_engine/celery/monitor_tasks.py
 workflow_engine/celery/pbs_tasks.py
 workflow_engine/celery/result_tasks.py
+workflow_engine/celery/setup_logging_handler.py
 workflow_engine/celery/workflow_tasks.py
 workflow_engine/management/__init__.py
 workflow_engine/management/manage.py
@@ -252,7 +252,3 @@ workflow_engine/views/__pycache__/record_view.cpython-36.pyc
 workflow_engine/views/__pycache__/shared.cpython-36.pyc
 workflow_engine/views/__pycache__/task_view.cpython-36.pyc
 workflow_engine/views/__pycache__/workflow_view.cpython-36.pyc
-workflow_engine/worker/__init__.py
-workflow_engine/worker/server_command.py
-workflow_engine/worker/qsub/__init__.py
-workflow_engine/worker/qsub/qsub_api.py

@@ -41,7 +41,7 @@ from workflow_engine.models import (
     Job
 )
 from workflow_engine.import_class import import_class
-from workflow_client.client_settings import configure_worker_app
+from workflow_engine.client_settings import configure_worker_app
 import pandas as pd
 import itertools as it
 from datetime import datetime

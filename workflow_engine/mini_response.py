@@ -1,7 +1,7 @@
 import argparse
-from workflow_client.client_settings import configure_worker_app
+from workflow_engine.client_settings import configure_worker_app
 from celery import Celery
-from workflow_client.signatures import (
+from workflow_engine.signatures import (
     process_pbs_id_signature,
     process_running_signature,
     process_finished_execution_signature,

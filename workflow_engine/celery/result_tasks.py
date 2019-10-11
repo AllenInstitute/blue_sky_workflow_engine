@@ -36,10 +36,10 @@
 import celery
 from django.core.exceptions import ObjectDoesNotExist
 from builtins import ModuleNotFoundError
-from workflow_client.signatures import run_workflow_node_jobs_signature
+from workflow_engine.signatures import run_workflow_node_jobs_signature
 from django.conf import settings
-from workflow_client.client_settings import configure_worker_app
-from workflow_client.signatures import METHODS
+from workflow_engine.client_settings import configure_worker_app
+from workflow_engine.signatures import METHODS
 import logging
 import traceback
 

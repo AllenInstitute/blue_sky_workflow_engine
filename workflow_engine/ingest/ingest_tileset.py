@@ -11,11 +11,11 @@ import datetime
 import pytz
 import argschema
 
-from workflow_client.ingest.schemas import (
+from workflow_engine.ingest.schemas import (
     EMMontageSetIngestSchema, ReferenceSetIngestSchema)
-# from workflow_client.module.render_module import RenderModuleException
+# from workflow_engine.module.render_module import RenderModuleException
 
-from workflow_client import celery_ingest
+from workflow_engine import celery_ingest
 
 _APP_KEY = 'blue_sky'
 # _APP_KEY = 'at_em_imaging_workflow'

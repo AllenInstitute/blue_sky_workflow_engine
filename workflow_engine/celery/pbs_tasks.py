@@ -34,7 +34,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 import celery
-from workflow_client.nb_utils.moab_api import (
+from workflow_engine.nb_utils.moab_api import (
     query_and_combine_states,
     submit_job,
     delete_moab_task
@@ -43,7 +43,7 @@ from django.core.exceptions import ObjectDoesNotExist
 import logging
 from celery.canvas import group
 import pandas as pd
-from workflow_client.signatures import (
+from workflow_engine.signatures import (
     process_running_signature,
     process_finished_execution_signature,
     process_failed_execution_signature,

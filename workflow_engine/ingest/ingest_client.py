@@ -28,7 +28,7 @@ ingest_signature = signature(
 ingest_signature.set(time_limit=10)
 
 class IngestClient():
-    _log = logging.getLogger('workflow_client.ingest.ingest_client')
+    _log = logging.getLogger('workflow_engine.ingest.ingest_client')
 
     def __init__(self, app_key, workflow_name):
         self.app_key = app_key

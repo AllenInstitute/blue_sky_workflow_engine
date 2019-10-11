@@ -34,12 +34,12 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 import celery
-from workflow_client.client_settings import configure_worker_app
+from workflow_engine.client_settings import configure_worker_app
 import django; django.setup()
 from django.conf import settings
 from workflow_engine.models import Task
 from celery.exceptions import SoftTimeLimitExceeded
-from workflow_client.tasks.circus_signatures import ( 
+from workflow_engine.tasks.circus_signatures import ( 
     check_remote_status_signature
 )
 import logging

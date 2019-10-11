@@ -1,5 +1,5 @@
 from django.contrib import admin
-from workflow_client import signatures
+from workflow_engine import signatures
 from workflow_engine.models import (
     Task,
 )

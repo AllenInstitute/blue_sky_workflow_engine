@@ -28,9 +28,9 @@ def prepend_find_packages(*roots):
     return packages
 
 setup(
-    name='workflow_client',
+    name='workflow_engine',
     version='%s%s' % (VERSION, RELEASE),
-    packages=prepend_find_packages('workflow_client'),
+    packages=prepend_find_packages('workflow_engine'),
     include_package_data=True,
     license='Allen Institute Software License',
     description='Blue Sky Workflow Client',

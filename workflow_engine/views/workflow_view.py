@@ -48,7 +48,7 @@ from workflow_engine.import_class import import_class
 from workflow_engine.views   import shared, HEADER_PAGES
 from workflow_engine.workflow_controller import WorkflowController
 from collections import deque
-from workflow_client.signatures import (
+from workflow_engine.signatures import (
     run_workflow_node_jobs_signature,
     create_job_signature
 )

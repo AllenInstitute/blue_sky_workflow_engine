@@ -33,13 +33,13 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-from workflow_client.simple_router import SimpleRouter
+from workflow_engine.simple_router import SimpleRouter
 import os
 import yaml
 import logging
 
 
-_log = logging.getLogger('workflow_client.client_settings')
+_log = logging.getLogger('workflow_engine.client_settings')
 
 
 class settings_attr_dict(dict):

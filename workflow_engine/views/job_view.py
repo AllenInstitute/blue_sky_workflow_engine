@@ -41,7 +41,7 @@ from workflow_engine.models import (
     ONE
 )
 from workflow_engine.views import shared, HEADER_PAGES
-from workflow_client.signatures import (
+from workflow_engine.signatures import (
     queue_job_signature,
     kill_job_signature
 )

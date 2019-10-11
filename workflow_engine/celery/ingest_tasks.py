@@ -35,7 +35,7 @@
 #
 import django; django.setup()
 from django.conf import settings
-from workflow_client.client_settings import configure_worker_app
+from workflow_engine.client_settings import configure_worker_app
 from workflow_engine.import_class import import_class
 import celery
 import logging

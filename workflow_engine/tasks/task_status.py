@@ -33,7 +33,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-from workflow_client import signatures
+from workflow_engine import signatures
 from celery.canvas import group
 import itertools as it
 import pandas as pd

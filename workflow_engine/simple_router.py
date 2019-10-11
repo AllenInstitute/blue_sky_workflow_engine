@@ -2,7 +2,7 @@ from kombu import Exchange, Queue
 import logging
 
 class SimpleRouter(object):
-    _log = logging.getLogger('workflow_client.simple_router')
+    _log = logging.getLogger('workflow_engine.simple_router')
     # Note the values are sets, not dicts
     base_dict = {
         'ingest': {

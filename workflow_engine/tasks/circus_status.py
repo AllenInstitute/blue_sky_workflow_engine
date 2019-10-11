@@ -34,7 +34,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 from .task_status import TaskStatus
-from workflow_client.tasks.circus_signatures import (
+from workflow_engine.tasks.circus_signatures import (
     check_status_signature,
 )
 import pandas as pd

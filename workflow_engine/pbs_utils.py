@@ -36,12 +36,12 @@
 import jinja2
 
 class PbsUtils(object):
-    _spark_template_package = 'workflow_client'
+    _spark_template_package = 'workflow_engine'
     _spark_templates = 'templates'
     _log_configuration_template = 'spark_log4j_template.properties'
 
     def __init__(self):
-        self.package = 'workflow_client'
+        self.package = 'workflow_engine'
         self.templates = 'templates'
         self.scripts = {
             'spark_moab': 'spark_submit_cluster.pbs',

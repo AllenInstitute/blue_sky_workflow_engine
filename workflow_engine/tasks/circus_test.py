@@ -2,10 +2,10 @@
 import celery
 from circus.process import Process
 from circus.client import CircusClient
-from workflow_client.tasks.circus_status import CircusStatus
+from workflow_engine.tasks.circus_status import CircusStatus
 from celery.exceptions import SoftTimeLimitExceeded
 import traceback
-from workflow_client.simple_router import SimpleRouter
+from workflow_engine.simple_router import SimpleRouter
 from datetime import datetime, timedelta
 import logging.config
 import jinja2
@@ -61,7 +61,7 @@ def after_setup_celery_task_logger(logger, **kwargs):
             'level': 'INFO',
             'propagate': True,
         },
-        'workflow_client': {
+        'workflow_engine': {
             'handlers': ['console', 'file'],
             'level': 'INFO',
             'propagate': True,

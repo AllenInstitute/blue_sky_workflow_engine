@@ -33,14 +33,14 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-from workflow_client.signatures import ingest_signature
+from workflow_engine.signatures import ingest_signature
 from workflow_engine.celery import settings
 import celery
 import logging
 import os
 
 
-_log = logging.getLogger('workflow_client.celery_ingest')
+_log = logging.getLogger('workflow_engine.celery_ingest')
 logging.basicConfig(level=logging.INFO)
 _log.setLevel(logging.INFO)
 

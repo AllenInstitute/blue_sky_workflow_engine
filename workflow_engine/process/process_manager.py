@@ -103,7 +103,7 @@ def get_arbiter_list(app_name, workdir, log_dir=None):
 #                '"source {} {}_circus; '.format(_ACTIVATE_PATH, bg),
 #                'unset DJANGO_SETTINGS_MODULE; ',
 #                'python -m celery ',
-#                '-A workflow_client.tasks.circus_test worker ',
+#                '-A workflow_engine.tasks.circus_test worker ',
 #                '--broker={}'.format(_MESSAGE_BROKER),
 #                '--concurrency=1 --loglevel=info ',
 #                '-n circus@{}'.format(app_name),

@@ -39,10 +39,10 @@ from workflow_engine.models import (
     Task,
     WorkflowNode
 )
-from workflow_client.signatures import METHODS
+from workflow_engine.signatures import METHODS
 from workflow_engine.workflow_controller import WorkflowController
 from django.core.exceptions import ObjectDoesNotExist
-from workflow_client.client_settings import configure_worker_app
+from workflow_engine.client_settings import configure_worker_app
 from celery.exceptions import SoftTimeLimitExceeded
 import logging
 import traceback

@@ -39,7 +39,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from workflow_engine.models import ONE, ZERO
 from workflow_engine.mixins import Archivable, Runnable, Tagable, Timestamped
-from workflow_client.pbs_utils import PbsUtils
+from workflow_engine.pbs_utils import PbsUtils
 import os
 import logging
 

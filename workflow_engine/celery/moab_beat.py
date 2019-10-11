@@ -37,8 +37,8 @@ import celery
 from django.conf import settings
 import django; django.setup()
 import logging.config
-from workflow_client.client_settings import configure_worker_app
-from workflow_client.signatures import (
+from workflow_engine.client_settings import configure_worker_app
+from workflow_engine.signatures import (
     check_moab_status_signature,
     check_circus_task_status_signature,
     update_dashboard_signature

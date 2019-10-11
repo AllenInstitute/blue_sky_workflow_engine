@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from workflow_client.signatures import ingest_signature
+from workflow_engine.signatures import ingest_signature
 import json
 import traceback
 import logging
