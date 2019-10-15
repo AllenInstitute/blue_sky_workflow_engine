@@ -95,14 +95,3 @@ inspect_signature = signature(
     retry=False,
     ignore_result=False
 )
-
-
-failed_execution_handler_signature = signature(
-    'workflow_engine.celery.error_handler.failed_execution_handler')
-failed_execution_handler_signature.set(
-    broker_connection_timeout=10,
-    broker_connection_retry=False,
-    priority=_PRIORITY_NORMAL,
-    retry=False,
-    ignore_result=False
-)

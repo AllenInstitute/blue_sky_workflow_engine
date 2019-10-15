@@ -45,6 +45,5 @@ def _route_task(name, args, kwargs,
 if __name__ == "__main__":
     app = Celery('workflow_engine_ui')
     configure_worker_app(app, 'workflow_engine_ui')
-    app.conf.task_routes = (_route_task,)
 
     DjangoApplication().run()

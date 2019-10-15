@@ -457,6 +457,8 @@ def workflow_summary(workflow_name):
     return summary
 
 def monitor_workflow_data(request):
+    del request  # unused
+
     ws = WorkflowStatus()
 
     return HttpResponse(

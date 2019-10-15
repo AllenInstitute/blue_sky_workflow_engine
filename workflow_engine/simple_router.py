@@ -35,7 +35,6 @@ class SimpleRouter(object):
             'kill_job',
             'enqueue_next_queue',
             'run_workflow_node_jobs_by_id',
-            'failed_execution_handler'
         },
         'result': { 
             'process_pbs_id',

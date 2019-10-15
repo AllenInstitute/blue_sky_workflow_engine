@@ -45,7 +45,6 @@ from workflow_engine.views import workflow_view
 from workflow_engine.views import home_view
 from workflow_engine.views import grid_view
 from workflow_engine.views import ingest_view
-from workflow_engine.views.monitor_view import MonitorView
 
 admin.autodiscover()
 
@@ -108,7 +107,6 @@ urlpatterns = [
         ingest_view.ingest, name='ingest'
     ),
 
-    re_path(r'^data', MonitorView.as_view()),
     re_path(r'job_grid$', grid_view.index, name='grid'),
     re_path('^admin/', admin.site.urls),
     re_path('^accounts/', include('django.contrib.auth.urls'))

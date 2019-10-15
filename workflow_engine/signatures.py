@@ -134,10 +134,6 @@ process_pbs_id_signature.set(
 )
 
 
-failed_execution_handler_signature = signature(
-    'workflow_engine.celery.error_handler.failed_execution_handler')
-
-
 #
 # WORKFLOW / UI TASKS
 #
