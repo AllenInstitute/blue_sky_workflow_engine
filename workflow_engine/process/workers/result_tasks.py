@@ -44,10 +44,10 @@ import logging
 import traceback
 
 
-_log = logging.getLogger('workflow_engine.celery.result_tasks')
+_log = logging.getLogger('workflow_engine.process.workers.result_tasks')
 
 
-app = celery.Celery('workflow_engine.celery.result_tasks')
+app = celery.Celery('workflow_engine.process.workers.result_tasks')
 configure_worker_app(app, settings.APP_PACKAGE, 'result')
 
 

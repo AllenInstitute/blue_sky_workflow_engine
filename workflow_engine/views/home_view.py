@@ -68,7 +68,7 @@ def index(request):
 
     context['flower_monitor_url'] = settings.FLOWER_MONITOR_URL
     context['rabbit_monitor_url'] = settings.RABBIT_MONITOR_URL
-    context['message_queue_host']  = settings.MESSAGE_QUEUE_HOST
+    context['message_queue_host'] = '---'
     context['notebook_url'] = settings.NOTEBOOK_URL
     try:
         context['stanbol_url'] = settings.STANBOL_URL

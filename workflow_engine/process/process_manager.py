@@ -21,7 +21,7 @@ def celery_command_string(worker_name, app_name):
     return " ".join((
         _CELERY_PATH,
         "-A",
-        "workflow_engine.celery.{}_tasks".format(worker_name),
+        "workflow_engine.process.workers.{}_tasks".format(worker_name),
         "worker --concurrency=1 --loglevel=info",
         "-n {}@{}".format(worker_name, app_name))
     )
@@ -75,7 +75,7 @@ def get_arbiter_list(app_name, workdir, log_dir=None):
             'cmd': ' '.join((
                 "/bin/bash -c ",
                 "'source {} {}; ".format(_ACTIVATE_PATH, bg_conda_env),
-                "python -m workflow_engine.ui_server'"
+                "python -m workflow_engine.process.workers.ui_server'"
             )),
             "env": dmerge(django_env, {
                 'DEBUG_LOG': debug_log_path(log_dir, 'ui')
@@ -103,7 +103,7 @@ def get_arbiter_list(app_name, workdir, log_dir=None):
 #                '"source {} {}_circus; '.format(_ACTIVATE_PATH, bg),
 #                'unset DJANGO_SETTINGS_MODULE; ',
 #                'python -m celery ',
-#                '-A workflow_engine.tasks.circus_test worker ',
+#                '-A workflow_engine.process.workers.circus_test worker ',
 #                '--broker={}'.format(_MESSAGE_BROKER),
 #                '--concurrency=1 --loglevel=info ',
 #                '-n circus@{}'.format(app_name),
@@ -126,30 +126,14 @@ def get_arbiter_list(app_name, workdir, log_dir=None):
             }), 
             'numprocesses': 1
         },
-#        {
-#            'cmd': ' '.join((
-#                '/bin/bash -c ',
-#                '"source {} {}; '.format(_ACTIVATE_PATH, bg_conda_env),
-#                'python -m celery ',
-#                '-A workflow_engine.celery.moab_beat beat ',
-#                '--broker={}"'.format(_MESSAGE_BROKER))),
-#            "env": dmerge(django_env, {
-#                'DEBUG_LOG': debug_log_path(log_dir, 'beat')
-#            }), 
-#            'numprocesses': 1
-#        }
     ]
-    
+
     for worker_name in (
              'result',
              'ingest',
              'workflow',
              'moab',
-             #'moab_status',
              'mock',
-             'circus_status',
-             #'local',
-             #'monitor',
         ):
         arbiter_list.extend([
             {

@@ -6,6 +6,7 @@ from workflow_engine.tasks.circus_status import CircusStatus
 from celery.exceptions import SoftTimeLimitExceeded
 import traceback
 from workflow_engine.simple_router import SimpleRouter
+from workflow_engine import signatures
 from datetime import datetime, timedelta
 import logging.config
 import jinja2
@@ -15,7 +16,7 @@ import os
 app_name = 'circus_test'
 
 _log = logging.getLogger(
-    'workflow_engine.celery.circus_worker'
+    'workflow_engine.process.workers.circus_worker'
 )
 
 
@@ -89,9 +90,6 @@ class CircusProcessTask(celery.Task):
 
 app_name = os.environ.get('BLUE_SKY_APP_NAME')
 app = celery.Celery(app_name)
-app.conf.imports = (
-    'workflow_engine.celery.error_handler',
-)
 router = SimpleRouter(app_name)
 app.conf.task_queue_max_priority = 10
 app.conf.task_queues = router.task_queues(
@@ -203,7 +201,7 @@ echo $? > exit_code.txt
 
 
 @celery.shared_task(
-    name='workflow_engine.celery.submit_worker_task',
+    name='workflow_engine.process.workers.submit_worker_task',
     base=CircusProcessTask,
     bind=True,
     trail=True)

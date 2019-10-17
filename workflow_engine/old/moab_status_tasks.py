@@ -36,31 +36,34 @@
 import django; django.setup()
 from django.conf import settings
 from workflow_engine.client_settings import configure_worker_app
-import celery
+from workflow_engine.process.workers.moab.moab_api import (
+    query_and_combine_states
+)
+from workflow_engine.signatures import (
+    process_running_signature,
+    process_finished_execution_signature,
+    process_failed_execution_signature,
+    process_failed_signature
+)
+from celery.exceptions import SoftTimeLimitExceeded
 import logging
-from workflow_engine import signatures
+import celery
+from celery.canvas import group
+import itertools as it
 
 
-_log = logging.getLogger('workflow_engine.celery.mock_tasks')
+_log = logging.getLogger('workflow_engine.celery.moab_status_tasks')
 
 
-SUCCESS_EXIT_CODE = 0
-ERROR_EXIT_CODE = 1
-
-
-app = celery.Celery('workflow_engine.celery.mock_tasks')
-configure_worker_app(app, settings.APP_PACKAGE, 'mock')
+app = celery.Celery('workflow_engine.celery.moab_status_tasks')
+configure_worker_app(app, settings.APP_PACKAGE, 'moab_status')
+app.conf.imports = ()
 
 
 def query_running_task_dicts():
     tasks = Task.objects.filter(
         running_state__in=['QUEUED', 'RUNNING'])
 
-
-    #
-    # TODO: check the start time and use that to
-    # change stuff to RUNNING, or to finish it.
-    #
     task_dicts = [{
         'task_id': t.id,
         'workflow_state': t.running_state,
@@ -70,61 +73,53 @@ def query_running_task_dicts():
 
     return task_dicts
 
+# Todo need to use moab id and task id in all cases
+result_actions = { 
+    'running_message': process_running_signature,
+    'finished_message': process_finished_execution_signature,
+    'failed_execution_message': process_failed_execution_signature,
+    'failed_message': process_failed_signature
+}
 
-@celery.shared_task(bind=True, trail=True)
-def check_status(self):
-    return 'OK'
+def combined_df_response_group(combined_df):
+    return group(
+        it.chain.from_iterable(
+            combined_df.loc[
+                combined_df[col] == True
+            ]['task_id'].apply(
+                lambda x: sig.clone((x,))
+            )
+            for (col,sig)
+            in result_actions.items()
+        )
+    )
 
 
 @celery.shared_task(
-    name='workflow_engine.celery.submit_mock_task',
     bind=True,
-    trail=True
-)
-def submit_mock_task(self, task_id):
-    _log.info(
-        'Submitting task %d',
-        task_id
-    )
-
+    name='workflow_engine.celery.moab_status_tasks.check_moab_status',
+    trail=True)
+def check_moab_status(self):
     try:
-        the_task = Task.objects.get(id=task_id)
+        combined_workflow_moab_dataframe = query_and_combine_states(
+            query_running_task_dicts()
+        )
 
-        if the_task.in_pending_state():
-            mock_moab_id = task_id
-            signatures.process_pbs_id_signature.delay(task_id, mock_moab_id)
-            signatures.process_running_signature.delay(task_id)
+        _log.info('combined_dataframe' + str(combined_workflow_moab_dataframe))
 
-            exit_code = SUCCESS_EXIT_CODE
+        grp = combined_df_response_group(
+            combined_workflow_moab_dataframe
+        )
 
-            if exit_code == SUCCESS_EXIT_CODE:
-                signatures.process_finished_execution_signature.delay(task_id)
+        _log.info("Message group: " + str(grp))
 
-                # with open(logfile, "a") as log:
-                #     log.write("SUCCESS - execution finished successfully for task " +
-                #     str(task_id))
-            else:
-                signatures.process_failed_execution_signature.delay(task_id)
+        grp.delay()
+    except SoftTimeLimitExceeded:
+        _log.warning('Soft Time Limit Exceeded')
+        return 'timeout'
 
-                # with open(logfile, "a") as log:
-                #    log.write("FAILURE - execution failed for task " + str(task_id))
-    except:
-        signatures.process_failed_execution_signature.delay(task_id)
+    return 'OK'
 
-    return None
-
-
-# TODO: change name to something like process task state
-# Not sure if we still need name
-# Do need a UI task like this
-@celery.shared_task(bind=True)
-def run_task(self, name, args):
-    raise Exception("Removed/Unimplemented")
-
-
-@celery.shared_task(bind=True, trail=True)
-def kill_task(self, task_id):
-    raise Exception("Removed/Unimplemented")
 
 # circular imports
 from workflow_engine.models import Task

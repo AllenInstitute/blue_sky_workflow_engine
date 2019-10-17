@@ -24,7 +24,7 @@ class settings_attr_dict(dict):
     __getattr__ = dict.get
 
 ingest_signature = signature(
-    'workflow_engine.celery.ingest_tasks.ingest_task')
+    'workflow_engine.process.workers.ingest_tasks.ingest_task')
 ingest_signature.set(time_limit=10)
 
 class IngestClient():

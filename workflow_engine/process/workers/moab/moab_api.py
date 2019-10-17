@@ -44,7 +44,9 @@ import logging
 #
 # See: http://docs.adaptivecomputing.com/mws/7-1-1/guide/apiDocumentation.html#rest
 #
-_log = logging.getLogger('workflow_engine.nb_utils.moab_api')
+_log = logging.getLogger(
+    'workflow_engine.process.workers.moab.moab_api'
+)
 
 
 def moab_url(

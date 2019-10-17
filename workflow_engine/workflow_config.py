@@ -54,6 +54,11 @@ class WorkflowConfig:
 
     @classmethod
     def from_yaml(cls, y):
+        '''Load workflow from a YAML file.
+
+        Args:
+            y (str): path to workflow definition file
+        '''
         definition = yaml.load(y, Loader=yaml.SafeLoader)
         return cls.parse_yaml_definition(definition)
 

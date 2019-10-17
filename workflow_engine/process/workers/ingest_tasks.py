@@ -42,10 +42,12 @@ import logging
 import traceback
 
 
-_log = logging.getLogger('workflow_engine.celery.ingest_tasks')
+_log = logging.getLogger('workflow_engine.process.workers.ingest_tasks')
 
 
-app = celery.Celery('workflow_engine.celery.ingest_tasks')
+app = celery.Celery(
+    'workflow_engine.process.workers.ingest_tasks'
+)
 configure_worker_app(app, settings.APP_PACKAGE, 'ingest')
 
 

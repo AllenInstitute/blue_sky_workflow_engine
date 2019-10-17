@@ -44,30 +44,28 @@ class METHODS:
        to import signatures without needing to import the task module
        and all dependencies.
     '''
-    INGEST = 'workflow_engine.celery.ingest_tasks.ingest_task'
+    INGEST = 'workflow_engine.process.workers.ingest_tasks.ingest_task'
     CHECK_CIRCUS_STATUS = 'workflow_engine.check_circus_status'
     CHECK_CIRCUS_TASK_STATUS = 'workflow_engine.check_circus_task_status'
     
-    CHECK_MOAB_STATUS = 'workflow_engine.celery.moab_status_tasks.check_moab_status'
-    SUBMIT_MOAB_TASK = 'workflow_engine.celery.moab_tasks.submit_moab_task'
-    KILL_MOAB_TASK = 'workflow_engine.celery.moab_tasks.kill_moab_task'
+    CHECK_MOAB_STATUS = 'workflow_engine.process.workers.moab_status_tasks.check_moab_status'
+    SUBMIT_MOAB_TASK = 'workflow_engine.process.workers.moab.moab_tasks.submit_moab_task'
+    KILL_MOAB_TASK = 'workflow_engine.process.workers.moab.moab_tasks.kill_moab_task'
 
-    SUBMIT_WORKER_TASK = 'workflow_engine.celery.submit_worker_task'
+    SUBMIT_WORKER_TASK = 'workflow_engine.process.workers.submit_worker_task'
 
-    PROCESS_RUNNING = 'workflow_engine.celery.result_tasks.process_running'
-    PROCESS_FINISHED_EXECUTION = 'workflow_engine.celery.result_tasks.process_finished_execution'
-    PROCESS_FAILED_EXECUTION = 'workflow_engine.celery.result_tasks.process_failed_execution'
-    PROCESS_FAILED = 'workflow_engine.celery.result_tasks.process_failed'
-    PROCESS_PBS_ID = 'workflow_engine.celery.result_tasks.process_pbs_id'
+    PROCESS_RUNNING = 'workflow_engine.process.workers.result_tasks.process_running'
+    PROCESS_FINISHED_EXECUTION = 'workflow_engine.process.workers.result_tasks.process_finished_execution'
+    PROCESS_FAILED_EXECUTION = 'workflow_engine.process.workers.result_tasks.process_failed_execution'
+    PROCESS_FAILED = 'workflow_engine.process.workers.result_tasks.process_failed'
+    PROCESS_PBS_ID = 'workflow_engine.process.workers.result_tasks.process_pbs_id'
 
-    CREATE_JOB = 'workflow_engine.celery.workflow_tasks.create_job'
-    QUEUE_JOB = 'workflow_engine.celery.workflow_tasks.queue_job'
-    RUN_WORKFLOW_NODE_JOBS = 'workflow_engine.celery.workflow_tasks.run_workflow_node_jobs_by_id'
-    RUN_JOBS_BY_ID = 'workflow_engine.celery.workflow_tasks.set_jobs_for_run_by_id'
-    ENQUEUE_NEXT = 'workflow_engine.celery.workflow_tasks.enqueue_next_queue'
-    KILL_JOB = 'workflow_engine.celery.workflow_tasks.kill_job'
-
-    UPDATE_DASHBOARD = 'workflow_engine.broadcast.update_dashboard'
+    CREATE_JOB = 'workflow_engine.process.workers.workflow_tasks.create_job'
+    QUEUE_JOB = 'workflow_engine.process.workers.workflow_tasks.queue_job'
+    RUN_WORKFLOW_NODE_JOBS = 'workflow_engine.process.workers.workflow_tasks.run_workflow_node_jobs_by_id'
+    RUN_JOBS_BY_ID = 'workflow_engine.process.workers.workflow_tasks.set_jobs_for_run_by_id'
+    ENQUEUE_NEXT = 'workflow_engine.process.workers.workflow_tasks.enqueue_next_queue'
+    KILL_JOB = 'workflow_engine.process.workers.workflow_tasks.kill_job'
 #
 # INGEST TASKS
 #
@@ -143,7 +141,7 @@ run_jobs_by_id_signature = signature(METHODS.RUN_JOBS_BY_ID)
 
 # TODO: unimplemented?
 run_tasks_signature = signature(
-    'workflow_engine.celery.moab_tasks.run_task')
+    'workflow_engine.process.workers.moab.moab_tasks.run_task')
 
 
 create_job_signature = signature(METHODS.CREATE_JOB)
@@ -152,10 +150,100 @@ enqueue_next_queue_signature = signature(METHODS.ENQUEUE_NEXT)
 kill_job_signature = signature(METHODS.KILL_JOB)
 
 
-# MONITOR TASKS
-update_dashboard_signature = signature(METHODS.UPDATE_DASHBOARD)
-update_dashboard_signature.set(
-    delivery_mode='transient',
+#
+# CIRCUS PROCESS WORKER TASKS
+#
+_PRIORITY_HIGH=6
+_PRIORITY_NORMAL=5
+_PRIORITY_LOW=4
+
+
+submit_task_signature = signature(
+    'workflow_engine.process.workers.submit_worker_task')
+submit_task_signature.set(
+    broker_connection_timeout=10,
+    broker_connection_retry=False,
+    priority=_PRIORITY_NORMAL,
+    retry=False,
+    ignore_result=False
+)
+
+
+submit_mock_signature = signature(
+    'workflow_engine.process.workers.submit_mock_task')
+submit_task_signature.set(
+    broker_connection_timeout=10,
+    broker_connection_retry=False,
+    priority=_PRIORITY_NORMAL,
+    retry=False,
+    ignore_result=False,
+    expires=60,
+)
+
+
+kill_task_signature = signature(
+    'circus_test.kill_task')
+kill_task_signature.set(
+    broker_connection_timeout=10,
+    broker_connection_retry=False,
+    priority=_PRIORITY_HIGH,
+    retry=False,
+    ignore_result=False
+)
+
+
+task_stdout_signature = signature(
+    'circus_test.task_stdout')
+task_stdout_signature.set(
+    broker_connection_timeout=10,
+    broker_connection_retry=False,
+    priority=_PRIORITY_NORMAL,
+    retry=False,
+    ignore_result=False
+)
+
+
+task_stderr_signature = signature(
+    'circus_test.task_stderr')
+task_stderr_signature.set(
+    broker_connection_timeout=10,
+    broker_connection_retry=False,
+    priority=_PRIORITY_NORMAL,
+    retry=False,
+    ignore_result=False
+)
+
+
+check_status_signature = signature(
+    'workflow_engine.check_circus_status')
+check_status_signature.set(
+    broker_connection_timeout=10,
+    broker_connection_retry=False,
+    priority=_PRIORITY_LOW,
+    retry=False,
+    ignore_result=False
+)
+
+
+check_remote_status_signature = signature(
+    'workflow_engine.check_remote_status')
+check_status_signature.set(
+    broker_connection_timeout=10,
+    broker_connection_retry=False,
     soft_time_limit=30,
     time_limit=60,
-    expires=45)
+    expires=45,
+    priority=_PRIORITY_LOW,
+    retry=False,
+    ignore_result=False
+)
+
+
+inspect_signature = signature(
+    'workflow_engine.inspect_circus').set(
+    broker_connection_timeout=10,
+    broker_connection_retry=False,
+    priority=_PRIORITY_NORMAL,
+    retry=False,
+    ignore_result=False
+)

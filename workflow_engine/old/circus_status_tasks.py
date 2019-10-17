@@ -39,9 +39,7 @@ import django; django.setup()
 from django.conf import settings
 from workflow_engine.models import Task
 from celery.exceptions import SoftTimeLimitExceeded
-from workflow_engine.tasks.circus_signatures import ( 
-    check_remote_status_signature
-)
+from workflow_engine.signatures import check_remote_status_signature
 import logging
 
 _log = logging.getLogger('workflow_engine.celery.circus_status_tasks')

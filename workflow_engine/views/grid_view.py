@@ -67,7 +67,7 @@ def index(request):
 
     context['flower_monitor_url'] = settings.FLOWER_MONITOR_URL
     context['rabbit_monitor_url'] = settings.RABBIT_MONITOR_URL
-    context['message_queue_host']  = settings.MESSAGE_QUEUE_HOST
+    context['message_queue_host']  = '---'
     context['admin_url'] = settings.ADMIN_URL
 
     context['seconds_between_refresh'] = 300

@@ -110,7 +110,7 @@ def configure_worker_app(
     app.conf.task_routes = (
         router.route_task,
         {
-            'workflow_engine.celery.workflow_tasks.run_workflow_node_jobs_by_id':
+            'workflow_engine.process.workers.workflow_tasks.run_workflow_node_jobs_by_id':
             {
                 'routing_key': 'at_em.#'
             }

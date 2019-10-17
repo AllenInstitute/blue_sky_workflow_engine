@@ -10,7 +10,3 @@ def configure_logging_from_settings(*args, **kwargs):
     from django.conf import settings
 
     logging.config.dictConfig(settings.LOGGING)
-
-    logging.getLogger(
-        'workflow_engine.celery.setup_logging_handler'
-    ).info("===CONFIGURED===")

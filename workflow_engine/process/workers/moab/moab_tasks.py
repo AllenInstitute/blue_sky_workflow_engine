@@ -33,72 +33,33 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-import celery
-from workflow_engine.nb_utils.moab_api import (
-    query_and_combine_states,
+import django; django.setup()
+from django.conf import settings
+from workflow_engine.client_settings import configure_worker_app
+from workflow_engine.process.workers.moab.moab_api import (
     submit_job,
+    submit_job_array,
     delete_moab_task
 )
-from django.core.exceptions import ObjectDoesNotExist
-import logging
-from celery.canvas import group
-import pandas as pd
 from workflow_engine.signatures import (
-    process_running_signature,
-    process_finished_execution_signature,
     process_failed_execution_signature,
-    process_failed_signature,
     process_pbs_id_signature
 )
+from django.core.exceptions import ObjectDoesNotExist
+from workflow_engine.pbs_utils import PbsUtils
+import celery
+import logging
+import traceback
+import os
 
 
-_log = logging.getLogger('workflow_engine.celery.pbs_tasks')
+_log = logging.getLogger('workflow_engine.process.workers.moab.moab_tasks')
 
 
-def query_running_task_dicts():
-    tasks = Task.objects.filter(
-        running_state__in=['QUEUED', 'RUNNING'])
+app = celery.Celery('workflow_engine.process.workers.moab.moab_tasks')
+configure_worker_app(app, settings.APP_PACKAGE, 'moab')
+app.conf.imports = ()
 
-    task_dicts = [{
-        'task_id': t.id,
-        'workflow_state': t.running_state,
-        'moab_id': t.pbs_id } for t in tasks if t.pbs_task()]
-
-    _log.info('task dicts: ' + str(task_dicts))
-
-    return task_dicts
-
-
-
-# Todo need to use moab id and task id in all cases
-result_actions = { 
-    'running_message':
-        lambda x: process_running_signature(x),
-    'finished_message':
-        lambda x: process_finished_execution_signature(x),
-    'failed_execution_message': 
-        lambda x: process_failed_execution_signature(x),
-    'failed_message':
-        lambda x: process_failed_signature(x)
-}
-
-
-@celery.shared_task(bind=True, trail=True)
-def check_moab_status(self):
-    combined_workflow_moab_dataframe = \
-        query_and_combine_states(
-            query_running_task_dicts())
-
-    _log.info('combined_dataframe' + str(combined_workflow_moab_dataframe))
-
-    grp = group(list(pd.concat(
-        combined_workflow_moab_dataframe.loc[
-            combined_workflow_moab_dataframe[col] == True]['task_id'].apply(fn)
-        for (col,fn) in result_actions.items())))
-
-    grp.delay()
-
-    return 'OK'
 
 @celery.shared_task(bind=True, trail=True)
 def submit_moab_task(self, task_id):
@@ -106,32 +67,61 @@ def submit_moab_task(self, task_id):
 
     try:
         the_task = Task.objects.get(id=task_id)
- 
-        pbs_file = the_task.get_strategy().get_pbs_file(the_task)
+
+        the_strategy = the_task.get_strategy()
+        pbs_file = the_strategy.get_pbs_file(the_task)
         the_task.create_pbs_file(pbs_file)
 
         if the_task.in_pending_state():
             _log.info('in pending state')
 
-            moab_id = submit_job(
-                the_task.id,
-                the_task.pbs_file)
+            try:
+                moab_cfg = Configuration.objects.get(
+                    configuration_type='moab_configuration').json_object
+            except:
+                moab_cfg = None
+
+            if the_task.get_executable().remote_queue == 'spark_moab':
+                #Log4j
+                log_dir = the_strategy.get_or_create_task_storage_directory(the_task)
+                log4j_properties_path = os.path.join(log_dir, 'log4j.properties')
+                # log4j_log_path = os.path.join(log_dir, 'spark.log')
+                log4j_log_path = 'spark.log'
+
+                PbsUtils().write_spark_log_files(
+                    log4j_properties_path,
+                    log4j_log_path
+                )
+
+                moab_id = submit_job_array(
+                    the_task.id,
+                    the_task.pbs_file,
+                    moab_cfg=moab_cfg)
+            else:
+                moab_id = submit_job(
+                    the_task.id,
+                    the_task.pbs_file,
+                    moab_cfg=moab_cfg)
 
             if moab_id != 'ERROR':
-                the_task.set_queued_state(moab_id)
+                # the_task.set_queued_state(moab_id)
                 process_pbs_id_signature.delay(
                     task_id, moab_id)
             else:
                 process_failed_execution_signature.delay(
-                    task_id, fail_now=True)
+                    task_id,
+                    fail_now=True
+                )
 
-        _log.info("MOAB ID: {}".format(moab_id))
+            _log.info("MOAB ID: {}".format(moab_id))
     except Exception as e:
         moab_id = None
-        msg = 'Error submitting task {}'.format(str(e))
+        msg = 'Error submitting task {}'.format(str(e) + str(traceback.format_exc()))
         _log.error(msg)
         process_failed_execution_signature.delay(
-            task_id, fail_now=True)
+            task_id,
+            error_message=str(e),
+            fail_now=True)
 
 
 # TODO: change name to something like process task state
@@ -144,13 +134,24 @@ def run_task(self, name, args):
 
 @celery.shared_task(bind=True, trail=True)
 def kill_moab_task(self, task_id):
+    response_message = 'killed'
+
     try:
         the_task = Task.objects.get(id=task_id)
         delete_moab_task(the_task.pbs_id)
+        the_task.set_process_killed_state()  # TODO: rename for task/process
+        response_message = str(the_task.pbs_id)
     except ObjectDoesNotExist as e:
         _log.warning("Cannot kill task %s, does not exist. %s",
                      task_id,
                      str(e))
+        response_message = 'str(e)'
+
+    return response_message
 
 # circular imports
-from workflow_engine.models import Task
+from workflow_engine.models import (
+    Task,
+    Configuration
+)
+

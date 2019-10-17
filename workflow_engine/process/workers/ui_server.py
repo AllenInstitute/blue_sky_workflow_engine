@@ -35,12 +35,6 @@ class DjangoApplication(object):
         cherrypy.engine.start()
         cherrypy.engine.block()
 
-def _route_task(name, args, kwargs,
-              options, task=None, **kw):
-    return {
-        'queue': 'workflow@at_em_imaging_workflow',
-    }
-
 
 if __name__ == "__main__":
     app = Celery('workflow_engine_ui')
