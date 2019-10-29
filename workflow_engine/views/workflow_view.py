@@ -315,19 +315,19 @@ def node_info_payload(workflow_node):
         'pending': node_jobs.filter(
             running_state=Runnable.STATE.PENDING).count(),
         'queued': node_jobs.filter(
-            run_state=Runnable.STATE.QUEUED).count(),
+            running_state=Runnable.STATE.QUEUED).count(),
         'running': node_jobs.filter(
-            run_state=Runnable.STATE.RUNNING).count(),
+            running_state=Runnable.STATE.RUNNING).count(),
         'finished_execution': node_jobs.filter(
-            run_state=Runnable.STATE.FINISHED_EXECUTION).count(),
+            running_state=Runnable.STATE.FINISHED_EXECUTION).count(),
         'failed_execution': node_jobs.filter(
-            run_state=Runnable.STATE.FAILED_EXECUTION).count(),
+            running_state=Runnable.STATE.FAILED_EXECUTION).count(),
         'failed': node_jobs.filter(
-            run_state=Runnable.STATE.FAILED).count(),
+            running_state=Runnable.STATE.FAILED).count(),
         'success_count': node_jobs.filter(
-            run_state=Runnable.STATE.SUCCESS).count(),
+            running_state=Runnable.STATE.SUCCESS).count(),
         'process_killed': node_jobs.filter(
-            run_state=Runnable.STATE.PROCESS_KILLED).count(),
+            running_state=Runnable.STATE.PROCESS_KILLED).count(),
         'number_of_jobs_link':
             'jobs/1/?workflow_node_ids={}'.format(workflow_node.id),
         'pending_link': 

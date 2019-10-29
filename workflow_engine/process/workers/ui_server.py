@@ -37,7 +37,7 @@ class DjangoApplication(object):
 
 
 if __name__ == "__main__":
-    app = Celery('workflow_engine_ui')
-    configure_worker_app(app, 'workflow_engine_ui')
+    app = Celery(settings.APP_PACKAGE)
+    configure_worker_app(app, settings.APP_PACKAGE)
 
     DjangoApplication().run()
