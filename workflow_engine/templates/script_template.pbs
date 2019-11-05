@@ -8,8 +8,8 @@
 #PBS -o {{ task.log_file }}
 
 function finish {
-    source activate {{ settings.PBS_RESPONSE_CONDA_ENV }}
-    python -m workflow_client.mini_response --action finished {{ task.id }}
+    source {{ settings.PBS_RESPONSE_CONDA_ENV }} bsky_prod
+    python -m workflow_engine.mini_response --action finished {{ task.id }}
 }
 
 trap finish EXIT
@@ -17,10 +17,9 @@ trap finish EXIT
 source /etc/profile
 module load anaconda
 
-export TMPDIR="/scratch/capacity/${PBS_JOBID}/"
-export SPARK_LOCAL_DIRS="/scratch/capacity/${PBS_JOBID}/"
 export PYTHONNOUSERSITE=1
 export BLUE_SKY_SETTINGS={{ settings.BLUE_SKY_SETTINGS_HPC_RESPONSE }}
+export BSKY_ENV={{ settings.REMOTE_BLUE_SKY_ENV }}
 
 {%for evar in task.environment_vars()
 %}export {{ evar }}
@@ -31,7 +30,6 @@ export PYTHONPATH=${PYTHONPATH}:{{ settings.HPC_RESPONSE_PYTHONPATH }}
 umask 002
 
 source activate {{ settings.PBS_RESPONSE_CONDA_ENV }}
-python -m workflow_client.mini_response --action running {{ task.id }}
+python -m workflow_engine.mini_response --action running {{ task.id }}
 
-source activate {{ settings.PBS_CONDA_ENV }}
 {{ task.full_executable }}

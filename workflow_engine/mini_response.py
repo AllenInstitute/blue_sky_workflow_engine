@@ -1,4 +1,5 @@
 import argparse
+from django.conf import settings
 from workflow_engine.client_settings import configure_worker_app
 from celery import Celery
 from workflow_engine.signatures import (
@@ -12,14 +13,14 @@ from workflow_engine.signatures import (
 _RESPONSE_TIMEOUT = 10
 
 
-APP_NAME='at_em_imaging_workflow'
+APP_NAME = settings.APP_PACKAGE
 BLUE_GREEN='blue'
 
 
 def route_task(name, args, kwargs,
               options, task=None, **kw):
     return {
-        'queue': 'result@at_em_imaging_workflow',
+        'queue': 'result@{}'.format(APP_NAME),
     }
 
 
