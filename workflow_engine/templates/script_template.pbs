@@ -29,7 +29,7 @@ export PYTHONPATH=${PYTHONPATH}:{{ settings.HPC_RESPONSE_PYTHONPATH }}
 
 umask 002
 
-source activate {{ settings.PBS_RESPONSE_CONDA_ENV }}
+source {{ settings.PBS_RESPONSE_CONDA_ENV }} bsky_prod
 python -m workflow_engine.mini_response --action running {{ task.id }}
 
 {{ task.full_executable }}
