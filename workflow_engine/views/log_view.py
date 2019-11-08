@@ -201,7 +201,7 @@ def get_task_log_holder(task_id, types, context):
         log_holder.error_message = FileHolder.add_color_highlighting(
             task.error_message)
 
-        log_holder.run_state = task.run_state.name
+        log_holder.run_state = task.running_state
         log_holder.enqueued_object_id = task.enqueued_task_object_id
     except Exception as e:
         context['error_message'] = 'Something went wrong: ' + str(e)
