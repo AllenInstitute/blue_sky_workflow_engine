@@ -38,7 +38,7 @@
 	<td class="wf_td"><a class='link_to_page' href="/workflow_engine/workflows?workflow_ids={{ record.workflow_node.workflow.id }}">{{record.workflow_node.workflow.name}}</a></td>
 	<td class="wf_td"><a class='link_to_page' href="/workflow_engine/job_queues?job_queue_ids={{ record.workflow_node.job_queue.id }}">{{record.workflow_node.job_queue.name}}</a></td>
 	<td class="wf_td"><a class='link_to_page' href="/workflow_engine/tasks?job_id={{ record.id }}">Tasks({{record.number_of_tasks}})</a></td>
-	<td class="wf_td {{record.get_color_class}}" id="job_state_{{ record.id }}">{{record.run_state.name}}</td>
+	<td class="wf_td {{record.get_color_class}}" id="job_state_{{ record.id }}">{{record.running_state}}</td>
 	{% if record.can_rerun %}
 		<td class="wf_td run_link" id="run_option_{{record.id}}"><img onclick="base_workflow.queue_job({{record.id}})" src="{% static 'workflow_engine/images/run.png' %}" alt="Run"/></td>
 	{% else %}

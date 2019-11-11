@@ -127,11 +127,11 @@ def get_tasks_show_data(task_object, request, result):
         ('enqueued_object_id', task_object.enqueued_task_object_id),
         ('enqueued_object_type', str(task_object.enqueued_task_object_type)),
         ('enqueued_object', task_object.get_enqueued_object_display()),
-        ('run state', task_object.run_state.name),
+        ('run state', task_object.running_state),
         ('retry count', str(task_object.retry_count) + '/' + str(task_object.get_max_retries())),
         ('start', task_object.get_start_run_time()),
         ('end', task_object.get_end_run_time()),
-        ('file records', ', '.join(task_object.get_file_records())),
+        ('file records', ', '.join([x.get_full_name() for x in task_object.get_file_records()])),
         ('created at', task_object.get_created_at()),
         ('updated at', task_object.get_updated_at()),
         ('duration', task_object.get_duration()),
@@ -211,7 +211,7 @@ def get_task_status(request):
 
             for record in records:
                 task_data = {}
-                task_data['run_state_name'] = record.run_state.name
+                task_data['run_state_name'] = record.running_state
                 task_data['start_run_time'] = record.get_start_run_time()
                 task_data['end_run_time'] = record.get_end_run_time()
                 task_data['duration'] = record.get_duration()
