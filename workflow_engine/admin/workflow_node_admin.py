@@ -1,38 +1,57 @@
 from django.contrib import admin
-from django.contrib.contenttypes.admin import GenericStackedInline
-from workflow_engine.models.configuration import Configuration
-from django.urls import reverse
-from django.utils.safestring import mark_safe
+from .configuration_inline import ConfigurationInline
+from workflow_engine.models import WorkflowNode
 
 
-class ConfigurationInline(GenericStackedInline):
-    model = Configuration
-    fields = ('name', 'configuration_type', 'json_object')
+class SourcesInline(admin.TabularInline):
+    model = WorkflowNode.sources.through
+    fk_name = 'source'
+    extra = 0
+
+class SinksInline(admin.TabularInline):
+    model = WorkflowNode.sinks.through
+    fk_name = 'sink'
     extra = 0
 
 
 class WorkflowNodeAdmin(admin.ModelAdmin):
-    list_display = [
+    list_display = (
         'id',
         'job_queue',
-        'parent',
         'workflow',
+        #'source_names',
+        #'sink_names',
         'batch_size',
         'priority',
         'overwrite_previous_job',
         'max_retries',
-        'is_head',
         'disabled',
         'archived'
-        ]
+    )
+    search_fields = (
+        'job_queue__name',
+    )
     read_only_fields = (
-        )
+    )
     list_select_related = (
-        )
-    list_filter = [
+    )
+    list_filter = (
         'workflow',
-        'is_head',
         'disabled',
-        'archived']
-    actions = []
-    inlines = (ConfigurationInline,)
+        'archived'
+    )
+    filter_horizontal = (
+        'sources',
+        'sinks'
+    )
+    actions = ()
+    inlines = (ConfigurationInline, SourcesInline, SinksInline)
+
+    def get_queryset(self, request):
+        return self.model.all_objects.get_queryset()
+
+    def source_names(self, node_obj):
+        return ','.join(str(n) for n in node_obj.sources.all())
+
+    def sink_names(self, node_obj):
+        return ','.join(str(n) for n in node_obj.sinks.all())

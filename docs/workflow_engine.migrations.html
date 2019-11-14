@@ -1,0 +1,508 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>workflow_engine.migrations package &#8212; Blue Sky Workflow Engine  documentation</title>
+    <link rel="stylesheet" href="_static/aibs_sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="workflow_engine.mixins package" href="workflow_engine.mixins.html" />
+    <link rel="prev" title="workflow_engine.celery package" href="workflow_engine.celery.html" /> 
+  </head>
+  <body>
+<link href="http://www.brain-map.org/assets/stylesheets/portal.css" media="screen" rel="stylesheet" type="text/css" />
+<script src="http://www.brain-map.org/assets/javascripts/portal.js" type="text/javascript"></script>
+<script src="http://www.brain-map.org/assets/javascripts/ga.js" type="text/javascript"></script>
+<script type="text/javascript">
+    var _pSupressBrowserFlashWarning = true;
+    var _pTabId = "pHome";
+    var _pMoreProjectsId = "pMoreProjects";
+    var _pImagePath = "http://www.brain-map.org/assets/images/";
+    var _pSiteWarnings = function() {
+        this.show_warning() = {};
+    }
+</script>
+<script type="text/javascript">
+    function initialize() {
+        /*** do your stuff, then initialize the portal plugin ***/
+        _pPortalOnLoad();
+    }
+</script>
+<style>
+  #header_content > a {
+  display: inline-block;
+  width: 250px;
+  height: 75px;
+  background-image:url("/_static/external_assets/images/Brain_Atlas_Logotype_SDK.png") !important;
+  background-size: 235px 37px;
+  background-position: 0px 20px;
+  background-repeat: no-repeat;
+  }
+</style>
+
+<script type="text/javascript" src="http://www.brain-map.org/external_assets/javascripts/portalHeader.js"></script>
+<link rel="stylesheet" type="text/css" href="/_static/external_assets/stylesheets/common_layout.css" />
+
+
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-workflow_engine.migrations">
+<span id="workflow-engine-migrations-package"></span><h1>workflow_engine.migrations package<a class="headerlink" href="#module-workflow_engine.migrations" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-workflow_engine.migrations.0001_initial">
+<span id="workflow-engine-migrations-0001-initial-module"></span><h2>workflow_engine.migrations.0001_initial module<a class="headerlink" href="#module-workflow_engine.migrations.0001_initial" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.migrations.0001_initial.Migration">
+<em class="property">class </em><code class="descclassname">workflow_engine.migrations.0001_initial.</code><code class="descname">Migration</code><span class="sig-paren">(</span><em>name</em>, <em>app_label</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/migrations/0001_initial.html#Migration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.migrations.0001_initial.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">django.db.migrations.migration.Migration</span></code></p>
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0001_initial.Migration.dependencies">
+<code class="descname">dependencies</code><em class="property"> = [('contenttypes', '0002_remove_content_type_name')]</em><a class="headerlink" href="#workflow_engine.migrations.0001_initial.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0001_initial.Migration.initial">
+<code class="descname">initial</code><em class="property"> = True</em><a class="headerlink" href="#workflow_engine.migrations.0001_initial.Migration.initial" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0001_initial.Migration.operations">
+<code class="descname">operations</code><em class="property"> = [&lt;CreateModel  name='Datafix', fields=[('id', &lt;django.db.models.fields.AutoField&gt;), ('name', &lt;django.db.models.fields.CharField&gt;), ('timestamp', &lt;django.db.models.fields.CharField&gt;), ('run_at', &lt;django.db.models.fields.DateTimeField&gt;), ('created_at', &lt;django.db.models.fields.DateTimeField&gt;), ('updated_at', &lt;django.db.models.fields.DateTimeField&gt;)]&gt;, &lt;CreateModel  name='Executable', fields=[('id', &lt;django.db.models.fields.AutoField&gt;), ('name', &lt;django.db.models.fields.CharField&gt;), ('description', &lt;django.db.models.fields.CharField&gt;), ('static_arguments', &lt;django.db.models.fields.CharField&gt;), ('environment', &lt;django.db.models.fields.CharField&gt;), ('executable_path', &lt;django.db.models.fields.CharField&gt;), ('pbs_executable_path', &lt;django.db.models.fields.CharField&gt;), ('created_at', &lt;django.db.models.fields.DateTimeField&gt;), ('updated_at', &lt;django.db.models.fields.DateTimeField&gt;), ('remote_queue', &lt;django.db.models.fields.CharField&gt;), ('pbs_processor', &lt;django.db.models.fields.CharField&gt;), ('pbs_walltime', &lt;django.db.models.fields.CharField&gt;), ('pbs_queue', &lt;django.db.models.fields.CharField&gt;), ('version', &lt;django.db.models.fields.CharField&gt;)]&gt;, &lt;CreateModel  name='FileRecord', fields=[('id', &lt;django.db.models.fields.AutoField&gt;), ('filename', &lt;django.db.models.fields.CharField&gt;), ('storage_directory', &lt;django.db.models.fields.CharField&gt;), ('order', &lt;django.db.models.fields.IntegerField&gt;), ('created_at', &lt;django.db.models.fields.DateTimeField&gt;), ('updated_at', &lt;django.db.models.fields.DateTimeField&gt;)]&gt;, &lt;CreateModel  name='Job', fields=[('id', &lt;django.db.models.fields.AutoField&gt;), ('enqueued_object_id', &lt;django.db.models.fields.IntegerField&gt;), ('duration', &lt;django.db.models.fields.DurationField&gt;), ('start_run_time', &lt;django.db.models.fields.DateTimeField&gt;), ('end_run_time', &lt;django.db.models.fields.DateTimeField&gt;), ('error_message', &lt;django.db.models.fields.TextField&gt;), ('created_at', &lt;django.db.models.fields.DateTimeField&gt;), ('updated_at', &lt;django.db.models.fields.DateTimeField&gt;), ('priority', &lt;django.db.models.fields.IntegerField&gt;), ('archived', &lt;django.db.models.fields.NullBooleanField&gt;), ('tags', &lt;django.db.models.fields.CharField&gt;)]&gt;, &lt;CreateModel  name='JobQueue', fields=[('id', &lt;django.db.models.fields.AutoField&gt;), ('name', &lt;django.db.models.fields.CharField&gt;), ('description', &lt;django.db.models.fields.CharField&gt;), ('job_strategy_class', &lt;django.db.models.fields.CharField&gt;), ('enqueued_object_class', &lt;django.db.models.fields.CharField&gt;), ('created_at', &lt;django.db.models.fields.DateTimeField&gt;), ('updated_at', &lt;django.db.models.fields.DateTimeField&gt;), ('executable', &lt;django.db.models.fields.related.ForeignKey&gt;)]&gt;, &lt;CreateModel  name='RunState', fields=[('id', &lt;django.db.models.fields.AutoField&gt;), ('name', &lt;django.db.models.fields.CharField&gt;)]&gt;, &lt;CreateModel  name='Task', fields=[('id', &lt;django.db.models.fields.AutoField&gt;), ('enqueued_task_object_id', &lt;django.db.models.fields.IntegerField&gt;), ('enqueued_task_object_class', &lt;django.db.models.fields.CharField&gt;), ('archived', &lt;django.db.models.fields.NullBooleanField&gt;), ('full_executable', &lt;django.db.models.fields.CharField&gt;), ('error_message', &lt;django.db.models.fields.TextField&gt;), ('log_file', &lt;django.db.models.fields.CharField&gt;), ('input_file', &lt;django.db.models.fields.CharField&gt;), ('output_file', &lt;django.db.models.fields.CharField&gt;), ('pbs_file', &lt;django.db.models.fields.CharField&gt;), ('start_run_time', &lt;django.db.models.fields.DateTimeField&gt;), ('end_run_time', &lt;django.db.models.fields.DateTimeField&gt;), ('duration', &lt;django.db.models.fields.DurationField&gt;), ('created_at', &lt;django.db.models.fields.DateTimeField&gt;), ('updated_at', &lt;django.db.models.fields.DateTimeField&gt;), ('pbs_id', &lt;django.db.models.fields.CharField&gt;), ('retry_count', &lt;django.db.models.fields.IntegerField&gt;), ('tags', &lt;django.db.models.fields.CharField&gt;), ('job', &lt;django.db.models.fields.related.ForeignKey&gt;), ('run_state', &lt;django.db.models.fields.related.ForeignKey&gt;)]&gt;, &lt;CreateModel  name='WellKnownFile', fields=[('id', &lt;django.db.models.fields.AutoField&gt;), ('attachable_id', &lt;django.db.models.fields.PositiveIntegerField&gt;), ('well_known_file_type', &lt;django.db.models.fields.CharField&gt;), ('created_at', &lt;django.db.models.fields.DateTimeField&gt;), ('updated_at', &lt;django.db.models.fields.DateTimeField&gt;), ('attachable_type', &lt;django.db.models.fields.related.ForeignKey&gt;)]&gt;, &lt;CreateModel  name='Workflow', fields=[('id', &lt;django.db.models.fields.AutoField&gt;), ('name', &lt;django.db.models.fields.CharField&gt;), ('description', &lt;django.db.models.fields.CharField&gt;), ('ingest_strategy_class', &lt;django.db.models.fields.CharField&gt;), ('disabled', &lt;django.db.models.fields.BooleanField&gt;), ('use_pbs', &lt;django.db.models.fields.BooleanField&gt;), ('created_at', &lt;django.db.models.fields.DateTimeField&gt;), ('updated_at', &lt;django.db.models.fields.DateTimeField&gt;)]&gt;, &lt;CreateModel  name='WorkflowNode', fields=[('id', &lt;django.db.models.fields.AutoField&gt;), ('is_head', &lt;django.db.models.fields.BooleanField&gt;), ('disabled', &lt;django.db.models.fields.BooleanField&gt;), ('batch_size', &lt;django.db.models.fields.IntegerField&gt;), ('priority', &lt;django.db.models.fields.IntegerField&gt;), ('created_at', &lt;django.db.models.fields.DateTimeField&gt;), ('updated_at', &lt;django.db.models.fields.DateTimeField&gt;), ('overwrite_previous_job', &lt;django.db.models.fields.BooleanField&gt;), ('max_retries', &lt;django.db.models.fields.IntegerField&gt;), ('job_queue', &lt;django.db.models.fields.related.ForeignKey&gt;), ('parent', &lt;django.db.models.fields.related.ForeignKey&gt;), ('workflow', &lt;django.db.models.fields.related.ForeignKey&gt;)]&gt;, &lt;AddField  model_name='job', name='run_state', field=&lt;django.db.models.fields.related.ForeignKey&gt;&gt;, &lt;AddField  model_name='job', name='workflow_node', field=&lt;django.db.models.fields.related.ForeignKey&gt;&gt;, &lt;AddField  model_name='filerecord', name='task', field=&lt;django.db.models.fields.related.ForeignKey&gt;&gt;, &lt;AddField  model_name='filerecord', name='well_known_file', field=&lt;django.db.models.fields.related.ForeignKey&gt;&gt;]</em><a class="headerlink" href="#workflow_engine.migrations.0001_initial.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.migrations.0002_configuration">
+<span id="workflow-engine-migrations-0002-configuration-module"></span><h2>workflow_engine.migrations.0002_configuration module<a class="headerlink" href="#module-workflow_engine.migrations.0002_configuration" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.migrations.0002_configuration.Migration">
+<em class="property">class </em><code class="descclassname">workflow_engine.migrations.0002_configuration.</code><code class="descname">Migration</code><span class="sig-paren">(</span><em>name</em>, <em>app_label</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/migrations/0002_configuration.html#Migration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.migrations.0002_configuration.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">django.db.migrations.migration.Migration</span></code></p>
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0002_configuration.Migration.dependencies">
+<code class="descname">dependencies</code><em class="property"> = [('workflow_engine', '0001_initial')]</em><a class="headerlink" href="#workflow_engine.migrations.0002_configuration.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0002_configuration.Migration.operations">
+<code class="descname">operations</code><em class="property"> = [&lt;CreateModel  name='Configuration', fields=[('id', &lt;django.db.models.fields.AutoField&gt;), ('json_object', &lt;jsonfield.fields.JSONField&gt;)]&gt;]</em><a class="headerlink" href="#workflow_engine.migrations.0002_configuration.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.migrations.0003_improved_json_configuration">
+<span id="workflow-engine-migrations-0003-improved-json-configuration-module"></span><h2>workflow_engine.migrations.0003_improved_json_configuration module<a class="headerlink" href="#module-workflow_engine.migrations.0003_improved_json_configuration" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.migrations.0003_improved_json_configuration.Migration">
+<em class="property">class </em><code class="descclassname">workflow_engine.migrations.0003_improved_json_configuration.</code><code class="descname">Migration</code><span class="sig-paren">(</span><em>name</em>, <em>app_label</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/migrations/0003_improved_json_configuration.html#Migration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.migrations.0003_improved_json_configuration.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">django.db.migrations.migration.Migration</span></code></p>
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0003_improved_json_configuration.Migration.dependencies">
+<code class="descname">dependencies</code><em class="property"> = [('contenttypes', '0002_remove_content_type_name'), ('workflow_engine', '0002_configuration')]</em><a class="headerlink" href="#workflow_engine.migrations.0003_improved_json_configuration.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0003_improved_json_configuration.Migration.operations">
+<code class="descname">operations</code><em class="property"> = [&lt;AddField  model_name='configuration', name='configuration_type', field=&lt;django.db.models.fields.CharField&gt;&gt;, &lt;AddField  model_name='configuration', name='content_type', field=&lt;django.db.models.fields.related.ForeignKey&gt;&gt;, &lt;AddField  model_name='configuration', name='created_at', field=&lt;django.db.models.fields.DateTimeField&gt;, preserve_default=False&gt;, &lt;AddField  model_name='configuration', name='name', field=&lt;django.db.models.fields.CharField&gt;&gt;, &lt;AddField  model_name='configuration', name='object_id', field=&lt;django.db.models.fields.PositiveIntegerField&gt;&gt;, &lt;AddField  model_name='configuration', name='updated_at', field=&lt;django.db.models.fields.DateTimeField&gt;&gt;, &lt;AlterField  model_name='configuration', name='json_object', field=&lt;jsonfield.fields.JSONField&gt;&gt;]</em><a class="headerlink" href="#workflow_engine.migrations.0003_improved_json_configuration.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.migrations.0004_blank_admin_fields">
+<span id="workflow-engine-migrations-0004-blank-admin-fields-module"></span><h2>workflow_engine.migrations.0004_blank_admin_fields module<a class="headerlink" href="#module-workflow_engine.migrations.0004_blank_admin_fields" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.migrations.0004_blank_admin_fields.Migration">
+<em class="property">class </em><code class="descclassname">workflow_engine.migrations.0004_blank_admin_fields.</code><code class="descname">Migration</code><span class="sig-paren">(</span><em>name</em>, <em>app_label</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/migrations/0004_blank_admin_fields.html#Migration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.migrations.0004_blank_admin_fields.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">django.db.migrations.migration.Migration</span></code></p>
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0004_blank_admin_fields.Migration.dependencies">
+<code class="descname">dependencies</code><em class="property"> = [('workflow_engine', '0003_improved_json_configuration')]</em><a class="headerlink" href="#workflow_engine.migrations.0004_blank_admin_fields.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0004_blank_admin_fields.Migration.operations">
+<code class="descname">operations</code><em class="property"> = [&lt;AlterField  model_name='workflownode', name='parent', field=&lt;django.db.models.fields.related.ForeignKey&gt;&gt;]</em><a class="headerlink" href="#workflow_engine.migrations.0004_blank_admin_fields.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.migrations.0005_blank_executable_fields">
+<span id="workflow-engine-migrations-0005-blank-executable-fields-module"></span><h2>workflow_engine.migrations.0005_blank_executable_fields module<a class="headerlink" href="#module-workflow_engine.migrations.0005_blank_executable_fields" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.migrations.0005_blank_executable_fields.Migration">
+<em class="property">class </em><code class="descclassname">workflow_engine.migrations.0005_blank_executable_fields.</code><code class="descname">Migration</code><span class="sig-paren">(</span><em>name</em>, <em>app_label</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/migrations/0005_blank_executable_fields.html#Migration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.migrations.0005_blank_executable_fields.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">django.db.migrations.migration.Migration</span></code></p>
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0005_blank_executable_fields.Migration.dependencies">
+<code class="descname">dependencies</code><em class="property"> = [('workflow_engine', '0004_blank_admin_fields')]</em><a class="headerlink" href="#workflow_engine.migrations.0005_blank_executable_fields.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0005_blank_executable_fields.Migration.operations">
+<code class="descname">operations</code><em class="property"> = [&lt;AlterField  model_name='executable', name='environment', field=&lt;django.db.models.fields.CharField&gt;&gt;, &lt;AlterField  model_name='executable', name='pbs_executable_path', field=&lt;django.db.models.fields.CharField&gt;&gt;, &lt;AlterField  model_name='executable', name='static_arguments', field=&lt;django.db.models.fields.CharField&gt;&gt;]</em><a class="headerlink" href="#workflow_engine.migrations.0005_blank_executable_fields.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.migrations.0006_workflow_archive">
+<span id="workflow-engine-migrations-0006-workflow-archive-module"></span><h2>workflow_engine.migrations.0006_workflow_archive module<a class="headerlink" href="#module-workflow_engine.migrations.0006_workflow_archive" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.migrations.0006_workflow_archive.Migration">
+<em class="property">class </em><code class="descclassname">workflow_engine.migrations.0006_workflow_archive.</code><code class="descname">Migration</code><span class="sig-paren">(</span><em>name</em>, <em>app_label</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/migrations/0006_workflow_archive.html#Migration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.migrations.0006_workflow_archive.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">django.db.migrations.migration.Migration</span></code></p>
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0006_workflow_archive.Migration.dependencies">
+<code class="descname">dependencies</code><em class="property"> = [('workflow_engine', '0005_blank_executable_fields')]</em><a class="headerlink" href="#workflow_engine.migrations.0006_workflow_archive.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0006_workflow_archive.Migration.operations">
+<code class="descname">operations</code><em class="property"> = [&lt;AddField  model_name='executable', name='archived', field=&lt;django.db.models.fields.NullBooleanField&gt;&gt;, &lt;AddField  model_name='jobqueue', name='archived', field=&lt;django.db.models.fields.NullBooleanField&gt;&gt;, &lt;AddField  model_name='workflow', name='archived', field=&lt;django.db.models.fields.NullBooleanField&gt;&gt;, &lt;AddField  model_name='workflownode', name='archived', field=&lt;django.db.models.fields.NullBooleanField&gt;&gt;, &lt;AlterField  model_name='executable', name='name', field=&lt;django.db.models.fields.CharField&gt;&gt;, &lt;AlterField  model_name='jobqueue', name='name', field=&lt;django.db.models.fields.CharField&gt;&gt;]</em><a class="headerlink" href="#workflow_engine.migrations.0006_workflow_archive.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.migrations.0007_delete_datafix">
+<span id="workflow-engine-migrations-0007-delete-datafix-module"></span><h2>workflow_engine.migrations.0007_delete_datafix module<a class="headerlink" href="#module-workflow_engine.migrations.0007_delete_datafix" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.migrations.0007_delete_datafix.Migration">
+<em class="property">class </em><code class="descclassname">workflow_engine.migrations.0007_delete_datafix.</code><code class="descname">Migration</code><span class="sig-paren">(</span><em>name</em>, <em>app_label</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/migrations/0007_delete_datafix.html#Migration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.migrations.0007_delete_datafix.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">django.db.migrations.migration.Migration</span></code></p>
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0007_delete_datafix.Migration.dependencies">
+<code class="descname">dependencies</code><em class="property"> = [('workflow_engine', '0006_workflow_archive')]</em><a class="headerlink" href="#workflow_engine.migrations.0007_delete_datafix.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0007_delete_datafix.Migration.operations">
+<code class="descname">operations</code><em class="property"> = [&lt;DeleteModel  name='Datafix'&gt;]</em><a class="headerlink" href="#workflow_engine.migrations.0007_delete_datafix.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.migrations.0008_generic_task_job_relations">
+<span id="workflow-engine-migrations-0008-generic-task-job-relations-module"></span><h2>workflow_engine.migrations.0008_generic_task_job_relations module<a class="headerlink" href="#module-workflow_engine.migrations.0008_generic_task_job_relations" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.migrations.0008_generic_task_job_relations.Migration">
+<em class="property">class </em><code class="descclassname">workflow_engine.migrations.0008_generic_task_job_relations.</code><code class="descname">Migration</code><span class="sig-paren">(</span><em>name</em>, <em>app_label</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/migrations/0008_generic_task_job_relations.html#Migration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.migrations.0008_generic_task_job_relations.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">django.db.migrations.migration.Migration</span></code></p>
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0008_generic_task_job_relations.Migration.dependencies">
+<code class="descname">dependencies</code><em class="property"> = [('contenttypes', '0002_remove_content_type_name'), ('workflow_engine', '0007_delete_datafix')]</em><a class="headerlink" href="#workflow_engine.migrations.0008_generic_task_job_relations.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0008_generic_task_job_relations.Migration.operations">
+<code class="descname">operations</code><em class="property"> = [&lt;AddField  model_name='job', name='enqueued_object_type', field=&lt;django.db.models.fields.related.ForeignKey&gt;&gt;, &lt;AddField  model_name='jobqueue', name='enqueued_object_type', field=&lt;django.db.models.fields.related.ForeignKey&gt;&gt;, &lt;AddField  model_name='task', name='enqueued_task_object_type', field=&lt;django.db.models.fields.related.ForeignKey&gt;&gt;, &lt;AlterField  model_name='job', name='enqueued_object_id', field=&lt;django.db.models.fields.IntegerField&gt;&gt;]</em><a class="headerlink" href="#workflow_engine.migrations.0008_generic_task_job_relations.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.migrations.0009_workflow_edges">
+<span id="workflow-engine-migrations-0009-workflow-edges-module"></span><h2>workflow_engine.migrations.0009_workflow_edges module<a class="headerlink" href="#module-workflow_engine.migrations.0009_workflow_edges" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.migrations.0009_workflow_edges.Migration">
+<em class="property">class </em><code class="descclassname">workflow_engine.migrations.0009_workflow_edges.</code><code class="descname">Migration</code><span class="sig-paren">(</span><em>name</em>, <em>app_label</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/migrations/0009_workflow_edges.html#Migration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.migrations.0009_workflow_edges.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">django.db.migrations.migration.Migration</span></code></p>
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0009_workflow_edges.Migration.dependencies">
+<code class="descname">dependencies</code><em class="property"> = [('workflow_engine', '0008_generic_task_job_relations')]</em><a class="headerlink" href="#workflow_engine.migrations.0009_workflow_edges.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0009_workflow_edges.Migration.operations">
+<code class="descname">operations</code><em class="property"> = [&lt;CreateModel  name='WorkflowEdge', fields=[('id', &lt;django.db.models.fields.AutoField&gt;), ('disabled', &lt;django.db.models.fields.BooleanField&gt;), ('created_at', &lt;django.db.models.fields.DateTimeField&gt;), ('updated_at', &lt;django.db.models.fields.DateTimeField&gt;), ('archived', &lt;django.db.models.fields.NullBooleanField&gt;), ('sink', &lt;django.db.models.fields.related.ForeignKey&gt;), ('source', &lt;django.db.models.fields.related.ForeignKey&gt;), ('workflow', &lt;django.db.models.fields.related.ForeignKey&gt;)]&gt;, &lt;AlterField  model_name='executable', name='description', field=&lt;django.db.models.fields.CharField&gt;&gt;, &lt;AlterField  model_name='jobqueue', name='description', field=&lt;django.db.models.fields.CharField&gt;&gt;, &lt;AlterField  model_name='jobqueue', name='enqueued_object_class', field=&lt;django.db.models.fields.CharField&gt;&gt;, &lt;RunPython &lt;function copy_edges&gt; reverse_code=&lt;function RunPython.noop&gt;&gt;]</em><a class="headerlink" href="#workflow_engine.migrations.0009_workflow_edges.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.migrations.0009_workflow_edges.copy_edges">
+<code class="descclassname">workflow_engine.migrations.0009_workflow_edges.</code><code class="descname">copy_edges</code><span class="sig-paren">(</span><em>apps</em>, <em>schema_editor</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/migrations/0009_workflow_edges.html#copy_edges"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.migrations.0009_workflow_edges.copy_edges" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.migrations.0010_source_sink">
+<span id="workflow-engine-migrations-0010-source-sink-module"></span><h2>workflow_engine.migrations.0010_source_sink module<a class="headerlink" href="#module-workflow_engine.migrations.0010_source_sink" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.migrations.0010_source_sink.Migration">
+<em class="property">class </em><code class="descclassname">workflow_engine.migrations.0010_source_sink.</code><code class="descname">Migration</code><span class="sig-paren">(</span><em>name</em>, <em>app_label</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/migrations/0010_source_sink.html#Migration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.migrations.0010_source_sink.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">django.db.migrations.migration.Migration</span></code></p>
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0010_source_sink.Migration.dependencies">
+<code class="descname">dependencies</code><em class="property"> = [('workflow_engine', '0009_workflow_edges')]</em><a class="headerlink" href="#workflow_engine.migrations.0010_source_sink.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0010_source_sink.Migration.operations">
+<code class="descname">operations</code><em class="property"> = [&lt;AddField  model_name='workflownode', name='sinks', field=&lt;django.db.models.fields.related.ManyToManyField&gt;&gt;]</em><a class="headerlink" href="#workflow_engine.migrations.0010_source_sink.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.migrations.0011_enqueueable">
+<span id="workflow-engine-migrations-0011-enqueueable-module"></span><h2>workflow_engine.migrations.0011_enqueueable module<a class="headerlink" href="#module-workflow_engine.migrations.0011_enqueueable" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.migrations.0011_enqueueable.Migration">
+<em class="property">class </em><code class="descclassname">workflow_engine.migrations.0011_enqueueable.</code><code class="descname">Migration</code><span class="sig-paren">(</span><em>name</em>, <em>app_label</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/migrations/0011_enqueueable.html#Migration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.migrations.0011_enqueueable.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">django.db.migrations.migration.Migration</span></code></p>
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0011_enqueueable.Migration.dependencies">
+<code class="descname">dependencies</code><em class="property"> = [('workflow_engine', '0010_source_sink')]</em><a class="headerlink" href="#workflow_engine.migrations.0011_enqueueable.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0011_enqueueable.Migration.operations">
+<code class="descname">operations</code><em class="property"> = [&lt;AlterField  model_name='executable', name='pbs_processor', field=&lt;django.db.models.fields.CharField&gt;&gt;, &lt;AlterField  model_name='executable', name='pbs_queue', field=&lt;django.db.models.fields.CharField&gt;&gt;, &lt;AlterField  model_name='executable', name='pbs_walltime', field=&lt;django.db.models.fields.CharField&gt;&gt;, &lt;AlterField  model_name='executable', name='remote_queue', field=&lt;django.db.models.fields.CharField&gt;&gt;, &lt;AlterField  model_name='executable', name='version', field=&lt;django.db.models.fields.CharField&gt;&gt;, &lt;AlterField  model_name='task', name='duration', field=&lt;django.db.models.fields.DurationField&gt;&gt;, &lt;AlterField  model_name='task', name='end_run_time', field=&lt;django.db.models.fields.DateTimeField&gt;&gt;, &lt;AlterField  model_name='task', name='enqueued_task_object_class', field=&lt;django.db.models.fields.CharField&gt;&gt;, &lt;AlterField  model_name='task', name='error_message', field=&lt;django.db.models.fields.TextField&gt;&gt;, &lt;AlterField  model_name='task', name='input_file', field=&lt;django.db.models.fields.CharField&gt;&gt;, &lt;AlterField  model_name='task', name='log_file', field=&lt;django.db.models.fields.CharField&gt;&gt;, &lt;AlterField  model_name='task', name='output_file', field=&lt;django.db.models.fields.CharField&gt;&gt;, &lt;AlterField  model_name='task', name='pbs_file', field=&lt;django.db.models.fields.CharField&gt;&gt;, &lt;AlterField  model_name='task', name='pbs_id', field=&lt;django.db.models.fields.CharField&gt;&gt;, &lt;AlterField  model_name='task', name='start_run_time', field=&lt;django.db.models.fields.DateTimeField&gt;&gt;, &lt;AlterField  model_name='task', name='tags', field=&lt;django.db.models.fields.CharField&gt;&gt;]</em><a class="headerlink" href="#workflow_engine.migrations.0011_enqueueable.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.migrations.0012_enqueued_object_relation">
+<span id="workflow-engine-migrations-0012-enqueued-object-relation-module"></span><h2>workflow_engine.migrations.0012_enqueued_object_relation module<a class="headerlink" href="#module-workflow_engine.migrations.0012_enqueued_object_relation" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.migrations.0012_enqueued_object_relation.Migration">
+<em class="property">class </em><code class="descclassname">workflow_engine.migrations.0012_enqueued_object_relation.</code><code class="descname">Migration</code><span class="sig-paren">(</span><em>name</em>, <em>app_label</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/migrations/0012_enqueued_object_relation.html#Migration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.migrations.0012_enqueued_object_relation.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">django.db.migrations.migration.Migration</span></code></p>
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0012_enqueued_object_relation.Migration.dependencies">
+<code class="descname">dependencies</code><em class="property"> = [('workflow_engine', '0011_enqueueable')]</em><a class="headerlink" href="#workflow_engine.migrations.0012_enqueued_object_relation.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0012_enqueued_object_relation.Migration.operations">
+<code class="descname">operations</code><em class="property"> = [&lt;AlterField  model_name='configuration', name='content_type', field=&lt;django.db.models.fields.related.ForeignKey&gt;&gt;]</em><a class="headerlink" href="#workflow_engine.migrations.0012_enqueued_object_relation.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.migrations.0013_remove_task_object_class_string">
+<span id="workflow-engine-migrations-0013-remove-task-object-class-string-module"></span><h2>workflow_engine.migrations.0013_remove_task_object_class_string module<a class="headerlink" href="#module-workflow_engine.migrations.0013_remove_task_object_class_string" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.migrations.0013_remove_task_object_class_string.Migration">
+<em class="property">class </em><code class="descclassname">workflow_engine.migrations.0013_remove_task_object_class_string.</code><code class="descname">Migration</code><span class="sig-paren">(</span><em>name</em>, <em>app_label</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/migrations/0013_remove_task_object_class_string.html#Migration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.migrations.0013_remove_task_object_class_string.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">django.db.migrations.migration.Migration</span></code></p>
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0013_remove_task_object_class_string.Migration.dependencies">
+<code class="descname">dependencies</code><em class="property"> = [('workflow_engine', '0012_enqueued_object_relation')]</em><a class="headerlink" href="#workflow_engine.migrations.0013_remove_task_object_class_string.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0013_remove_task_object_class_string.Migration.operations">
+<code class="descname">operations</code><em class="property"> = [&lt;RemoveField  model_name='task', name='enqueued_task_object_class'&gt;]</em><a class="headerlink" href="#workflow_engine.migrations.0013_remove_task_object_class_string.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.migrations.0014_remove_job_enqueued_object_class_string">
+<span id="workflow-engine-migrations-0014-remove-job-enqueued-object-class-string-module"></span><h2>workflow_engine.migrations.0014_remove_job_enqueued_object_class_string module<a class="headerlink" href="#module-workflow_engine.migrations.0014_remove_job_enqueued_object_class_string" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.migrations.0014_remove_job_enqueued_object_class_string.Migration">
+<em class="property">class </em><code class="descclassname">workflow_engine.migrations.0014_remove_job_enqueued_object_class_string.</code><code class="descname">Migration</code><span class="sig-paren">(</span><em>name</em>, <em>app_label</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/migrations/0014_remove_job_enqueued_object_class_string.html#Migration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.migrations.0014_remove_job_enqueued_object_class_string.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">django.db.migrations.migration.Migration</span></code></p>
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0014_remove_job_enqueued_object_class_string.Migration.dependencies">
+<code class="descname">dependencies</code><em class="property"> = [('workflow_engine', '0013_remove_task_object_class_string')]</em><a class="headerlink" href="#workflow_engine.migrations.0014_remove_job_enqueued_object_class_string.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0014_remove_job_enqueued_object_class_string.Migration.operations">
+<code class="descname">operations</code><em class="property"> = [&lt;RemoveField  model_name='jobqueue', name='enqueued_object_class'&gt;]</em><a class="headerlink" href="#workflow_engine.migrations.0014_remove_job_enqueued_object_class_string.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.migrations.0015_more_optional_admin_fields">
+<span id="workflow-engine-migrations-0015-more-optional-admin-fields-module"></span><h2>workflow_engine.migrations.0015_more_optional_admin_fields module<a class="headerlink" href="#module-workflow_engine.migrations.0015_more_optional_admin_fields" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.migrations.0015_more_optional_admin_fields.Migration">
+<em class="property">class </em><code class="descclassname">workflow_engine.migrations.0015_more_optional_admin_fields.</code><code class="descname">Migration</code><span class="sig-paren">(</span><em>name</em>, <em>app_label</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/migrations/0015_more_optional_admin_fields.html#Migration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.migrations.0015_more_optional_admin_fields.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">django.db.migrations.migration.Migration</span></code></p>
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0015_more_optional_admin_fields.Migration.dependencies">
+<code class="descname">dependencies</code><em class="property"> = [('workflow_engine', '0014_remove_job_enqueued_object_class_string')]</em><a class="headerlink" href="#workflow_engine.migrations.0015_more_optional_admin_fields.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0015_more_optional_admin_fields.Migration.operations">
+<code class="descname">operations</code><em class="property"> = [&lt;AlterField  model_name='job', name='end_run_time', field=&lt;django.db.models.fields.DateTimeField&gt;&gt;, &lt;AlterField  model_name='job', name='enqueued_object_id', field=&lt;django.db.models.fields.IntegerField&gt;&gt;, &lt;AlterField  model_name='job', name='enqueued_object_type', field=&lt;django.db.models.fields.related.ForeignKey&gt;&gt;, &lt;AlterField  model_name='job', name='error_message', field=&lt;django.db.models.fields.TextField&gt;&gt;, &lt;AlterField  model_name='job', name='start_run_time', field=&lt;django.db.models.fields.DateTimeField&gt;&gt;, &lt;AlterField  model_name='job', name='tags', field=&lt;django.db.models.fields.CharField&gt;&gt;]</em><a class="headerlink" href="#workflow_engine.migrations.0015_more_optional_admin_fields.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.migrations.0016_archive_false_manager">
+<span id="workflow-engine-migrations-0016-archive-false-manager-module"></span><h2>workflow_engine.migrations.0016_archive_false_manager module<a class="headerlink" href="#module-workflow_engine.migrations.0016_archive_false_manager" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.migrations.0016_archive_false_manager.Migration">
+<em class="property">class </em><code class="descclassname">workflow_engine.migrations.0016_archive_false_manager.</code><code class="descname">Migration</code><span class="sig-paren">(</span><em>name</em>, <em>app_label</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/migrations/0016_archive_false_manager.html#Migration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.migrations.0016_archive_false_manager.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">django.db.migrations.migration.Migration</span></code></p>
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0016_archive_false_manager.Migration.dependencies">
+<code class="descname">dependencies</code><em class="property"> = [('workflow_engine', '0015_more_optional_admin_fields')]</em><a class="headerlink" href="#workflow_engine.migrations.0016_archive_false_manager.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0016_archive_false_manager.Migration.operations">
+<code class="descname">operations</code><em class="property"> = [&lt;AlterModelManagers  name='executable', managers=[('all_objects', &lt;django.db.models.manager.Manager object&gt;)]&gt;, &lt;AlterModelManagers  name='job', managers=[('all_objects', &lt;django.db.models.manager.Manager object&gt;)]&gt;, &lt;AlterModelManagers  name='jobqueue', managers=[('all_objects', &lt;django.db.models.manager.Manager object&gt;)]&gt;, &lt;AlterModelManagers  name='task', managers=[('all_objects', &lt;django.db.models.manager.Manager object&gt;)]&gt;, &lt;AlterModelManagers  name='workflow', managers=[('all_objects', &lt;django.db.models.manager.Manager object&gt;)]&gt;, &lt;AlterModelManagers  name='workflowedge', managers=[('all_objects', &lt;django.db.models.manager.Manager object&gt;)]&gt;, &lt;AlterModelManagers  name='workflownode', managers=[('safe_objects', &lt;django.db.models.manager.Manager object&gt;)]&gt;, &lt;AlterField  model_name='executable', name='description', field=&lt;django.db.models.fields.CharField&gt;&gt;, &lt;AlterField  model_name='jobqueue', name='description', field=&lt;django.db.models.fields.CharField&gt;&gt;]</em><a class="headerlink" href="#workflow_engine.migrations.0016_archive_false_manager.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.migrations.0017_edge_order">
+<span id="workflow-engine-migrations-0017-edge-order-module"></span><h2>workflow_engine.migrations.0017_edge_order module<a class="headerlink" href="#module-workflow_engine.migrations.0017_edge_order" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.migrations.0017_edge_order.Migration">
+<em class="property">class </em><code class="descclassname">workflow_engine.migrations.0017_edge_order.</code><code class="descname">Migration</code><span class="sig-paren">(</span><em>name</em>, <em>app_label</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/migrations/0017_edge_order.html#Migration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.migrations.0017_edge_order.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">django.db.migrations.migration.Migration</span></code></p>
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0017_edge_order.Migration.dependencies">
+<code class="descname">dependencies</code><em class="property"> = [('workflow_engine', '0016_archive_false_manager')]</em><a class="headerlink" href="#workflow_engine.migrations.0017_edge_order.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0017_edge_order.Migration.operations">
+<code class="descname">operations</code><em class="property"> = [&lt;AlterModelOptions  name='workflowedge', options={'ordering': ('priority',)}&gt;, &lt;AddField  model_name='workflowedge', name='priority', field=&lt;django.db.models.fields.PositiveIntegerField&gt;&gt;, &lt;AlterField  model_name='executable', name='description', field=&lt;django.db.models.fields.CharField&gt;&gt;, &lt;AlterField  model_name='job', name='duration', field=&lt;django.db.models.fields.DurationField&gt;&gt;, &lt;AlterField  model_name='jobqueue', name='description', field=&lt;django.db.models.fields.CharField&gt;&gt;, &lt;AlterField  model_name='workflow', name='description', field=&lt;django.db.models.fields.CharField&gt;&gt;]</em><a class="headerlink" href="#workflow_engine.migrations.0017_edge_order.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.migrations.0018_running_state">
+<span id="workflow-engine-migrations-0018-running-state-module"></span><h2>workflow_engine.migrations.0018_running_state module<a class="headerlink" href="#module-workflow_engine.migrations.0018_running_state" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.migrations.0018_running_state.Migration">
+<em class="property">class </em><code class="descclassname">workflow_engine.migrations.0018_running_state.</code><code class="descname">Migration</code><span class="sig-paren">(</span><em>name</em>, <em>app_label</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/migrations/0018_running_state.html#Migration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.migrations.0018_running_state.Migration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">django.db.migrations.migration.Migration</span></code></p>
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0018_running_state.Migration.dependencies">
+<code class="descname">dependencies</code><em class="property"> = [('workflow_engine', '0017_edge_order')]</em><a class="headerlink" href="#workflow_engine.migrations.0018_running_state.Migration.dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.migrations.0018_running_state.Migration.operations">
+<code class="descname">operations</code><em class="property"> = [&lt;AddField  model_name='job', name='running_state', field=&lt;django_fsm.FSMField&gt;&gt;, &lt;AddField  model_name='task', name='running_state', field=&lt;django_fsm.FSMField&gt;&gt;, &lt;RunPython &lt;function copy_run_states&gt; reverse_code=&lt;function RunPython.noop&gt;&gt;]</em><a class="headerlink" href="#workflow_engine.migrations.0018_running_state.Migration.operations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.migrations.0018_running_state.copy_run_states">
+<code class="descclassname">workflow_engine.migrations.0018_running_state.</code><code class="descname">copy_run_states</code><span class="sig-paren">(</span><em>apps</em>, <em>schema_editor</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/migrations/0018_running_state.html#copy_run_states"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.migrations.0018_running_state.copy_run_states" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="customizing.html">Customization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="strategies.html">Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configurations.html">Configuration Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop.html">Developers Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">Authors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="workflow_engine.html">Source Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.admin.html">workflow_engine.admin package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.celery.html">workflow_engine.celery package</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">workflow_engine.migrations package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.mixins.html">workflow_engine.mixins package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.models.html">workflow_engine.models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.serializers.html">workflow_engine.serializers package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.strategies.html">workflow_engine.strategies package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.views.html">workflow_engine.views package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.worker.html">workflow_engine.worker package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="workflow_engine.worker.qsub.html">workflow_engine.worker.qsub package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workflow_client.html">Client Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="workflow_client.ingest.html">workflow_client.ingest package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_client.nb_utils.html">workflow_client.nb_utils package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_client.tasks.html">workflow_client.tasks package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/AllenInstitute/BlueSkyWorkflowEngine">Github Profile</a></li>
+</ul>
+
+<h3> Questions </h3>
+<p class="questions">
+  Send any questions using the <a href="http://alleninstitute.org/contact_us/index.html">Send Us a Message</a> link below, 
+  or submit your question to <a href="http://stackoverflow.com/">StackOverflow</a> using with the 'allen-sdk' tag.
+</p>
+
+<p class="questions">
+  If you encounter any problems using the AllenSDK, please create an issue on <a href="http://github.com/alleninstitute/allensdk/issues/">Github's issue tracker</a>.
+</p>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+    <div class="footer" role="contentinfo">
+    </div>
+<script type="text/javascript" src="http://www.brain-map.org/external_assets/javascripts/portalFooter.js"></script>
+
+
+  </body>
+</html>

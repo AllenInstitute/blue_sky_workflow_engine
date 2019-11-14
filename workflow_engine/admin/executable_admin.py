@@ -1,5 +1,5 @@
 from django.contrib import admin
-
+from .configuration_inline import ConfigurationInline
 
 class ExecutableAdmin(admin.ModelAdmin):
     list_display = [
@@ -17,6 +17,9 @@ class ExecutableAdmin(admin.ModelAdmin):
         'archived'
         ]
     list_select_related = []
-    list_filter = ['archived']
+    list_filter = ('archived',)
     actions = []
-    inlines = []
+    inlines = (ConfigurationInline,)
+
+    def get_queryset(self, request):
+        return self.model.all_objects.get_queryset()

@@ -1,0 +1,622 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>workflow_engine.strategies package &#8212; Blue Sky Workflow Engine  documentation</title>
+    <link rel="stylesheet" href="_static/aibs_sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="workflow_engine.views package" href="workflow_engine.views.html" />
+    <link rel="prev" title="workflow_engine.serializers package" href="workflow_engine.serializers.html" /> 
+  </head>
+  <body>
+<link href="http://www.brain-map.org/assets/stylesheets/portal.css" media="screen" rel="stylesheet" type="text/css" />
+<script src="http://www.brain-map.org/assets/javascripts/portal.js" type="text/javascript"></script>
+<script src="http://www.brain-map.org/assets/javascripts/ga.js" type="text/javascript"></script>
+<script type="text/javascript">
+    var _pSupressBrowserFlashWarning = true;
+    var _pTabId = "pHome";
+    var _pMoreProjectsId = "pMoreProjects";
+    var _pImagePath = "http://www.brain-map.org/assets/images/";
+    var _pSiteWarnings = function() {
+        this.show_warning() = {};
+    }
+</script>
+<script type="text/javascript">
+    function initialize() {
+        /*** do your stuff, then initialize the portal plugin ***/
+        _pPortalOnLoad();
+    }
+</script>
+<style>
+  #header_content > a {
+  display: inline-block;
+  width: 250px;
+  height: 75px;
+  background-image:url("/_static/external_assets/images/Brain_Atlas_Logotype_SDK.png") !important;
+  background-size: 235px 37px;
+  background-position: 0px 20px;
+  background-repeat: no-repeat;
+  }
+</style>
+
+<script type="text/javascript" src="http://www.brain-map.org/external_assets/javascripts/portalHeader.js"></script>
+<link rel="stylesheet" type="text/css" href="/_static/external_assets/stylesheets/common_layout.css" />
+
+
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-workflow_engine.strategies">
+<span id="workflow-engine-strategies-package"></span><h1>workflow_engine.strategies package<a class="headerlink" href="#module-workflow_engine.strategies" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-workflow_engine.strategies.base_strategy">
+<span id="workflow-engine-strategies-base-strategy-module"></span><h2>workflow_engine.strategies.base_strategy module<a class="headerlink" href="#module-workflow_engine.strategies.base_strategy" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.strategies.base_strategy.BaseStrategy">
+<em class="property">class </em><code class="descclassname">workflow_engine.strategies.base_strategy.</code><code class="descname">BaseStrategy</code><a class="reference internal" href="_modules/workflow_engine/strategies/base_strategy.html#BaseStrategy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.base_strategy.BaseStrategy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="workflow_engine.strategies.base_strategy.BaseStrategy.can_transition">
+<code class="descname">can_transition</code><span class="sig-paren">(</span><em>self</em>, <em>enqueued_object</em>, <em>workflow_node=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/base_strategy.html#BaseStrategy.can_transition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.base_strategy.BaseStrategy.can_transition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.base_strategy.BaseStrategy.check_key">
+<code class="descname">check_key</code><span class="sig-paren">(</span><em>self</em>, <em>dictionary</em>, <em>key</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/base_strategy.html#BaseStrategy.check_key"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.base_strategy.BaseStrategy.check_key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.base_strategy.BaseStrategy.fail_execution_task">
+<code class="descname">fail_execution_task</code><span class="sig-paren">(</span><em>self</em>, <em>task</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/base_strategy.html#BaseStrategy.fail_execution_task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.base_strategy.BaseStrategy.fail_execution_task" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.base_strategy.BaseStrategy.fail_task">
+<code class="descname">fail_task</code><span class="sig-paren">(</span><em>self</em>, <em>task</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/base_strategy.html#BaseStrategy.fail_task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.base_strategy.BaseStrategy.fail_task" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.base_strategy.BaseStrategy.get_base_storage_directory">
+<code class="descname">get_base_storage_directory</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/base_strategy.html#BaseStrategy.get_base_storage_directory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.base_strategy.BaseStrategy.get_base_storage_directory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.base_strategy.BaseStrategy.get_job_storage_directory">
+<code class="descname">get_job_storage_directory</code><span class="sig-paren">(</span><em>self</em>, <em>base_storage_directory</em>, <em>job</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/base_strategy.html#BaseStrategy.get_job_storage_directory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.base_strategy.BaseStrategy.get_job_storage_directory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.base_strategy.BaseStrategy.get_objects_for_queue">
+<code class="descname">get_objects_for_queue</code><span class="sig-paren">(</span><em>self</em>, <em>prev_queue</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/base_strategy.html#BaseStrategy.get_objects_for_queue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.base_strategy.BaseStrategy.get_objects_for_queue" title="Permalink to this definition">¶</a></dt>
+<dd><p>override if needed
+this is called when a job transitions from a previous queue
+given the previous job, return an array of enqueued objects
+for this queue</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.base_strategy.BaseStrategy.get_or_create_storage_directory">
+<code class="descname">get_or_create_storage_directory</code><span class="sig-paren">(</span><em>self</em>, <em>job</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/base_strategy.html#BaseStrategy.get_or_create_storage_directory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.base_strategy.BaseStrategy.get_or_create_storage_directory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.base_strategy.BaseStrategy.get_or_create_task_storage_directory">
+<code class="descname">get_or_create_task_storage_directory</code><span class="sig-paren">(</span><em>self</em>, <em>task</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/base_strategy.html#BaseStrategy.get_or_create_task_storage_directory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.base_strategy.BaseStrategy.get_or_create_task_storage_directory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.base_strategy.BaseStrategy.get_storage_directory">
+<code class="descname">get_storage_directory</code><span class="sig-paren">(</span><em>self</em>, <em>base_storage_directory</em>, <em>job</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/base_strategy.html#BaseStrategy.get_storage_directory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.base_strategy.BaseStrategy.get_storage_directory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.base_strategy.BaseStrategy.get_task_objects_for_queue">
+<code class="descname">get_task_objects_for_queue</code><span class="sig-paren">(</span><em>self</em>, <em>enqueued_object</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/base_strategy.html#BaseStrategy.get_task_objects_for_queue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.base_strategy.BaseStrategy.get_task_objects_for_queue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.base_strategy.BaseStrategy.get_task_storage_directory">
+<code class="descname">get_task_storage_directory</code><span class="sig-paren">(</span><em>self</em>, <em>task</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/base_strategy.html#BaseStrategy.get_task_storage_directory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.base_strategy.BaseStrategy.get_task_storage_directory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.base_strategy.BaseStrategy.get_well_known_file">
+<code class="descname">get_well_known_file</code><span class="sig-paren">(</span><em>self</em>, <em>attachable_object</em>, <em>well_known_file_type</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/base_strategy.html#BaseStrategy.get_well_known_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.base_strategy.BaseStrategy.get_well_known_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.base_strategy.BaseStrategy.is_execution_strategy">
+<code class="descname">is_execution_strategy</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/base_strategy.html#BaseStrategy.is_execution_strategy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.base_strategy.BaseStrategy.is_execution_strategy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="workflow_engine.strategies.base_strategy.BaseStrategy.make_dirs_chmod">
+<em class="property">classmethod </em><code class="descname">make_dirs_chmod</code><span class="sig-paren">(</span><em>path</em>, <em>mode</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/base_strategy.html#BaseStrategy.make_dirs_chmod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.base_strategy.BaseStrategy.make_dirs_chmod" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.base_strategy.BaseStrategy.must_wait">
+<code class="descname">must_wait</code><span class="sig-paren">(</span><em>self</em>, <em>enqueued_object</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/base_strategy.html#BaseStrategy.must_wait"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.base_strategy.BaseStrategy.must_wait" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.base_strategy.BaseStrategy.on_fail_execution">
+<code class="descname">on_fail_execution</code><span class="sig-paren">(</span><em>self</em>, <em>task</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/base_strategy.html#BaseStrategy.on_fail_execution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.base_strategy.BaseStrategy.on_fail_execution" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.base_strategy.BaseStrategy.on_failure">
+<code class="descname">on_failure</code><span class="sig-paren">(</span><em>self</em>, <em>task</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/base_strategy.html#BaseStrategy.on_failure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.base_strategy.BaseStrategy.on_failure" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.base_strategy.BaseStrategy.on_finishing">
+<code class="descname">on_finishing</code><span class="sig-paren">(</span><em>self</em>, <em>enqueued_object</em>, <em>results</em>, <em>task</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/base_strategy.html#BaseStrategy.on_finishing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.base_strategy.BaseStrategy.on_finishing" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.base_strategy.BaseStrategy.on_running">
+<code class="descname">on_running</code><span class="sig-paren">(</span><em>self</em>, <em>task</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/base_strategy.html#BaseStrategy.on_running"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.base_strategy.BaseStrategy.on_running" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.base_strategy.BaseStrategy.prep_job">
+<code class="descname">prep_job</code><span class="sig-paren">(</span><em>self</em>, <em>job</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/base_strategy.html#BaseStrategy.prep_job"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.base_strategy.BaseStrategy.prep_job" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.base_strategy.BaseStrategy.prep_task">
+<code class="descname">prep_task</code><span class="sig-paren">(</span><em>self</em>, <em>task</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/base_strategy.html#BaseStrategy.prep_task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.base_strategy.BaseStrategy.prep_task" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.base_strategy.BaseStrategy.set_error_message_from_log">
+<code class="descname">set_error_message_from_log</code><span class="sig-paren">(</span><em>self</em>, <em>task</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/base_strategy.html#BaseStrategy.set_error_message_from_log"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.base_strategy.BaseStrategy.set_error_message_from_log" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.base_strategy.BaseStrategy.set_well_known_file">
+<code class="descname">set_well_known_file</code><span class="sig-paren">(</span><em>self</em>, <em>full_path</em>, <em>attachable_object</em>, <em>well_known_file_type</em>, <em>task=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/base_strategy.html#BaseStrategy.set_well_known_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.base_strategy.BaseStrategy.set_well_known_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.base_strategy.BaseStrategy.skip_execution">
+<code class="descname">skip_execution</code><span class="sig-paren">(</span><em>self</em>, <em>enqueued_object</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/base_strategy.html#BaseStrategy.skip_execution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.base_strategy.BaseStrategy.skip_execution" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.base_strategy.BaseStrategy.transform_objects_for_queue">
+<code class="descname">transform_objects_for_queue</code><span class="sig-paren">(</span><em>self</em>, <em>prev_queue_object</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/base_strategy.html#BaseStrategy.transform_objects_for_queue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.base_strategy.BaseStrategy.transform_objects_for_queue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.strategies.execution_strategy">
+<span id="workflow-engine-strategies-execution-strategy-module"></span><h2>workflow_engine.strategies.execution_strategy module<a class="headerlink" href="#module-workflow_engine.strategies.execution_strategy" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.strategies.execution_strategy.ExecutionStrategy">
+<em class="property">class </em><code class="descclassname">workflow_engine.strategies.execution_strategy.</code><code class="descname">ExecutionStrategy</code><a class="reference internal" href="_modules/workflow_engine/strategies/execution_strategy.html#ExecutionStrategy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.execution_strategy.ExecutionStrategy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#workflow_engine.strategies.base_strategy.BaseStrategy" title="workflow_engine.strategies.base_strategy.BaseStrategy"><code class="xref py py-class docutils literal"><span class="pre">workflow_engine.strategies.base_strategy.BaseStrategy</span></code></a></p>
+<dl class="method">
+<dt id="workflow_engine.strategies.execution_strategy.ExecutionStrategy.add_write_to_log_command">
+<code class="descname">add_write_to_log_command</code><span class="sig-paren">(</span><em>self</em>, <em>executable</em>, <em>log_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/execution_strategy.html#ExecutionStrategy.add_write_to_log_command"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.execution_strategy.ExecutionStrategy.add_write_to_log_command" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.execution_strategy.ExecutionStrategy.create_input_file">
+<code class="descname">create_input_file</code><span class="sig-paren">(</span><em>self</em>, <em>input_file</em>, <em>enqueued_object</em>, <em>storage_directory</em>, <em>task</em>, <em>input_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/execution_strategy.html#ExecutionStrategy.create_input_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.execution_strategy.ExecutionStrategy.create_input_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.execution_strategy.ExecutionStrategy.finish_task">
+<code class="descname">finish_task</code><span class="sig-paren">(</span><em>self</em>, <em>task</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/execution_strategy.html#ExecutionStrategy.finish_task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.execution_strategy.ExecutionStrategy.finish_task" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.execution_strategy.ExecutionStrategy.get_dynamic_arguments">
+<code class="descname">get_dynamic_arguments</code><span class="sig-paren">(</span><em>self</em>, <em>task</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/execution_strategy.html#ExecutionStrategy.get_dynamic_arguments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.execution_strategy.ExecutionStrategy.get_dynamic_arguments" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.execution_strategy.ExecutionStrategy.get_full_executable">
+<code class="descname">get_full_executable</code><span class="sig-paren">(</span><em>self</em>, <em>task</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/execution_strategy.html#ExecutionStrategy.get_full_executable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.execution_strategy.ExecutionStrategy.get_full_executable" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the command with all arguments and parameters</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.execution_strategy.ExecutionStrategy.get_input">
+<code class="descname">get_input</code><span class="sig-paren">(</span><em>self</em>, <em>enqueued_object</em>, <em>storage_directory</em>, <em>task</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/execution_strategy.html#ExecutionStrategy.get_input"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.execution_strategy.ExecutionStrategy.get_input" title="Permalink to this definition">¶</a></dt>
+<dd><p>Override to populate and write input.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>enqueued_object</strong> <span class="classifier-delimiter">:</span> <span class="classifier">Enqueueable</span></dt>
+<dd><p class="first last">primary database object to be manipulated</p>
+</dd>
+<dt><strong>storage_directory</strong> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first last">where to store input files</p>
+</dd>
+<dt><strong>task</strong> <span class="classifier-delimiter">:</span> <span class="classifier">Task</span></dt>
+<dd><p class="first last">to be run</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt>dict</dt>
+<dd><p class="first last">strategy-specific input</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.execution_strategy.ExecutionStrategy.get_input_file">
+<code class="descname">get_input_file</code><span class="sig-paren">(</span><em>self</em>, <em>task</em>, <em>create_dir=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/execution_strategy.html#ExecutionStrategy.get_input_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.execution_strategy.ExecutionStrategy.get_input_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.execution_strategy.ExecutionStrategy.get_log_file">
+<code class="descname">get_log_file</code><span class="sig-paren">(</span><em>self</em>, <em>task</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/execution_strategy.html#ExecutionStrategy.get_log_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.execution_strategy.ExecutionStrategy.get_log_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.execution_strategy.ExecutionStrategy.get_or_create_storage_directory">
+<code class="descname">get_or_create_storage_directory</code><span class="sig-paren">(</span><em>self</em>, <em>job</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/execution_strategy.html#ExecutionStrategy.get_or_create_storage_directory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.execution_strategy.ExecutionStrategy.get_or_create_storage_directory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.execution_strategy.ExecutionStrategy.get_output_file">
+<code class="descname">get_output_file</code><span class="sig-paren">(</span><em>self</em>, <em>task</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/execution_strategy.html#ExecutionStrategy.get_output_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.execution_strategy.ExecutionStrategy.get_output_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.execution_strategy.ExecutionStrategy.get_pbs_file">
+<code class="descname">get_pbs_file</code><span class="sig-paren">(</span><em>self</em>, <em>task</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/execution_strategy.html#ExecutionStrategy.get_pbs_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.execution_strategy.ExecutionStrategy.get_pbs_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.execution_strategy.ExecutionStrategy.get_remote_queue">
+<code class="descname">get_remote_queue</code><span class="sig-paren">(</span><em>self</em>, <em>task</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/execution_strategy.html#ExecutionStrategy.get_remote_queue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.execution_strategy.ExecutionStrategy.get_remote_queue" title="Permalink to this definition">¶</a></dt>
+<dd><p>helper method to get the remote blue_sky worker queue name</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>task</strong> <span class="classifier-delimiter">:</span> <span class="classifier">Task</span></dt>
+<dd><p class="first last">used to access the executable</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt>string</dt>
+<dd><p class="first last">well-known string used to choose which worker to submit task to</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.execution_strategy.ExecutionStrategy.get_task_arguments">
+<code class="descname">get_task_arguments</code><span class="sig-paren">(</span><em>self</em>, <em>task</em>, <em>write_files=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/execution_strategy.html#ExecutionStrategy.get_task_arguments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.execution_strategy.ExecutionStrategy.get_task_arguments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Override to generate command-line arguments at run time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>task</strong> <span class="classifier-delimiter">:</span> <span class="classifier">Task</span></dt>
+<dd><p class="first last">to be run</p>
+</dd>
+<dt><strong>write_files</strong> <span class="classifier-delimiter">:</span> <span class="classifier">boolean</span></dt>
+<dd><p class="first last">generate files as a side effect</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt>list or None</dt>
+<dd><p class="first last">argument strings</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.execution_strategy.ExecutionStrategy.is_execution_strategy">
+<code class="descname">is_execution_strategy</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/execution_strategy.html#ExecutionStrategy.is_execution_strategy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.execution_strategy.ExecutionStrategy.is_execution_strategy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.execution_strategy.ExecutionStrategy.kill_pbs_task">
+<code class="descname">kill_pbs_task</code><span class="sig-paren">(</span><em>self</em>, <em>task</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/execution_strategy.html#ExecutionStrategy.kill_pbs_task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.execution_strategy.ExecutionStrategy.kill_pbs_task" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.execution_strategy.ExecutionStrategy.read_output">
+<code class="descname">read_output</code><span class="sig-paren">(</span><em>self</em>, <em>task</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/execution_strategy.html#ExecutionStrategy.read_output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.execution_strategy.ExecutionStrategy.read_output" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.execution_strategy.ExecutionStrategy.run_asynchronous_task">
+<code class="descname">run_asynchronous_task</code><span class="sig-paren">(</span><em>self</em>, <em>task</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/execution_strategy.html#ExecutionStrategy.run_asynchronous_task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.execution_strategy.ExecutionStrategy.run_asynchronous_task" title="Permalink to this definition">¶</a></dt>
+<dd><p>Do the main strategy functionality.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt>celery.AsyncResult</dt>
+<dd><p class="first last">None is returned if this is a ‘skip’ (e.g. Wait or Ingest) strategy.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.execution_strategy.ExecutionStrategy.run_task">
+<code class="descname">run_task</code><span class="sig-paren">(</span><em>self</em>, <em>task</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/execution_strategy.html#ExecutionStrategy.run_task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.execution_strategy.ExecutionStrategy.run_task" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.execution_strategy.ExecutionStrategy.running_task">
+<code class="descname">running_task</code><span class="sig-paren">(</span><em>self</em>, <em>task</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/execution_strategy.html#ExecutionStrategy.running_task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.execution_strategy.ExecutionStrategy.running_task" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.execution_strategy.ExecutionStrategy.skip_execution">
+<code class="descname">skip_execution</code><span class="sig-paren">(</span><em>self</em>, <em>enqueued_object</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/execution_strategy.html#ExecutionStrategy.skip_execution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.execution_strategy.ExecutionStrategy.skip_execution" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.strategies.ingest_strategy">
+<span id="workflow-engine-strategies-ingest-strategy-module"></span><h2>workflow_engine.strategies.ingest_strategy module<a class="headerlink" href="#module-workflow_engine.strategies.ingest_strategy" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.strategies.ingest_strategy.IngestStrategy">
+<em class="property">class </em><code class="descclassname">workflow_engine.strategies.ingest_strategy.</code><code class="descname">IngestStrategy</code><a class="reference internal" href="_modules/workflow_engine/strategies/ingest_strategy.html#IngestStrategy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.ingest_strategy.IngestStrategy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#workflow_engine.strategies.execution_strategy.ExecutionStrategy" title="workflow_engine.strategies.execution_strategy.ExecutionStrategy"><code class="xref py py-class docutils literal"><span class="pre">workflow_engine.strategies.execution_strategy.ExecutionStrategy</span></code></a></p>
+<dl class="classmethod">
+<dt id="workflow_engine.strategies.ingest_strategy.IngestStrategy.call_ingest_strategy">
+<em class="property">classmethod </em><code class="descname">call_ingest_strategy</code><span class="sig-paren">(</span><em>wf_name</em>, <em>message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/ingest_strategy.html#IngestStrategy.call_ingest_strategy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.ingest_strategy.IngestStrategy.call_ingest_strategy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.ingest_strategy.IngestStrategy.create_enqueued_object">
+<code class="descname">create_enqueued_object</code><span class="sig-paren">(</span><em>self</em>, <em>dictionary</em>, <em>tags=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/ingest_strategy.html#IngestStrategy.create_enqueued_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.ingest_strategy.IngestStrategy.create_enqueued_object" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.ingest_strategy.IngestStrategy.generate_response">
+<code class="descname">generate_response</code><span class="sig-paren">(</span><em>self</em>, <em>enqueued_object</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/ingest_strategy.html#IngestStrategy.generate_response"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.ingest_strategy.IngestStrategy.generate_response" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.ingest_strategy.IngestStrategy.get_workflow_name">
+<code class="descname">get_workflow_name</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/ingest_strategy.html#IngestStrategy.get_workflow_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.ingest_strategy.IngestStrategy.get_workflow_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>used to query the workflow object for start_workflow</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt>String</dt>
+<dd><p class="first last">machine readable workflow name</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.ingest_strategy.IngestStrategy.ingest_message">
+<code class="descname">ingest_message</code><span class="sig-paren">(</span><em>self</em>, <em>workflow_name</em>, <em>message</em>, <em>tags=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/ingest_strategy.html#IngestStrategy.ingest_message"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.ingest_strategy.IngestStrategy.ingest_message" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.ingest_strategy.IngestStrategy.is_execution_strategy">
+<code class="descname">is_execution_strategy</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/ingest_strategy.html#IngestStrategy.is_execution_strategy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.ingest_strategy.IngestStrategy.is_execution_strategy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.ingest_strategy.IngestStrategy.is_ingest_strategy">
+<code class="descname">is_ingest_strategy</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/ingest_strategy.html#IngestStrategy.is_ingest_strategy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.ingest_strategy.IngestStrategy.is_ingest_strategy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.ingest_strategy.IngestStrategy.skip_execution">
+<code class="descname">skip_execution</code><span class="sig-paren">(</span><em>self</em>, <em>enqueued_object</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/ingest_strategy.html#IngestStrategy.skip_execution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.ingest_strategy.IngestStrategy.skip_execution" title="Permalink to this definition">¶</a></dt>
+<dd><p>override executing jobs, only create enqueued objects</p>
+<p>Ingest strategies are derived from executable strategies,
+but are not used to execute jobs.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt>boolean</dt>
+<dd><p class="first last">always true</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.strategies.input_config_mixin">
+<span id="workflow-engine-strategies-input-config-mixin-module"></span><h2>workflow_engine.strategies.input_config_mixin module<a class="headerlink" href="#module-workflow_engine.strategies.input_config_mixin" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.strategies.input_config_mixin.InputConfigMixin">
+<em class="property">class </em><code class="descclassname">workflow_engine.strategies.input_config_mixin.</code><code class="descname">InputConfigMixin</code><a class="reference internal" href="_modules/workflow_engine/strategies/input_config_mixin.html#InputConfigMixin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.input_config_mixin.InputConfigMixin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="workflow_engine.strategies.input_config_mixin.InputConfigMixin.get_workflow_node_input_template">
+<code class="descname">get_workflow_node_input_template</code><span class="sig-paren">(</span><em>self</em>, <em>task</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/input_config_mixin.html#InputConfigMixin.get_workflow_node_input_template"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.input_config_mixin.InputConfigMixin.get_workflow_node_input_template" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.strategies.wait_strategy">
+<span id="workflow-engine-strategies-wait-strategy-module"></span><h2>workflow_engine.strategies.wait_strategy module<a class="headerlink" href="#module-workflow_engine.strategies.wait_strategy" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.strategies.wait_strategy.WaitStrategy">
+<em class="property">class </em><code class="descclassname">workflow_engine.strategies.wait_strategy.</code><code class="descname">WaitStrategy</code><a class="reference internal" href="_modules/workflow_engine/strategies/wait_strategy.html#WaitStrategy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.wait_strategy.WaitStrategy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#workflow_engine.strategies.execution_strategy.ExecutionStrategy" title="workflow_engine.strategies.execution_strategy.ExecutionStrategy"><code class="xref py py-class docutils literal"><span class="pre">workflow_engine.strategies.execution_strategy.ExecutionStrategy</span></code></a></p>
+<dl class="method">
+<dt id="workflow_engine.strategies.wait_strategy.WaitStrategy.is_execution_strategy">
+<code class="descname">is_execution_strategy</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/wait_strategy.html#WaitStrategy.is_execution_strategy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.wait_strategy.WaitStrategy.is_execution_strategy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.wait_strategy.WaitStrategy.is_wait_strategy">
+<code class="descname">is_wait_strategy</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/wait_strategy.html#WaitStrategy.is_wait_strategy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.wait_strategy.WaitStrategy.is_wait_strategy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.wait_strategy.WaitStrategy.must_wait">
+<code class="descname">must_wait</code><span class="sig-paren">(</span><em>self</em>, <em>enqueued_object</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/wait_strategy.html#WaitStrategy.must_wait"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.wait_strategy.WaitStrategy.must_wait" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.wait_strategy.WaitStrategy.run_task">
+<code class="descname">run_task</code><span class="sig-paren">(</span><em>self</em>, <em>task</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/wait_strategy.html#WaitStrategy.run_task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.wait_strategy.WaitStrategy.run_task" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.wait_strategy.WaitStrategy.set_error_message_from_log">
+<code class="descname">set_error_message_from_log</code><span class="sig-paren">(</span><em>self</em>, <em>task</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/wait_strategy.html#WaitStrategy.set_error_message_from_log"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.wait_strategy.WaitStrategy.set_error_message_from_log" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.strategies.wait_strategy.WaitStrategy.skip_execution">
+<code class="descname">skip_execution</code><span class="sig-paren">(</span><em>self</em>, <em>enqueued_object</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/strategies/wait_strategy.html#WaitStrategy.skip_execution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.strategies.wait_strategy.WaitStrategy.skip_execution" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="customizing.html">Customization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="strategies.html">Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configurations.html">Configuration Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop.html">Developers Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">Authors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="workflow_engine.html">Source Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.admin.html">workflow_engine.admin package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.celery.html">workflow_engine.celery package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.migrations.html">workflow_engine.migrations package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.mixins.html">workflow_engine.mixins package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.models.html">workflow_engine.models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.serializers.html">workflow_engine.serializers package</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">workflow_engine.strategies package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.views.html">workflow_engine.views package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.worker.html">workflow_engine.worker package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="workflow_engine.worker.qsub.html">workflow_engine.worker.qsub package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workflow_client.html">Client Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="workflow_client.ingest.html">workflow_client.ingest package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_client.nb_utils.html">workflow_client.nb_utils package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_client.tasks.html">workflow_client.tasks package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/AllenInstitute/BlueSkyWorkflowEngine">Github Profile</a></li>
+</ul>
+
+<h3> Questions </h3>
+<p class="questions">
+  Send any questions using the <a href="http://alleninstitute.org/contact_us/index.html">Send Us a Message</a> link below, 
+  or submit your question to <a href="http://stackoverflow.com/">StackOverflow</a> using with the 'allen-sdk' tag.
+</p>
+
+<p class="questions">
+  If you encounter any problems using the AllenSDK, please create an issue on <a href="http://github.com/alleninstitute/allensdk/issues/">Github's issue tracker</a>.
+</p>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+    <div class="footer" role="contentinfo">
+    </div>
+<script type="text/javascript" src="http://www.brain-map.org/external_assets/javascripts/portalFooter.js"></script>
+
+
+  </body>
+</html>

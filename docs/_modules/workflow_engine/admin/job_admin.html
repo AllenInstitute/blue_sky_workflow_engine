@@ -1,0 +1,311 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>workflow_engine.admin.job_admin &#8212; Blue Sky Workflow Engine  documentation</title>
+    <link rel="stylesheet" href="../../../_static/aibs_sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body>
+<link href="http://www.brain-map.org/assets/stylesheets/portal.css" media="screen" rel="stylesheet" type="text/css" />
+<script src="http://www.brain-map.org/assets/javascripts/portal.js" type="text/javascript"></script>
+<script src="http://www.brain-map.org/assets/javascripts/ga.js" type="text/javascript"></script>
+<script type="text/javascript">
+    var _pSupressBrowserFlashWarning = true;
+    var _pTabId = "pHome";
+    var _pMoreProjectsId = "pMoreProjects";
+    var _pImagePath = "http://www.brain-map.org/assets/images/";
+    var _pSiteWarnings = function() {
+        this.show_warning() = {};
+    }
+</script>
+<script type="text/javascript">
+    function initialize() {
+        /*** do your stuff, then initialize the portal plugin ***/
+        _pPortalOnLoad();
+    }
+</script>
+<style>
+  #header_content > a {
+  display: inline-block;
+  width: 250px;
+  height: 75px;
+  background-image:url("/_static/external_assets/images/Brain_Atlas_Logotype_SDK.png") !important;
+  background-size: 235px 37px;
+  background-position: 0px 20px;
+  background-repeat: no-repeat;
+  }
+</style>
+
+<script type="text/javascript" src="http://www.brain-map.org/external_assets/javascripts/portalHeader.js"></script>
+<link rel="stylesheet" type="text/css" href="/_static/external_assets/stylesheets/common_layout.css" />
+
+
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for workflow_engine.admin.job_admin</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">django.contrib</span> <span class="k">import</span> <span class="n">admin</span>
+<span class="kn">from</span> <span class="nn">workflow_engine.workflow_controller</span> <span class="k">import</span> <span class="n">WorkflowController</span>
+<span class="kn">from</span> <span class="nn">workflow_engine.models</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">Task</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">django.urls</span> <span class="k">import</span> <span class="n">reverse</span>
+<span class="kn">from</span> <span class="nn">django.utils.safestring</span> <span class="k">import</span> <span class="n">mark_safe</span>
+
+
+<div class="viewcode-block" id="kill_jobs"><a class="viewcode-back" href="../../../workflow_engine.admin.html#workflow_engine.admin.job_admin.kill_jobs">[docs]</a><span class="k">def</span> <span class="nf">kill_jobs</span><span class="p">(</span><span class="n">modeladmin</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">queryset</span><span class="p">):</span>
+    <span class="n">kill_jobs</span><span class="o">.</span><span class="n">short_description</span> <span class="o">=</span> \
+        <span class="s2">&quot;Kill jobs&quot;</span>
+
+    <span class="k">for</span> <span class="n">job</span> <span class="ow">in</span> <span class="n">queryset</span><span class="p">:</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">kill</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="set_killed"><a class="viewcode-back" href="../../../workflow_engine.admin.html#workflow_engine.admin.job_admin.set_killed">[docs]</a><span class="k">def</span> <span class="nf">set_killed</span><span class="p">(</span><span class="n">modeladmin</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">queryset</span><span class="p">):</span>
+    <span class="n">set_killed</span><span class="o">.</span><span class="n">short_description</span> <span class="o">=</span> \
+        <span class="s2">&quot;Set job state to killed&quot;</span>
+
+    <span class="k">for</span> <span class="n">job</span> <span class="ow">in</span> <span class="n">queryset</span><span class="p">:</span>
+        <span class="n">job</span><span class="o">.</span><span class="n">set_process_killed_state</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="start_jobs"><a class="viewcode-back" href="../../../workflow_engine.admin.html#workflow_engine.admin.job_admin.start_jobs">[docs]</a><span class="k">def</span> <span class="nf">start_jobs</span><span class="p">(</span><span class="n">modeladmin</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">queryset</span><span class="p">):</span>
+    <span class="n">start_jobs</span><span class="o">.</span><span class="n">short_description</span> <span class="o">=</span> \
+        <span class="s2">&quot;Start jobs&quot;</span>
+
+    <span class="n">job_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">queryset</span><span class="p">]</span>
+    <span class="n">WorkflowController</span><span class="o">.</span><span class="n">set_jobs_for_run_by_id</span><span class="p">(</span><span class="n">job_ids</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="enqueue_next"><a class="viewcode-back" href="../../../workflow_engine.admin.html#workflow_engine.admin.job_admin.enqueue_next">[docs]</a><span class="k">def</span> <span class="nf">enqueue_next</span><span class="p">(</span><span class="n">modeladmin</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">queryset</span><span class="p">):</span>
+    <span class="n">enqueue_next</span><span class="o">.</span><span class="n">short_description</span> <span class="o">=</span> \
+        <span class="s2">&quot;Enqueue next queue&quot;</span>
+
+    <span class="k">for</span> <span class="n">job_item</span> <span class="ow">in</span> <span class="n">queryset</span><span class="p">:</span>
+        <span class="n">WorkflowController</span><span class="o">.</span><span class="n">enqueue_next_queue_by_job_id</span><span class="p">(</span><span class="n">job_item</span><span class="o">.</span><span class="n">id</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="raise_priority"><a class="viewcode-back" href="../../../workflow_engine.admin.html#workflow_engine.admin.job_admin.raise_priority">[docs]</a><span class="k">def</span> <span class="nf">raise_priority</span><span class="p">(</span><span class="n">modeladmin</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">queryset</span><span class="p">):</span>
+    <span class="n">raise_priority</span><span class="o">.</span><span class="n">short_description</span> <span class="o">=</span> <span class="s2">&quot;Run sooner&quot;</span>
+
+    <span class="k">for</span> <span class="n">job_item</span> <span class="ow">in</span> <span class="n">queryset</span><span class="p">:</span>
+        <span class="n">job_item</span><span class="o">.</span><span class="n">priority</span> <span class="o">=</span> <span class="n">job_item</span><span class="o">.</span><span class="n">priority</span> <span class="o">-</span> <span class="mi">10</span>
+        <span class="n">job_item</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="lower_priority"><a class="viewcode-back" href="../../../workflow_engine.admin.html#workflow_engine.admin.job_admin.lower_priority">[docs]</a><span class="k">def</span> <span class="nf">lower_priority</span><span class="p">(</span><span class="n">modeladmin</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">queryset</span><span class="p">):</span>
+    <span class="n">lower_priority</span><span class="o">.</span><span class="n">short_description</span> <span class="o">=</span> <span class="s2">&quot;Run later&quot;</span>
+
+    <span class="k">for</span> <span class="n">job_item</span> <span class="ow">in</span> <span class="n">queryset</span><span class="p">:</span>
+        <span class="n">job_item</span><span class="o">.</span><span class="n">priority</span> <span class="o">=</span> <span class="n">job_item</span><span class="o">.</span><span class="n">priority</span> <span class="o">+</span> <span class="mi">10</span>
+        <span class="n">job_item</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="reset_priority"><a class="viewcode-back" href="../../../workflow_engine.admin.html#workflow_engine.admin.job_admin.reset_priority">[docs]</a><span class="k">def</span> <span class="nf">reset_priority</span><span class="p">(</span><span class="n">modeladmin</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">queryset</span><span class="p">):</span>
+    <span class="n">reset_priority</span><span class="o">.</span><span class="n">short_description</span> <span class="o">=</span> <span class="s2">&quot;Reset priority&quot;</span>
+
+    <span class="k">for</span> <span class="n">job_item</span> <span class="ow">in</span> <span class="n">queryset</span><span class="p">:</span>
+        <span class="n">job_item</span><span class="o">.</span><span class="n">priority</span> <span class="o">=</span> <span class="n">job_item</span><span class="o">.</span><span class="n">workflow_node</span><span class="o">.</span><span class="n">priority</span>
+        <span class="n">job_item</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="TaskInline"><a class="viewcode-back" href="../../../workflow_engine.admin.html#workflow_engine.admin.job_admin.TaskInline">[docs]</a><span class="k">class</span> <span class="nc">TaskInline</span><span class="p">(</span><span class="n">admin</span><span class="o">.</span><span class="n">StackedInline</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">Task</span>
+    <span class="n">extra</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+
+<div class="viewcode-block" id="JobAdmin"><a class="viewcode-back" href="../../../workflow_engine.admin.html#workflow_engine.admin.job_admin.JobAdmin">[docs]</a><span class="k">class</span> <span class="nc">JobAdmin</span><span class="p">(</span><span class="n">admin</span><span class="o">.</span><span class="n">ModelAdmin</span><span class="p">):</span>
+    <span class="n">search_fields</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">&#39;id&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;enqueued_object_id&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">list_display</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">&#39;id&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;enqueued_object_link&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;enqueued_object_state&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;start_run_time&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;duration&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;workflow_link&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;workflow_node_link&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;running_state&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;task_ids&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;archived&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="n">read_only_fields</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">&#39;workflow_link&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;workflow_node_link&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;enqueued_object_state&#39;</span>
+        <span class="p">)</span>
+    <span class="n">list_select_related</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">&#39;workflow_node&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;workflow_node__workflow&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="n">list_filter</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">&#39;workflow_node__workflow&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;workflow_node&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;running_state&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;archived&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="n">actions</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">kill_jobs</span><span class="p">,</span>
+        <span class="n">set_killed</span><span class="p">,</span>
+        <span class="n">start_jobs</span><span class="p">,</span>
+        <span class="n">enqueue_next</span><span class="p">,</span>
+        <span class="n">raise_priority</span><span class="p">,</span>
+        <span class="n">lower_priority</span><span class="p">,</span>
+        <span class="n">reset_priority</span><span class="p">)</span>
+    <span class="n">inlines</span> <span class="o">=</span> <span class="p">(</span><span class="n">TaskInline</span><span class="p">,)</span>
+
+<div class="viewcode-block" id="JobAdmin.get_queryset"><a class="viewcode-back" href="../../../workflow_engine.admin.html#workflow_engine.admin.job_admin.JobAdmin.get_queryset">[docs]</a>    <span class="k">def</span> <span class="nf">get_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">all_objects</span><span class="o">.</span><span class="n">get_queryset</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="JobAdmin.enqueued_object_state"><a class="viewcode-back" href="../../../workflow_engine.admin.html#workflow_engine.admin.job_admin.JobAdmin.enqueued_object_state">[docs]</a>    <span class="k">def</span> <span class="nf">enqueued_object_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job_object</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1">#enqueued_object = job_object.enqueued_object</span>
+            <span class="n">enqueued_object</span> <span class="o">=</span> <span class="n">job_object</span><span class="o">.</span><span class="n">enqueued_object_type</span><span class="o">.</span><span class="n">model_class</span><span class="p">(</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">job_object</span><span class="o">.</span><span class="n">enqueued_object_id</span><span class="p">)</span>
+            <span class="n">object_state</span> <span class="o">=</span> <span class="n">enqueued_object</span><span class="o">.</span><span class="n">object_state</span>
+            <span class="k">return</span> <span class="n">object_state</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;-&quot;</span></div>
+
+<div class="viewcode-block" id="JobAdmin.workflow_link"><a class="viewcode-back" href="../../../workflow_engine.admin.html#workflow_engine.admin.job_admin.JobAdmin.workflow_link">[docs]</a>    <span class="k">def</span> <span class="nf">workflow_link</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job_object</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">mark_safe</span><span class="p">(</span><span class="s1">&#39;&lt;a href=&quot;</span><span class="si">{}</span><span class="s1">&quot;&gt;</span><span class="si">{}</span><span class="s1">&lt;/a&gt;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">reverse</span><span class="p">(</span><span class="s2">&quot;admin:workflow_engine_workflow_change&quot;</span><span class="p">,</span>
+                    <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">job_object</span><span class="o">.</span><span class="n">workflow_node</span><span class="o">.</span><span class="n">workflow</span><span class="o">.</span><span class="n">pk</span><span class="p">,)),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">job_object</span><span class="o">.</span><span class="n">workflow_node</span><span class="o">.</span><span class="n">workflow</span><span class="p">)))</span></div>
+
+    <span class="n">workflow_link</span><span class="o">.</span><span class="n">short_description</span> <span class="o">=</span> <span class="s2">&quot;Workflow&quot;</span>
+
+<div class="viewcode-block" id="JobAdmin.workflow_node_link"><a class="viewcode-back" href="../../../workflow_engine.admin.html#workflow_engine.admin.job_admin.JobAdmin.workflow_node_link">[docs]</a>    <span class="k">def</span> <span class="nf">workflow_node_link</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job_object</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">mark_safe</span><span class="p">(</span><span class="s1">&#39;&lt;a href=&quot;</span><span class="si">{}</span><span class="s1">&quot;&gt;</span><span class="si">{}</span><span class="s1">&lt;/a&gt;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">reverse</span><span class="p">(</span><span class="s2">&quot;admin:workflow_engine_workflownode_change&quot;</span><span class="p">,</span>
+                    <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">job_object</span><span class="o">.</span><span class="n">workflow_node</span><span class="o">.</span><span class="n">pk</span><span class="p">,)),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">job_object</span><span class="o">.</span><span class="n">workflow_node</span><span class="p">)))</span></div>
+
+    <span class="n">workflow_node_link</span><span class="o">.</span><span class="n">short_description</span> <span class="o">=</span> <span class="s2">&quot;Workflow Node&quot;</span>
+
+<div class="viewcode-block" id="JobAdmin.enqueued_object_link"><a class="viewcode-back" href="../../../workflow_engine.admin.html#workflow_engine.admin.job_admin.JobAdmin.enqueued_object_link">[docs]</a>    <span class="k">def</span> <span class="nf">enqueued_object_link</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job_object</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">enqueued_object_type</span> <span class="o">=</span> <span class="n">job_object</span><span class="o">.</span><span class="n">enqueued_object_type</span>
+            <span class="n">enqueued_object</span> <span class="o">=</span> <span class="n">job_object</span><span class="o">.</span><span class="n">enqueued_object</span>
+
+            <span class="k">return</span> <span class="n">mark_safe</span><span class="p">(</span><span class="s1">&#39;&lt;a href=&quot;</span><span class="si">{}</span><span class="s1">&quot;&gt;</span><span class="si">{}</span><span class="s1">&lt;/a&gt;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">reverse</span><span class="p">(</span><span class="s2">&quot;admin:</span><span class="si">{}</span><span class="s2">_</span><span class="si">{}</span><span class="s2">_change&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">enqueued_object_type</span><span class="o">.</span><span class="n">app_label</span><span class="p">,</span>
+                    <span class="n">enqueued_object_type</span><span class="o">.</span><span class="n">model</span><span class="p">),</span>
+                    <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">enqueued_object</span><span class="o">.</span><span class="n">id</span><span class="p">,)),</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">enqueued_object</span><span class="p">)))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;-&#39;</span></div>
+
+    <span class="n">enqueued_object_link</span><span class="o">.</span><span class="n">short_description</span> <span class="o">=</span> <span class="s2">&quot;Enqueued Object&quot;</span>
+
+<div class="viewcode-block" id="JobAdmin.lookup_allowed"><a class="viewcode-back" href="../../../workflow_engine.admin.html#workflow_engine.admin.job_admin.JobAdmin.lookup_allowed">[docs]</a>    <span class="k">def</span> <span class="nf">lookup_allowed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="s1">&#39;id__in&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;running_state&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;workflow_node__job_queue__name&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;running_state__in&#39;</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">JobAdmin</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">lookup_allowed</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="../../../index.html">Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Install Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../settings.html">Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../customizing.html">Customization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../workflows.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../strategies.html">Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../configurations.html">Configuration Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../develop.html">Developers Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../authors.html">Authors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../workflow_engine.html">Source Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_engine.admin.html">workflow_engine.admin package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_engine.celery.html">workflow_engine.celery package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_engine.migrations.html">workflow_engine.migrations package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_engine.mixins.html">workflow_engine.mixins package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_engine.models.html">workflow_engine.models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_engine.serializers.html">workflow_engine.serializers package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_engine.strategies.html">workflow_engine.strategies package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_engine.views.html">workflow_engine.views package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_engine.worker.html">workflow_engine.worker package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../workflow_engine.worker.qsub.html">workflow_engine.worker.qsub package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../workflow_client.html">Client Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_client.ingest.html">workflow_client.ingest package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_client.nb_utils.html">workflow_client.nb_utils package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_client.tasks.html">workflow_client.tasks package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/AllenInstitute/BlueSkyWorkflowEngine">Github Profile</a></li>
+</ul>
+
+<h3> Questions </h3>
+<p class="questions">
+  Send any questions using the <a href="http://alleninstitute.org/contact_us/index.html">Send Us a Message</a> link below, 
+  or submit your question to <a href="http://stackoverflow.com/">StackOverflow</a> using with the 'allen-sdk' tag.
+</p>
+
+<p class="questions">
+  If you encounter any problems using the AllenSDK, please create an issue on <a href="http://github.com/alleninstitute/allensdk/issues/">Github's issue tracker</a>.
+</p>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+    <div class="footer" role="contentinfo">
+    </div>
+<script type="text/javascript" src="http://www.brain-map.org/external_assets/javascripts/portalFooter.js"></script>
+
+
+  </body>
+</html>

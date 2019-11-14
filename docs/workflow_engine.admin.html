@@ -1,0 +1,814 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>workflow_engine.admin package &#8212; Blue Sky Workflow Engine  documentation</title>
+    <link rel="stylesheet" href="_static/aibs_sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="workflow_engine.celery package" href="workflow_engine.celery.html" />
+    <link rel="prev" title="workflow_engine package" href="workflow_engine.html" /> 
+  </head>
+  <body>
+<link href="http://www.brain-map.org/assets/stylesheets/portal.css" media="screen" rel="stylesheet" type="text/css" />
+<script src="http://www.brain-map.org/assets/javascripts/portal.js" type="text/javascript"></script>
+<script src="http://www.brain-map.org/assets/javascripts/ga.js" type="text/javascript"></script>
+<script type="text/javascript">
+    var _pSupressBrowserFlashWarning = true;
+    var _pTabId = "pHome";
+    var _pMoreProjectsId = "pMoreProjects";
+    var _pImagePath = "http://www.brain-map.org/assets/images/";
+    var _pSiteWarnings = function() {
+        this.show_warning() = {};
+    }
+</script>
+<script type="text/javascript">
+    function initialize() {
+        /*** do your stuff, then initialize the portal plugin ***/
+        _pPortalOnLoad();
+    }
+</script>
+<style>
+  #header_content > a {
+  display: inline-block;
+  width: 250px;
+  height: 75px;
+  background-image:url("/_static/external_assets/images/Brain_Atlas_Logotype_SDK.png") !important;
+  background-size: 235px 37px;
+  background-position: 0px 20px;
+  background-repeat: no-repeat;
+  }
+</style>
+
+<script type="text/javascript" src="http://www.brain-map.org/external_assets/javascripts/portalHeader.js"></script>
+<link rel="stylesheet" type="text/css" href="/_static/external_assets/stylesheets/common_layout.css" />
+
+
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-workflow_engine.admin">
+<span id="workflow-engine-admin-package"></span><h1>workflow_engine.admin package<a class="headerlink" href="#module-workflow_engine.admin" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-workflow_engine.admin.configuration_admin">
+<span id="workflow-engine-admin-configuration-admin-module"></span><h2>workflow_engine.admin.configuration_admin module<a class="headerlink" href="#module-workflow_engine.admin.configuration_admin" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.admin.configuration_admin.ConfigurationAdmin">
+<em class="property">class </em><code class="descclassname">workflow_engine.admin.configuration_admin.</code><code class="descname">ConfigurationAdmin</code><span class="sig-paren">(</span><em>model</em>, <em>admin_site</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/configuration_admin.html#ConfigurationAdmin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.configuration_admin.ConfigurationAdmin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">django.contrib.admin.options.ModelAdmin</span></code></p>
+<dl class="method">
+<dt id="workflow_engine.admin.configuration_admin.ConfigurationAdmin.attachable_link">
+<code class="descname">attachable_link</code><span class="sig-paren">(</span><em>self</em>, <em>configuration_object</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/configuration_admin.html#ConfigurationAdmin.attachable_link"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.configuration_admin.ConfigurationAdmin.attachable_link" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.configuration_admin.ConfigurationAdmin.list_display">
+<code class="descname">list_display</code><em class="property"> = ('id', 'attachable_link', 'name', 'configuration_type', 'created_at', 'updated_at')</em><a class="headerlink" href="#workflow_engine.admin.configuration_admin.ConfigurationAdmin.list_display" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.configuration_admin.ConfigurationAdmin.list_filter">
+<code class="descname">list_filter</code><em class="property"> = ['content_type', 'configuration_type']</em><a class="headerlink" href="#workflow_engine.admin.configuration_admin.ConfigurationAdmin.list_filter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.configuration_admin.ConfigurationAdmin.list_select_related">
+<code class="descname">list_select_related</code><em class="property"> = []</em><a class="headerlink" href="#workflow_engine.admin.configuration_admin.ConfigurationAdmin.list_select_related" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.configuration_admin.ConfigurationAdmin.media">
+<code class="descname">media</code><a class="headerlink" href="#workflow_engine.admin.configuration_admin.ConfigurationAdmin.media" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.configuration_admin.ConfigurationAdmin.read_only_fields">
+<code class="descname">read_only_fields</code><em class="property"> = ('created_at', 'updated_at')</em><a class="headerlink" href="#workflow_engine.admin.configuration_admin.ConfigurationAdmin.read_only_fields" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.admin.configuration_inline">
+<span id="workflow-engine-admin-configuration-inline-module"></span><h2>workflow_engine.admin.configuration_inline module<a class="headerlink" href="#module-workflow_engine.admin.configuration_inline" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.admin.configuration_inline.ConfigurationInline">
+<em class="property">class </em><code class="descclassname">workflow_engine.admin.configuration_inline.</code><code class="descname">ConfigurationInline</code><span class="sig-paren">(</span><em>parent_model</em>, <em>admin_site</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/configuration_inline.html#ConfigurationInline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.configuration_inline.ConfigurationInline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">django.contrib.contenttypes.admin.GenericStackedInline</span></code></p>
+<dl class="attribute">
+<dt id="workflow_engine.admin.configuration_inline.ConfigurationInline.extra">
+<code class="descname">extra</code><em class="property"> = 0</em><a class="headerlink" href="#workflow_engine.admin.configuration_inline.ConfigurationInline.extra" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.configuration_inline.ConfigurationInline.fields">
+<code class="descname">fields</code><em class="property"> = ('name', 'configuration_type', 'json_object')</em><a class="headerlink" href="#workflow_engine.admin.configuration_inline.ConfigurationInline.fields" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.configuration_inline.ConfigurationInline.media">
+<code class="descname">media</code><a class="headerlink" href="#workflow_engine.admin.configuration_inline.ConfigurationInline.media" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.configuration_inline.ConfigurationInline.model">
+<code class="descname">model</code><a class="headerlink" href="#workflow_engine.admin.configuration_inline.ConfigurationInline.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="workflow_engine.models.html#workflow_engine.models.configuration.Configuration" title="workflow_engine.models.configuration.Configuration"><code class="xref py py-class docutils literal"><span class="pre">workflow_engine.models.configuration.Configuration</span></code></a></p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.admin.executable_admin">
+<span id="workflow-engine-admin-executable-admin-module"></span><h2>workflow_engine.admin.executable_admin module<a class="headerlink" href="#module-workflow_engine.admin.executable_admin" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.admin.executable_admin.ExecutableAdmin">
+<em class="property">class </em><code class="descclassname">workflow_engine.admin.executable_admin.</code><code class="descname">ExecutableAdmin</code><span class="sig-paren">(</span><em>model</em>, <em>admin_site</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/executable_admin.html#ExecutableAdmin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.executable_admin.ExecutableAdmin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">django.contrib.admin.options.ModelAdmin</span></code></p>
+<dl class="attribute">
+<dt id="workflow_engine.admin.executable_admin.ExecutableAdmin.actions">
+<code class="descname">actions</code><em class="property"> = []</em><a class="headerlink" href="#workflow_engine.admin.executable_admin.ExecutableAdmin.actions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.admin.executable_admin.ExecutableAdmin.get_queryset">
+<code class="descname">get_queryset</code><span class="sig-paren">(</span><em>self</em>, <em>request</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/executable_admin.html#ExecutableAdmin.get_queryset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.executable_admin.ExecutableAdmin.get_queryset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.executable_admin.ExecutableAdmin.inlines">
+<code class="descname">inlines</code><em class="property"> = (&lt;class 'workflow_engine.admin.configuration_inline.ConfigurationInline'&gt;,)</em><a class="headerlink" href="#workflow_engine.admin.executable_admin.ExecutableAdmin.inlines" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.executable_admin.ExecutableAdmin.list_display">
+<code class="descname">list_display</code><em class="property"> = ['id', 'name', 'description', 'executable_path', 'pbs_executable_path', 'static_arguments', 'pbs_queue', 'pbs_processor', 'pbs_walltime', 'created_at', 'updated_at', 'archived']</em><a class="headerlink" href="#workflow_engine.admin.executable_admin.ExecutableAdmin.list_display" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.executable_admin.ExecutableAdmin.list_filter">
+<code class="descname">list_filter</code><em class="property"> = ('archived',)</em><a class="headerlink" href="#workflow_engine.admin.executable_admin.ExecutableAdmin.list_filter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.executable_admin.ExecutableAdmin.list_select_related">
+<code class="descname">list_select_related</code><em class="property"> = []</em><a class="headerlink" href="#workflow_engine.admin.executable_admin.ExecutableAdmin.list_select_related" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.executable_admin.ExecutableAdmin.media">
+<code class="descname">media</code><a class="headerlink" href="#workflow_engine.admin.executable_admin.ExecutableAdmin.media" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.admin.job_admin">
+<span id="workflow-engine-admin-job-admin-module"></span><h2>workflow_engine.admin.job_admin module<a class="headerlink" href="#module-workflow_engine.admin.job_admin" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.admin.job_admin.JobAdmin">
+<em class="property">class </em><code class="descclassname">workflow_engine.admin.job_admin.</code><code class="descname">JobAdmin</code><span class="sig-paren">(</span><em>model</em>, <em>admin_site</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/job_admin.html#JobAdmin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.job_admin.JobAdmin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">django.contrib.admin.options.ModelAdmin</span></code></p>
+<dl class="attribute">
+<dt id="workflow_engine.admin.job_admin.JobAdmin.actions">
+<code class="descname">actions</code><em class="property"> = (&lt;function kill_jobs&gt;, &lt;function set_killed&gt;, &lt;function start_jobs&gt;, &lt;function enqueue_next&gt;, &lt;function raise_priority&gt;, &lt;function lower_priority&gt;, &lt;function reset_priority&gt;)</em><a class="headerlink" href="#workflow_engine.admin.job_admin.JobAdmin.actions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.admin.job_admin.JobAdmin.enqueued_object_link">
+<code class="descname">enqueued_object_link</code><span class="sig-paren">(</span><em>self</em>, <em>job_object</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/job_admin.html#JobAdmin.enqueued_object_link"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.job_admin.JobAdmin.enqueued_object_link" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.admin.job_admin.JobAdmin.enqueued_object_state">
+<code class="descname">enqueued_object_state</code><span class="sig-paren">(</span><em>self</em>, <em>job_object</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/job_admin.html#JobAdmin.enqueued_object_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.job_admin.JobAdmin.enqueued_object_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.admin.job_admin.JobAdmin.get_queryset">
+<code class="descname">get_queryset</code><span class="sig-paren">(</span><em>self</em>, <em>request</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/job_admin.html#JobAdmin.get_queryset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.job_admin.JobAdmin.get_queryset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.job_admin.JobAdmin.inlines">
+<code class="descname">inlines</code><em class="property"> = (&lt;class 'workflow_engine.admin.job_admin.TaskInline'&gt;,)</em><a class="headerlink" href="#workflow_engine.admin.job_admin.JobAdmin.inlines" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.job_admin.JobAdmin.list_display">
+<code class="descname">list_display</code><em class="property"> = ('id', 'enqueued_object_link', 'enqueued_object_state', 'start_run_time', 'duration', 'workflow_link', 'workflow_node_link', 'running_state', 'task_ids', 'archived')</em><a class="headerlink" href="#workflow_engine.admin.job_admin.JobAdmin.list_display" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.job_admin.JobAdmin.list_filter">
+<code class="descname">list_filter</code><em class="property"> = ('workflow_node__workflow', 'workflow_node', 'running_state', 'archived')</em><a class="headerlink" href="#workflow_engine.admin.job_admin.JobAdmin.list_filter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.job_admin.JobAdmin.list_select_related">
+<code class="descname">list_select_related</code><em class="property"> = ('workflow_node', 'workflow_node__workflow')</em><a class="headerlink" href="#workflow_engine.admin.job_admin.JobAdmin.list_select_related" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.admin.job_admin.JobAdmin.lookup_allowed">
+<code class="descname">lookup_allowed</code><span class="sig-paren">(</span><em>self</em>, <em>key</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/job_admin.html#JobAdmin.lookup_allowed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.job_admin.JobAdmin.lookup_allowed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.job_admin.JobAdmin.media">
+<code class="descname">media</code><a class="headerlink" href="#workflow_engine.admin.job_admin.JobAdmin.media" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.job_admin.JobAdmin.read_only_fields">
+<code class="descname">read_only_fields</code><em class="property"> = ('workflow_link', 'workflow_node_link', 'enqueued_object_state')</em><a class="headerlink" href="#workflow_engine.admin.job_admin.JobAdmin.read_only_fields" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.job_admin.JobAdmin.search_fields">
+<code class="descname">search_fields</code><em class="property"> = ('id', 'enqueued_object_id')</em><a class="headerlink" href="#workflow_engine.admin.job_admin.JobAdmin.search_fields" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.admin.job_admin.JobAdmin.workflow_link">
+<code class="descname">workflow_link</code><span class="sig-paren">(</span><em>self</em>, <em>job_object</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/job_admin.html#JobAdmin.workflow_link"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.job_admin.JobAdmin.workflow_link" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.admin.job_admin.JobAdmin.workflow_node_link">
+<code class="descname">workflow_node_link</code><span class="sig-paren">(</span><em>self</em>, <em>job_object</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/job_admin.html#JobAdmin.workflow_node_link"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.job_admin.JobAdmin.workflow_node_link" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="workflow_engine.admin.job_admin.TaskInline">
+<em class="property">class </em><code class="descclassname">workflow_engine.admin.job_admin.</code><code class="descname">TaskInline</code><span class="sig-paren">(</span><em>parent_model</em>, <em>admin_site</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/job_admin.html#TaskInline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.job_admin.TaskInline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">django.contrib.admin.options.StackedInline</span></code></p>
+<dl class="attribute">
+<dt id="workflow_engine.admin.job_admin.TaskInline.extra">
+<code class="descname">extra</code><em class="property"> = 0</em><a class="headerlink" href="#workflow_engine.admin.job_admin.TaskInline.extra" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.job_admin.TaskInline.media">
+<code class="descname">media</code><a class="headerlink" href="#workflow_engine.admin.job_admin.TaskInline.media" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.job_admin.TaskInline.model">
+<code class="descname">model</code><a class="headerlink" href="#workflow_engine.admin.job_admin.TaskInline.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="workflow_engine.models.html#workflow_engine.models.task.Task" title="workflow_engine.models.task.Task"><code class="xref py py-class docutils literal"><span class="pre">workflow_engine.models.task.Task</span></code></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.admin.job_admin.enqueue_next">
+<code class="descclassname">workflow_engine.admin.job_admin.</code><code class="descname">enqueue_next</code><span class="sig-paren">(</span><em>modeladmin</em>, <em>request</em>, <em>queryset</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/job_admin.html#enqueue_next"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.job_admin.enqueue_next" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.admin.job_admin.kill_jobs">
+<code class="descclassname">workflow_engine.admin.job_admin.</code><code class="descname">kill_jobs</code><span class="sig-paren">(</span><em>modeladmin</em>, <em>request</em>, <em>queryset</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/job_admin.html#kill_jobs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.job_admin.kill_jobs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.admin.job_admin.lower_priority">
+<code class="descclassname">workflow_engine.admin.job_admin.</code><code class="descname">lower_priority</code><span class="sig-paren">(</span><em>modeladmin</em>, <em>request</em>, <em>queryset</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/job_admin.html#lower_priority"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.job_admin.lower_priority" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.admin.job_admin.raise_priority">
+<code class="descclassname">workflow_engine.admin.job_admin.</code><code class="descname">raise_priority</code><span class="sig-paren">(</span><em>modeladmin</em>, <em>request</em>, <em>queryset</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/job_admin.html#raise_priority"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.job_admin.raise_priority" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.admin.job_admin.reset_priority">
+<code class="descclassname">workflow_engine.admin.job_admin.</code><code class="descname">reset_priority</code><span class="sig-paren">(</span><em>modeladmin</em>, <em>request</em>, <em>queryset</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/job_admin.html#reset_priority"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.job_admin.reset_priority" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.admin.job_admin.set_killed">
+<code class="descclassname">workflow_engine.admin.job_admin.</code><code class="descname">set_killed</code><span class="sig-paren">(</span><em>modeladmin</em>, <em>request</em>, <em>queryset</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/job_admin.html#set_killed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.job_admin.set_killed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.admin.job_admin.start_jobs">
+<code class="descclassname">workflow_engine.admin.job_admin.</code><code class="descname">start_jobs</code><span class="sig-paren">(</span><em>modeladmin</em>, <em>request</em>, <em>queryset</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/job_admin.html#start_jobs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.job_admin.start_jobs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.admin.job_queue_admin">
+<span id="workflow-engine-admin-job-queue-admin-module"></span><h2>workflow_engine.admin.job_queue_admin module<a class="headerlink" href="#module-workflow_engine.admin.job_queue_admin" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.admin.job_queue_admin.JobQueueAdmin">
+<em class="property">class </em><code class="descclassname">workflow_engine.admin.job_queue_admin.</code><code class="descname">JobQueueAdmin</code><span class="sig-paren">(</span><em>model</em>, <em>admin_site</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/job_queue_admin.html#JobQueueAdmin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.job_queue_admin.JobQueueAdmin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">django.contrib.admin.options.ModelAdmin</span></code></p>
+<dl class="attribute">
+<dt id="workflow_engine.admin.job_queue_admin.JobQueueAdmin.actions">
+<code class="descname">actions</code><em class="property"> = []</em><a class="headerlink" href="#workflow_engine.admin.job_queue_admin.JobQueueAdmin.actions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.admin.job_queue_admin.JobQueueAdmin.executable_link">
+<code class="descname">executable_link</code><span class="sig-paren">(</span><em>self</em>, <em>job_queue_object</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/job_queue_admin.html#JobQueueAdmin.executable_link"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.job_queue_admin.JobQueueAdmin.executable_link" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.admin.job_queue_admin.JobQueueAdmin.get_queryset">
+<code class="descname">get_queryset</code><span class="sig-paren">(</span><em>self</em>, <em>request</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/job_queue_admin.html#JobQueueAdmin.get_queryset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.job_queue_admin.JobQueueAdmin.get_queryset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.job_queue_admin.JobQueueAdmin.inlines">
+<code class="descname">inlines</code><em class="property"> = []</em><a class="headerlink" href="#workflow_engine.admin.job_queue_admin.JobQueueAdmin.inlines" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.job_queue_admin.JobQueueAdmin.list_display">
+<code class="descname">list_display</code><em class="property"> = ['id', 'name', 'description', 'job_strategy_class', 'enqueued_object_type', 'executable_link', 'created_at', 'updated_at', 'archived']</em><a class="headerlink" href="#workflow_engine.admin.job_queue_admin.JobQueueAdmin.list_display" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.job_queue_admin.JobQueueAdmin.list_filter">
+<code class="descname">list_filter</code><em class="property"> = ['archived']</em><a class="headerlink" href="#workflow_engine.admin.job_queue_admin.JobQueueAdmin.list_filter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.job_queue_admin.JobQueueAdmin.list_select_related">
+<code class="descname">list_select_related</code><em class="property"> = ('executable',)</em><a class="headerlink" href="#workflow_engine.admin.job_queue_admin.JobQueueAdmin.list_select_related" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.job_queue_admin.JobQueueAdmin.media">
+<code class="descname">media</code><a class="headerlink" href="#workflow_engine.admin.job_queue_admin.JobQueueAdmin.media" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.job_queue_admin.JobQueueAdmin.read_only_fields">
+<code class="descname">read_only_fields</code><em class="property"> = ('executable_link',)</em><a class="headerlink" href="#workflow_engine.admin.job_queue_admin.JobQueueAdmin.read_only_fields" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.admin.job_queue_admin.JobQueueAdmin.workflow_link">
+<code class="descname">workflow_link</code><span class="sig-paren">(</span><em>self</em>, <em>job_object</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/job_queue_admin.html#JobQueueAdmin.workflow_link"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.job_queue_admin.JobQueueAdmin.workflow_link" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.admin.task_admin">
+<span id="workflow-engine-admin-task-admin-module"></span><h2>workflow_engine.admin.task_admin module<a class="headerlink" href="#module-workflow_engine.admin.task_admin" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.admin.task_admin.TaskAdmin">
+<em class="property">class </em><code class="descclassname">workflow_engine.admin.task_admin.</code><code class="descname">TaskAdmin</code><span class="sig-paren">(</span><em>model</em>, <em>admin_site</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/task_admin.html#TaskAdmin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.task_admin.TaskAdmin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">django.contrib.admin.options.ModelAdmin</span></code></p>
+<dl class="method">
+<dt id="workflow_engine.admin.task_admin.TaskAdmin.change_view">
+<code class="descname">change_view</code><span class="sig-paren">(</span><em>self</em>, <em>request</em>, <em>object_id</em>, <em>extra_context=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/task_admin.html#TaskAdmin.change_view"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.task_admin.TaskAdmin.change_view" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.admin.task_admin.TaskAdmin.enqueued_task_object_link">
+<code class="descname">enqueued_task_object_link</code><span class="sig-paren">(</span><em>self</em>, <em>task_object</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/task_admin.html#TaskAdmin.enqueued_task_object_link"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.task_admin.TaskAdmin.enqueued_task_object_link" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.admin.task_admin.TaskAdmin.get_queryset">
+<code class="descname">get_queryset</code><span class="sig-paren">(</span><em>self</em>, <em>request</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/task_admin.html#TaskAdmin.get_queryset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.task_admin.TaskAdmin.get_queryset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.task_admin.TaskAdmin.list_display">
+<code class="descname">list_display</code><em class="property"> = ('id', 'enqueued_task_object_link', 'pbs_id', 'storage_link', 'duration', 'retry_count', 'start_run_time', 'end_run_time', 'running_state')</em><a class="headerlink" href="#workflow_engine.admin.task_admin.TaskAdmin.list_display" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.task_admin.TaskAdmin.list_filter">
+<code class="descname">list_filter</code><em class="property"> = ('job__workflow_node__workflow', 'job__workflow_node', 'running_state', 'archived')</em><a class="headerlink" href="#workflow_engine.admin.task_admin.TaskAdmin.list_filter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.task_admin.TaskAdmin.list_select_related">
+<code class="descname">list_select_related</code><em class="property"> = ('job__workflow_node', 'job__workflow_node__workflow')</em><a class="headerlink" href="#workflow_engine.admin.task_admin.TaskAdmin.list_select_related" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.task_admin.TaskAdmin.media">
+<code class="descname">media</code><a class="headerlink" href="#workflow_engine.admin.task_admin.TaskAdmin.media" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.task_admin.TaskAdmin.read_only_fields">
+<code class="descname">read_only_fields</code><em class="property"> = ('start_run_time', 'end_run_time')</em><a class="headerlink" href="#workflow_engine.admin.task_admin.TaskAdmin.read_only_fields" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.task_admin.TaskAdmin.search_fields">
+<code class="descname">search_fields</code><em class="property"> = ('id', 'enqueued_task_object_id', 'pbs_id')</em><a class="headerlink" href="#workflow_engine.admin.task_admin.TaskAdmin.search_fields" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.admin.task_admin.TaskAdmin.storage_link">
+<code class="descname">storage_link</code><span class="sig-paren">(</span><em>self</em>, <em>task_object</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/task_admin.html#TaskAdmin.storage_link"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.task_admin.TaskAdmin.storage_link" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.admin.task_admin.TaskAdmin.workflow_link">
+<code class="descname">workflow_link</code><span class="sig-paren">(</span><em>self</em>, <em>job_object</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/task_admin.html#TaskAdmin.workflow_link"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.task_admin.TaskAdmin.workflow_link" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.admin.task_admin.TaskAdmin.workflow_node_link">
+<code class="descname">workflow_node_link</code><span class="sig-paren">(</span><em>self</em>, <em>job_object</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/task_admin.html#TaskAdmin.workflow_node_link"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.task_admin.TaskAdmin.workflow_node_link" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.admin.well_known_file_admin">
+<span id="workflow-engine-admin-well-known-file-admin-module"></span><h2>workflow_engine.admin.well_known_file_admin module<a class="headerlink" href="#module-workflow_engine.admin.well_known_file_admin" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.admin.well_known_file_admin.WellKnownFileAdmin">
+<em class="property">class </em><code class="descclassname">workflow_engine.admin.well_known_file_admin.</code><code class="descname">WellKnownFileAdmin</code><span class="sig-paren">(</span><em>model</em>, <em>admin_site</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/well_known_file_admin.html#WellKnownFileAdmin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.well_known_file_admin.WellKnownFileAdmin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">django.contrib.admin.options.ModelAdmin</span></code></p>
+<dl class="method">
+<dt id="workflow_engine.admin.well_known_file_admin.WellKnownFileAdmin.attachable_link">
+<code class="descname">attachable_link</code><span class="sig-paren">(</span><em>self</em>, <em>well_known_file_object</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/well_known_file_admin.html#WellKnownFileAdmin.attachable_link"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.well_known_file_admin.WellKnownFileAdmin.attachable_link" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.well_known_file_admin.WellKnownFileAdmin.list_display">
+<code class="descname">list_display</code><em class="property"> = ('id', 'attachable_link', 'record_dir', 'record_filename', 'well_known_file_type', 'created_at', 'updated_at')</em><a class="headerlink" href="#workflow_engine.admin.well_known_file_admin.WellKnownFileAdmin.list_display" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.well_known_file_admin.WellKnownFileAdmin.list_filter">
+<code class="descname">list_filter</code><em class="property"> = ['attachable_type', 'well_known_file_type']</em><a class="headerlink" href="#workflow_engine.admin.well_known_file_admin.WellKnownFileAdmin.list_filter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.well_known_file_admin.WellKnownFileAdmin.list_select_related">
+<code class="descname">list_select_related</code><em class="property"> = []</em><a class="headerlink" href="#workflow_engine.admin.well_known_file_admin.WellKnownFileAdmin.list_select_related" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.well_known_file_admin.WellKnownFileAdmin.media">
+<code class="descname">media</code><a class="headerlink" href="#workflow_engine.admin.well_known_file_admin.WellKnownFileAdmin.media" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.well_known_file_admin.WellKnownFileAdmin.read_only_fields">
+<code class="descname">read_only_fields</code><em class="property"> = ('record_dir', 'record_filename', 'created_at', 'updated_at')</em><a class="headerlink" href="#workflow_engine.admin.well_known_file_admin.WellKnownFileAdmin.read_only_fields" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.admin.well_known_file_admin.WellKnownFileAdmin.record_dir">
+<code class="descname">record_dir</code><span class="sig-paren">(</span><em>self</em>, <em>wkf_object</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/well_known_file_admin.html#WellKnownFileAdmin.record_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.well_known_file_admin.WellKnownFileAdmin.record_dir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.admin.well_known_file_admin.WellKnownFileAdmin.record_filename">
+<code class="descname">record_filename</code><span class="sig-paren">(</span><em>self</em>, <em>wkf_object</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/well_known_file_admin.html#WellKnownFileAdmin.record_filename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.well_known_file_admin.WellKnownFileAdmin.record_filename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.admin.workflow_admin">
+<span id="workflow-engine-admin-workflow-admin-module"></span><h2>workflow_engine.admin.workflow_admin module<a class="headerlink" href="#module-workflow_engine.admin.workflow_admin" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.admin.workflow_admin.WorkflowAdmin">
+<em class="property">class </em><code class="descclassname">workflow_engine.admin.workflow_admin.</code><code class="descname">WorkflowAdmin</code><span class="sig-paren">(</span><em>model</em>, <em>admin_site</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/workflow_admin.html#WorkflowAdmin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.workflow_admin.WorkflowAdmin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">django.contrib.admin.options.ModelAdmin</span></code></p>
+<dl class="class">
+<dt id="workflow_engine.admin.workflow_admin.WorkflowAdmin.Media">
+<em class="property">class </em><code class="descname">Media</code><a class="reference internal" href="_modules/workflow_engine/admin/workflow_admin.html#WorkflowAdmin.Media"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.workflow_admin.WorkflowAdmin.Media" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="workflow_engine.admin.workflow_admin.WorkflowAdmin.Media.css">
+<code class="descname">css</code><em class="property"> = {'all': ('workflow_engine/css/dagre.css',)}</em><a class="headerlink" href="#workflow_engine.admin.workflow_admin.WorkflowAdmin.Media.css" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.workflow_admin.WorkflowAdmin.Media.js">
+<code class="descname">js</code><em class="property"> = ('workflow_engine/javascript/cytoscape.min.js', 'workflow_engine/javascript/workflow_graph.js')</em><a class="headerlink" href="#workflow_engine.admin.workflow_admin.WorkflowAdmin.Media.js" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.workflow_admin.WorkflowAdmin.actions">
+<code class="descname">actions</code><em class="property"> = []</em><a class="headerlink" href="#workflow_engine.admin.workflow_admin.WorkflowAdmin.actions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.workflow_admin.WorkflowAdmin.change_list_template">
+<code class="descname">change_list_template</code><em class="property"> = 'admin/workflow_change_list.html'</em><a class="headerlink" href="#workflow_engine.admin.workflow_admin.WorkflowAdmin.change_list_template" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.admin.workflow_admin.WorkflowAdmin.changelist_view">
+<code class="descname">changelist_view</code><span class="sig-paren">(</span><em>self</em>, <em>request</em>, <em>extra_context=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/workflow_admin.html#WorkflowAdmin.changelist_view"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.workflow_admin.WorkflowAdmin.changelist_view" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.admin.workflow_admin.WorkflowAdmin.get_queryset">
+<code class="descname">get_queryset</code><span class="sig-paren">(</span><em>self</em>, <em>request</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/workflow_admin.html#WorkflowAdmin.get_queryset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.workflow_admin.WorkflowAdmin.get_queryset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.workflow_admin.WorkflowAdmin.inlines">
+<code class="descname">inlines</code><em class="property"> = []</em><a class="headerlink" href="#workflow_engine.admin.workflow_admin.WorkflowAdmin.inlines" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.workflow_admin.WorkflowAdmin.list_display">
+<code class="descname">list_display</code><em class="property"> = ['id', 'name', 'description', 'disabled', 'use_pbs', 'archived']</em><a class="headerlink" href="#workflow_engine.admin.workflow_admin.WorkflowAdmin.list_display" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.workflow_admin.WorkflowAdmin.list_filter">
+<code class="descname">list_filter</code><em class="property"> = ['archived']</em><a class="headerlink" href="#workflow_engine.admin.workflow_admin.WorkflowAdmin.list_filter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.workflow_admin.WorkflowAdmin.list_select_related">
+<code class="descname">list_select_related</code><em class="property"> = []</em><a class="headerlink" href="#workflow_engine.admin.workflow_admin.WorkflowAdmin.list_select_related" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.workflow_admin.WorkflowAdmin.media">
+<code class="descname">media</code><a class="headerlink" href="#workflow_engine.admin.workflow_admin.WorkflowAdmin.media" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.admin.workflow_edge_admin">
+<span id="workflow-engine-admin-workflow-edge-admin-module"></span><h2>workflow_engine.admin.workflow_edge_admin module<a class="headerlink" href="#module-workflow_engine.admin.workflow_edge_admin" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.admin.workflow_edge_admin.WorkflowEdgeAdmin">
+<em class="property">class </em><code class="descclassname">workflow_engine.admin.workflow_edge_admin.</code><code class="descname">WorkflowEdgeAdmin</code><span class="sig-paren">(</span><em>model</em>, <em>admin_site</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/workflow_edge_admin.html#WorkflowEdgeAdmin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.workflow_edge_admin.WorkflowEdgeAdmin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">django.contrib.admin.options.ModelAdmin</span></code></p>
+<dl class="attribute">
+<dt id="workflow_engine.admin.workflow_edge_admin.WorkflowEdgeAdmin.actions">
+<code class="descname">actions</code><em class="property"> = []</em><a class="headerlink" href="#workflow_engine.admin.workflow_edge_admin.WorkflowEdgeAdmin.actions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.admin.workflow_edge_admin.WorkflowEdgeAdmin.get_queryset">
+<code class="descname">get_queryset</code><span class="sig-paren">(</span><em>self</em>, <em>request</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/workflow_edge_admin.html#WorkflowEdgeAdmin.get_queryset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.workflow_edge_admin.WorkflowEdgeAdmin.get_queryset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.workflow_edge_admin.WorkflowEdgeAdmin.list_display">
+<code class="descname">list_display</code><em class="property"> = ['id', 'source', 'sink', 'disabled', 'archived']</em><a class="headerlink" href="#workflow_engine.admin.workflow_edge_admin.WorkflowEdgeAdmin.list_display" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.workflow_edge_admin.WorkflowEdgeAdmin.list_filter">
+<code class="descname">list_filter</code><em class="property"> = ['workflow', 'disabled', 'archived']</em><a class="headerlink" href="#workflow_engine.admin.workflow_edge_admin.WorkflowEdgeAdmin.list_filter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.workflow_edge_admin.WorkflowEdgeAdmin.list_select_related">
+<code class="descname">list_select_related</code><em class="property"> = ()</em><a class="headerlink" href="#workflow_engine.admin.workflow_edge_admin.WorkflowEdgeAdmin.list_select_related" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.workflow_edge_admin.WorkflowEdgeAdmin.media">
+<code class="descname">media</code><a class="headerlink" href="#workflow_engine.admin.workflow_edge_admin.WorkflowEdgeAdmin.media" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.workflow_edge_admin.WorkflowEdgeAdmin.read_only_fields">
+<code class="descname">read_only_fields</code><em class="property"> = ()</em><a class="headerlink" href="#workflow_engine.admin.workflow_edge_admin.WorkflowEdgeAdmin.read_only_fields" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.admin.workflow_node_admin">
+<span id="workflow-engine-admin-workflow-node-admin-module"></span><h2>workflow_engine.admin.workflow_node_admin module<a class="headerlink" href="#module-workflow_engine.admin.workflow_node_admin" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.admin.workflow_node_admin.SinksInline">
+<em class="property">class </em><code class="descclassname">workflow_engine.admin.workflow_node_admin.</code><code class="descname">SinksInline</code><span class="sig-paren">(</span><em>parent_model</em>, <em>admin_site</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/workflow_node_admin.html#SinksInline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.workflow_node_admin.SinksInline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">django.contrib.admin.options.TabularInline</span></code></p>
+<dl class="attribute">
+<dt id="workflow_engine.admin.workflow_node_admin.SinksInline.extra">
+<code class="descname">extra</code><em class="property"> = 0</em><a class="headerlink" href="#workflow_engine.admin.workflow_node_admin.SinksInline.extra" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.workflow_node_admin.SinksInline.fk_name">
+<code class="descname">fk_name</code><em class="property"> = 'sink'</em><a class="headerlink" href="#workflow_engine.admin.workflow_node_admin.SinksInline.fk_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.workflow_node_admin.SinksInline.media">
+<code class="descname">media</code><a class="headerlink" href="#workflow_engine.admin.workflow_node_admin.SinksInline.media" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.workflow_node_admin.SinksInline.model">
+<code class="descname">model</code><a class="headerlink" href="#workflow_engine.admin.workflow_node_admin.SinksInline.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="workflow_engine.models.html#workflow_engine.models.workflow_edge.WorkflowEdge" title="workflow_engine.models.workflow_edge.WorkflowEdge"><code class="xref py py-class docutils literal"><span class="pre">workflow_engine.models.workflow_edge.WorkflowEdge</span></code></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="workflow_engine.admin.workflow_node_admin.SourcesInline">
+<em class="property">class </em><code class="descclassname">workflow_engine.admin.workflow_node_admin.</code><code class="descname">SourcesInline</code><span class="sig-paren">(</span><em>parent_model</em>, <em>admin_site</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/workflow_node_admin.html#SourcesInline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.workflow_node_admin.SourcesInline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">django.contrib.admin.options.TabularInline</span></code></p>
+<dl class="attribute">
+<dt id="workflow_engine.admin.workflow_node_admin.SourcesInline.extra">
+<code class="descname">extra</code><em class="property"> = 0</em><a class="headerlink" href="#workflow_engine.admin.workflow_node_admin.SourcesInline.extra" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.workflow_node_admin.SourcesInline.fk_name">
+<code class="descname">fk_name</code><em class="property"> = 'source'</em><a class="headerlink" href="#workflow_engine.admin.workflow_node_admin.SourcesInline.fk_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.workflow_node_admin.SourcesInline.media">
+<code class="descname">media</code><a class="headerlink" href="#workflow_engine.admin.workflow_node_admin.SourcesInline.media" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.workflow_node_admin.SourcesInline.model">
+<code class="descname">model</code><a class="headerlink" href="#workflow_engine.admin.workflow_node_admin.SourcesInline.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="workflow_engine.models.html#workflow_engine.models.workflow_edge.WorkflowEdge" title="workflow_engine.models.workflow_edge.WorkflowEdge"><code class="xref py py-class docutils literal"><span class="pre">workflow_engine.models.workflow_edge.WorkflowEdge</span></code></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="workflow_engine.admin.workflow_node_admin.WorkflowNodeAdmin">
+<em class="property">class </em><code class="descclassname">workflow_engine.admin.workflow_node_admin.</code><code class="descname">WorkflowNodeAdmin</code><span class="sig-paren">(</span><em>model</em>, <em>admin_site</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/workflow_node_admin.html#WorkflowNodeAdmin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.workflow_node_admin.WorkflowNodeAdmin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">django.contrib.admin.options.ModelAdmin</span></code></p>
+<dl class="attribute">
+<dt id="workflow_engine.admin.workflow_node_admin.WorkflowNodeAdmin.actions">
+<code class="descname">actions</code><em class="property"> = ()</em><a class="headerlink" href="#workflow_engine.admin.workflow_node_admin.WorkflowNodeAdmin.actions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.workflow_node_admin.WorkflowNodeAdmin.filter_horizontal">
+<code class="descname">filter_horizontal</code><em class="property"> = ('sources', 'sinks')</em><a class="headerlink" href="#workflow_engine.admin.workflow_node_admin.WorkflowNodeAdmin.filter_horizontal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.admin.workflow_node_admin.WorkflowNodeAdmin.get_queryset">
+<code class="descname">get_queryset</code><span class="sig-paren">(</span><em>self</em>, <em>request</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/workflow_node_admin.html#WorkflowNodeAdmin.get_queryset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.workflow_node_admin.WorkflowNodeAdmin.get_queryset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.workflow_node_admin.WorkflowNodeAdmin.inlines">
+<code class="descname">inlines</code><em class="property"> = (&lt;class 'workflow_engine.admin.configuration_inline.ConfigurationInline'&gt;, &lt;class 'workflow_engine.admin.workflow_node_admin.SourcesInline'&gt;, &lt;class 'workflow_engine.admin.workflow_node_admin.SinksInline'&gt;)</em><a class="headerlink" href="#workflow_engine.admin.workflow_node_admin.WorkflowNodeAdmin.inlines" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.workflow_node_admin.WorkflowNodeAdmin.list_display">
+<code class="descname">list_display</code><em class="property"> = ('id', 'job_queue', 'workflow', 'batch_size', 'priority', 'overwrite_previous_job', 'max_retries', 'disabled', 'archived')</em><a class="headerlink" href="#workflow_engine.admin.workflow_node_admin.WorkflowNodeAdmin.list_display" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.workflow_node_admin.WorkflowNodeAdmin.list_filter">
+<code class="descname">list_filter</code><em class="property"> = ('workflow', 'disabled', 'archived')</em><a class="headerlink" href="#workflow_engine.admin.workflow_node_admin.WorkflowNodeAdmin.list_filter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.workflow_node_admin.WorkflowNodeAdmin.list_select_related">
+<code class="descname">list_select_related</code><em class="property"> = ()</em><a class="headerlink" href="#workflow_engine.admin.workflow_node_admin.WorkflowNodeAdmin.list_select_related" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.workflow_node_admin.WorkflowNodeAdmin.media">
+<code class="descname">media</code><a class="headerlink" href="#workflow_engine.admin.workflow_node_admin.WorkflowNodeAdmin.media" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.workflow_node_admin.WorkflowNodeAdmin.read_only_fields">
+<code class="descname">read_only_fields</code><em class="property"> = ()</em><a class="headerlink" href="#workflow_engine.admin.workflow_node_admin.WorkflowNodeAdmin.read_only_fields" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.admin.workflow_node_admin.WorkflowNodeAdmin.search_fields">
+<code class="descname">search_fields</code><em class="property"> = ('job_queue__name',)</em><a class="headerlink" href="#workflow_engine.admin.workflow_node_admin.WorkflowNodeAdmin.search_fields" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.admin.workflow_node_admin.WorkflowNodeAdmin.sink_names">
+<code class="descname">sink_names</code><span class="sig-paren">(</span><em>self</em>, <em>node_obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/workflow_node_admin.html#WorkflowNodeAdmin.sink_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.workflow_node_admin.WorkflowNodeAdmin.sink_names" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.admin.workflow_node_admin.WorkflowNodeAdmin.source_names">
+<code class="descname">source_names</code><span class="sig-paren">(</span><em>self</em>, <em>node_obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/admin/workflow_node_admin.html#WorkflowNodeAdmin.source_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.admin.workflow_node_admin.WorkflowNodeAdmin.source_names" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="customizing.html">Customization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="strategies.html">Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configurations.html">Configuration Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop.html">Developers Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">Authors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="workflow_engine.html">Source Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">workflow_engine.admin package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.celery.html">workflow_engine.celery package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.migrations.html">workflow_engine.migrations package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.mixins.html">workflow_engine.mixins package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.models.html">workflow_engine.models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.serializers.html">workflow_engine.serializers package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.strategies.html">workflow_engine.strategies package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.views.html">workflow_engine.views package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.worker.html">workflow_engine.worker package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="workflow_engine.worker.qsub.html">workflow_engine.worker.qsub package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workflow_client.html">Client Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="workflow_client.ingest.html">workflow_client.ingest package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_client.nb_utils.html">workflow_client.nb_utils package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_client.tasks.html">workflow_client.tasks package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/AllenInstitute/BlueSkyWorkflowEngine">Github Profile</a></li>
+</ul>
+
+<h3> Questions </h3>
+<p class="questions">
+  Send any questions using the <a href="http://alleninstitute.org/contact_us/index.html">Send Us a Message</a> link below, 
+  or submit your question to <a href="http://stackoverflow.com/">StackOverflow</a> using with the 'allen-sdk' tag.
+</p>
+
+<p class="questions">
+  If you encounter any problems using the AllenSDK, please create an issue on <a href="http://github.com/alleninstitute/allensdk/issues/">Github's issue tracker</a>.
+</p>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+    <div class="footer" role="contentinfo">
+    </div>
+<script type="text/javascript" src="http://www.brain-map.org/external_assets/javascripts/portalFooter.js"></script>
+
+
+  </body>
+</html>

@@ -6,6 +6,18 @@
 #PBS -r n
 #PBS -j oe
 #PBS -o {{ task.log_file }}
+
+source /etc/profile
+module load anaconda
+
+export TMPDIR="/scratch/capacity/${PBS_JOBID}/"
+
+{% for evar in task.environment_vars() %}
+export {{ evar }}
+{% endfor %}
+
 umask 002
+source activate {{ settings.PBS_CONDA_ENV }}
+
 {{ task.full_executable }}
 

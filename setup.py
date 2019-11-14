@@ -1,14 +1,11 @@
 import os
 from setuptools import find_packages, setup
 
-VERSION = '0.120.0.dev0'
+VERSION = '0.121.0'
 
 
 with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
     README = readme.read()
-
-# allow setup.py to be run from any path
-#os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 with open('requirements.txt', 'r') as f:
     required = f.read().splitlines()
@@ -30,7 +27,10 @@ def prepend_find_packages(*roots):
 setup(
     name='django-blue-sky-workflow-engine',
     version='%s' % (VERSION),
-    packages=prepend_find_packages('workflow_engine', 'workflow_client'),
+    scripts=(
+        os.path.join('bin', 'restart_workers.sh'),
+    ),
+    packages=prepend_find_packages('workflow_engine', 'workflow_engine'),
     package_data={'': ['*.conf', '*.cfg', '*.json', '*.env', '*.sh', '*.txt', '*.pbs', 'Makefile'] },
     include_package_data=True,
     license='Allen Institute Software License',
@@ -41,21 +41,17 @@ setup(
     author_email='nathans@alleninstitute.org',
     install_requires=required,
     tests_require=test_required,
-    setup_requires=[
-        'flake8'
-    ],
+    setup_requires=[],
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',
-        'Framework :: Django :: 1.11',
+        'Framework :: Django :: 2.2',
         'Intended Audience :: Developers',
         'License :: Allen Institute Software License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Topic :: Internet :: WWW/HTTP'
     ]
 )

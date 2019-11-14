@@ -37,11 +37,13 @@ from django.http import HttpResponse
 from workflow_engine.file_holder import FileHolder
 from workflow_engine.log_holder import LogHolder
 from django.template import loader
-from workflow_engine.models.job_queue import JobQueue
-from workflow_engine.models.executable import Executable
-from workflow_engine.models.job import Job
-from workflow_engine.models.task import Task
-from workflow_engine.models import ONE
+from workflow_engine.models import (
+    JobQueue,
+    Executable,
+    Job,
+    Task,
+    ONE
+)
 from workflow_engine.views import shared, HEADER_PAGES
 import os
 
@@ -167,20 +169,25 @@ def get_task_log_holder(task_id, types, context):
             log_holder.full_executable = task.full_executable
 
         if include_log_file:
-            log_holder.add_file_holder(FileHolder(task.log_file, 'Log', task.start_run_time))
+            log_holder.add_file_holder(FileHolder(
+                task.log_file, 'Log', task.start_run_time))
 
         if include_input_file:
-            log_holder.add_file_holder(FileHolder(task.input_file, 'Input', task.start_run_time))
+            log_holder.add_file_holder(
+                FileHolder(task.input_file, 'Input', task.start_run_time))
 
         if include_output_file:
-            log_holder.add_file_holder(FileHolder(task.output_file, 'Output', task.start_run_time))
+            log_holder.add_file_holder(
+                FileHolder(task.output_file, 'Output', task.start_run_time))
 
         if include_executable_file:
             executable_file = get_executable_file(task.full_executable)
-            log_holder.add_file_holder(FileHolder(executable_file, 'Executable', task.start_run_time))
+            log_holder.add_file_holder(
+                FileHolder(executable_file, 'Executable', task.start_run_time))
 
         if include_pbs_file:
-            log_holder.add_file_holder(FileHolder(task.pbs_file, 'Pbs', task.start_run_time))
+            log_holder.add_file_holder(
+                FileHolder(task.pbs_file, 'Pbs', task.start_run_time))
 
         job_queue = task.get_job_queue()
         log_holder.job_queue_name = job_queue.name
@@ -191,9 +198,10 @@ def get_task_log_holder(task_id, types, context):
             log_holder.executable_id = executable.id
             log_holder.executable_name = executable.name
 
-        log_holder.error_message = FileHolder.add_color_highlighting(task.error_message)
+        log_holder.error_message = FileHolder.add_color_highlighting(
+            task.error_message)
 
-        log_holder.run_state = task.run_state.name
+        log_holder.run_state = task.running_state
         log_holder.enqueued_object_id = task.enqueued_task_object_id
     except Exception as e:
         context['error_message'] = 'Something went wrong: ' + str(e)

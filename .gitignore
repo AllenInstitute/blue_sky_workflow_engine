@@ -4,8 +4,16 @@
 .pydevproject
 .coverage
 .cache
+*.bak
 *.pyc
+*.egg-info
+*.log
+.ipynb_checkpoints
+*.ipynb
+nohup.out
 doc/
 htmlcov/
 test-reports/
 build/
+/.pytest_cache/
+/record_view.py

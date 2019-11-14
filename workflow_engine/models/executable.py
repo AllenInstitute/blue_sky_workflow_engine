@@ -34,45 +34,109 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 from django.db import models
-from django.utils import timezone
+from workflow_engine.mixins import (
+    Archivable,
+    Configurable,
+    Nameable,
+    Timestamped
+)
 import logging
-_model_logger = logging.getLogger('workflow_engine.models')
+_model_logger = logging.getLogger('workflow_engine.models.executable')
 
 
-class Executable(models.Model):
-    name = models.CharField(max_length=255)
-    description = models.CharField(max_length=255, null=True)
-    static_arguments = models.CharField(max_length=255,
-                                        null=True, blank=True)
-    environment = models.CharField(max_length=1000,
-                                   null=True, blank=True)
-    executable_path = models.CharField(max_length=1000)
-    pbs_executable_path = models.CharField(max_length=1000,
-                                           null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    remote_queue = models.CharField(max_length=255, default='pbs')
-    pbs_processor = models.CharField(max_length=255, default='vmem=6g')
-    pbs_walltime = models.CharField(max_length=255, default='walltime=5:00:00')
-    pbs_queue = models.CharField(max_length=255, default='lims')
-    version = models.CharField(max_length=255, default='0.1')
-    archived = models.NullBooleanField(default=False)
-
-    def __str__(self):
-        return self.name
-
-    def get_created_at(self):
-        return timezone.localtime(self.created_at).strftime('%m/%d/%Y %I:%M:%S')
-
-    def get_updated_at(self):
-        return timezone.localtime(self.updated_at).strftime('%m/%d/%Y %I:%M:%S')
+class Executable(Archivable, Configurable, Nameable, Timestamped, models.Model):
+    static_arguments = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True
+    )
+    environment = models.CharField(
+        max_length=1000,
+        null=True,
+        blank=True
+    )
+    executable_path = models.CharField(
+        max_length=1000
+    )
+    pbs_executable_path = models.CharField(
+        max_length=1000,
+        null=True,
+        blank=True
+    )
+    remote_queue = models.CharField(
+        max_length=255,
+        default='pbs',
+        blank=True
+    )
+    pbs_processor = models.CharField(
+        max_length=255,
+        default='vmem=6g',
+        blank=True
+    )
+    pbs_walltime = models.CharField(
+        max_length=255,
+        default='walltime=5:00:00',
+        blank=True
+    )
+    pbs_queue = models.CharField(
+        max_length=255,
+        default='lims',
+        blank=True
+    )
+    version = models.CharField(
+        max_length=255,
+        default='0.1',
+        blank=True
+    )
 
     def get_job_queues(self):
-        return JobQueue.objects.filter(executable=self)
+        return self.jobqueue_set.all()
 
-    def archive(self):
-        self.archived = True
-        self.save()
+    def spark_moab_environment(self):
+        # TODO: factor into a spark_moab helper class
+        spark_cfgs =  self.configurations.filter(
+            configuration_type='spark_moab_configuration'
+        )
+
+        num_spark_cfgs = spark_cfgs.count()
+
+        if num_spark_cfgs == 1:
+            spark_cfg = spark_cfgs.first()
+            return spark_cfg.json_object
+        elif num_spark_cfgs > 1:
+            self.set_error_message(
+                'Found {} not one spark configurations on {}'.format(
+                    num_spark_cfgs,
+                    self.name
+                )
+            )
+            self.fail_task()
+
+        return None
 
 
-from workflow_engine.models.job_queue import JobQueue
+
+    def environment_vars(self):
+        '''
+            returns: environment variable list in form VAR=val
+        '''
+        env = self.environment
+        _model_logger.info('ENV :{}'.format(env))
+
+        if env is None or len(env) == 0:
+            env = []
+        else:
+            try:
+                env = env.split(';')
+            except:
+                env = []
+
+        spark_env = self.spark_moab_environment()
+        _model_logger.info('SPARK ENV: {}'.format(spark_env))
+
+        if spark_env is not None:
+            env.extend(["{}={}".format(k,v) for k,v in spark_env.items()])
+
+        _model_logger.info("ENV: {}".format(env))
+
+        return env

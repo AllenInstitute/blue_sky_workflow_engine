@@ -33,8 +33,4 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-imports = (
-    'workflow_engine.celery.worker_tasks',
-    'workflow_engine.celery.moab_tasks',
-    'workflow_engine.celery.result_tasks'
-)
+imports = ()

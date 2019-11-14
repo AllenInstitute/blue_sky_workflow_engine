@@ -34,46 +34,35 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 from django.db import models
-from django.utils import timezone
 from workflow_engine.import_class import import_class
+from workflow_engine.mixins import Archivable, Nameable, Timestamped
+from django.contrib.contenttypes.models import ContentType
 import logging
-_model_logger = logging.getLogger('workflow_engine.models')
 
 
-class JobQueue(models.Model):
-    name = models.CharField(max_length=255)
-    description = models.CharField(max_length=255, null=True)
+class JobQueue(Archivable, Nameable, Timestamped, models.Model):
+    _logger = logging.getLogger('workflow_engine.models.job_queue')
+
     job_strategy_class = models.CharField(max_length=255)
-    enqueued_object_class = models.CharField(max_length=255)
+    enqueued_object_type = models.ForeignKey(
+        ContentType,
+        default=None,
+        null=True,
+        on_delete=models.CASCADE
+    )
     executable = models.ForeignKey(
-        'workflow_engine.Executable', null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    archived = models.NullBooleanField(default=False)
-
-
-    def __str__(self):
-        return self.name
+        'workflow_engine.Executable',
+        null=True,
+        on_delete=models.CASCADE
+    )
 
     def get_strategy(self):
-        _model_logger.info(
+        JobQueue._logger.info(
             "importing %s" % (self.job_strategy_class))
         claz = import_class(self.job_strategy_class)
         strategy_object = claz()
 
         return strategy_object
 
-    def get_created_at(self):
-        return timezone.localtime(self.created_at).strftime('%m/%d/%Y %I:%M:%S')
-
-    def get_updated_at(self):
-        return timezone.localtime(self.updated_at).strftime('%m/%d/%Y %I:%M:%S')
-
     def get_workflow_nodes(self):
-        return WorkflowNode.objects.filter(job_queue=self)
-
-    def archive(self):
-        self.archived = True
-        self.save()
-
-from workflow_engine.models.workflow_node import WorkflowNode
+        return self.workflownode_set.all()

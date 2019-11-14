@@ -1,0 +1,98 @@
+td.run_state_pending {
+    background-color: #808000;
+}
+
+td.run_state_pending a:link, td.run_state_pending a:visited {
+    color: white;
+}
+
+td.run_state_queued {
+    background-color: #FFEFD5;
+}
+
+td.outdated {
+    border-color: red;
+    border-width: 2px;
+    border-style: solid;
+}
+
+td.run_state_queued a:link, td.run_state_queued a:visited {
+    color: black;
+}
+
+td.run_state_running {
+    background-color: rgb(150,255,150);
+}
+
+td.run_state_running a:link, td.run_state_running a:visited {
+    color: white;
+}
+
+td.run_state_success {
+    background-color: #006400;
+}
+
+td.run_state_success a:link, td.run_state_success a:visited {
+    color: white;
+}
+
+td.run_state_failed_execution {
+    background-color: #FA8072;
+}
+
+td.run_state_failed_execution a:link, td.run_state_failed_execution a:visited {
+    color: white;
+}
+
+td.run_state_failed {
+    background-color: #800000;
+}
+
+td.run_state_failed a:link, td.run_state_failed a:visited {
+    color: white;
+}
+
+td.run_state_process_killed {
+    background-color: #000000;
+}
+
+td.run_state_process_killed a:link, td.run_state_process_killed a:visited {
+    color: white;
+}
+
+td.run_state_unknown {
+    background-color: rgb(150,150,150);
+}
+
+td.run_state_unknown a:link, td.run_state_unknown a:visited {
+    color: white;
+}
+
+td.processing {
+    background-color: LightGreen;
+    color: black;
+}
+
+td.montage_qc_passed {
+    background-color: green;
+}
+
+td.montage_qc_passed a:link, td.montage_qc_passed a:visited {
+    color: white;
+}
+
+td.montage_qc_failed {
+    background-color: red;
+}
+
+td.montage_qc_failed a:link, td.montage_qc_failed a:visited {
+    color: white;
+}
+
+td.montage_state_unknown {
+    background-color: rgb(150,150,150);
+}
+
+td.montage_state_unknown a:link, td.montage_state_unknown a:visited {
+    color: white;
+}

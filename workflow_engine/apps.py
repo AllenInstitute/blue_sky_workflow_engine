@@ -38,3 +38,7 @@ from django.apps import AppConfig
 
 class WorkflowEngineConfig(AppConfig):
     name = 'workflow_engine'
+    verbose_name= 'Blue Sky Workflow Engine'
+
+    def ready(self):
+        pass

@@ -1,0 +1,28 @@
+workflow\_engine\.serializers package
+=====================================
+
+.. automodule:: workflow_engine.serializers
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Submodules
+----------
+
+workflow\_engine\.serializers\.ingest\_serializer module
+--------------------------------------------------------
+
+.. automodule:: workflow_engine.serializers.ingest_serializer
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+workflow\_engine\.serializers\.task\_monitor\_serializer module
+---------------------------------------------------------------
+
+.. automodule:: workflow_engine.serializers.task_monitor_serializer
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+

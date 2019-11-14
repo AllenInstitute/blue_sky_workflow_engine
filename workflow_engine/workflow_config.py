@@ -1,3 +1,41 @@
+# Allen Institute Software License - This software license is the 2-clause BSD
+# license plus a third clause that prohibits redistribution for commercial
+# purposes without further permission.
+#
+# Copyright 2018-2019. Allen Institute. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice,
+# this list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following disclaimer in the documentation
+# and/or other materials provided with the distribution.
+#
+# 3. Redistributions for commercial purposes are not permitted without the
+# Allen Institute's written permission.
+# For purposes of this license, commercial purposes is the incorporation of the
+# Allen Institute's software into anything for which you will charge fees or
+# other compensation. Contact terms@alleninstitute.org for commercial licensing
+# opportunities.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+from django.contrib.contenttypes.models import ContentType
+from workflow_engine.import_class import import_class
+from io import StringIO
 import yaml
 import logging
 
@@ -16,11 +54,25 @@ class WorkflowConfig:
 
     @classmethod
     def from_yaml(cls, y):
-        definition = yaml.load(y)
+        '''Load workflow from a YAML file.
+
+        Args:
+            y (str): path to workflow definition file
+        '''
+        definition = yaml.load(y, Loader=yaml.SafeLoader)
+        return cls.parse_yaml_definition(definition)
+
+    @classmethod
+    def from_yaml_string(cls, y):
+        strm = StringIO(y)
+        definition = yaml.load(strm, Loader=yaml.SafeLoader)
+        return cls.parse_yaml_definition(definition)
+
+    @classmethod
+    def parse_yaml_definition(cls, definition):
         workflows = {
-            'run_states': definition['run_states'],
             'executables': definition['executables'],
-            'flows': []
+            'workflows': []
         }
 
         for e in workflows['executables'].values():
@@ -82,12 +134,17 @@ class WorkflowConfig:
                 else:
                     state['batch_size'] = 1
 
+                if 'max_retries' in s:
+                    state['max_retries'] = s['max_retries']
+                else:
+                    state['max_retries'] = 1
+
                 states[s['key']] = state
                 state_list.append(s['key'])
 
             ingest = wf_def.get('ingest', None)
 
-            workflows['flows'].append(
+            workflows['workflows'].append(
                 cls(k, ingest, states, wf_def['graph'], state_list))
 
         return workflows
@@ -99,17 +156,20 @@ class WorkflowConfig:
 
 
     @classmethod
-    def create_workflow(cls, workflows_yml):
-        from workflow_engine.models.job_queue import JobQueue
-        from workflow_engine.models.executable import Executable
-        from workflow_engine.models.workflow_node import WorkflowNode
-        from workflow_engine.models.workflow import Workflow
-        from workflow_engine.models.run_state import RunState
+    def create_workflow_from_string(cls, yml_string):
+        workflow_config = cls.from_yaml_string(yml_string)
 
+        cls.create_workflow_from_config(workflow_config)
+
+    @classmethod
+    def create_workflow(cls, workflows_yml):
         workflow_config = cls.from_yaml_file(workflows_yml)
-        
-        null_executable, created = \
-            Executable.objects.get_or_create(
+
+        cls.create_workflow_from_config(workflow_config)
+
+    @classmethod
+    def create_workflow_from_config(cls, workflow_config):
+        null_executable, _ = Executable.objects.get_or_create(
                 name='Null Executable',
                 defaults={
                     'description': 'Error Case',
@@ -142,12 +202,8 @@ class WorkflowConfig:
                         'pbs_queue': e['pbs_queue'],
                         'pbs_processor': e['pbs_processor'],
                         'pbs_walltime': e['pbs_walltime']})
-        
-        for run_state_name in workflow_config['run_states']:
-            RunState.objects.update_or_create(
-                name=run_state_name)
-    
-        for workflow_spec in workflow_config['flows']:
+
+        for workflow_spec in workflow_config['workflows']:
             workflow_name = workflow_spec.name
     
             workflow, _ = \
@@ -174,18 +230,22 @@ class WorkflowConfig:
                         node['class'],
                         node['enqueued_class'],
                         node['executable']))
-    
+
+                eoc = import_class(node['enqueued_class'])
+                eo_content_type = ContentType.objects.get_for_model(eoc)
+
                 queue, _ = \
                     JobQueue.objects.update_or_create(
                         name=queue_name,
                         archived=False,
                         defaults={
                             'job_strategy_class': str(node['class']),
-                            'enqueued_object_class': node['enqueued_class'],
+                            'enqueued_object_type': eo_content_type,
                             'executable': executables[node['executable']]})
     
                 batch_size = node['batch_size']
-                max_retries = 1
+                max_retries = node['max_retries'] if 'max_retries' in node else 1
+                max_retries = max_retries
 
                 nodes[node['key']], _ = \
                     WorkflowNode.objects.update_or_create(
@@ -203,38 +263,53 @@ class WorkflowConfig:
                 queue_name = node['label']
 
                 # For now only use the first parent
-                parent_key = next(iter(node['parents']), None)
+#                parent_key = next(iter(node['parents']), None)
+                for parent_key in iter(node['parents']):
 
-                if parent_key in nodes and parent_key is not None:
-                    parent_node = nodes[parent_key]
-                    head = False
-                else:
-                    parent_node = None
-                    head = True
+                    if parent_key in nodes and parent_key is not None:
+                        parent_node = nodes[parent_key]
+                        head = False
+                    else:
+                        parent_node = None
+                        head = True
+# 
+                    # TODO: deprecated
+                    nodes[node['key']].parent = parent_node
+                    nodes[node['key']].is_head = head
+                    nodes[node['key']].save()
 
-                nodes[node['key']].parent = parent_node
-                nodes[node['key']].is_head = head
-                nodes[node['key']].save()
+                    WorkflowEdge.objects.update_or_create(
+                        workflow=workflow,
+                        source=parent_node,
+                        sink=nodes[node['key']],
+                        disabled=False,
+                        archived=False
+                    )
 
-                WorkflowConfig._log.info(
-                    "parent: %s->%s %s" % (node['key'],
-                                           parent_key,
-                                           str(nodes[parent_key])))
+                    WorkflowConfig._log.info(
+                        "edge: %s->%s %s" % (node['key'],
+                                               parent_key,
+                                               str(nodes[parent_key])))
 
     @classmethod
     def archive_all_workflows(cls):
-        from workflow_engine.models.job_queue import JobQueue
-        from workflow_engine.models.executable import Executable
-        from workflow_engine.models.workflow_node import WorkflowNode
-        from workflow_engine.models.workflow import Workflow
-        from workflow_engine.models.run_state import RunState
-
-        for queue in JobQueue.objects.all():
+        for queue in JobQueue.all_objects.filter(archived=False):
             queue.archive()
-        for node in WorkflowNode.objects.all():
+        for node in WorkflowNode.all_objects.filter(archived=False):
             node.archive()
-        for exe in Executable.objects.all():
+        for exe in Executable.all_objects.filter(archived=False):
             exe.archive()
-        for flow in Workflow.objects.all():
+        for flow in Workflow.all_objects.filter(archived=False):
             flow.archive()
-        # RunState.objects.all().delete()  # TODO: runstates are in regular config.
+        for edge in WorkflowEdge.all_objects.filter(archived=False):
+            edge.archive()
+
+
+# circular imports?
+from workflow_engine.models import (
+    JobQueue,
+    Executable,
+    WorkflowNode,
+    WorkflowEdge,
+    Workflow
+)

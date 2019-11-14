@@ -36,6 +36,7 @@
 from django.conf import settings
 from django.http import HttpResponse
 from django.template import loader
+from django.urls import reverse
 from workflow_engine.views import shared, HEADER_PAGES
 import django
 import sys
@@ -67,8 +68,13 @@ def index(request):
 
     context['flower_monitor_url'] = settings.FLOWER_MONITOR_URL
     context['rabbit_monitor_url'] = settings.RABBIT_MONITOR_URL
-    context['message_queue_host']  = settings.MESSAGE_QUEUE_HOST
-    context['admin_url'] = settings.ADMIN_URL
+    context['message_queue_host'] = '---'
+    context['notebook_url'] = settings.NOTEBOOK_URL
+    try:
+        context['stanbol_url'] = settings.STANBOL_URL
+        context['marmotta_url'] = settings.MARMOTTA_URL
+    except:
+        pass
 
     context['seconds_between_refresh'] = settings.MILLISECONDS_BETWEEN_REFRESH / MILLISECONDS_IN_SECOND
     shared.add_settings_info_to_context(context)

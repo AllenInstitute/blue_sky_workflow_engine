@@ -34,6 +34,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 from django.db import models
+from workflow_engine.mixins import Timestamped
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from workflow_engine.models import ZERO, ONE
@@ -42,13 +43,14 @@ import logging
 _model_logger = logging.getLogger('workflow_engine.models')
 
 
-class WellKnownFile(models.Model):
+class WellKnownFile(Timestamped, models.Model):
     attachable_id = models.PositiveIntegerField()
-    attachable_type = models.ForeignKey(ContentType)
+    attachable_type = models.ForeignKey(
+        ContentType,
+        on_delete=models.CASCADE
+    )
     well_known_file_type = models.CharField(max_length=255)
     content_object = GenericForeignKey('attachable_type', 'attachable_id')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         file_r = self.filerecord_set.order_by('order').first()
@@ -146,4 +148,4 @@ class WellKnownFile(models.Model):
 
 
 # Circular imports
-from workflow_engine.models.file_record import FileRecord
+from .file_record import FileRecord

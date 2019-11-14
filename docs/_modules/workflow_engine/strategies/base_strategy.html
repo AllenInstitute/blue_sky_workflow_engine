@@ -1,0 +1,390 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>workflow_engine.strategies.base_strategy &#8212; Blue Sky Workflow Engine  documentation</title>
+    <link rel="stylesheet" href="../../../_static/aibs_sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body>
+<link href="http://www.brain-map.org/assets/stylesheets/portal.css" media="screen" rel="stylesheet" type="text/css" />
+<script src="http://www.brain-map.org/assets/javascripts/portal.js" type="text/javascript"></script>
+<script src="http://www.brain-map.org/assets/javascripts/ga.js" type="text/javascript"></script>
+<script type="text/javascript">
+    var _pSupressBrowserFlashWarning = true;
+    var _pTabId = "pHome";
+    var _pMoreProjectsId = "pMoreProjects";
+    var _pImagePath = "http://www.brain-map.org/assets/images/";
+    var _pSiteWarnings = function() {
+        this.show_warning() = {};
+    }
+</script>
+<script type="text/javascript">
+    function initialize() {
+        /*** do your stuff, then initialize the portal plugin ***/
+        _pPortalOnLoad();
+    }
+</script>
+<style>
+  #header_content > a {
+  display: inline-block;
+  width: 250px;
+  height: 75px;
+  background-image:url("/_static/external_assets/images/Brain_Atlas_Logotype_SDK.png") !important;
+  background-size: 235px 37px;
+  background-position: 0px 20px;
+  background-repeat: no-repeat;
+  }
+</style>
+
+<script type="text/javascript" src="http://www.brain-map.org/external_assets/javascripts/portalHeader.js"></script>
+<link rel="stylesheet" type="text/css" href="/_static/external_assets/stylesheets/common_layout.css" />
+
+
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for workflow_engine.strategies.base_strategy</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Allen Institute Software License - This software license is the 2-clause BSD</span>
+<span class="c1"># license plus a third clause that prohibits redistribution for commercial</span>
+<span class="c1"># purposes without further permission.</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright 2017. Allen Institute. All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Redistribution and use in source and binary forms, with or without</span>
+<span class="c1"># modification, are permitted provided that the following conditions are met:</span>
+<span class="c1">#</span>
+<span class="c1"># 1. Redistributions of source code must retain the above copyright notice,</span>
+<span class="c1"># this list of conditions and the following disclaimer.</span>
+<span class="c1">#</span>
+<span class="c1"># 2. Redistributions in binary form must reproduce the above copyright notice,</span>
+<span class="c1"># this list of conditions and the following disclaimer in the documentation</span>
+<span class="c1"># and/or other materials provided with the distribution.</span>
+<span class="c1">#</span>
+<span class="c1"># 3. Redistributions for commercial purposes are not permitted without the</span>
+<span class="c1"># Allen Institute&#39;s written permission.</span>
+<span class="c1"># For purposes of this license, commercial purposes is the incorporation of the</span>
+<span class="c1"># Allen Institute&#39;s software into anything for which you will charge fees or</span>
+<span class="c1"># other compensation. Contact terms@alleninstitute.org for commercial licensing</span>
+<span class="c1"># opportunities.</span>
+<span class="c1">#</span>
+<span class="c1"># THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;</span>
+<span class="c1"># AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</span>
+<span class="c1"># IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</span>
+<span class="c1"># ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE</span>
+<span class="c1"># LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR</span>
+<span class="c1"># CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF</span>
+<span class="c1"># SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS</span>
+<span class="c1"># INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN</span>
+<span class="c1"># CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)</span>
+<span class="c1"># ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</span>
+<span class="c1"># POSSIBILITY OF SUCH DAMAGE.</span>
+<span class="c1">#</span>
+<span class="kn">from</span> <span class="nn">workflow_engine.models</span> <span class="k">import</span> <span class="n">WellKnownFile</span>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="k">import</span> <span class="n">settings</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+
+<div class="viewcode-block" id="BaseStrategy"><a class="viewcode-back" href="../../../workflow_engine.strategies.html#workflow_engine.strategies.base_strategy.BaseStrategy">[docs]</a><span class="k">class</span> <span class="nc">BaseStrategy</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">_log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;workflow_engine.strategies.base_strategy&#39;</span><span class="p">)</span>
+    <span class="c1"># </span>
+    <span class="c1"># everthing bellow this can be overriden</span>
+    <span class="c1">#</span>
+
+    <span class="c1"># override if needed</span>
+    <span class="c1"># called before the job starts running</span>
+<div class="viewcode-block" id="BaseStrategy.prep_job"><a class="viewcode-back" href="../../../workflow_engine.strategies.html#workflow_engine.strategies.base_strategy.BaseStrategy.prep_job">[docs]</a>    <span class="k">def</span> <span class="nf">prep_job</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+    <span class="c1"># override if needed</span>
+    <span class="c1"># called before the task starts running</span>
+<div class="viewcode-block" id="BaseStrategy.prep_task"><a class="viewcode-back" href="../../../workflow_engine.strategies.html#workflow_engine.strategies.base_strategy.BaseStrategy.prep_task">[docs]</a>    <span class="k">def</span> <span class="nf">prep_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+    <span class="c1"># override if needed</span>
+    <span class="c1"># called if the task fails</span>
+<div class="viewcode-block" id="BaseStrategy.on_failure"><a class="viewcode-back" href="../../../workflow_engine.strategies.html#workflow_engine.strategies.base_strategy.BaseStrategy.on_failure">[docs]</a>    <span class="k">def</span> <span class="nf">on_failure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="BaseStrategy.on_fail_execution"><a class="viewcode-back" href="../../../workflow_engine.strategies.html#workflow_engine.strategies.base_strategy.BaseStrategy.on_fail_execution">[docs]</a>    <span class="k">def</span> <span class="nf">on_fail_execution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">on_failure</span><span class="p">(</span><span class="n">task</span><span class="p">)</span></div>
+
+    <span class="c1"># override if needed</span>
+    <span class="c1"># called when the task starts running</span>
+<div class="viewcode-block" id="BaseStrategy.on_running"><a class="viewcode-back" href="../../../workflow_engine.strategies.html#workflow_engine.strategies.base_strategy.BaseStrategy.on_running">[docs]</a>    <span class="k">def</span> <span class="nf">on_running</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+    <span class="c1"># override if needed</span>
+    <span class="c1"># called after the execution finishes</span>
+    <span class="c1"># process and save results to the database</span>
+<div class="viewcode-block" id="BaseStrategy.on_finishing"><a class="viewcode-back" href="../../../workflow_engine.strategies.html#workflow_engine.strategies.base_strategy.BaseStrategy.on_finishing">[docs]</a>    <span class="k">def</span> <span class="nf">on_finishing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enqueued_object</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+    <span class="c1"># Do not override</span>
+<div class="viewcode-block" id="BaseStrategy.get_job_storage_directory"><a class="viewcode-back" href="../../../workflow_engine.strategies.html#workflow_engine.strategies.base_strategy.BaseStrategy.get_job_storage_directory">[docs]</a>    <span class="k">def</span> <span class="nf">get_job_storage_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_storage_directory</span><span class="p">,</span> <span class="n">job</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_storage_directory</span><span class="p">(</span><span class="n">base_storage_directory</span><span class="p">,</span> <span class="n">job</span><span class="p">),</span>
+            <span class="s1">&#39;jobs&#39;</span><span class="p">,</span> <span class="s1">&#39;job_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">id</span><span class="p">))</span></div>
+
+    <span class="c1"># override if needed</span>
+<div class="viewcode-block" id="BaseStrategy.get_storage_directory"><a class="viewcode-back" href="../../../workflow_engine.strategies.html#workflow_engine.strategies.base_strategy.BaseStrategy.get_storage_directory">[docs]</a>    <span class="k">def</span> <span class="nf">get_storage_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">base_storage_directory</span><span class="p">,</span> <span class="n">job</span><span class="p">):</span>
+        <span class="n">enqueued_object</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">enqueued_object</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dirs</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">enqueued_object</span><span class="o">.</span><span class="n">get_storage_directory</span><span class="p">(</span><span class="n">base_storage_directory</span><span class="p">)</span>
+            <span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">dirs</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">base_storage_directory</span><span class="p">,</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">enqueued_object_type</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">),</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">job</span><span class="o">.</span><span class="n">enqueued_object_id</span><span class="p">)</span>
+            <span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="o">*</span><span class="n">dirs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseStrategy.get_objects_for_queue"><a class="viewcode-back" href="../../../workflow_engine.strategies.html#workflow_engine.strategies.base_strategy.BaseStrategy.get_objects_for_queue">[docs]</a>    <span class="k">def</span> <span class="nf">get_objects_for_queue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prev_queue</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        override if needed</span>
+<span class="sd">        this is called when a job transitions from a previous queue</span>
+<span class="sd">        given the previous job, return an array of enqueued objects</span>
+<span class="sd">        for this queue</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform_objects_for_queue</span><span class="p">(</span><span class="n">prev_queue</span><span class="o">.</span><span class="n">enqueued_object</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseStrategy.transform_objects_for_queue"><a class="viewcode-back" href="../../../workflow_engine.strategies.html#workflow_engine.strategies.base_strategy.BaseStrategy.transform_objects_for_queue">[docs]</a>    <span class="k">def</span> <span class="nf">transform_objects_for_queue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prev_queue_object</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span> <span class="n">prev_queue_object</span> <span class="p">]</span></div>
+
+    <span class="c1"># override if needed</span>
+    <span class="c1"># return one or more task enqueued objects for a job enqueued object</span>
+<div class="viewcode-block" id="BaseStrategy.get_task_objects_for_queue"><a class="viewcode-back" href="../../../workflow_engine.strategies.html#workflow_engine.strategies.base_strategy.BaseStrategy.get_task_objects_for_queue">[docs]</a>    <span class="k">def</span> <span class="nf">get_task_objects_for_queue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enqueued_object</span><span class="p">):</span>
+        <span class="n">objects</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">objects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">enqueued_object</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">objects</span></div>
+
+    <span class="c1"># override if needed</span>
+<div class="viewcode-block" id="BaseStrategy.can_transition"><a class="viewcode-back" href="../../../workflow_engine.strategies.html#workflow_engine.strategies.base_strategy.BaseStrategy.can_transition">[docs]</a>    <span class="k">def</span> <span class="nf">can_transition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enqueued_object</span><span class="p">,</span> <span class="n">workflow_node</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+    <span class="c1">#</span>
+    <span class="c1"># everthing bellow this should not be overriden</span>
+    <span class="c1">#</span>
+
+    <span class="c1"># Do not override</span>
+<div class="viewcode-block" id="BaseStrategy.get_base_storage_directory"><a class="viewcode-back" href="../../../workflow_engine.strategies.html#workflow_engine.strategies.base_strategy.BaseStrategy.get_base_storage_directory">[docs]</a>    <span class="k">def</span> <span class="nf">get_base_storage_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">settings</span><span class="o">.</span><span class="n">BASE_FILE_PATH</span></div>
+
+    <span class="c1"># Do not override</span>
+<div class="viewcode-block" id="BaseStrategy.is_execution_strategy"><a class="viewcode-back" href="../../../workflow_engine.strategies.html#workflow_engine.strategies.base_strategy.BaseStrategy.is_execution_strategy">[docs]</a>    <span class="k">def</span> <span class="nf">is_execution_strategy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="BaseStrategy.must_wait"><a class="viewcode-back" href="../../../workflow_engine.strategies.html#workflow_engine.strategies.base_strategy.BaseStrategy.must_wait">[docs]</a>    <span class="k">def</span> <span class="nf">must_wait</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enqueued_object</span><span class="p">):</span>
+        <span class="k">del</span> <span class="n">enqueued_object</span>  <span class="c1"># unused arg</span>
+
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="BaseStrategy.skip_execution"><a class="viewcode-back" href="../../../workflow_engine.strategies.html#workflow_engine.strategies.base_strategy.BaseStrategy.skip_execution">[docs]</a>    <span class="k">def</span> <span class="nf">skip_execution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enqueued_object</span><span class="p">):</span>
+        <span class="k">del</span> <span class="n">enqueued_object</span>  <span class="c1"># unused arg</span>
+
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="BaseStrategy.make_dirs_chmod"><a class="viewcode-back" href="../../../workflow_engine.strategies.html#workflow_engine.strategies.base_strategy.BaseStrategy.make_dirs_chmod">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">make_dirs_chmod</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        <span class="p">(</span><span class="n">head</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">make_dirs_chmod</span><span class="p">(</span><span class="n">head</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">+=</span> <span class="p">[</span><span class="n">path</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">res</span></div>
+
+    <span class="c1"># Do not override</span>
+    <span class="c1"># TODO: the data flow in constructing this path is overly complex</span>
+<div class="viewcode-block" id="BaseStrategy.get_task_storage_directory"><a class="viewcode-back" href="../../../workflow_engine.strategies.html#workflow_engine.strategies.base_strategy.BaseStrategy.get_task_storage_directory">[docs]</a>    <span class="k">def</span> <span class="nf">get_task_storage_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
+        <span class="n">task_storage_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_job_storage_directory</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">get_base_storage_directory</span><span class="p">(),</span> <span class="n">task</span><span class="o">.</span><span class="n">job</span><span class="p">),</span>
+            <span class="s1">&#39;tasks&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;task_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">task_storage_dir</span></div>
+
+    <span class="c1"># Do not override</span>
+<div class="viewcode-block" id="BaseStrategy.get_or_create_task_storage_directory"><a class="viewcode-back" href="../../../workflow_engine.strategies.html#workflow_engine.strategies.base_strategy.BaseStrategy.get_or_create_task_storage_directory">[docs]</a>    <span class="k">def</span> <span class="nf">get_or_create_task_storage_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
+        <span class="n">storage_directory</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_task_storage_directory</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+        <span class="n">BaseStrategy</span><span class="o">.</span><span class="n">make_dirs_chmod</span><span class="p">(</span><span class="n">storage_directory</span><span class="p">,</span> <span class="mo">0o777</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">storage_directory</span></div>
+
+    <span class="c1"># Do not override</span>
+<div class="viewcode-block" id="BaseStrategy.check_key"><a class="viewcode-back" href="../../../workflow_engine.strategies.html#workflow_engine.strategies.base_strategy.BaseStrategy.check_key">[docs]</a>    <span class="k">def</span> <span class="nf">check_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dictionary</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dictionary</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;expected &#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39; key in results&quot;</span><span class="p">)</span></div>
+
+    <span class="c1"># Do not override</span>
+<div class="viewcode-block" id="BaseStrategy.get_or_create_storage_directory"><a class="viewcode-back" href="../../../workflow_engine.strategies.html#workflow_engine.strategies.base_strategy.BaseStrategy.get_or_create_storage_directory">[docs]</a>    <span class="k">def</span> <span class="nf">get_or_create_storage_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">job</span><span class="p">):</span>
+        <span class="n">storage_directory</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_job_storage_directory</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_base_storage_directory</span><span class="p">(),</span> <span class="n">job</span><span class="p">)</span>
+        <span class="n">BaseStrategy</span><span class="o">.</span><span class="n">make_dirs_chmod</span><span class="p">(</span><span class="n">storage_directory</span><span class="p">,</span> <span class="mo">0o777</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">storage_directory</span></div>
+
+    <span class="c1"># Do not override</span>
+<div class="viewcode-block" id="BaseStrategy.fail_task"><a class="viewcode-back" href="../../../workflow_engine.strategies.html#workflow_engine.strategies.base_strategy.BaseStrategy.fail_task">[docs]</a>    <span class="k">def</span> <span class="nf">fail_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">on_failure</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">set_error_message</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; - &#39;</span> <span class="o">+</span> \
+                <span class="nb">str</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()))</span>
+
+        <span class="n">task</span><span class="o">.</span><span class="n">set_failed_fields_and_rerun</span><span class="p">()</span></div>
+
+
+   <span class="c1"># Do not override</span>
+<div class="viewcode-block" id="BaseStrategy.set_error_message_from_log"><a class="viewcode-back" href="../../../workflow_engine.strategies.html#workflow_engine.strategies.base_strategy.BaseStrategy.set_error_message_from_log">[docs]</a>    <span class="k">def</span> <span class="nf">set_error_message_from_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">log_file</span><span class="p">):</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+                    <span class="p">[</span><span class="s1">&#39;tail&#39;</span><span class="p">,</span> <span class="n">task</span><span class="o">.</span><span class="n">log_file</span><span class="p">],</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+                <span class="n">task</span><span class="o">.</span><span class="n">set_error_message</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">BaseStrategy</span><span class="o">.</span><span class="n">_log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s1">&#39;Something went wrong: </span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
+                <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="p">)</span></div>
+
+    <span class="c1"># Do not override</span>
+<div class="viewcode-block" id="BaseStrategy.fail_execution_task"><a class="viewcode-back" href="../../../workflow_engine.strategies.html#workflow_engine.strategies.base_strategy.BaseStrategy.fail_execution_task">[docs]</a>    <span class="k">def</span> <span class="nf">fail_execution_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_error_message_from_log</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">on_fail_execution</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">err_msg</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()))</span>
+            <span class="n">BaseStrategy</span><span class="o">.</span><span class="n">_log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span> 
+            <span class="n">task</span><span class="o">.</span><span class="n">set_error_message</span><span class="p">(</span><span class="n">err_msg</span><span class="p">)</span>
+
+        <span class="n">task</span><span class="o">.</span><span class="n">set_failed_execution_fields_and_rerun</span><span class="p">()</span></div>
+
+
+    <span class="c1"># Do not override</span>
+    <span class="c1"># TODO: deprecate</span>
+<div class="viewcode-block" id="BaseStrategy.set_well_known_file"><a class="viewcode-back" href="../../../workflow_engine.strategies.html#workflow_engine.strategies.base_strategy.BaseStrategy.set_well_known_file">[docs]</a>    <span class="k">def</span> <span class="nf">set_well_known_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">full_path</span><span class="p">,</span> <span class="n">attachable_object</span><span class="p">,</span>
+                            <span class="n">well_known_file_type</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># from workflow_engine.models import WellKnownFile</span>
+        <span class="n">WellKnownFile</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span>
+                          <span class="n">attachable_object</span><span class="p">,</span>
+                          <span class="n">well_known_file_type</span><span class="p">,</span>
+                          <span class="n">task</span><span class="p">)</span></div>
+
+    <span class="c1"># Do not override</span>
+    <span class="c1"># TODO: deprecate</span>
+<div class="viewcode-block" id="BaseStrategy.get_well_known_file"><a class="viewcode-back" href="../../../workflow_engine.strategies.html#workflow_engine.strategies.base_strategy.BaseStrategy.get_well_known_file">[docs]</a>    <span class="k">def</span> <span class="nf">get_well_known_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attachable_object</span><span class="p">,</span> <span class="n">well_known_file_type</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">WellKnownFile</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">attachable_object</span><span class="p">,</span> <span class="n">well_known_file_type</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="../../../index.html">Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Install Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../settings.html">Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../customizing.html">Customization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../workflows.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../strategies.html">Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../configurations.html">Configuration Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../develop.html">Developers Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../authors.html">Authors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../workflow_engine.html">Source Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_engine.admin.html">workflow_engine.admin package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_engine.celery.html">workflow_engine.celery package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_engine.migrations.html">workflow_engine.migrations package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_engine.mixins.html">workflow_engine.mixins package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_engine.models.html">workflow_engine.models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_engine.serializers.html">workflow_engine.serializers package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_engine.strategies.html">workflow_engine.strategies package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_engine.views.html">workflow_engine.views package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_engine.worker.html">workflow_engine.worker package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../workflow_engine.worker.qsub.html">workflow_engine.worker.qsub package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../workflow_client.html">Client Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_client.ingest.html">workflow_client.ingest package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_client.nb_utils.html">workflow_client.nb_utils package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../workflow_client.tasks.html">workflow_client.tasks package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/AllenInstitute/BlueSkyWorkflowEngine">Github Profile</a></li>
+</ul>
+
+<h3> Questions </h3>
+<p class="questions">
+  Send any questions using the <a href="http://alleninstitute.org/contact_us/index.html">Send Us a Message</a> link below, 
+  or submit your question to <a href="http://stackoverflow.com/">StackOverflow</a> using with the 'allen-sdk' tag.
+</p>
+
+<p class="questions">
+  If you encounter any problems using the AllenSDK, please create an issue on <a href="http://github.com/alleninstitute/allensdk/issues/">Github's issue tracker</a>.
+</p>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+    <div class="footer" role="contentinfo">
+    </div>
+<script type="text/javascript" src="http://www.brain-map.org/external_assets/javascripts/portalFooter.js"></script>
+
+
+  </body>
+</html>

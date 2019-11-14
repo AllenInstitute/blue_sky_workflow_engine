@@ -35,18 +35,24 @@
 #
 from django.http import HttpResponse
 from django.template import loader
-from workflow_engine.models.job import Job
-from workflow_engine.models.workflow_node import WorkflowNode
-from workflow_engine.models import ONE
+from workflow_engine.models import (
+    Job,
+    WorkflowNode,
+    ONE
+)
 from workflow_engine.views import shared, HEADER_PAGES
-from workflow_engine.celery.signatures \
-    import queue_job_signature, kill_job_signature
+from workflow_engine.signatures import (
+    queue_job_signature,
+    kill_job_signature
+)
 import logging
-from workflow_engine.views.decorators \
-    import object_json_response, object_json_response2
+from workflow_engine.views.decorators import (
+    object_json_response,
+    object_json_response2
+)
 
 
-_TIMEOUT = 20
+#_TIMEOUT = 20
 _log = logging.getLogger('workflow_engine.views.job_view')
 
 
@@ -127,27 +133,34 @@ def add_sort_jobs(context, sort, url, set_params):
 
 @object_json_response2('job_id')
 def queue_job(job_id, request, result):
-    r = queue_job_signature.delay(job_id)
-    outp = r.wait(_TIMEOUT)
-    _log.info('QUEUE_JOB ' + str(outp))
+    del request  # not used
+    del result  # not used
+    queue_job_signature.delay(job_id)
+    #outp = r.wait(_TIMEOUT)
+    #_log.info('QUEUE_JOB ' + str(outp))
 
 
 @object_json_response2('job_id')
 def kill_job(job_id, request, result):
-    r = kill_job_signature.delay(job_id[0])
-    outp = r.wait(_TIMEOUT)
-    _log.info('QUEUE_JOB ' + str(outp))
+    del request  # not used
+    del result  # not used
+    kill_job_signature.delay(job_id[0])
+    #outp = r.wait(_TIMEOUT)
+    #_log.info('QUEUE_JOB ' + str(outp))
 
 
 @object_json_response2('job_id')
 def run_all_jobs(job_id, request, response):
+    del request  # not used
+    del response  # not used
     queue_job_signature.delay(job_id)
 
 
 @object_json_response(id_name='job_id', clazz=Job)
 def get_job_status(job_object, request, result):
+    del request  # not used
     job_data = {}
-    job_data['run_state_name'] = job_object.run_state.name
+    job_data['run_state_name'] = job_object.running_state
     job_data['start_run_time'] = job_object.get_start_run_time()
     job_data['end_run_time'] = job_object.get_end_run_time()
     job_data['duration'] = job_object.get_duration()
@@ -157,12 +170,13 @@ def get_job_status(job_object, request, result):
 
 @object_json_response(id_name='job_id', clazz=Job)
 def get_job_show_data(job_object, request, result):
+    del request  # not used
     result['payload'] = shared.order_payload([
         ('id', job_object.id),
         ('enqueued_object_id', job_object.enqueued_object_id),
-        ('enqueued_object_class', job_object.get_enqueued_object_class_type()),
+        ('enqueued_object_class', str(job_object.enqueued_object_type)),
         ('enqueued_object', job_object.get_enqueued_object_display()),
-        ('run state', job_object.run_state.name),
+        ('run state', job_object.running_state),
         ('workflow', job_object.workflow_node.workflow.name),
         ('job queue', job_object.workflow_node.job_queue.name),
         ('start', job_object.get_start_run_time()),

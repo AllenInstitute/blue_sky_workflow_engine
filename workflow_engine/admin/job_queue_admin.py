@@ -9,7 +9,7 @@ class JobQueueAdmin(admin.ModelAdmin):
         'name',
         'description',
         'job_strategy_class',
-        'enqueued_object_class',
+        'enqueued_object_type',
         'executable_link',
         'created_at',
         'updated_at',
@@ -25,6 +25,8 @@ class JobQueueAdmin(admin.ModelAdmin):
     actions = []
     inlines = []
 
+    def get_queryset(self, request):
+        return self.model.all_objects.get_queryset()
 
     def executable_link(self, job_queue_object):
         return mark_safe('<a href="{}">{}</a>'.format(

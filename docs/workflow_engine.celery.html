@@ -1,0 +1,427 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>workflow_engine.celery package &#8212; Blue Sky Workflow Engine  documentation</title>
+    <link rel="stylesheet" href="_static/aibs_sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="workflow_engine.migrations package" href="workflow_engine.migrations.html" />
+    <link rel="prev" title="workflow_engine.admin package" href="workflow_engine.admin.html" /> 
+  </head>
+  <body>
+<link href="http://www.brain-map.org/assets/stylesheets/portal.css" media="screen" rel="stylesheet" type="text/css" />
+<script src="http://www.brain-map.org/assets/javascripts/portal.js" type="text/javascript"></script>
+<script src="http://www.brain-map.org/assets/javascripts/ga.js" type="text/javascript"></script>
+<script type="text/javascript">
+    var _pSupressBrowserFlashWarning = true;
+    var _pTabId = "pHome";
+    var _pMoreProjectsId = "pMoreProjects";
+    var _pImagePath = "http://www.brain-map.org/assets/images/";
+    var _pSiteWarnings = function() {
+        this.show_warning() = {};
+    }
+</script>
+<script type="text/javascript">
+    function initialize() {
+        /*** do your stuff, then initialize the portal plugin ***/
+        _pPortalOnLoad();
+    }
+</script>
+<style>
+  #header_content > a {
+  display: inline-block;
+  width: 250px;
+  height: 75px;
+  background-image:url("/_static/external_assets/images/Brain_Atlas_Logotype_SDK.png") !important;
+  background-size: 235px 37px;
+  background-position: 0px 20px;
+  background-repeat: no-repeat;
+  }
+</style>
+
+<script type="text/javascript" src="http://www.brain-map.org/external_assets/javascripts/portalHeader.js"></script>
+<link rel="stylesheet" type="text/css" href="/_static/external_assets/stylesheets/common_layout.css" />
+
+
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-workflow_engine.celery">
+<span id="workflow-engine-celery-package"></span><h1>workflow_engine.celery package<a class="headerlink" href="#module-workflow_engine.celery" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-workflow_engine.celery.circus_status_tasks">
+<span id="workflow-engine-celery-circus-status-tasks-module"></span><h2>workflow_engine.celery.circus_status_tasks module<a class="headerlink" href="#module-workflow_engine.celery.circus_status_tasks" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="workflow_engine.celery.circus_status_tasks.after_setup_celery_task_logger">
+<code class="descclassname">workflow_engine.celery.circus_status_tasks.</code><code class="descname">after_setup_celery_task_logger</code><span class="sig-paren">(</span><em>logger</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/celery/circus_status_tasks.html#after_setup_celery_task_logger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.celery.circus_status_tasks.after_setup_celery_task_logger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.celery.circus_status_tasks.get_queued_and_running_task_dicts">
+<code class="descclassname">workflow_engine.celery.circus_status_tasks.</code><code class="descname">get_queued_and_running_task_dicts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/celery/circus_status_tasks.html#get_queued_and_running_task_dicts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.celery.circus_status_tasks.get_queued_and_running_task_dicts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.celery.circus_status_tasks.node_tasks_in_states">
+<code class="descclassname">workflow_engine.celery.circus_status_tasks.</code><code class="descname">node_tasks_in_states</code><span class="sig-paren">(</span><em>remote_queue</em>, <em>state_names</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/celery/circus_status_tasks.html#node_tasks_in_states"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.celery.circus_status_tasks.node_tasks_in_states" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.celery.error_handler">
+<span id="workflow-engine-celery-error-handler-module"></span><h2>workflow_engine.celery.error_handler module<a class="headerlink" href="#module-workflow_engine.celery.error_handler" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-workflow_engine.celery.ingest_tasks">
+<span id="workflow-engine-celery-ingest-tasks-module"></span><h2>workflow_engine.celery.ingest_tasks module<a class="headerlink" href="#module-workflow_engine.celery.ingest_tasks" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="workflow_engine.celery.ingest_tasks.after_setup_celery_task_logger">
+<code class="descclassname">workflow_engine.celery.ingest_tasks.</code><code class="descname">after_setup_celery_task_logger</code><span class="sig-paren">(</span><em>logger</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/celery/ingest_tasks.html#after_setup_celery_task_logger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.celery.ingest_tasks.after_setup_celery_task_logger" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function sets the ‘celery.task’ logger handler and formatter</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.celery.ingest_tasks.load_workflow_config">
+<code class="descclassname">workflow_engine.celery.ingest_tasks.</code><code class="descname">load_workflow_config</code><span class="sig-paren">(</span><em>yaml_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/celery/ingest_tasks.html#load_workflow_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.celery.ingest_tasks.load_workflow_config" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.celery.local_tasks">
+<span id="workflow-engine-celery-local-tasks-module"></span><h2>workflow_engine.celery.local_tasks module<a class="headerlink" href="#module-workflow_engine.celery.local_tasks" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="workflow_engine.celery.local_tasks.after_setup_celery_task_logger">
+<code class="descclassname">workflow_engine.celery.local_tasks.</code><code class="descname">after_setup_celery_task_logger</code><span class="sig-paren">(</span><em>logger</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/celery/local_tasks.html#after_setup_celery_task_logger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.celery.local_tasks.after_setup_celery_task_logger" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function sets the ‘celery.task’ logger handler and formatter</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.celery.local_tasks.query_running_task_dicts">
+<code class="descclassname">workflow_engine.celery.local_tasks.</code><code class="descname">query_running_task_dicts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/celery/local_tasks.html#query_running_task_dicts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.celery.local_tasks.query_running_task_dicts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.celery.moab_beat">
+<span id="workflow-engine-celery-moab-beat-module"></span><h2>workflow_engine.celery.moab_beat module<a class="headerlink" href="#module-workflow_engine.celery.moab_beat" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="workflow_engine.celery.moab_beat.after_setup_celery_task_logger">
+<code class="descclassname">workflow_engine.celery.moab_beat.</code><code class="descname">after_setup_celery_task_logger</code><span class="sig-paren">(</span><em>logger</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/celery/moab_beat.html#after_setup_celery_task_logger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.celery.moab_beat.after_setup_celery_task_logger" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function sets the ‘celery.task’ logger handler and formatter</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.celery.moab_beat.setup_periodic_tasks">
+<code class="descclassname">workflow_engine.celery.moab_beat.</code><code class="descname">setup_periodic_tasks</code><span class="sig-paren">(</span><em>sender</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/celery/moab_beat.html#setup_periodic_tasks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.celery.moab_beat.setup_periodic_tasks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.celery.moab_status_tasks">
+<span id="workflow-engine-celery-moab-status-tasks-module"></span><h2>workflow_engine.celery.moab_status_tasks module<a class="headerlink" href="#module-workflow_engine.celery.moab_status_tasks" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="workflow_engine.celery.moab_status_tasks.after_setup_celery_task_logger">
+<code class="descclassname">workflow_engine.celery.moab_status_tasks.</code><code class="descname">after_setup_celery_task_logger</code><span class="sig-paren">(</span><em>logger</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/celery/moab_status_tasks.html#after_setup_celery_task_logger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.celery.moab_status_tasks.after_setup_celery_task_logger" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function sets the ‘celery.task’ logger handler and formatter</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.celery.moab_status_tasks.combined_df_response_group">
+<code class="descclassname">workflow_engine.celery.moab_status_tasks.</code><code class="descname">combined_df_response_group</code><span class="sig-paren">(</span><em>combined_df</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/celery/moab_status_tasks.html#combined_df_response_group"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.celery.moab_status_tasks.combined_df_response_group" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.celery.moab_status_tasks.query_running_task_dicts">
+<code class="descclassname">workflow_engine.celery.moab_status_tasks.</code><code class="descname">query_running_task_dicts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/celery/moab_status_tasks.html#query_running_task_dicts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.celery.moab_status_tasks.query_running_task_dicts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.celery.moab_tasks">
+<span id="workflow-engine-celery-moab-tasks-module"></span><h2>workflow_engine.celery.moab_tasks module<a class="headerlink" href="#module-workflow_engine.celery.moab_tasks" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="workflow_engine.celery.moab_tasks.after_setup_celery_task_logger">
+<code class="descclassname">workflow_engine.celery.moab_tasks.</code><code class="descname">after_setup_celery_task_logger</code><span class="sig-paren">(</span><em>logger</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/celery/moab_tasks.html#after_setup_celery_task_logger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.celery.moab_tasks.after_setup_celery_task_logger" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function sets the ‘celery.task’ logger handler and formatter</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.celery.mock_tasks">
+<span id="workflow-engine-celery-mock-tasks-module"></span><h2>workflow_engine.celery.mock_tasks module<a class="headerlink" href="#module-workflow_engine.celery.mock_tasks" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="workflow_engine.celery.mock_tasks.after_setup_celery_task_logger">
+<code class="descclassname">workflow_engine.celery.mock_tasks.</code><code class="descname">after_setup_celery_task_logger</code><span class="sig-paren">(</span><em>logger</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/celery/mock_tasks.html#after_setup_celery_task_logger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.celery.mock_tasks.after_setup_celery_task_logger" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function sets the ‘celery.task’ logger handler and formatter</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.celery.mock_tasks.query_running_task_dicts">
+<code class="descclassname">workflow_engine.celery.mock_tasks.</code><code class="descname">query_running_task_dicts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/celery/mock_tasks.html#query_running_task_dicts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.celery.mock_tasks.query_running_task_dicts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.celery.monitor_tasks">
+<span id="workflow-engine-celery-monitor-tasks-module"></span><h2>workflow_engine.celery.monitor_tasks module<a class="headerlink" href="#module-workflow_engine.celery.monitor_tasks" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="workflow_engine.celery.monitor_tasks.append_extra_function">
+<code class="descclassname">workflow_engine.celery.monitor_tasks.</code><code class="descname">append_extra_function</code><span class="sig-paren">(</span><em>fn</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/celery/monitor_tasks.html#append_extra_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.celery.monitor_tasks.append_extra_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.celery.monitor_tasks.count_node_jobs_in_state">
+<code class="descclassname">workflow_engine.celery.monitor_tasks.</code><code class="descname">count_node_jobs_in_state</code><span class="sig-paren">(</span><em>node</em>, <em>run_state</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/celery/monitor_tasks.html#count_node_jobs_in_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.celery.monitor_tasks.count_node_jobs_in_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.celery.monitor_tasks.update_job_grid_json">
+<code class="descclassname">workflow_engine.celery.monitor_tasks.</code><code class="descname">update_job_grid_json</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/celery/monitor_tasks.html#update_job_grid_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.celery.monitor_tasks.update_job_grid_json" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.celery.monitor_tasks.update_workflow_state_json">
+<code class="descclassname">workflow_engine.celery.monitor_tasks.</code><code class="descname">update_workflow_state_json</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/celery/monitor_tasks.html#update_workflow_state_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.celery.monitor_tasks.update_workflow_state_json" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.celery.monitor_tasks.workflow_summary">
+<code class="descclassname">workflow_engine.celery.monitor_tasks.</code><code class="descname">workflow_summary</code><span class="sig-paren">(</span><em>workflow_object</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/celery/monitor_tasks.html#workflow_summary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.celery.monitor_tasks.workflow_summary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.celery.pbs_tasks">
+<span id="workflow-engine-celery-pbs-tasks-module"></span><h2>workflow_engine.celery.pbs_tasks module<a class="headerlink" href="#module-workflow_engine.celery.pbs_tasks" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="workflow_engine.celery.pbs_tasks.query_running_task_dicts">
+<code class="descclassname">workflow_engine.celery.pbs_tasks.</code><code class="descname">query_running_task_dicts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/celery/pbs_tasks.html#query_running_task_dicts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.celery.pbs_tasks.query_running_task_dicts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.celery.result_tasks">
+<span id="workflow-engine-celery-result-tasks-module"></span><h2>workflow_engine.celery.result_tasks module<a class="headerlink" href="#module-workflow_engine.celery.result_tasks" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="workflow_engine.celery.result_tasks.after_setup_celery_task_logger">
+<code class="descclassname">workflow_engine.celery.result_tasks.</code><code class="descname">after_setup_celery_task_logger</code><span class="sig-paren">(</span><em>logger</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/celery/result_tasks.html#after_setup_celery_task_logger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.celery.result_tasks.after_setup_celery_task_logger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.celery.result_tasks.get_task_strategy_by_task_id">
+<code class="descclassname">workflow_engine.celery.result_tasks.</code><code class="descname">get_task_strategy_by_task_id</code><span class="sig-paren">(</span><em>task_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/celery/result_tasks.html#get_task_strategy_by_task_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.celery.result_tasks.get_task_strategy_by_task_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.celery.signatures">
+<span id="workflow-engine-celery-signatures-module"></span><h2>workflow_engine.celery.signatures module<a class="headerlink" href="#module-workflow_engine.celery.signatures" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.celery.signatures.METHODS">
+<em class="property">class </em><code class="descclassname">workflow_engine.celery.signatures.</code><code class="descname">METHODS</code><a class="reference internal" href="_modules/workflow_engine/celery/signatures.html#METHODS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.celery.signatures.METHODS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="workflow_engine.celery.signatures.METHODS.CHECK_CIRCUS_STATUS">
+<code class="descname">CHECK_CIRCUS_STATUS</code><em class="property"> = 'workflow_engine.check_circus_status'</em><a class="headerlink" href="#workflow_engine.celery.signatures.METHODS.CHECK_CIRCUS_STATUS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.celery.signatures.METHODS.CHECK_CIRCUS_TASK_STATUS">
+<code class="descname">CHECK_CIRCUS_TASK_STATUS</code><em class="property"> = 'workflow_engine.check_circus_task_status'</em><a class="headerlink" href="#workflow_engine.celery.signatures.METHODS.CHECK_CIRCUS_TASK_STATUS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.celery.signatures.METHODS.CHECK_MOAB_STATUS">
+<code class="descname">CHECK_MOAB_STATUS</code><em class="property"> = 'workflow_engine.celery.moab_status_tasks.check_moab_status'</em><a class="headerlink" href="#workflow_engine.celery.signatures.METHODS.CHECK_MOAB_STATUS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.celery.signatures.METHODS.CREATE_JOB">
+<code class="descname">CREATE_JOB</code><em class="property"> = 'workflow_engine.celery.workflow_tasks.create_job'</em><a class="headerlink" href="#workflow_engine.celery.signatures.METHODS.CREATE_JOB" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.celery.signatures.METHODS.ENQUEUE_NEXT">
+<code class="descname">ENQUEUE_NEXT</code><em class="property"> = 'workflow_engine.celery.workflow_tasks.enqueue_next_queue'</em><a class="headerlink" href="#workflow_engine.celery.signatures.METHODS.ENQUEUE_NEXT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.celery.signatures.METHODS.INGEST">
+<code class="descname">INGEST</code><em class="property"> = 'workflow_engine.celery.ingest_tasks.ingest_task'</em><a class="headerlink" href="#workflow_engine.celery.signatures.METHODS.INGEST" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.celery.signatures.METHODS.KILL_JOB">
+<code class="descname">KILL_JOB</code><em class="property"> = 'workflow_engine.celery.workflow_tasks.kill_job'</em><a class="headerlink" href="#workflow_engine.celery.signatures.METHODS.KILL_JOB" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.celery.signatures.METHODS.KILL_MOAB_TASK">
+<code class="descname">KILL_MOAB_TASK</code><em class="property"> = 'workflow_engine.celery.moab_tasks.kill_moab_task'</em><a class="headerlink" href="#workflow_engine.celery.signatures.METHODS.KILL_MOAB_TASK" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.celery.signatures.METHODS.PROCESS_FAILED">
+<code class="descname">PROCESS_FAILED</code><em class="property"> = 'workflow_engine.celery.result_tasks.process_failed'</em><a class="headerlink" href="#workflow_engine.celery.signatures.METHODS.PROCESS_FAILED" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.celery.signatures.METHODS.PROCESS_FAILED_EXECUTION">
+<code class="descname">PROCESS_FAILED_EXECUTION</code><em class="property"> = 'workflow_engine.celery.result_tasks.process_failed_execution'</em><a class="headerlink" href="#workflow_engine.celery.signatures.METHODS.PROCESS_FAILED_EXECUTION" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.celery.signatures.METHODS.PROCESS_FINISHED_EXECUTION">
+<code class="descname">PROCESS_FINISHED_EXECUTION</code><em class="property"> = 'workflow_engine.celery.result_tasks.process_finished_execution'</em><a class="headerlink" href="#workflow_engine.celery.signatures.METHODS.PROCESS_FINISHED_EXECUTION" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.celery.signatures.METHODS.PROCESS_PBS_ID">
+<code class="descname">PROCESS_PBS_ID</code><em class="property"> = 'workflow_engine.celery.result_tasks.process_pbs_id'</em><a class="headerlink" href="#workflow_engine.celery.signatures.METHODS.PROCESS_PBS_ID" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.celery.signatures.METHODS.PROCESS_RUNNING">
+<code class="descname">PROCESS_RUNNING</code><em class="property"> = 'workflow_engine.celery.result_tasks.process_running'</em><a class="headerlink" href="#workflow_engine.celery.signatures.METHODS.PROCESS_RUNNING" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.celery.signatures.METHODS.QUEUE_JOB">
+<code class="descname">QUEUE_JOB</code><em class="property"> = 'workflow_engine.celery.workflow_tasks.queue_job'</em><a class="headerlink" href="#workflow_engine.celery.signatures.METHODS.QUEUE_JOB" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.celery.signatures.METHODS.RUN_WORKFLOW_NODE_JOBS">
+<code class="descname">RUN_WORKFLOW_NODE_JOBS</code><em class="property"> = 'workflow_engine.celery.workflow_tasks.run_workflow_node_jobs_by_id'</em><a class="headerlink" href="#workflow_engine.celery.signatures.METHODS.RUN_WORKFLOW_NODE_JOBS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.celery.signatures.METHODS.SUBMIT_MOAB_TASK">
+<code class="descname">SUBMIT_MOAB_TASK</code><em class="property"> = 'workflow_engine.celery.moab_tasks.submit_moab_task'</em><a class="headerlink" href="#workflow_engine.celery.signatures.METHODS.SUBMIT_MOAB_TASK" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.celery.signatures.METHODS.SUBMIT_WORKER_TASK">
+<code class="descname">SUBMIT_WORKER_TASK</code><em class="property"> = 'workflow_engine.celery.submit_worker_task'</em><a class="headerlink" href="#workflow_engine.celery.signatures.METHODS.SUBMIT_WORKER_TASK" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.celery.signatures.METHODS.UPDATE_DASHBOARD">
+<code class="descname">UPDATE_DASHBOARD</code><em class="property"> = 'workflow_engine.broadcast.update_dashboard'</em><a class="headerlink" href="#workflow_engine.celery.signatures.METHODS.UPDATE_DASHBOARD" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.celery.workflow_tasks">
+<span id="workflow-engine-celery-workflow-tasks-module"></span><h2>workflow_engine.celery.workflow_tasks module<a class="headerlink" href="#module-workflow_engine.celery.workflow_tasks" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="workflow_engine.celery.workflow_tasks.after_setup_celery_task_logger">
+<code class="descclassname">workflow_engine.celery.workflow_tasks.</code><code class="descname">after_setup_celery_task_logger</code><span class="sig-paren">(</span><em>logger</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/celery/workflow_tasks.html#after_setup_celery_task_logger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.celery.workflow_tasks.after_setup_celery_task_logger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.celery.workflow_tasks.get_task_strategy_by_task_id">
+<code class="descclassname">workflow_engine.celery.workflow_tasks.</code><code class="descname">get_task_strategy_by_task_id</code><span class="sig-paren">(</span><em>task_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/celery/workflow_tasks.html#get_task_strategy_by_task_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.celery.workflow_tasks.get_task_strategy_by_task_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.celery.workflow_tasks.report_error">
+<code class="descclassname">workflow_engine.celery.workflow_tasks.</code><code class="descname">report_error</code><span class="sig-paren">(</span><em>msg</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/celery/workflow_tasks.html#report_error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.celery.workflow_tasks.report_error" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.celery.workflow_tasks.report_exception">
+<code class="descclassname">workflow_engine.celery.workflow_tasks.</code><code class="descname">report_exception</code><span class="sig-paren">(</span><em>msg</em>, <em>e</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/celery/workflow_tasks.html#report_exception"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.celery.workflow_tasks.report_exception" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="customizing.html">Customization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="strategies.html">Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configurations.html">Configuration Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop.html">Developers Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">Authors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="workflow_engine.html">Source Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.admin.html">workflow_engine.admin package</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">workflow_engine.celery package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.migrations.html">workflow_engine.migrations package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.mixins.html">workflow_engine.mixins package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.models.html">workflow_engine.models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.serializers.html">workflow_engine.serializers package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.strategies.html">workflow_engine.strategies package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.views.html">workflow_engine.views package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.worker.html">workflow_engine.worker package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="workflow_engine.worker.qsub.html">workflow_engine.worker.qsub package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workflow_client.html">Client Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="workflow_client.ingest.html">workflow_client.ingest package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_client.nb_utils.html">workflow_client.nb_utils package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_client.tasks.html">workflow_client.tasks package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/AllenInstitute/BlueSkyWorkflowEngine">Github Profile</a></li>
+</ul>
+
+<h3> Questions </h3>
+<p class="questions">
+  Send any questions using the <a href="http://alleninstitute.org/contact_us/index.html">Send Us a Message</a> link below, 
+  or submit your question to <a href="http://stackoverflow.com/">StackOverflow</a> using with the 'allen-sdk' tag.
+</p>
+
+<p class="questions">
+  If you encounter any problems using the AllenSDK, please create an issue on <a href="http://github.com/alleninstitute/allensdk/issues/">Github's issue tracker</a>.
+</p>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+    <div class="footer" role="contentinfo">
+    </div>
+<script type="text/javascript" src="http://www.brain-map.org/external_assets/javascripts/portalFooter.js"></script>
+
+
+  </body>
+</html>

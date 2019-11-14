@@ -1,0 +1,7 @@
+[circus]
+check_delay = 5
+endpoint = tcp://127.0.0.1:5655
+pubsub_endpoint = tcp://127.0.0.1:5656
+stats_endpoint = tcp://127.0.0.1:5657
+statsd = 1
+

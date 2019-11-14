@@ -1,0 +1,546 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>workflow_engine.views package &#8212; Blue Sky Workflow Engine  documentation</title>
+    <link rel="stylesheet" href="_static/aibs_sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="workflow_engine.worker package" href="workflow_engine.worker.html" />
+    <link rel="prev" title="workflow_engine.strategies package" href="workflow_engine.strategies.html" /> 
+  </head>
+  <body>
+<link href="http://www.brain-map.org/assets/stylesheets/portal.css" media="screen" rel="stylesheet" type="text/css" />
+<script src="http://www.brain-map.org/assets/javascripts/portal.js" type="text/javascript"></script>
+<script src="http://www.brain-map.org/assets/javascripts/ga.js" type="text/javascript"></script>
+<script type="text/javascript">
+    var _pSupressBrowserFlashWarning = true;
+    var _pTabId = "pHome";
+    var _pMoreProjectsId = "pMoreProjects";
+    var _pImagePath = "http://www.brain-map.org/assets/images/";
+    var _pSiteWarnings = function() {
+        this.show_warning() = {};
+    }
+</script>
+<script type="text/javascript">
+    function initialize() {
+        /*** do your stuff, then initialize the portal plugin ***/
+        _pPortalOnLoad();
+    }
+</script>
+<style>
+  #header_content > a {
+  display: inline-block;
+  width: 250px;
+  height: 75px;
+  background-image:url("/_static/external_assets/images/Brain_Atlas_Logotype_SDK.png") !important;
+  background-size: 235px 37px;
+  background-position: 0px 20px;
+  background-repeat: no-repeat;
+  }
+</style>
+
+<script type="text/javascript" src="http://www.brain-map.org/external_assets/javascripts/portalHeader.js"></script>
+<link rel="stylesheet" type="text/css" href="/_static/external_assets/stylesheets/common_layout.css" />
+
+
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-workflow_engine.views">
+<span id="workflow-engine-views-package"></span><h1>workflow_engine.views package<a class="headerlink" href="#module-workflow_engine.views" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-workflow_engine.views.decorators">
+<span id="workflow-engine-views-decorators-module"></span><h2>workflow_engine.views.decorators module<a class="headerlink" href="#module-workflow_engine.views.decorators" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="workflow_engine.views.decorators.object_json_all_response">
+<code class="descclassname">workflow_engine.views.decorators.</code><code class="descname">object_json_all_response</code><span class="sig-paren">(</span><em>clazz</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/decorators.html#object_json_all_response"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.decorators.object_json_all_response" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.decorators.object_json_response">
+<code class="descclassname">workflow_engine.views.decorators.</code><code class="descname">object_json_response</code><span class="sig-paren">(</span><em>id_name</em>, <em>clazz</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/decorators.html#object_json_response"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.decorators.object_json_response" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.decorators.object_json_response2">
+<code class="descclassname">workflow_engine.views.decorators.</code><code class="descname">object_json_response2</code><span class="sig-paren">(</span><em>id_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/decorators.html#object_json_response2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.decorators.object_json_response2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.decorators.object_yaml_all_response">
+<code class="descclassname">workflow_engine.views.decorators.</code><code class="descname">object_yaml_all_response</code><span class="sig-paren">(</span><em>clazz</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/decorators.html#object_yaml_all_response"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.decorators.object_yaml_all_response" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.views.executable_view">
+<span id="workflow-engine-views-executable-view-module"></span><h2>workflow_engine.views.executable_view module<a class="headerlink" href="#module-workflow_engine.views.executable_view" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="workflow_engine.views.executable_view.add_sort_executable">
+<code class="descclassname">workflow_engine.views.executable_view.</code><code class="descname">add_sort_executable</code><span class="sig-paren">(</span><em>context</em>, <em>sort</em>, <em>url</em>, <em>set_params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/executable_view.html#add_sort_executable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.executable_view.add_sort_executable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.executable_view.executables">
+<code class="descclassname">workflow_engine.views.executable_view.</code><code class="descname">executables</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/executable_view.html#executables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.executable_view.executables" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.executable_view.executables_page">
+<code class="descclassname">workflow_engine.views.executable_view.</code><code class="descname">executables_page</code><span class="sig-paren">(</span><em>request</em>, <em>page</em>, <em>url=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/executable_view.html#executables_page"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.executable_view.executables_page" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.executable_view.get_executable_names">
+<code class="descclassname">workflow_engine.views.executable_view.</code><code class="descname">get_executable_names</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/executable_view.html#get_executable_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.executable_view.get_executable_names" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.views.grid_view">
+<span id="workflow-engine-views-grid-view-module"></span><h2>workflow_engine.views.grid_view module<a class="headerlink" href="#module-workflow_engine.views.grid_view" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="workflow_engine.views.grid_view.get_python_version">
+<code class="descclassname">workflow_engine.views.grid_view.</code><code class="descname">get_python_version</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/grid_view.html#get_python_version"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.grid_view.get_python_version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.grid_view.index">
+<code class="descclassname">workflow_engine.views.grid_view.</code><code class="descname">index</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/grid_view.html#index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.grid_view.index" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.views.home_view">
+<span id="workflow-engine-views-home-view-module"></span><h2>workflow_engine.views.home_view module<a class="headerlink" href="#module-workflow_engine.views.home_view" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="workflow_engine.views.home_view.get_python_version">
+<code class="descclassname">workflow_engine.views.home_view.</code><code class="descname">get_python_version</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/home_view.html#get_python_version"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.home_view.get_python_version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.home_view.index">
+<code class="descclassname">workflow_engine.views.home_view.</code><code class="descname">index</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/home_view.html#index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.home_view.index" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.views.ingest_view">
+<span id="workflow-engine-views-ingest-view-module"></span><h2>workflow_engine.views.ingest_view module<a class="headerlink" href="#module-workflow_engine.views.ingest_view" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="workflow_engine.views.ingest_view.ingest">
+<code class="descclassname">workflow_engine.views.ingest_view.</code><code class="descname">ingest</code><span class="sig-paren">(</span><em>request</em>, <em>workflow_name=None</em>, <em>tag=None</em>, <em>format=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/ingest_view.html#ingest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.ingest_view.ingest" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.views.job_grid">
+<span id="workflow-engine-views-job-grid-module"></span><h2>workflow_engine.views.job_grid module<a class="headerlink" href="#module-workflow_engine.views.job_grid" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.views.job_grid.JobGrid">
+<em class="property">class </em><code class="descclassname">workflow_engine.views.job_grid.</code><code class="descname">JobGrid</code><a class="reference internal" href="_modules/workflow_engine/views/job_grid.html#JobGrid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.job_grid.JobGrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="workflow_engine.views.job_grid.JobGrid.extra_columns">
+<code class="descname">extra_columns</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/job_grid.html#JobGrid.extra_columns"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.job_grid.JobGrid.extra_columns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.views.job_grid.JobGrid.filter_workflow_nodes">
+<code class="descname">filter_workflow_nodes</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/job_grid.html#JobGrid.filter_workflow_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.job_grid.JobGrid.filter_workflow_nodes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.views.job_grid.JobGrid.generate_grid">
+<code class="descname">generate_grid</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/job_grid.html#JobGrid.generate_grid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.job_grid.JobGrid.generate_grid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.views.job_grid.JobGrid.index_field">
+<code class="descname">index_field</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/job_grid.html#JobGrid.index_field"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.job_grid.JobGrid.index_field" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.views.job_grid.JobGrid.query_enqueued_objects">
+<code class="descname">query_enqueued_objects</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/job_grid.html#JobGrid.query_enqueued_objects"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.job_grid.JobGrid.query_enqueued_objects" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.views.job_grid.JobGrid.query_workflow_objects">
+<code class="descname">query_workflow_objects</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/job_grid.html#JobGrid.query_workflow_objects"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.job_grid.JobGrid.query_workflow_objects" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.views.job_grid.JobGrid.sort_columns">
+<code class="descname">sort_columns</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/job_grid.html#JobGrid.sort_columns"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.job_grid.JobGrid.sort_columns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.views.job_grid.JobGrid.sort_workflow_nodes">
+<code class="descname">sort_workflow_nodes</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/job_grid.html#JobGrid.sort_workflow_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.job_grid.JobGrid.sort_workflow_nodes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.views.job_grid.JobGrid.sorted_node_names">
+<code class="descname">sorted_node_names</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/job_grid.html#JobGrid.sorted_node_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.job_grid.JobGrid.sorted_node_names" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.views.job_queue_view">
+<span id="workflow-engine-views-job-queue-view-module"></span><h2>workflow_engine.views.job_queue_view module<a class="headerlink" href="#module-workflow_engine.views.job_queue_view" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="workflow_engine.views.job_queue_view.add_sort_job_queues">
+<code class="descclassname">workflow_engine.views.job_queue_view.</code><code class="descname">add_sort_job_queues</code><span class="sig-paren">(</span><em>context</em>, <em>sort</em>, <em>url</em>, <em>set_params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/job_queue_view.html#add_sort_job_queues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.job_queue_view.add_sort_job_queues" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.job_queue_view.job_queues">
+<code class="descclassname">workflow_engine.views.job_queue_view.</code><code class="descname">job_queues</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/job_queue_view.html#job_queues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.job_queue_view.job_queues" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.job_queue_view.job_queues_page">
+<code class="descclassname">workflow_engine.views.job_queue_view.</code><code class="descname">job_queues_page</code><span class="sig-paren">(</span><em>request</em>, <em>page</em>, <em>url=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/job_queue_view.html#job_queues_page"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.job_queue_view.job_queues_page" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.views.job_view">
+<span id="workflow-engine-views-job-view-module"></span><h2>workflow_engine.views.job_view module<a class="headerlink" href="#module-workflow_engine.views.job_view" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="workflow_engine.views.job_view.add_sort_jobs">
+<code class="descclassname">workflow_engine.views.job_view.</code><code class="descname">add_sort_jobs</code><span class="sig-paren">(</span><em>context</em>, <em>sort</em>, <em>url</em>, <em>set_params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/job_view.html#add_sort_jobs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.job_view.add_sort_jobs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.job_view.jobs">
+<code class="descclassname">workflow_engine.views.job_view.</code><code class="descname">jobs</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/job_view.html#jobs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.job_view.jobs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.job_view.jobs_page">
+<code class="descclassname">workflow_engine.views.job_view.</code><code class="descname">jobs_page</code><span class="sig-paren">(</span><em>request</em>, <em>page</em>, <em>url=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/job_view.html#jobs_page"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.job_view.jobs_page" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.views.log_view">
+<span id="workflow-engine-views-log-view-module"></span><h2>workflow_engine.views.log_view module<a class="headerlink" href="#module-workflow_engine.views.log_view" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="workflow_engine.views.log_view.get_executable_file">
+<code class="descclassname">workflow_engine.views.log_view.</code><code class="descname">get_executable_file</code><span class="sig-paren">(</span><em>full_executable</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/log_view.html#get_executable_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.log_view.get_executable_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.log_view.get_executable_log_holder">
+<code class="descclassname">workflow_engine.views.log_view.</code><code class="descname">get_executable_log_holder</code><span class="sig-paren">(</span><em>executable_id</em>, <em>context</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/log_view.html#get_executable_log_holder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.log_view.get_executable_log_holder" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.log_view.get_task_log_holder">
+<code class="descclassname">workflow_engine.views.log_view.</code><code class="descname">get_task_log_holder</code><span class="sig-paren">(</span><em>task_id</em>, <em>types</em>, <em>context</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/log_view.html#get_task_log_holder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.log_view.get_task_log_holder" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.log_view.logs">
+<code class="descclassname">workflow_engine.views.log_view.</code><code class="descname">logs</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/log_view.html#logs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.log_view.logs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.views.monitor_view">
+<span id="workflow-engine-views-monitor-view-module"></span><h2>workflow_engine.views.monitor_view module<a class="headerlink" href="#module-workflow_engine.views.monitor_view" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.views.monitor_view.MonitorView">
+<em class="property">class </em><code class="descclassname">workflow_engine.views.monitor_view.</code><code class="descname">MonitorView</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/monitor_view.html#MonitorView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.monitor_view.MonitorView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">rest_pandas.views.PandasView</span></code></p>
+<dl class="attribute">
+<dt id="workflow_engine.views.monitor_view.MonitorView.queryset">
+<code class="descname">queryset</code><a class="headerlink" href="#workflow_engine.views.monitor_view.MonitorView.queryset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.views.monitor_view.MonitorView.serializer_class">
+<code class="descname">serializer_class</code><a class="headerlink" href="#workflow_engine.views.monitor_view.MonitorView.serializer_class" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="workflow_engine.serializers.html#workflow_engine.serializers.task_monitor_serializer.TaskMonitorSerializer" title="workflow_engine.serializers.task_monitor_serializer.TaskMonitorSerializer"><code class="xref py py-class docutils literal"><span class="pre">workflow_engine.serializers.task_monitor_serializer.TaskMonitorSerializer</span></code></a></p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.views.record_view">
+<span id="workflow-engine-views-record-view-module"></span><h2>workflow_engine.views.record_view module<a class="headerlink" href="#module-workflow_engine.views.record_view" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="workflow_engine.views.record_view.check_unique">
+<code class="descclassname">workflow_engine.views.record_view.</code><code class="descname">check_unique</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/record_view.html#check_unique"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.record_view.check_unique" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.record_view.delete_record">
+<code class="descclassname">workflow_engine.views.record_view.</code><code class="descname">delete_record</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/record_view.html#delete_record"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.record_view.delete_record" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.record_view.get_record_info">
+<code class="descclassname">workflow_engine.views.record_view.</code><code class="descname">get_record_info</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/record_view.html#get_record_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.record_view.get_record_info" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.record_view.get_search_data">
+<code class="descclassname">workflow_engine.views.record_view.</code><code class="descname">get_search_data</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/record_view.html#get_search_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.record_view.get_search_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.record_view.record_json_response">
+<code class="descclassname">workflow_engine.views.record_view.</code><code class="descname">record_json_response</code><span class="sig-paren">(</span><em>fn</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/record_view.html#record_json_response"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.record_view.record_json_response" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.record_view.update_record">
+<code class="descclassname">workflow_engine.views.record_view.</code><code class="descname">update_record</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/record_view.html#update_record"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.record_view.update_record" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.views.shared">
+<span id="workflow-engine-views-shared-module"></span><h2>workflow_engine.views.shared module<a class="headerlink" href="#module-workflow_engine.views.shared" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="workflow_engine.views.shared.add_context">
+<code class="descclassname">workflow_engine.views.shared.</code><code class="descname">add_context</code><span class="sig-paren">(</span><em>context</em>, <em>records</em>, <em>page_link</em>, <em>page</em>, <em>selected_page</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/shared.html#add_context"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.shared.add_context" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.shared.add_settings_info_to_context">
+<code class="descclassname">workflow_engine.views.shared.</code><code class="descname">add_settings_info_to_context</code><span class="sig-paren">(</span><em>context</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/shared.html#add_settings_info_to_context"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.shared.add_settings_info_to_context" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.shared.get_page_range_end">
+<code class="descclassname">workflow_engine.views.shared.</code><code class="descname">get_page_range_end</code><span class="sig-paren">(</span><em>num_pages</em>, <em>page</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/shared.html#get_page_range_end"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.shared.get_page_range_end" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.shared.get_page_range_start">
+<code class="descclassname">workflow_engine.views.shared.</code><code class="descname">get_page_range_start</code><span class="sig-paren">(</span><em>page_range_end</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/shared.html#get_page_range_start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.shared.get_page_range_start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.shared.order_payload">
+<code class="descclassname">workflow_engine.views.shared.</code><code class="descname">order_payload</code><span class="sig-paren">(</span><em>spec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/shared.html#order_payload"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.shared.order_payload" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.shared.page_link_helper">
+<code class="descclassname">workflow_engine.views.shared.</code><code class="descname">page_link_helper</code><span class="sig-paren">(</span><em>url</em>, <em>selected_page</em>, <em>page_number</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/shared.html#page_link_helper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.shared.page_link_helper" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.shared.sort_helper">
+<code class="descclassname">workflow_engine.views.shared.</code><code class="descname">sort_helper</code><span class="sig-paren">(</span><em>column_name</em>, <em>sort</em>, <em>url</em>, <em>set_params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/shared.html#sort_helper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.shared.sort_helper" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.shared.string_to_bool">
+<code class="descclassname">workflow_engine.views.shared.</code><code class="descname">string_to_bool</code><span class="sig-paren">(</span><em>input</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/shared.html#string_to_bool"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.shared.string_to_bool" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.shared.to_none">
+<code class="descclassname">workflow_engine.views.shared.</code><code class="descname">to_none</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/shared.html#to_none"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.shared.to_none" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.views.task_view">
+<span id="workflow-engine-views-task-view-module"></span><h2>workflow_engine.views.task_view module<a class="headerlink" href="#module-workflow_engine.views.task_view" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="workflow_engine.views.task_view.add_sort_tasks">
+<code class="descclassname">workflow_engine.views.task_view.</code><code class="descname">add_sort_tasks</code><span class="sig-paren">(</span><em>context</em>, <em>sort</em>, <em>url</em>, <em>set_params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/task_view.html#add_sort_tasks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.task_view.add_sort_tasks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.task_view.download_bash">
+<code class="descclassname">workflow_engine.views.task_view.</code><code class="descname">download_bash</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/task_view.html#download_bash"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.task_view.download_bash" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.task_view.get_task_status">
+<code class="descclassname">workflow_engine.views.task_view.</code><code class="descname">get_task_status</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/task_view.html#get_task_status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.task_view.get_task_status" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.task_view.kill_task">
+<code class="descclassname">workflow_engine.views.task_view.</code><code class="descname">kill_task</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/task_view.html#kill_task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.task_view.kill_task" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.task_view.queue_task">
+<code class="descclassname">workflow_engine.views.task_view.</code><code class="descname">queue_task</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/task_view.html#queue_task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.task_view.queue_task" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.task_view.tasks">
+<code class="descclassname">workflow_engine.views.task_view.</code><code class="descname">tasks</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/task_view.html#tasks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.task_view.tasks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.task_view.tasks_page">
+<code class="descclassname">workflow_engine.views.task_view.</code><code class="descname">tasks_page</code><span class="sig-paren">(</span><em>request</em>, <em>page</em>, <em>url=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/task_view.html#tasks_page"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.task_view.tasks_page" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.views.workflow_view">
+<span id="workflow-engine-views-workflow-view-module"></span><h2>workflow_engine.views.workflow_view module<a class="headerlink" href="#module-workflow_engine.views.workflow_view" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="workflow_engine.views.workflow_view.build_chart">
+<code class="descclassname">workflow_engine.views.workflow_view.</code><code class="descname">build_chart</code><span class="sig-paren">(</span><em>workflow</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/workflow_view.html#build_chart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.workflow_view.build_chart" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.workflow_view.build_node_structure">
+<code class="descclassname">workflow_engine.views.workflow_view.</code><code class="descname">build_node_structure</code><span class="sig-paren">(</span><em>node</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/workflow_view.html#build_node_structure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.workflow_view.build_node_structure" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.workflow_view.build_workflow_children">
+<code class="descclassname">workflow_engine.views.workflow_view.</code><code class="descname">build_workflow_children</code><span class="sig-paren">(</span><em>node</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/workflow_view.html#build_workflow_children"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.workflow_view.build_workflow_children" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.workflow_view.child_connector">
+<code class="descclassname">workflow_engine.views.workflow_view.</code><code class="descname">child_connector</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/workflow_view.html#child_connector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.workflow_view.child_connector" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.workflow_view.count_node_jobs_in_state">
+<code class="descclassname">workflow_engine.views.workflow_view.</code><code class="descname">count_node_jobs_in_state</code><span class="sig-paren">(</span><em>node</em>, <em>run_state</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/workflow_view.html#count_node_jobs_in_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.workflow_view.count_node_jobs_in_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.workflow_view.get_node_color_class">
+<code class="descclassname">workflow_engine.views.workflow_view.</code><code class="descname">get_node_color_class</code><span class="sig-paren">(</span><em>run_state</em>, <em>prev_run_state</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/workflow_view.html#get_node_color_class"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.workflow_view.get_node_color_class" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.workflow_view.get_node_content">
+<code class="descclassname">workflow_engine.views.workflow_view.</code><code class="descname">get_node_content</code><span class="sig-paren">(</span><em>node</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/workflow_view.html#get_node_content"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.workflow_view.get_node_content" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.workflow_view.monitor_workflow_data">
+<code class="descclassname">workflow_engine.views.workflow_view.</code><code class="descname">monitor_workflow_data</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/workflow_view.html#monitor_workflow_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.workflow_view.monitor_workflow_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.workflow_view.node_info_payload">
+<code class="descclassname">workflow_engine.views.workflow_view.</code><code class="descname">node_info_payload</code><span class="sig-paren">(</span><em>workflow_node</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/workflow_view.html#node_info_payload"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.workflow_view.node_info_payload" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.workflow_view.to_key">
+<code class="descclassname">workflow_engine.views.workflow_view.</code><code class="descname">to_key</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/workflow_view.html#to_key"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.workflow_view.to_key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.workflow_view.workflow_summary">
+<code class="descclassname">workflow_engine.views.workflow_view.</code><code class="descname">workflow_summary</code><span class="sig-paren">(</span><em>workflow_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/workflow_view.html#workflow_summary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.workflow_view.workflow_summary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="workflow_engine.views.workflow_view.workflows">
+<code class="descclassname">workflow_engine.views.workflow_view.</code><code class="descname">workflows</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/views/workflow_view.html#workflows"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.views.workflow_view.workflows" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="customizing.html">Customization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="strategies.html">Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configurations.html">Configuration Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop.html">Developers Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">Authors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="workflow_engine.html">Source Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.admin.html">workflow_engine.admin package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.celery.html">workflow_engine.celery package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.migrations.html">workflow_engine.migrations package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.mixins.html">workflow_engine.mixins package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.models.html">workflow_engine.models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.serializers.html">workflow_engine.serializers package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.strategies.html">workflow_engine.strategies package</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">workflow_engine.views package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.worker.html">workflow_engine.worker package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="workflow_engine.worker.qsub.html">workflow_engine.worker.qsub package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workflow_client.html">Client Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="workflow_client.ingest.html">workflow_client.ingest package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_client.nb_utils.html">workflow_client.nb_utils package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_client.tasks.html">workflow_client.tasks package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/AllenInstitute/BlueSkyWorkflowEngine">Github Profile</a></li>
+</ul>
+
+<h3> Questions </h3>
+<p class="questions">
+  Send any questions using the <a href="http://alleninstitute.org/contact_us/index.html">Send Us a Message</a> link below, 
+  or submit your question to <a href="http://stackoverflow.com/">StackOverflow</a> using with the 'allen-sdk' tag.
+</p>
+
+<p class="questions">
+  If you encounter any problems using the AllenSDK, please create an issue on <a href="http://github.com/alleninstitute/allensdk/issues/">Github's issue tracker</a>.
+</p>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+    <div class="footer" role="contentinfo">
+    </div>
+<script type="text/javascript" src="http://www.brain-map.org/external_assets/javascripts/portalFooter.js"></script>
+
+
+  </body>
+</html>

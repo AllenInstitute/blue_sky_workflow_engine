@@ -1,0 +1,27 @@
+workflow\_engine\.worker package
+================================
+
+.. automodule:: workflow_engine.worker
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+
+    workflow_engine.worker.qsub
+
+Submodules
+----------
+
+workflow\_engine\.worker\.server\_command module
+------------------------------------------------
+
+.. automodule:: workflow_engine.worker.server_command
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+

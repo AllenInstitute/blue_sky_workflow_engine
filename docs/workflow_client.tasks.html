@@ -1,0 +1,225 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>workflow_client.tasks package &#8212; Blue Sky Workflow Engine  documentation</title>
+    <link rel="stylesheet" href="_static/aibs_sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="workflow_client.nb_utils package" href="workflow_client.nb_utils.html" /> 
+  </head>
+  <body>
+<link href="http://www.brain-map.org/assets/stylesheets/portal.css" media="screen" rel="stylesheet" type="text/css" />
+<script src="http://www.brain-map.org/assets/javascripts/portal.js" type="text/javascript"></script>
+<script src="http://www.brain-map.org/assets/javascripts/ga.js" type="text/javascript"></script>
+<script type="text/javascript">
+    var _pSupressBrowserFlashWarning = true;
+    var _pTabId = "pHome";
+    var _pMoreProjectsId = "pMoreProjects";
+    var _pImagePath = "http://www.brain-map.org/assets/images/";
+    var _pSiteWarnings = function() {
+        this.show_warning() = {};
+    }
+</script>
+<script type="text/javascript">
+    function initialize() {
+        /*** do your stuff, then initialize the portal plugin ***/
+        _pPortalOnLoad();
+    }
+</script>
+<style>
+  #header_content > a {
+  display: inline-block;
+  width: 250px;
+  height: 75px;
+  background-image:url("/_static/external_assets/images/Brain_Atlas_Logotype_SDK.png") !important;
+  background-size: 235px 37px;
+  background-position: 0px 20px;
+  background-repeat: no-repeat;
+  }
+</style>
+
+<script type="text/javascript" src="http://www.brain-map.org/external_assets/javascripts/portalHeader.js"></script>
+<link rel="stylesheet" type="text/css" href="/_static/external_assets/stylesheets/common_layout.css" />
+
+
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-workflow_client.tasks">
+<span id="workflow-client-tasks-package"></span><h1>workflow_client.tasks package<a class="headerlink" href="#module-workflow_client.tasks" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-workflow_client.tasks.circus_signatures">
+<span id="workflow-client-tasks-circus-signatures-module"></span><h2>workflow_client.tasks.circus_signatures module<a class="headerlink" href="#module-workflow_client.tasks.circus_signatures" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-workflow_client.tasks.circus_status">
+<span id="workflow-client-tasks-circus-status-module"></span><h2>workflow_client.tasks.circus_status module<a class="headerlink" href="#module-workflow_client.tasks.circus_status" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_client.tasks.circus_status.CircusStatus">
+<em class="property">class </em><code class="descclassname">workflow_client.tasks.circus_status.</code><code class="descname">CircusStatus</code><span class="sig-paren">(</span><em>remote_queues=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_client/tasks/circus_status.html#CircusStatus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_client.tasks.circus_status.CircusStatus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#workflow_client.tasks.task_status.TaskStatus" title="workflow_client.tasks.task_status.TaskStatus"><code class="xref py py-class docutils literal"><span class="pre">workflow_client.tasks.task_status.TaskStatus</span></code></a></p>
+<dl class="attribute">
+<dt id="workflow_client.tasks.circus_status.CircusStatus.STATUS_MAP">
+<code class="descname">STATUS_MAP</code><em class="property"> = {0: 'Running', 1: 'Completed'}</em><a class="headerlink" href="#workflow_client.tasks.circus_status.CircusStatus.STATUS_MAP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_client.tasks.circus_status.CircusStatus.query_remote_state">
+<code class="descname">query_remote_state</code><span class="sig-paren">(</span><em>self</em>, <em>status_dict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_client/tasks/circus_status.html#CircusStatus.query_remote_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_client.tasks.circus_status.CircusStatus.query_remote_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>state_dicts: [{ ‘remote_id’: ‘Moab.123’}, … ]</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="workflow-client-tasks-circus-test-module">
+<h2>workflow_client.tasks.circus_test module<a class="headerlink" href="#workflow-client-tasks-circus-test-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-workflow_client.tasks.moab_status">
+<span id="workflow-client-tasks-moab-status-module"></span><h2>workflow_client.tasks.moab_status module<a class="headerlink" href="#module-workflow_client.tasks.moab_status" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_client.tasks.moab_status.MoabStatus">
+<em class="property">class </em><code class="descclassname">workflow_client.tasks.moab_status.</code><code class="descname">MoabStatus</code><span class="sig-paren">(</span><em>remote_queues=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_client/tasks/moab_status.html#MoabStatus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_client.tasks.moab_status.MoabStatus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#workflow_client.tasks.task_status.TaskStatus" title="workflow_client.tasks.task_status.TaskStatus"><code class="xref py py-class docutils literal"><span class="pre">workflow_client.tasks.task_status.TaskStatus</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_client.tasks.task_status">
+<span id="workflow-client-tasks-task-status-module"></span><h2>workflow_client.tasks.task_status module<a class="headerlink" href="#module-workflow_client.tasks.task_status" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_client.tasks.task_status.TaskStatus">
+<em class="property">class </em><code class="descclassname">workflow_client.tasks.task_status.</code><code class="descname">TaskStatus</code><span class="sig-paren">(</span><em>remote_queues</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_client/tasks/task_status.html#TaskStatus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_client.tasks.task_status.TaskStatus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="workflow_client.tasks.task_status.TaskStatus.RESULT_ACTIONS">
+<code class="descname">RESULT_ACTIONS</code><em class="property"> = {'failed_execution_message': workflow_engine.celery.result_tasks.process_failed_execution(), 'failed_message': workflow_engine.celery.result_tasks.process_failed(), 'finished_message': workflow_engine.celery.result_tasks.process_finished_execution(), 'running_message': workflow_engine.celery.result_tasks.process_running()}</em><a class="headerlink" href="#workflow_client.tasks.task_status.TaskStatus.RESULT_ACTIONS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_client.tasks.task_status.TaskStatus.combined_df">
+<code class="descname">combined_df</code><span class="sig-paren">(</span><em>self</em>, <em>blue_sky_job_df</em>, <em>remote_job_df</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_client/tasks/task_status.html#TaskStatus.combined_df"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_client.tasks.task_status.TaskStatus.combined_df" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_client.tasks.task_status.TaskStatus.combined_df_response_group">
+<code class="descname">combined_df_response_group</code><span class="sig-paren">(</span><em>self</em>, <em>combined_df</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_client/tasks/task_status.html#TaskStatus.combined_df_response_group"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_client.tasks.task_status.TaskStatus.combined_df_response_group" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_client.tasks.task_status.TaskStatus.send_remote_status_results">
+<code class="descname">send_remote_status_results</code><span class="sig-paren">(</span><em>self</em>, <em>running_task_dicts</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_client/tasks/task_status.html#TaskStatus.send_remote_status_results"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_client.tasks.task_status.TaskStatus.send_remote_status_results" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_client.tasks.task_status.TaskStatus.send_response_message_group">
+<code class="descname">send_response_message_group</code><span class="sig-paren">(</span><em>self</em>, <em>combined_df</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_client/tasks/task_status.html#TaskStatus.send_response_message_group"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_client.tasks.task_status.TaskStatus.send_response_message_group" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_client.tasks.task_status.TaskStatus.workflow_state_dataframe">
+<code class="descname">workflow_state_dataframe</code><span class="sig-paren">(</span><em>self</em>, <em>state_dict</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_client/tasks/task_status.html#TaskStatus.workflow_state_dataframe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_client.tasks.task_status.TaskStatus.workflow_state_dataframe" title="Permalink to this definition">¶</a></dt>
+<dd><p>state_dict: { id: “&lt;state&gt;” }</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="customizing.html">Customization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="strategies.html">Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configurations.html">Configuration Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop.html">Developers Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">Authors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflow_engine.html">Source Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.admin.html">workflow_engine.admin package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.celery.html">workflow_engine.celery package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.migrations.html">workflow_engine.migrations package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.mixins.html">workflow_engine.mixins package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.models.html">workflow_engine.models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.serializers.html">workflow_engine.serializers package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.strategies.html">workflow_engine.strategies package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.views.html">workflow_engine.views package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.worker.html">workflow_engine.worker package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="workflow_engine.worker.qsub.html">workflow_engine.worker.qsub package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="workflow_client.html">Client Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="workflow_client.ingest.html">workflow_client.ingest package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_client.nb_utils.html">workflow_client.nb_utils package</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">workflow_client.tasks package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/AllenInstitute/BlueSkyWorkflowEngine">Github Profile</a></li>
+</ul>
+
+<h3> Questions </h3>
+<p class="questions">
+  Send any questions using the <a href="http://alleninstitute.org/contact_us/index.html">Send Us a Message</a> link below, 
+  or submit your question to <a href="http://stackoverflow.com/">StackOverflow</a> using with the 'allen-sdk' tag.
+</p>
+
+<p class="questions">
+  If you encounter any problems using the AllenSDK, please create an issue on <a href="http://github.com/alleninstitute/allensdk/issues/">Github's issue tracker</a>.
+</p>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+    <div class="footer" role="contentinfo">
+    </div>
+<script type="text/javascript" src="http://www.brain-map.org/external_assets/javascripts/portalFooter.js"></script>
+
+
+  </body>
+</html>

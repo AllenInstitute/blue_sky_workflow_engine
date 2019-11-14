@@ -33,13 +33,11 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-from workflow_engine.models.task import Task
-from workflow_engine.models.run_state import RunState
-from workflow_engine.models.well_known_file import WellKnownFile
+from workflow_engine.models import WellKnownFile
 from django.conf import settings
-import subprocess
 import logging
 import traceback
+import subprocess
 import os
 
 
@@ -64,6 +62,9 @@ class BaseStrategy(object):
     def on_failure(self, task):
         pass
 
+    def on_fail_execution(self, task):
+        self.on_failure(task)
+
     # override if needed
     # called when the task starts running
     def on_running(self, task):
@@ -75,21 +76,40 @@ class BaseStrategy(object):
     def on_finishing(self, enqueued_object, results, task):
         pass
 
-    # override if needed
-    def get_storage_directory(self, base_storage_directory, job):
-        enqueued_object = job.get_enqueued_object()
-        BaseStrategy._log.info('get_storage_directory: %s, %s:' % (
-            base_storage_directory, str(enqueued_object.id)))
-        return os.path.join(base_storage_directory, str(enqueued_object.id))
+    # Do not override
+    def get_job_storage_directory(self, base_storage_directory, job):
+        return os.path.join(
+            self.get_storage_directory(base_storage_directory, job),
+            'jobs', 'job_' + str(job.id))
 
     # override if needed
-    # this is called when a job is transitioning from a previous queue
-    # given the previous job, return an array of enqueued objects
-    # for this queue
-    def get_objects_for_queue(self, prev_queue_job):
-        objects = []
-        objects.append(prev_queue_job.get_enqueued_object())
-        return objects
+    def get_storage_directory(self, base_storage_directory, job):
+        enqueued_object = job.enqueued_object
+
+        try:
+            dirs = [
+                enqueued_object.get_storage_directory(base_storage_directory)
+            ]
+        except:
+            dirs = [
+                base_storage_directory,
+                str(job.enqueued_object_type).replace(' ', '_'),
+                str(job.enqueued_object_id)
+            ]
+
+        return os.path.join(*dirs)
+
+    def get_objects_for_queue(self, prev_queue):
+        '''
+        override if needed
+        this is called when a job transitions from a previous queue
+        given the previous job, return an array of enqueued objects
+        for this queue
+        '''
+        return self.transform_objects_for_queue(prev_queue.enqueued_object)
+
+    def transform_objects_for_queue(self, prev_queue_object):
+        return [ prev_queue_object ]
 
     # override if needed
     # return one or more task enqueued objects for a job enqueued object
@@ -100,7 +120,7 @@ class BaseStrategy(object):
         return objects
 
     # override if needed
-    def can_transition(self, enqueued_object):
+    def can_transition(self, enqueued_object, workflow_node=None):
         return True
 
     #
@@ -115,14 +135,15 @@ class BaseStrategy(object):
     def is_execution_strategy(self):
         return False
 
-    def is_wait_strategy(self):
+    def must_wait(self, enqueued_object):
+        del enqueued_object  # unused arg
+
         return False
 
-    # Do not override
-    def get_job_storage_directory(self, base_storage_directory, job):
-        return os.path.join(
-            self.get_storage_directory(base_storage_directory, job),
-            'jobs', 'job_' + str(job.id))
+    def skip_execution(self, enqueued_object):
+        del enqueued_object  # unused arg
+
+        return True
 
     @classmethod
     def make_dirs_chmod(cls, path, mode):
@@ -134,9 +155,20 @@ class BaseStrategy(object):
             os.mkdir(path)
         except:
             pass
-        # os.chmod(path, mode)
+        os.chmod(path, mode)
         res += [path]
         return res
+
+    # Do not override
+    # TODO: the data flow in constructing this path is overly complex
+    def get_task_storage_directory(self, task):
+        task_storage_dir = os.path.join(
+            self.get_job_storage_directory(
+                self.get_base_storage_directory(), task.job),
+            'tasks',
+            'task_' + str(task.id))
+
+        return task_storage_dir
 
     # Do not override
     def get_or_create_task_storage_directory(self, task):
@@ -166,13 +198,40 @@ class BaseStrategy(object):
             task.set_error_message(str(e) + ' - ' + \
                 str(traceback.format_exc()))
 
-        task.set_failed_state()
-        task.set_end_run_time()
-        task.job.set_failed_state()
-        task.job.set_end_run_time()
-        task.rerun()
+        task.set_failed_fields_and_rerun()
+
 
     # Do not override
+    def set_error_message_from_log(self, task):
+        try:
+            if os.path.isfile(task.log_file):
+                result = subprocess.run(
+                    ['tail', task.log_file], stdout=subprocess.PIPE)
+                task.set_error_message(result.stdout.decode("utf-8"))
+        except Exception as e:
+            BaseStrategy._log.error(
+                'Something went wrong: %s\n%s',
+                str(e),
+                traceback.format_exc()
+            )
+
+    # Do not override
+    def fail_execution_task(self, task):
+        try:
+            self.set_error_message_from_log(task)
+            self.on_fail_execution(task)
+        except Exception as e:
+            err_msg = '%s - %s' % (
+                str(e),
+                str(traceback.format_exc()))
+            BaseStrategy._log.info(err_msg) 
+            task.set_error_message(err_msg)
+
+        task.set_failed_execution_fields_and_rerun()
+
+
+    # Do not override
+    # TODO: deprecate
     def set_well_known_file(self, full_path, attachable_object,
                             well_known_file_type, task=None):
         # from workflow_engine.models import WellKnownFile
@@ -182,5 +241,6 @@ class BaseStrategy(object):
                           task)
 
     # Do not override
+    # TODO: deprecate
     def get_well_known_file(self, attachable_object, well_known_file_type):
         return WellKnownFile.get(attachable_object, well_known_file_type)

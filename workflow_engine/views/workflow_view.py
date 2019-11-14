@@ -35,20 +35,30 @@
 #
 from django.http import HttpResponse
 from django.template import loader
-from workflow_engine.models import ZERO
-from workflow_engine.models.workflow import Workflow
-from workflow_engine.models.workflow_node import WorkflowNode
-from workflow_engine.models.run_state import RunState
+from workflow_engine.mixins import Runnable
+from workflow_engine.models import (
+    ZERO,
+    Workflow,
+    WorkflowNode,
+    Job,
+    Executable
+)
+from workflow_engine.workflow_status import WorkflowStatus
 from workflow_engine.import_class import import_class
 from workflow_engine.views   import shared, HEADER_PAGES
 from workflow_engine.workflow_controller import WorkflowController
-from workflow_engine.models.executable import Executable
 from collections import deque
-from workflow_engine.celery.signatures \
-    import run_workflow_node_jobs_signature, create_job_signature
-from workflow_engine.views.decorators \
-    import object_json_response, object_json_response2, object_json_all_response,\
+from workflow_engine.signatures import (
+    run_workflow_node_jobs_signature,
+    create_job_signature
+)
+from workflow_engine.views.decorators import (
+    object_json_response,
+    object_json_response2,
     object_yaml_all_response
+)
+import itertools as it
+import pandas as pd
 import logging
 import json
 
@@ -128,9 +138,9 @@ def child_connector():
 def get_node_color_class(run_state, prev_run_state):
     if prev_run_state == 'failed_state':
         node_color_class = prev_run_state
-    elif RunState.is_failed_type_state(run_state):
+    elif Runnable.is_failed_type_state(run_state):
         node_color_class = 'failed_state'
-    elif RunState.is_running_type_state(run_state):
+    elif Runnable.is_running_type_state(run_state):
         node_color_class = 'running_state'
     else:
         node_color_class = 'success_state'
@@ -274,69 +284,95 @@ def create_job(workflow_node_ids, request, result):
 
 @object_json_response('workflow_node_id', WorkflowNode)
 def get_node_info(workflow_node, request, result):
-    payload = result['payload']
+    result['payload'] = node_info_payload(workflow_node)
 
-    payload['job_queue'] = workflow_node.job_queue.name
-    payload['job_queue_link'] = \
-        'job_queues?job_queue_ids=' + \
-        str(workflow_node.job_queue.id)
+
+def node_info_payload(workflow_node):
     try:
-        payload['executable'] = workflow_node.job_queue.executable.name
-        payload['executable_link'] = \
-            'executables?executable_ids=' + \
-            str(workflow_node.job_queue.executable.id)
+        executable = workflow_node.job_queue.executable.name
+        executable_link = 'executables?executable_ids={}'.format(workflow_node.job_queue.executable.id)
     except:
-        payload['executable'] = ''
-        payload['executable_link'] = ''
-    
-    payload['enqueued_object_class'] = \
-        workflow_node.job_queue.enqueued_object_class.split('.')[-1]
-    payload['disabled'] = workflow_node.disabled
-    payload['overwrite_previous_job'] = workflow_node.overwrite_previous_job
-    payload['max_retries'] = workflow_node.max_retries
-    payload['batch_size'] = workflow_node.batch_size
-    payload['priority'] = workflow_node.priority
-
-    pending_state = RunState.get_pending_state()
-    queued_state = RunState.get_queued_state()
-    running_state = RunState.get_running_state()
-    finished_execution_state = RunState.get_finished_execution_state()
-    failed_execution_state = RunState.get_failed_execution_state()
-    failed_state = RunState.get_failed_state()
-    success_state = RunState.get_success_state()
-    process_killed_state = RunState.get_process_killed_state()
+        executable = ""
+        executable_link = ""
 
     node_jobs = workflow_node.job_set.filter(archived=False)
 
-    payload['number_of_jobs'] = node_jobs.count()
-    payload['pending'] = node_jobs.filter(
-        run_state=pending_state).count()
-    payload['queued'] = node_jobs.filter(
-        run_state=queued_state).count()
-    payload['running'] = node_jobs.filter(
-        run_state=running_state).count()
-    payload['finished_execution'] = node_jobs.filter(
-        run_state=finished_execution_state).count()
-    payload['failed_execution'] = node_jobs.filter(
-        run_state=failed_execution_state).count()
-    payload['failed'] = node_jobs.filter(
-        run_state=failed_state).count()
-    payload['success_count'] = node_jobs.filter(
-        run_state=success_state).count()
-    payload['process_killed'] = node_jobs.filter(
-        run_state=process_killed_state).count()
+    payload = {
+        'job_queue': workflow_node.job_queue.name,
+        'job_queue_link':
+            'job_queues?job_queue_ids={}'.format(workflow_node.job_queue.id),
+        'executable': executable,
+        'executable_link': executable_link,
+        'enqueued_object_class':
+            workflow_node.short_enqueued_object_class_name(),
+            #workflow_node.job_queue.job_strategy_class.split('.')[-1],
+        'disabled': workflow_node.disabled,
+        'overwrite_previous_job': workflow_node.overwrite_previous_job,
+        'max_retries': workflow_node.max_retries,
+        'batch_size': workflow_node.batch_size,
+        'priority': workflow_node.priority,
+        'number_of_jobs': node_jobs.count(),
+        'pending': node_jobs.filter(
+            running_state=Runnable.STATE.PENDING).count(),
+        'queued': node_jobs.filter(
+            running_state=Runnable.STATE.QUEUED).count(),
+        'running': node_jobs.filter(
+            running_state=Runnable.STATE.RUNNING).count(),
+        'finished_execution': node_jobs.filter(
+            running_state=Runnable.STATE.FINISHED_EXECUTION).count(),
+        'failed_execution': node_jobs.filter(
+            running_state=Runnable.STATE.FAILED_EXECUTION).count(),
+        'failed': node_jobs.filter(
+            running_state=Runnable.STATE.FAILED).count(),
+        'success_count': node_jobs.filter(
+            running_state=Runnable.STATE.SUCCESS).count(),
+        'process_killed': node_jobs.filter(
+            running_state=Runnable.STATE.PROCESS_KILLED).count(),
+        'number_of_jobs_link':
+            'jobs/1/?workflow_node_ids={}'.format(workflow_node.id),
+        'pending_link': 
+            'jobs/1/?running_state={}&workflow_node_ids={}'.format(
+                Runnable.STATE.PENDING,
+                workflow_node.id
+            ),
+        'queued_link':
+            'jobs/1/?running_state={}&workflow_node_ids={}'.format(
+                Runnable.STATE.QUEUED,
+                workflow_node.id
+            ),
+        'running_link':
+            'jobs/1/?running_state={}&workflow_node_ids={}'.format(
+                Runnable.STATE.RUNNING,
+                workflow_node.id
+            ),
+        'finished_execution_link':
+            'jobs/1/?running_state={}&workflow_node_ids={}'.format(
+                Runnable.STATE.FINISHED_EXECUTION,
+                workflow_node.id
+            ),
+        'failed_execution_link':
+            'jobs/1/?running_state={}&workflow_node_ids={}'.format(
+                Runnable.STATE.FAILED_EXECUTION,
+                workflow_node.id
+            ),
+        'failed_link':
+            'jobs/1/?running_state={}&workflow_node_ids={}'.format(
+                Runnable.STATE.FAILED,
+                workflow_node.id
+            ),
+        'success_count_link':
+            'jobs/1/?running_state={}&workflow_node_ids={}'.format(
+                Runnable.STATE.SUCCESS,
+                workflow_node.id
+            ),
+        'process_killed_link':
+            'jobs/1/?running_state={}&workflow_node_ids={}'.format(
+                Runnable.STATE.PROCESS_KILLED,
+                workflow_node.id
+            )
+    }
 
-    payload['number_of_jobs_link'] = 'jobs/1/?workflow_node_ids=' + str(workflow_node.id)
-    payload['pending_link'] = 'jobs/1/?run_state_ids=' + str(pending_state.id) + '&workflow_node_ids=' + str(workflow_node.id)
-    payload['queued_link'] = 'jobs/1/?run_state_ids=' + str(queued_state.id) + '&workflow_node_ids=' + str(workflow_node.id)
-    payload['running_link'] = 'jobs/1/?run_state_ids=' + str(running_state.id) + '&workflow_node_ids=' + str(workflow_node.id)
-    payload['finished_execution_link'] = 'jobs/1/?run_state_ids=' + str(finished_execution_state.id) + '&workflow_node_ids=' + str(workflow_node.id)
-    payload['failed_execution_link'] = 'jobs/1/?run_state_ids=' + str(failed_execution_state.id) + '&workflow_node_ids=' + str(workflow_node.id)
-    payload['failed_link'] = 'jobs/1/?run_state_ids=' + str(failed_state.id) + '&workflow_node_ids=' + str(workflow_node.id)
-    payload['success_count_link'] = 'jobs/1/?run_state_ids=' + str(success_state.id) + '&workflow_node_ids=' + str(workflow_node.id)
-    payload['process_killed_link'] = 'jobs/1/?run_state_ids=' + str(process_killed_state.id) + '&workflow_node_ids=' + str(workflow_node.id)
-
-    result['payload'] = payload
+    return payload
 
 
 @object_json_response('workflow_node_id', WorkflowNode)
@@ -384,14 +420,52 @@ def get_workflow_info(workflow_object, request, result):
     result['payload']['disabled'] = workflow_object.disabled
 
 
-@object_json_all_response(WorkflowNode)
-def monitor_workflow(nodes, request, result):
-    result['nodes'] = [ str(n) for n in nodes]
+# TODO: count via the database
+def count_node_jobs_in_state(node, run_state):
+    return Job.objects.filter(
+        workflow_node__job_queue__name=node,
+        running_state=run_state).count()
 
-    result['edges'] = [ {
-        'source': str(n.parent),
-        'target': str(n) } for n in nodes
-        if n.parent is not None ]
+
+def workflow_summary(workflow_name):
+    wns = WorkflowNode.objects.filter(
+        archived=False)
+
+    counts = [{
+        'node': node,
+        'state': run_state,
+        'count':  count_node_jobs_in_state(node, run_state) } 
+        for (node, run_state) in it.product(
+            (str(n) for n in wns),
+            Runnable.get_run_state_names()) ]
+
+    counts.extend([{
+        'node': str(n),
+        'state': 'BATCH_SIZE',
+        'count': n.batch_size
+    } for n in wns ])
+
+    counts_df = pd.DataFrame.from_records(counts)
+
+    totals = counts_df.groupby(by='node')['count'].sum()
+
+    summary = {
+        'run_states': counts_df.to_dict('records'),
+        'totals': totals.to_dict()
+    }
+    
+    return summary
+
+def monitor_workflow_data(request):
+    del request  # unused
+
+    ws = WorkflowStatus()
+
+    return HttpResponse(
+        ws.status_as_json(),
+        content_type='application/json'
+    )
+
 
 def to_key(s):
     return s.lower().replace(' ', '_')
@@ -447,8 +521,8 @@ def download_workflow(flows, request, result):
 
         graph = result['workflows'][k]['graph']
         head = f.workflownode_set.filter(
-            archived=False,
-            is_head=True).first()
+            sources=None,
+            archived=False).first()
         work_list = deque()
 
         current = head

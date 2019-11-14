@@ -1,0 +1,61 @@
+workflow\_client package
+========================
+
+.. automodule:: workflow_client
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+
+    workflow_client.ingest
+    workflow_client.nb_utils
+    workflow_client.tasks
+
+Submodules
+----------
+
+workflow\_client\.celery\_ingest module
+---------------------------------------
+
+.. automodule:: workflow_client.celery_ingest
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+workflow\_client\.circus\_logger module
+---------------------------------------
+
+.. automodule:: workflow_client.circus_logger
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+workflow\_client\.client\_settings module
+-----------------------------------------
+
+.. automodule:: workflow_client.client_settings
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+workflow\_client\.pbs\_utils module
+-----------------------------------
+
+.. automodule:: workflow_client.pbs_utils
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+workflow\_client\.simple\_router module
+---------------------------------------
+
+.. automodule:: workflow_client.simple_router
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+

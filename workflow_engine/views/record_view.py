@@ -34,17 +34,19 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 from django.http import JsonResponse
-from workflow_engine.models.executable import Executable
-from workflow_engine.models.job import Job
-from workflow_engine.models.job_queue import JobQueue
-from workflow_engine.models.workflow import Workflow
-from workflow_engine.models.run_state import RunState
+from workflow_engine.mixins import Runnable
+from workflow_engine.models import (
+    Executable,
+    Job,
+    Task,
+    JobQueue,
+    Workflow,
+    ZERO
+)
 from workflow_engine.views import shared
-from workflow_engine.models.task import Task
-import simplejson as json
+import json
 import traceback
 from workflow_engine.models.workflow_node import WorkflowNode
-from workflow_engine.celery.worker_tasks import ZERO
 
 
 def record_json_response(fn):
@@ -188,7 +190,7 @@ def update_record(record, request, result, record_type, data):
         record = Job()
         record.workflow_node = workflow_node
         record.enqueued_object_id = data['enqueued_object_id']
-        record.run_state = RunState.get_pending_state()
+        record.set_running_state()
         record.priority = workflow_node.priority
         record.archived = False
     else:
@@ -249,7 +251,7 @@ def delete_record(record, request, result, record_type, data):
             job_queue.delete()
     elif record_type == 'job':
         job = record
-        job.archive_record()
+        job.archive()
     elif record_type == 'task':
         tsk = record
         tsk.delete()
@@ -377,8 +379,7 @@ def get_search_data(request):
         elif(search_type == 'job'):
             jobs = Job.objects.all()
             ids = {}
-            enqueued_object_ids = {}   
-            run_state_ids = {}
+            enqueued_object_ids = {}
             workflow_ids = {}
             
             for job in jobs:
@@ -386,9 +387,9 @@ def get_search_data(request):
                 enqueued_object_ids[job.enqueued_object_id] = \
                     job.enqueued_object_id
 
-            run_states = RunState.objects.all()
-            for run_state in run_states:
-                run_state_ids[run_state.id] = run_state.name
+            run_state_ids = {
+                k: v for k,v in enumerate(Runnable.get_run_state_names())
+            }
 
             workflows = Workflow.objects.all()
             for workflow in workflows:
@@ -402,27 +403,26 @@ def get_search_data(request):
             tasks = Task.objects.all()
             ids = {}
             enqueued_task_object_ids = {}
-            enqueued_task_object_classes = {}
+            enqueued_task_object_types = {}
             job_ids = {}
-            run_state_ids = {}
 
             for task in tasks:
                 ids[task.id] = task.id
                 enqueued_task_object_ids[task.enqueued_task_object_id] = \
                     task.enqueued_task_object_id
-                enqueued_task_object_classes[
-                    task.enqueued_task_object_class] = \
-                        task.enqueued_task_object_class
+                enqueued_task_object_types[
+                    task.enqueued_task_object_type] = \
+                        task.enqueued_task_object_type
                 job_ids[task.job.id] = task.job.id
 
-            run_states = RunState.objects.all()
-            for run_state in run_states:
-                run_state_ids[run_state.id] = run_state.name
+            run_state_ids = {
+                k: v for k,v in enumerate(Runnable.get_run_state_names())
+            }
 
             payload['ids'] = ids
             payload['enqueued_task_object_ids'] = enqueued_task_object_ids
-            payload['enqueued_task_object_classes'] = \
-                enqueued_task_object_classes
+            payload['enqueued_task_object_types'] = \
+                enqueued_task_object_types
             payload['run_state_ids'] = run_state_ids
             payload['job_ids'] = job_ids
         elif(search_type == 'workflow'):

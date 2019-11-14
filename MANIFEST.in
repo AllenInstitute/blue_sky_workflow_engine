@@ -1,9 +1,1 @@
-include LICENSE README.rst Makefile *requirements.txt
-recursive-include workflow_engine/datafixes *
-recursive-include workflow_engine/management *
-recursive-include workflow_engine/migrations *
-recursive-include workflow_engine/static *
-recursive-include workflow_engine/strategies *
-recursive-include workflow_engine/templates *
-recursive-include workflow_engine/views *
-recursive-include workflow_client *
+include LICENSE README.rst Makefile *requirements.txt bin/*.sh

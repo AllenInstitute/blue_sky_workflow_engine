@@ -36,18 +36,20 @@
 import importlib
 import logging
 
-_log = logging.getLogger('workflow_engine.import_module')
+_log = logging.getLogger('workflow_engine.import_class')
 
 def import_class(class_full_name):
     pkgs = class_full_name.split('.')
     module_name = '.'.join(pkgs[0:-1])
     class_name = pkgs[-1]
     try:
-        _log.info('importing module "%s"' % (module_name))
+        _log.debug('importing module "%s"', module_name)
         mdl = importlib.import_module(module_name)
     except Exception as e:
-        _log.warn('could not import module "%s"' % (
-                  module_name))
+        _log.warning(
+            'could not import module "%s"',
+            str(module_name)
+        )
         raise(e)
 
     claz = getattr(mdl,class_name)

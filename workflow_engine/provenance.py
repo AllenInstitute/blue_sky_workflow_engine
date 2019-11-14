@@ -1,6 +1,6 @@
 import yaml
 from django.conf import settings
-from workflow_client import client_settings
+from workflow_engine import client_settings
 import copy
 import logging
 
@@ -59,7 +59,7 @@ class Provenance(object):
 
     def record_workflow_configuration(self, yaml_file):
         with open(yaml_file, 'r') as f:
-            definition = yaml.load(f)
+            definition = yaml.load(f, Loader=yaml.SafeLoader)
 
         self.json_dict['workflow'] = definition
 

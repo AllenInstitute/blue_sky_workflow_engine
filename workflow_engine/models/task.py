@@ -34,58 +34,90 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 from django.db import models
-from django.utils import timezone
 from django.conf import settings
-from workflow_engine.models import ONE, ZERO, TWO, SECONDS_IN_MIN
-from workflow_client.pbs_utils import PbsUtils
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+from workflow_engine.models import ONE, ZERO
+from workflow_engine.mixins import Archivable, Runnable, Tagable, Timestamped
+from workflow_engine.pbs_utils import PbsUtils
+import os
 import logging
-import traceback
-from workflow_engine.celery.signatures \
-    import kill_moab_task_signature, enqueue_next_queue_signature
 
 
 _logger = logging.getLogger('workflow_engine.models.task')
 
 
-class Task(models.Model):
-    enqueued_task_object_id = models.IntegerField(null=True)
-    enqueued_task_object_class = models.CharField(max_length=255, null=True)
+class Task(Archivable, Runnable, Tagable, Timestamped, models.Model):
+    enqueued_task_object_type = models.ForeignKey(
+        ContentType,
+        default=None,
+        null=True,
+        on_delete=models.CASCADE
+    )
+    '''Generic relation type'''
+
+    enqueued_task_object_id = models.IntegerField(
+        null=True
+    )
+    '''Generic relation id'''
+
+    enqueued_task_object = GenericForeignKey(
+        'enqueued_task_object_type',
+        'enqueued_task_object_id')
+    '''Combined generic relation type and id'''
+
     job = models.ForeignKey(
-        'workflow_engine.Job')
-    archived = models.NullBooleanField(default=False)
-    run_state = models.ForeignKey(
-        'workflow_engine.RunState')
-    full_executable = models.CharField(max_length=1000, null=True)
-    error_message = models.TextField(null=True)
-    log_file = models.CharField(max_length=255, null=True)
-    input_file = models.CharField(max_length=255, null=True)
-    output_file = models.CharField(max_length=255, null=True)
-    pbs_file = models.CharField(max_length=255, null=True)
-    start_run_time = models.DateTimeField(null=True)
-    end_run_time = models.DateTimeField(null=True)
-    duration = models.DurationField(null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    pbs_id = models.CharField(max_length=255, null=True)
-    retry_count = models.IntegerField(default=0)
-    tags = models.CharField(max_length=255, null=True)
+        'workflow_engine.Job',
+        on_delete=models.CASCADE
+    )
+
+    full_executable = models.CharField(
+        max_length=1000,
+        null=True
+    )
+
+    log_file = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True
+    )
+
+    input_file = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True
+    )
+
+    output_file = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True
+    )
+
+    pbs_file = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True)
+
+    pbs_id = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True
+    )
+
+    retry_count = models.IntegerField(
+        default=0
+    )
 
     def __str__(self):
         try:
-            enqueued_object_name = str(
-                WorkflowController.get_enqueued_object(self))
+            return "{} {} task {}".format(
+                str(self.job.workflow_node),
+                str(self.enqueued_task_object),
+                self.pk
+            )
         except:
-            enqueued_object_name = 'None'
-
-        return "%s %s task %d" % (
-            str(self.job.workflow_node),
-            enqueued_object_name,
-            self.id)
-    def get_created_at(self):
-        return timezone.localtime(self.created_at).strftime('%m/%d/%Y %I:%M:%S')
-
-    def get_updated_at(self):
-        return timezone.localtime(self.updated_at).strftime('%m/%d/%Y %I:%M:%S')
+            return "task {}".format(self.pk)
 
     def set_error_message(self, error_message):
         self.error_message = str(error_message)
@@ -101,23 +133,21 @@ class Task(models.Model):
         '''
             returns: environment variable list in form VAR=val
         '''
-        env = self.get_job_queue().executable.environment
+        env = self.get_job_queue().executable.environment_vars()
 
         if env is None:
             return []
 
-        return self.get_job_queue().executable.environment.split(';')
+        return env
 
     def has_pbs_workflow(self):
         self.job.workflow_node.workflow.use_pbs
 
     def has_pbs_executable(self):
-        return self.get_job_queue().executable.remote_queue == 'pbs'
+        return self.get_executable().remote_queue in ['pbs', 'spark_moab']
 
     def pbs_task(self):
         is_pbs = self.has_pbs_executable() or self.has_pbs_workflow() 
-
-        _logger.info("pbs_task: %s" % (is_pbs))
 
         return is_pbs
 
@@ -126,75 +156,19 @@ class Task(models.Model):
         strategy = self.get_strategy()
 
         if strategy.is_execution_strategy():
-            kill_moab_task_signature.delay(self.id)
+            strategy.kill_pbs_task(self)
 
         self.set_end_run_time()
 
-    def get_start_run_time(self):
-        result = None
-        if self.start_run_time != None:
-            result = timezone.localtime(
-                self.start_run_time).strftime('%m/%d/%Y %I:%M:%S')
-
-        return result
-
-    def get_end_run_time(self):
-        result = None
-        if self.end_run_time != None:
-            result = timezone.localtime(
-                self.end_run_time).strftime('%m/%d/%Y %I:%M:%S')
-
-        return result
-
     def get_enqueued_object_display(self):
         result = None
+
         try:
-            enqueued_object = WorkflowController.get_enqueued_object(self)
-            result = str(enqueued_object)
+            result = str(self.enqueued_task_object)
         except:
-            result = None
+            result = str(None)
 
         return result
-
-    def get_duration(self):
-        result = None
-        if self.duration != None:
-            total_seconds = self.duration.seconds
-            minutes = total_seconds / SECONDS_IN_MIN
-
-            result = str(round(minutes,TWO)) + ' min'
-
-        return result
-
-    def set_start_run_time(self):
-        self.start_run_time = timezone.now()
-        self.end_run_time = None
-        self.duration = None
-        self.save()
-
-    def set_end_run_time(self):
-        self.end_run_time = timezone.now()
-        self.duration = self.end_run_time - self.start_run_time
-        self.save()
-
-    def in_failed_state(self):
-        run_state_name = self.run_state.name
-        return (run_state_name == 'FAILED' or
-                run_state_name == 'PROCESS_KILLED' or
-                run_state_name == 'FAILED_EXECUTION')
-
-    def can_rerun(self):
-        run_state_name = self.run_state.name
-        return (run_state_name == 'PENDING' or
-                run_state_name == 'FAILED' or
-                run_state_name == 'SUCCESS' or
-                run_state_name == 'PROCESS_KILLED' or
-                run_state_name == 'FAILED_EXECUTION')
-
-    def get_color_class(self):
-        color = 'color_' + self.run_state.name.lower()
-
-        return color
 
     def clear_error_message(self):
         self.error_message = None
@@ -203,16 +177,28 @@ class Task(models.Model):
     def get_strategy(self):
         return self.job.get_strategy()
 
-    def fail_task(self):
-        strategy = self.get_strategy()
-        strategy.fail_task(self)
+    def get_task_arguments(self):
+        return ' '.join(
+            self.get_strategy().get_task_arguments(self)
+        )
 
-    def set_failed_execution_fields_and_rerun(self):
+    def set_failed_fields_and_rerun(self, rerun=True):
+        self.set_failed_state()
+        self.set_end_run_time()
+        self.job.set_failed_state()
+        self.job.set_end_run_time()
+
+        if rerun is True:
+            self.rerun()
+
+    def set_failed_execution_fields_and_rerun(self, rerun=True):
         self.set_failed_execution_state()
         self.set_end_run_time()
         self.job.set_failed_execution_state()
         self.job.set_end_run_time()
-        self.rerun()
+
+        if rerun is True:
+            self.rerun()
 
     def get_max_retries(self):
         return self.job.workflow_node.max_retries
@@ -233,61 +219,14 @@ class Task(models.Model):
         self.increment_retry_count()
         self.set_start_run_time()
         strategy = self.get_strategy()
-        _logger.info("Running task with strategy %s" % (str(strategy)))
+        _logger.info(
+            "Running task with strategy %s",
+            str(strategy)
+        )
         strategy.run_task(self)
-
-    def set_pending_state(self):
-        _logger.info("set pending state")
-        strategy = self.get_strategy()
-        strategy.run_task(self)
-        self.run_state = RunState.get_pending_state()
-        self.save()
-
-    def set_process_killed_state(self):
-        _logger.info("set process killed state")
-        self.run_state = RunState.get_process_killed_state()
-        self.save()
-
-    def set_running_state(self):
-        _logger.info("set running state")
-        self.run_state = RunState.get_running_state()
-        self.save()
-
-    def set_finished_execution_state(self):
-        _logger.info("finished execution state")
-        self.run_state = RunState.get_finished_execution_state()
-        self.save()
-
-    def set_failed_state(self):
-        _logger.info("set failed state")
-        self.run_state = RunState.get_failed_state()
-        self.save()
-
-    def set_failed_execution_state(self):
-        _logger.info("set failed execution state")
-        self.run_state = RunState.get_failed_execution_state()
-        self.save()
-
-    def set_success_state(self):
-        _logger.info("set success state")
-        self.run_state = RunState.get_success_state()
-        self.save()
-
-    def set_queued_state(self, pbs_id=None):
-        _logger.info("set queued state: %s", str(pbs_id))
-        self.run_state = RunState.get_queued_state()
-        if pbs_id is not None:
-            self.pbs_id = pbs_id
-        self.save()
-
-    def in_pending_state(self):
-        return (self.run_state.name == 'PENDING')
-
-    def in_success_state(self):
-        return (self.run_state.name == RunState.get_success_state().name)
 
     def get_enqueued_job_object(self):
-        return self.job.get_enqueued_object()
+        return self.job.enqueued_object
 
     def get_job_queue(self):
         return self.job.workflow_node.job_queue
@@ -300,9 +239,6 @@ class Task(models.Model):
 
     def get_task_name(self):
         return ('task_' + str(self.id))
-
-    def get_umask(self):
-        return '022'
 
     def get_pbs_commands(self):
         executable = self.get_executable()
@@ -317,20 +253,11 @@ class Task(models.Model):
 
         with open(pbs_file, 'w') as file_handle:
             file_handle.write(pbs_file_contents)
+        os.chmod(pbs_file, 0o664)
+
 
         self.pbs_file = pbs_file
         self.save()
 
     def get_file_records(self):
-        results = []
-        file_records = FileRecord.objects.filter(task=self)
-        for file_record in file_records:
-            results.append(file_record.get_full_name())
-
-        return results
-
-# circular imports
-from workflow_engine.models.run_state import RunState
-from workflow_engine.models.file_record import FileRecord
-from workflow_engine.workflow_controller import WorkflowController
-from workflow_engine.celery.moab_tasks import kill_moab_task
+        return list(self.filerecord_set.all())

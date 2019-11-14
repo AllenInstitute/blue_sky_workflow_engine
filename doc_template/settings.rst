@@ -21,8 +21,9 @@ Celery Task Queue and RabbitMQ Broker Settings
 Restarting the Worker Processes
 -------------------------------
 
-cd /at_em_imaging_workflow
-./restart_processes.sh
+cd /home/blue_sky_user/work
+source activate /conda_envs circus
+restart_processes.sh blue_sky /home/blue_sky_user/work
 
 
 Restarting the Docker Container

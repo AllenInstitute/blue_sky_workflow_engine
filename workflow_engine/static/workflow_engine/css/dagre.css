@@ -4,6 +4,18 @@
   height: 800px;
   left: 0;
   top: 0;
-  z-index: 999;
+  z-index: 10;
+}
+
+#node_info_container {
+    width: 300;
+}
+
+.node_info {
+    postion: absolute;
+    left: 300;
+    top: 300;
+    z-index: 30;
+    background: white;
 }
 

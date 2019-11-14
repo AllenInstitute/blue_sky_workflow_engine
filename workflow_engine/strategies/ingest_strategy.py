@@ -33,10 +33,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-from workflow_engine.strategies.execution_strategy \
-    import ExecutionStrategy
+from workflow_engine.strategies import ExecutionStrategy
 from workflow_engine.import_class import import_class
-import traceback
 import logging
 
 class IngestStrategy(ExecutionStrategy):
@@ -54,7 +52,7 @@ class IngestStrategy(ExecutionStrategy):
         return None
 
     def create_enqueued_object(self, dictionary, tags=None):
-        return None
+        return None, None
 
     def generate_response(self, enqueued_object):
         return None
@@ -98,7 +96,7 @@ class IngestStrategy(ExecutionStrategy):
 
 
     def ingest_message(self, workflow_name, message, tags=None):
-        if tags == None:
+        if tags is None:
             tags = []
 
         enqueued_object, start_node = \
@@ -116,18 +114,6 @@ class IngestStrategy(ExecutionStrategy):
 
         return ret
 
-    def run_task(self, task):
-        try:
-            self.prep_task(task)
-            task.save()
-            self.run_asynchronous_task(task)
-            task.set_queued_state()
-            self.finish_task(task)
-        except Exception as e:
-            task.set_error_message(
-                str(e) + ' - ' + str(traceback.format_exc()))
-            self.fail_task(task)
-
 
 from workflow_engine.workflow_controller import WorkflowController
-from workflow_engine.models.workflow import Workflow
+from workflow_engine.models import Workflow

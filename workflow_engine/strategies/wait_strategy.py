@@ -1,12 +1,14 @@
-from workflow_engine.strategies.execution_strategy \
-    import ExecutionStrategy
+from workflow_engine.strategies.execution_strategy import (
+    ExecutionStrategy
+)
 import traceback
 import logging
 
 
+# DEPRECATED
 class WaitStrategy(ExecutionStrategy):
     _log = logging.getLogger(
-        'development.strategies.wait_strategy')
+        'workflow_engine.strategies.wait_strategy')
 
     def must_wait(self, enqueued_object):
         return True
@@ -22,13 +24,16 @@ class WaitStrategy(ExecutionStrategy):
     def is_execution_strategy(self):
         return False
 
+    # TODO: execution strategy should inherit from wait strategy
+    def set_error_message_from_log(self, task):
+        pass
+
     def run_task(self, task):
         try:
-            enqueued_object = WorkflowController.get_enqueued_object(task)
+            enqueued_object = task.enqueued_task_object
 
             if self.must_wait(enqueued_object):
                 task.set_queued_state()
-                task.job.set_queued_state()
             else:
                 self.prep_task(task)
                 self.finish_task(task)
@@ -37,6 +42,3 @@ class WaitStrategy(ExecutionStrategy):
             WaitStrategy._log.error(mess)
             task.set_error_message(mess)
             self.fail_task(task)
-
-
-from workflow_engine.workflow_controller import WorkflowController

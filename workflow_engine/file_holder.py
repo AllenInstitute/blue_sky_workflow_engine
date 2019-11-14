@@ -35,46 +35,54 @@
 #
 import os.path
 import datetime
-from django.utils import timezone
 from django.conf import settings
 import pytz
 import re
+import subprocess
 
 ZERO = 0
 ONE_MINUTES = 60
 
 class FileHolder(object):
-    _TRUNCATE_TAIL_LINES = 500
+    _TRUNCATE_TAIL_LINES = 300
 
     def load_file(self, filename):
         if self.is_valid:
-            with open(filename) as f:
-                self.lines = f.readlines()[-FileHolder._TRUNCATE_TAIL_LINES:]
+            cmd = [
+                "/usr/bin/tail",
+                "-n",
+                str(FileHolder._TRUNCATE_TAIL_LINES),
+                filename]
+            p = subprocess.run(
+                cmd,
+                stdout=subprocess.PIPE,
+                timeout=2)
+            self.lines = p.stdout.decode('utf-8').split('\n')
 
 
     @classmethod
     def add_color_highlighting(cls, html):
         if html != None:
             html = re.sub(r"[^( |\)|\(|\n)]*(success)[^( |\)|\(|\n)]*",
-                          "<span class = log_s>\g<0></span>",
+                          r"<span class = log_s>\g<0></span>",
                           html,
-                          flags=re.IGNORECASE)
+                          flags=re.RegexFlag.IGNORECASE)
             html = re.sub(r"[^( |\)|\(|\n)]*(warnings)[^( |\)|\(|\n)]*",
-                          "<span class = log_warn>\g<0></span>",
+                          r"<span class = log_warn>\g<0></span>",
                           html,
-                          flags=re.IGNORECASE)
+                          flags=re.RegexFlag.IGNORECASE)
             html = re.sub(r"[^( |\)|\(|\n|:)]*(error)[^( |\)|\(|\n|:)]*",
-                          "<span class = log_er>\g<0></span>",
+                          r"<span class = log_er>\g<0></span>",
                           html,
-                          flags=re.IGNORECASE)
+                          flags=re.RegexFlag.IGNORECASE)
             html = re.sub(r"[^( |\)|\(|\n)]*(exception)[^( |\)|\(\n)]*",
-                          "<span class = log_er>\g<0></span>",
+                          r"<span class = log_er>\g<0></span>",
                           html,
-                          flags=re.IGNORECASE)
+                          flags=re.RegexFlag.IGNORECASE)
             html = re.sub(r"[^( |\)|\(|\n|:)]*(failure)[^( |\)|\(|\n|:)]*",
-                          "<span class = log_er>\g<0></span>",
+                          r"<span class = log_er>\g<0></span>",
                           html,
-                          flags=re.IGNORECASE)
+                          flags=re.RegexFlag.IGNORECASE)
 
         return html
 

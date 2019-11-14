@@ -1,0 +1,756 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>workflow_engine package &#8212; Blue Sky Workflow Engine  documentation</title>
+    <link rel="stylesheet" href="_static/aibs_sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="workflow_engine.admin package" href="workflow_engine.admin.html" />
+    <link rel="prev" title="Glossary" href="glossary.html" /> 
+  </head>
+  <body>
+<link href="http://www.brain-map.org/assets/stylesheets/portal.css" media="screen" rel="stylesheet" type="text/css" />
+<script src="http://www.brain-map.org/assets/javascripts/portal.js" type="text/javascript"></script>
+<script src="http://www.brain-map.org/assets/javascripts/ga.js" type="text/javascript"></script>
+<script type="text/javascript">
+    var _pSupressBrowserFlashWarning = true;
+    var _pTabId = "pHome";
+    var _pMoreProjectsId = "pMoreProjects";
+    var _pImagePath = "http://www.brain-map.org/assets/images/";
+    var _pSiteWarnings = function() {
+        this.show_warning() = {};
+    }
+</script>
+<script type="text/javascript">
+    function initialize() {
+        /*** do your stuff, then initialize the portal plugin ***/
+        _pPortalOnLoad();
+    }
+</script>
+<style>
+  #header_content > a {
+  display: inline-block;
+  width: 250px;
+  height: 75px;
+  background-image:url("/_static/external_assets/images/Brain_Atlas_Logotype_SDK.png") !important;
+  background-size: 235px 37px;
+  background-position: 0px 20px;
+  background-repeat: no-repeat;
+  }
+</style>
+
+<script type="text/javascript" src="http://www.brain-map.org/external_assets/javascripts/portalHeader.js"></script>
+<link rel="stylesheet" type="text/css" href="/_static/external_assets/stylesheets/common_layout.css" />
+
+
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-workflow_engine">
+<span id="workflow-engine-package"></span><h1>workflow_engine package<a class="headerlink" href="#module-workflow_engine" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="workflow_engine.admin.html">workflow_engine.admin package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.admin.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.admin.html#module-workflow_engine.admin.configuration_admin">workflow_engine.admin.configuration_admin module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.admin.html#module-workflow_engine.admin.configuration_inline">workflow_engine.admin.configuration_inline module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.admin.html#module-workflow_engine.admin.executable_admin">workflow_engine.admin.executable_admin module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.admin.html#module-workflow_engine.admin.job_admin">workflow_engine.admin.job_admin module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.admin.html#module-workflow_engine.admin.job_queue_admin">workflow_engine.admin.job_queue_admin module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.admin.html#module-workflow_engine.admin.task_admin">workflow_engine.admin.task_admin module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.admin.html#module-workflow_engine.admin.well_known_file_admin">workflow_engine.admin.well_known_file_admin module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.admin.html#module-workflow_engine.admin.workflow_admin">workflow_engine.admin.workflow_admin module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.admin.html#module-workflow_engine.admin.workflow_edge_admin">workflow_engine.admin.workflow_edge_admin module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.admin.html#module-workflow_engine.admin.workflow_node_admin">workflow_engine.admin.workflow_node_admin module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workflow_engine.celery.html">workflow_engine.celery package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.celery.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.celery.html#module-workflow_engine.celery.circus_status_tasks">workflow_engine.celery.circus_status_tasks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.celery.html#module-workflow_engine.celery.error_handler">workflow_engine.celery.error_handler module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.celery.html#module-workflow_engine.celery.ingest_tasks">workflow_engine.celery.ingest_tasks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.celery.html#module-workflow_engine.celery.local_tasks">workflow_engine.celery.local_tasks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.celery.html#module-workflow_engine.celery.moab_beat">workflow_engine.celery.moab_beat module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.celery.html#module-workflow_engine.celery.moab_status_tasks">workflow_engine.celery.moab_status_tasks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.celery.html#module-workflow_engine.celery.moab_tasks">workflow_engine.celery.moab_tasks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.celery.html#module-workflow_engine.celery.mock_tasks">workflow_engine.celery.mock_tasks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.celery.html#module-workflow_engine.celery.monitor_tasks">workflow_engine.celery.monitor_tasks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.celery.html#module-workflow_engine.celery.pbs_tasks">workflow_engine.celery.pbs_tasks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.celery.html#module-workflow_engine.celery.result_tasks">workflow_engine.celery.result_tasks module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.celery.html#module-workflow_engine.celery.signatures">workflow_engine.celery.signatures module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.celery.html#module-workflow_engine.celery.workflow_tasks">workflow_engine.celery.workflow_tasks module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workflow_engine.migrations.html">workflow_engine.migrations package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.migrations.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.migrations.html#module-workflow_engine.migrations.0001_initial">workflow_engine.migrations.0001_initial module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.migrations.html#module-workflow_engine.migrations.0002_configuration">workflow_engine.migrations.0002_configuration module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.migrations.html#module-workflow_engine.migrations.0003_improved_json_configuration">workflow_engine.migrations.0003_improved_json_configuration module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.migrations.html#module-workflow_engine.migrations.0004_blank_admin_fields">workflow_engine.migrations.0004_blank_admin_fields module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.migrations.html#module-workflow_engine.migrations.0005_blank_executable_fields">workflow_engine.migrations.0005_blank_executable_fields module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.migrations.html#module-workflow_engine.migrations.0006_workflow_archive">workflow_engine.migrations.0006_workflow_archive module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.migrations.html#module-workflow_engine.migrations.0007_delete_datafix">workflow_engine.migrations.0007_delete_datafix module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.migrations.html#module-workflow_engine.migrations.0008_generic_task_job_relations">workflow_engine.migrations.0008_generic_task_job_relations module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.migrations.html#module-workflow_engine.migrations.0009_workflow_edges">workflow_engine.migrations.0009_workflow_edges module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.migrations.html#module-workflow_engine.migrations.0010_source_sink">workflow_engine.migrations.0010_source_sink module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.migrations.html#module-workflow_engine.migrations.0011_enqueueable">workflow_engine.migrations.0011_enqueueable module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.migrations.html#module-workflow_engine.migrations.0012_enqueued_object_relation">workflow_engine.migrations.0012_enqueued_object_relation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.migrations.html#module-workflow_engine.migrations.0013_remove_task_object_class_string">workflow_engine.migrations.0013_remove_task_object_class_string module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.migrations.html#module-workflow_engine.migrations.0014_remove_job_enqueued_object_class_string">workflow_engine.migrations.0014_remove_job_enqueued_object_class_string module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.migrations.html#module-workflow_engine.migrations.0015_more_optional_admin_fields">workflow_engine.migrations.0015_more_optional_admin_fields module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.migrations.html#module-workflow_engine.migrations.0016_archive_false_manager">workflow_engine.migrations.0016_archive_false_manager module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.migrations.html#module-workflow_engine.migrations.0017_edge_order">workflow_engine.migrations.0017_edge_order module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.migrations.html#module-workflow_engine.migrations.0018_running_state">workflow_engine.migrations.0018_running_state module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workflow_engine.mixins.html">workflow_engine.mixins package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.mixins.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.mixins.html#module-workflow_engine.mixins.archivable">workflow_engine.mixins.archivable module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.mixins.html#module-workflow_engine.mixins.configurable">workflow_engine.mixins.configurable module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.mixins.html#module-workflow_engine.mixins.enqueueable">workflow_engine.mixins.enqueueable module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.mixins.html#module-workflow_engine.mixins.has_well_known_files">workflow_engine.mixins.has_well_known_files module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.mixins.html#module-workflow_engine.mixins.nameable">workflow_engine.mixins.nameable module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.mixins.html#module-workflow_engine.mixins.runnable">workflow_engine.mixins.runnable module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.mixins.html#module-workflow_engine.mixins.stateful">workflow_engine.mixins.stateful module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.mixins.html#module-workflow_engine.mixins.tagable">workflow_engine.mixins.tagable module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.mixins.html#module-workflow_engine.mixins.timestamped">workflow_engine.mixins.timestamped module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workflow_engine.models.html">workflow_engine.models package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.models.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.models.html#module-workflow_engine.models.configuration">workflow_engine.models.configuration module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.models.html#module-workflow_engine.models.datafix">workflow_engine.models.datafix module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.models.html#module-workflow_engine.models.enqueued_proxy">workflow_engine.models.enqueued_proxy module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.models.html#module-workflow_engine.models.executable">workflow_engine.models.executable module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.models.html#module-workflow_engine.models.file_record">workflow_engine.models.file_record module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.models.html#module-workflow_engine.models.job">workflow_engine.models.job module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.models.html#module-workflow_engine.models.job_queue">workflow_engine.models.job_queue module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.models.html#module-workflow_engine.models.run_state">workflow_engine.models.run_state module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.models.html#module-workflow_engine.models.task">workflow_engine.models.task module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.models.html#module-workflow_engine.models.well_known_file">workflow_engine.models.well_known_file module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.models.html#module-workflow_engine.models.workflow">workflow_engine.models.workflow module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.models.html#module-workflow_engine.models.workflow_edge">workflow_engine.models.workflow_edge module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.models.html#module-workflow_engine.models.workflow_node">workflow_engine.models.workflow_node module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workflow_engine.serializers.html">workflow_engine.serializers package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.serializers.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.serializers.html#module-workflow_engine.serializers.ingest_serializer">workflow_engine.serializers.ingest_serializer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.serializers.html#module-workflow_engine.serializers.task_monitor_serializer">workflow_engine.serializers.task_monitor_serializer module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workflow_engine.strategies.html">workflow_engine.strategies package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.strategies.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.strategies.html#module-workflow_engine.strategies.base_strategy">workflow_engine.strategies.base_strategy module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.strategies.html#module-workflow_engine.strategies.execution_strategy">workflow_engine.strategies.execution_strategy module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.strategies.html#module-workflow_engine.strategies.ingest_strategy">workflow_engine.strategies.ingest_strategy module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.strategies.html#module-workflow_engine.strategies.input_config_mixin">workflow_engine.strategies.input_config_mixin module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.strategies.html#module-workflow_engine.strategies.wait_strategy">workflow_engine.strategies.wait_strategy module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workflow_engine.views.html">workflow_engine.views package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.views.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.views.html#module-workflow_engine.views.decorators">workflow_engine.views.decorators module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.views.html#module-workflow_engine.views.executable_view">workflow_engine.views.executable_view module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.views.html#module-workflow_engine.views.grid_view">workflow_engine.views.grid_view module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.views.html#module-workflow_engine.views.home_view">workflow_engine.views.home_view module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.views.html#module-workflow_engine.views.ingest_view">workflow_engine.views.ingest_view module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.views.html#module-workflow_engine.views.job_grid">workflow_engine.views.job_grid module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.views.html#module-workflow_engine.views.job_queue_view">workflow_engine.views.job_queue_view module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.views.html#module-workflow_engine.views.job_view">workflow_engine.views.job_view module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.views.html#module-workflow_engine.views.log_view">workflow_engine.views.log_view module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.views.html#module-workflow_engine.views.monitor_view">workflow_engine.views.monitor_view module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.views.html#module-workflow_engine.views.record_view">workflow_engine.views.record_view module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.views.html#module-workflow_engine.views.shared">workflow_engine.views.shared module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.views.html#module-workflow_engine.views.task_view">workflow_engine.views.task_view module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.views.html#module-workflow_engine.views.workflow_view">workflow_engine.views.workflow_view module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workflow_engine.worker.html">workflow_engine.worker package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.worker.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="workflow_engine.worker.qsub.html">workflow_engine.worker.qsub package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="workflow_engine.worker.qsub.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="workflow_engine.worker.qsub.html#module-workflow_engine.worker.qsub.qsub_api">workflow_engine.worker.qsub.qsub_api module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.worker.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.worker.html#module-workflow_engine.worker.server_command">workflow_engine.worker.server_command module</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-workflow_engine.apps">
+<span id="workflow-engine-apps-module"></span><h2>workflow_engine.apps module<a class="headerlink" href="#module-workflow_engine.apps" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.apps.WorkflowEngineConfig">
+<em class="property">class </em><code class="descclassname">workflow_engine.apps.</code><code class="descname">WorkflowEngineConfig</code><span class="sig-paren">(</span><em>app_name</em>, <em>app_module</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/apps.html#WorkflowEngineConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.apps.WorkflowEngineConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">django.apps.config.AppConfig</span></code></p>
+<dl class="attribute">
+<dt id="workflow_engine.apps.WorkflowEngineConfig.name">
+<code class="descname">name</code><em class="property"> = 'workflow_engine'</em><a class="headerlink" href="#workflow_engine.apps.WorkflowEngineConfig.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.apps.WorkflowEngineConfig.ready">
+<code class="descname">ready</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/apps.html#WorkflowEngineConfig.ready"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.apps.WorkflowEngineConfig.ready" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.apps.WorkflowEngineConfig.verbose_name">
+<code class="descname">verbose_name</code><em class="property"> = 'Blue Sky Workflow Engine'</em><a class="headerlink" href="#workflow_engine.apps.WorkflowEngineConfig.verbose_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.blue_sky_state_machine">
+<span id="workflow-engine-blue-sky-state-machine-module"></span><h2>workflow_engine.blue_sky_state_machine module<a class="headerlink" href="#module-workflow_engine.blue_sky_state_machine" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.blue_sky_state_machine.BlueSkyStateMachine">
+<em class="property">class </em><code class="descclassname">workflow_engine.blue_sky_state_machine.</code><code class="descname">BlueSkyStateMachine</code><span class="sig-paren">(</span><em>machines</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/blue_sky_state_machine.html#BlueSkyStateMachine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.blue_sky_state_machine.BlueSkyStateMachine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="workflow_engine.blue_sky_state_machine.BlueSkyStateMachine.add_transition">
+<code class="descname">add_transition</code><span class="sig-paren">(</span><em>self</em>, <em>state</em>, <em>transitions</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/blue_sky_state_machine.html#BlueSkyStateMachine.add_transition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.blue_sky_state_machine.BlueSkyStateMachine.add_transition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.blue_sky_state_machine.BlueSkyStateMachine.can_transition">
+<code class="descname">can_transition</code><span class="sig-paren">(</span><em>self</em>, <em>model</em>, <em>from_state</em>, <em>to_state</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/blue_sky_state_machine.html#BlueSkyStateMachine.can_transition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.blue_sky_state_machine.BlueSkyStateMachine.can_transition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.blue_sky_state_machine.BlueSkyStateMachine.in_state">
+<code class="descname">in_state</code><span class="sig-paren">(</span><em>self</em>, <em>model</em>, <em>state_machine_field</em>, <em>state_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/blue_sky_state_machine.html#BlueSkyStateMachine.in_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.blue_sky_state_machine.BlueSkyStateMachine.in_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.blue_sky_state_machine.BlueSkyStateMachine.machine_key">
+<code class="descname">machine_key</code><span class="sig-paren">(</span><em>self</em>, <em>model</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/blue_sky_state_machine.html#BlueSkyStateMachine.machine_key"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.blue_sky_state_machine.BlueSkyStateMachine.machine_key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.blue_sky_state_machine.BlueSkyStateMachine.states">
+<code class="descname">states</code><span class="sig-paren">(</span><em>self</em>, <em>model</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/blue_sky_state_machine.html#BlueSkyStateMachine.states"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.blue_sky_state_machine.BlueSkyStateMachine.states" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.blue_sky_state_machine.BlueSkyStateMachine.transition">
+<code class="descname">transition</code><span class="sig-paren">(</span><em>self</em>, <em>model</em>, <em>state_machine_field</em>, <em>to_state</em>, <em>force=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/blue_sky_state_machine.html#BlueSkyStateMachine.transition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.blue_sky_state_machine.BlueSkyStateMachine.transition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.blue_sky_state_machine.BlueSkyStateMachine.transitions">
+<code class="descname">transitions</code><span class="sig-paren">(</span><em>self</em>, <em>model</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/blue_sky_state_machine.html#BlueSkyStateMachine.transitions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.blue_sky_state_machine.BlueSkyStateMachine.transitions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="workflow_engine.blue_sky_state_machine.FailedExecutionException">
+<em class="property">exception </em><code class="descclassname">workflow_engine.blue_sky_state_machine.</code><code class="descname">FailedExecutionException</code><a class="reference internal" href="_modules/workflow_engine/blue_sky_state_machine.html#FailedExecutionException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.blue_sky_state_machine.FailedExecutionException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="workflow_engine.blue_sky_state_machine.IllegalStateTransition">
+<em class="property">exception </em><code class="descclassname">workflow_engine.blue_sky_state_machine.</code><code class="descname">IllegalStateTransition</code><span class="sig-paren">(</span><em>model</em>, <em>field</em>, <em>from_state</em>, <em>to_state</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/blue_sky_state_machine.html#IllegalStateTransition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.blue_sky_state_machine.IllegalStateTransition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#workflow_engine.blue_sky_state_machine.FailedExecutionException" title="workflow_engine.blue_sky_state_machine.FailedExecutionException"><code class="xref py py-class docutils literal"><span class="pre">workflow_engine.blue_sky_state_machine.FailedExecutionException</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.celeryconfig">
+<span id="workflow-engine-celeryconfig-module"></span><h2>workflow_engine.celeryconfig module<a class="headerlink" href="#module-workflow_engine.celeryconfig" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-workflow_engine.file_holder">
+<span id="workflow-engine-file-holder-module"></span><h2>workflow_engine.file_holder module<a class="headerlink" href="#module-workflow_engine.file_holder" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.file_holder.FileHolder">
+<em class="property">class </em><code class="descclassname">workflow_engine.file_holder.</code><code class="descname">FileHolder</code><span class="sig-paren">(</span><em>filename</em>, <em>type_name</em>, <em>start_run_time=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/file_holder.html#FileHolder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.file_holder.FileHolder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="classmethod">
+<dt id="workflow_engine.file_holder.FileHolder.add_color_highlighting">
+<em class="property">classmethod </em><code class="descname">add_color_highlighting</code><span class="sig-paren">(</span><em>html</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/file_holder.html#FileHolder.add_color_highlighting"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.file_holder.FileHolder.add_color_highlighting" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.file_holder.FileHolder.check_out_of_date">
+<code class="descname">check_out_of_date</code><span class="sig-paren">(</span><em>self</em>, <em>start_run_time</em>, <em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/file_holder.html#FileHolder.check_out_of_date"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.file_holder.FileHolder.check_out_of_date" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.file_holder.FileHolder.get_html">
+<code class="descname">get_html</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/file_holder.html#FileHolder.get_html"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.file_holder.FileHolder.get_html" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.file_holder.FileHolder.load_file">
+<code class="descname">load_file</code><span class="sig-paren">(</span><em>self</em>, <em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/file_holder.html#FileHolder.load_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.file_holder.FileHolder.load_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.file_holder.FileHolder.set_time">
+<code class="descname">set_time</code><span class="sig-paren">(</span><em>self</em>, <em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/file_holder.html#FileHolder.set_time"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.file_holder.FileHolder.set_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.import_class">
+<span id="workflow-engine-import-class-module"></span><h2>workflow_engine.import_class module<a class="headerlink" href="#module-workflow_engine.import_class" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="workflow_engine.import_class.import_class">
+<code class="descclassname">workflow_engine.import_class.</code><code class="descname">import_class</code><span class="sig-paren">(</span><em>class_full_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/import_class.html#import_class"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.import_class.import_class" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.log_holder">
+<span id="workflow-engine-log-holder-module"></span><h2>workflow_engine.log_holder module<a class="headerlink" href="#module-workflow_engine.log_holder" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.log_holder.LogHolder">
+<em class="property">class </em><code class="descclassname">workflow_engine.log_holder.</code><code class="descname">LogHolder</code><a class="reference internal" href="_modules/workflow_engine/log_holder.html#LogHolder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.log_holder.LogHolder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="workflow_engine.log_holder.LogHolder.add_file_holder">
+<code class="descname">add_file_holder</code><span class="sig-paren">(</span><em>self</em>, <em>file_holder</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/log_holder.html#LogHolder.add_file_holder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.log_holder.LogHolder.add_file_holder" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.provenance">
+<span id="workflow-engine-provenance-module"></span><h2>workflow_engine.provenance module<a class="headerlink" href="#module-workflow_engine.provenance" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.provenance.Provenance">
+<em class="property">class </em><code class="descclassname">workflow_engine.provenance.</code><code class="descname">Provenance</code><a class="reference internal" href="_modules/workflow_engine/provenance.html#Provenance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.provenance.Provenance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="workflow_engine.provenance.Provenance.read_pip_freeze_dependencies">
+<code class="descname">read_pip_freeze_dependencies</code><span class="sig-paren">(</span><em>self</em>, <em>file_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/provenance.html#Provenance.read_pip_freeze_dependencies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.provenance.Provenance.read_pip_freeze_dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.provenance.Provenance.record_blue_sky_configuration">
+<code class="descname">record_blue_sky_configuration</code><span class="sig-paren">(</span><em>self</em>, <em>blue_sky_configuration_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/provenance.html#Provenance.record_blue_sky_configuration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.provenance.Provenance.record_blue_sky_configuration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.provenance.Provenance.record_django_settings">
+<code class="descname">record_django_settings</code><span class="sig-paren">(</span><em>self</em>, <em>keys</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/provenance.html#Provenance.record_django_settings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.provenance.Provenance.record_django_settings" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.provenance.Provenance.record_executable_configuration">
+<code class="descname">record_executable_configuration</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/provenance.html#Provenance.record_executable_configuration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.provenance.Provenance.record_executable_configuration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.provenance.Provenance.record_job_execution">
+<code class="descname">record_job_execution</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/provenance.html#Provenance.record_job_execution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.provenance.Provenance.record_job_execution" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.provenance.Provenance.record_pip_freeze_dependencies">
+<code class="descname">record_pip_freeze_dependencies</code><span class="sig-paren">(</span><em>self</em>, <em>environment_name</em>, <em>file_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/provenance.html#Provenance.record_pip_freeze_dependencies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.provenance.Provenance.record_pip_freeze_dependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.provenance.Provenance.record_workflow_configuration">
+<code class="descname">record_workflow_configuration</code><span class="sig-paren">(</span><em>self</em>, <em>yaml_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/provenance.html#Provenance.record_workflow_configuration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.provenance.Provenance.record_workflow_configuration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.ui_server">
+<span id="workflow-engine-ui-server-module"></span><h2>workflow_engine.ui_server module<a class="headerlink" href="#module-workflow_engine.ui_server" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.ui_server.DjangoApplication">
+<em class="property">class </em><code class="descclassname">workflow_engine.ui_server.</code><code class="descname">DjangoApplication</code><a class="reference internal" href="_modules/workflow_engine/ui_server.html#DjangoApplication"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.ui_server.DjangoApplication" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="workflow_engine.ui_server.DjangoApplication.HOST">
+<code class="descname">HOST</code><em class="property"> = '0.0.0.0'</em><a class="headerlink" href="#workflow_engine.ui_server.DjangoApplication.HOST" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="workflow_engine.ui_server.DjangoApplication.PORT">
+<code class="descname">PORT</code><em class="property"> = 8000</em><a class="headerlink" href="#workflow_engine.ui_server.DjangoApplication.PORT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.ui_server.DjangoApplication.mount_static">
+<code class="descname">mount_static</code><span class="sig-paren">(</span><em>self</em>, <em>url</em>, <em>root</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/ui_server.html#DjangoApplication.mount_static"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.ui_server.DjangoApplication.mount_static" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.ui_server.DjangoApplication.run">
+<code class="descname">run</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/ui_server.html#DjangoApplication.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.ui_server.DjangoApplication.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.urls">
+<span id="workflow-engine-urls-module"></span><h2>workflow_engine.urls module<a class="headerlink" href="#module-workflow_engine.urls" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-workflow_engine.workflow_config">
+<span id="workflow-engine-workflow-config-module"></span><h2>workflow_engine.workflow_config module<a class="headerlink" href="#module-workflow_engine.workflow_config" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.workflow_config.WorkflowConfig">
+<em class="property">class </em><code class="descclassname">workflow_engine.workflow_config.</code><code class="descname">WorkflowConfig</code><span class="sig-paren">(</span><em>n</em>, <em>i</em>, <em>s</em>, <em>g</em>, <em>l</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_config.html#WorkflowConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_config.WorkflowConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="classmethod">
+<dt id="workflow_engine.workflow_config.WorkflowConfig.archive_all_workflows">
+<em class="property">classmethod </em><code class="descname">archive_all_workflows</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_config.html#WorkflowConfig.archive_all_workflows"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_config.WorkflowConfig.archive_all_workflows" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="workflow_engine.workflow_config.WorkflowConfig.create_workflow">
+<em class="property">classmethod </em><code class="descname">create_workflow</code><span class="sig-paren">(</span><em>workflows_yml</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_config.html#WorkflowConfig.create_workflow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_config.WorkflowConfig.create_workflow" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="workflow_engine.workflow_config.WorkflowConfig.create_workflow_from_config">
+<em class="property">classmethod </em><code class="descname">create_workflow_from_config</code><span class="sig-paren">(</span><em>workflow_config</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_config.html#WorkflowConfig.create_workflow_from_config"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_config.WorkflowConfig.create_workflow_from_config" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="workflow_engine.workflow_config.WorkflowConfig.create_workflow_from_string">
+<em class="property">classmethod </em><code class="descname">create_workflow_from_string</code><span class="sig-paren">(</span><em>yml_string</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_config.html#WorkflowConfig.create_workflow_from_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_config.WorkflowConfig.create_workflow_from_string" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="workflow_engine.workflow_config.WorkflowConfig.from_yaml">
+<em class="property">classmethod </em><code class="descname">from_yaml</code><span class="sig-paren">(</span><em>y</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_config.html#WorkflowConfig.from_yaml"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_config.WorkflowConfig.from_yaml" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="workflow_engine.workflow_config.WorkflowConfig.from_yaml_file">
+<em class="property">classmethod </em><code class="descname">from_yaml_file</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_config.html#WorkflowConfig.from_yaml_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_config.WorkflowConfig.from_yaml_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="workflow_engine.workflow_config.WorkflowConfig.from_yaml_string">
+<em class="property">classmethod </em><code class="descname">from_yaml_string</code><span class="sig-paren">(</span><em>y</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_config.html#WorkflowConfig.from_yaml_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_config.WorkflowConfig.from_yaml_string" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="workflow_engine.workflow_config.WorkflowConfig.parse_yaml_definition">
+<em class="property">classmethod </em><code class="descname">parse_yaml_definition</code><span class="sig-paren">(</span><em>definition</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_config.html#WorkflowConfig.parse_yaml_definition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_config.WorkflowConfig.parse_yaml_definition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.workflow_controller">
+<span id="workflow-engine-workflow-controller-module"></span><h2>workflow_engine.workflow_controller module<a class="headerlink" href="#module-workflow_engine.workflow_controller" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.workflow_controller.WorkflowController">
+<em class="property">class </em><code class="descclassname">workflow_engine.workflow_controller.</code><code class="descname">WorkflowController</code><a class="reference internal" href="_modules/workflow_engine/workflow_controller.html#WorkflowController"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_controller.WorkflowController" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="classmethod">
+<dt id="workflow_engine.workflow_controller.WorkflowController.create_job">
+<em class="property">classmethod </em><code class="descname">create_job</code><span class="sig-paren">(</span><em>workflow_node_id</em>, <em>enqueued_object_id</em>, <em>priority</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_controller.html#WorkflowController.create_job"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_controller.WorkflowController.create_job" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="workflow_engine.workflow_controller.WorkflowController.create_tasks">
+<em class="property">classmethod </em><code class="descname">create_tasks</code><span class="sig-paren">(</span><em>job</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_controller.html#WorkflowController.create_tasks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_controller.WorkflowController.create_tasks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="workflow_engine.workflow_controller.WorkflowController.enqueue_from_admin_form">
+<em class="property">classmethod </em><code class="descname">enqueue_from_admin_form</code><span class="sig-paren">(</span><em>workflow_name</em>, <em>job_queue_name</em>, <em>source_object</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_controller.html#WorkflowController.enqueue_from_admin_form"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_controller.WorkflowController.enqueue_from_admin_form" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="workflow_engine.workflow_controller.WorkflowController.enqueue_in_target_node">
+<em class="property">classmethod </em><code class="descname">enqueue_in_target_node</code><span class="sig-paren">(</span><em>source_node</em>, <em>target_node</em>, <em>source_job</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_controller.html#WorkflowController.enqueue_in_target_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_controller.WorkflowController.enqueue_in_target_node" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="workflow_engine.workflow_controller.WorkflowController.enqueue_next_queue">
+<em class="property">classmethod </em><code class="descname">enqueue_next_queue</code><span class="sig-paren">(</span><em>source_job</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_controller.html#WorkflowController.enqueue_next_queue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_controller.WorkflowController.enqueue_next_queue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="workflow_engine.workflow_controller.WorkflowController.enqueue_next_queue_by_job_id">
+<em class="property">classmethod </em><code class="descname">enqueue_next_queue_by_job_id</code><span class="sig-paren">(</span><em>job_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_controller.html#WorkflowController.enqueue_next_queue_by_job_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_controller.WorkflowController.enqueue_next_queue_by_job_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="workflow_engine.workflow_controller.WorkflowController.enqueue_next_queue_by_workflow_node">
+<em class="property">classmethod </em><code class="descname">enqueue_next_queue_by_workflow_node</code><span class="sig-paren">(</span><em>workflow_name</em>, <em>enqueued_object</em>, <em>start_node_name=None</em>, <em>set_success=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_controller.html#WorkflowController.enqueue_next_queue_by_workflow_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_controller.WorkflowController.enqueue_next_queue_by_workflow_node" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="workflow_engine.workflow_controller.WorkflowController.enqueue_object">
+<em class="property">classmethod </em><code class="descname">enqueue_object</code><span class="sig-paren">(</span><em>workflow_node</em>, <em>enqueued_object</em>, <em>priority=None</em>, <em>reuse_job=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_controller.html#WorkflowController.enqueue_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_controller.WorkflowController.enqueue_object" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="workflow_engine.workflow_controller.WorkflowController.find_workflow_node">
+<em class="property">classmethod </em><code class="descname">find_workflow_node</code><span class="sig-paren">(</span><em>workflow_name</em>, <em>start_node_name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_controller.html#WorkflowController.find_workflow_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_controller.WorkflowController.find_workflow_node" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="workflow_engine.workflow_controller.WorkflowController.job_run">
+<em class="property">classmethod </em><code class="descname">job_run</code><span class="sig-paren">(</span><em>job</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_controller.html#WorkflowController.job_run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_controller.WorkflowController.job_run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="workflow_engine.workflow_controller.WorkflowController.kill_job">
+<em class="property">classmethod </em><code class="descname">kill_job</code><span class="sig-paren">(</span><em>job_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_controller.html#WorkflowController.kill_job"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_controller.WorkflowController.kill_job" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="workflow_engine.workflow_controller.WorkflowController.run_workflow_node_jobs">
+<em class="property">classmethod </em><code class="descname">run_workflow_node_jobs</code><span class="sig-paren">(</span><em>workflow_node</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_controller.html#WorkflowController.run_workflow_node_jobs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_controller.WorkflowController.run_workflow_node_jobs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="workflow_engine.workflow_controller.WorkflowController.run_workflow_nodes">
+<em class="property">classmethod </em><code class="descname">run_workflow_nodes</code><span class="sig-paren">(</span><em>workflow_object</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_controller.html#WorkflowController.run_workflow_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_controller.WorkflowController.run_workflow_nodes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="workflow_engine.workflow_controller.WorkflowController.set_job_for_run">
+<em class="property">classmethod </em><code class="descname">set_job_for_run</code><span class="sig-paren">(</span><em>job</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_controller.html#WorkflowController.set_job_for_run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_controller.WorkflowController.set_job_for_run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="workflow_engine.workflow_controller.WorkflowController.set_job_for_run_if_valid">
+<em class="property">classmethod </em><code class="descname">set_job_for_run_if_valid</code><span class="sig-paren">(</span><em>job</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_controller.html#WorkflowController.set_job_for_run_if_valid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_controller.WorkflowController.set_job_for_run_if_valid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="workflow_engine.workflow_controller.WorkflowController.set_jobs_for_run">
+<em class="property">classmethod </em><code class="descname">set_jobs_for_run</code><span class="sig-paren">(</span><em>queue_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_controller.html#WorkflowController.set_jobs_for_run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_controller.WorkflowController.set_jobs_for_run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use workflow node or job queue name to run jobs.
+Useful for triggering wait strategy job queues.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
+<dt><strong>wait_queue_name</strong> <span class="classifier-delimiter">:</span> <span class="classifier">String</span></dt>
+<dd><p class="first last">human readable name to look up the associated jobs</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="workflow_engine.workflow_controller.WorkflowController.set_jobs_for_run_by_id">
+<em class="property">classmethod </em><code class="descname">set_jobs_for_run_by_id</code><span class="sig-paren">(</span><em>job_ids</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_controller.html#WorkflowController.set_jobs_for_run_by_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_controller.WorkflowController.set_jobs_for_run_by_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="workflow_engine.workflow_controller.WorkflowController.start_workflow">
+<em class="property">classmethod </em><code class="descname">start_workflow</code><span class="sig-paren">(</span><em>workflow_name</em>, <em>enqueued_object</em>, <em>start_node_name=None</em>, <em>reuse_job=False</em>, <em>raise_priority=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_controller.html#WorkflowController.start_workflow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_controller.WorkflowController.start_workflow" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="workflow_engine.workflow_controller.WorkflowController.start_workflow_helper">
+<em class="property">classmethod </em><code class="descname">start_workflow_helper</code><span class="sig-paren">(</span><em>workflow_node</em>, <em>enqueued_object</em>, <em>reuse_job=False</em>, <em>raise_priority=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_controller.html#WorkflowController.start_workflow_helper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_controller.WorkflowController.start_workflow_helper" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.workflow_json_serializer">
+<span id="workflow-engine-workflow-json-serializer-module"></span><h2>workflow_engine.workflow_json_serializer module<a class="headerlink" href="#module-workflow_engine.workflow_json_serializer" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.workflow_json_serializer.WorkflowJsonSerializer">
+<em class="property">class </em><code class="descclassname">workflow_engine.workflow_json_serializer.</code><code class="descname">WorkflowJsonSerializer</code><a class="reference internal" href="_modules/workflow_engine/workflow_json_serializer.html#WorkflowJsonSerializer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_json_serializer.WorkflowJsonSerializer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="classmethod">
+<dt id="workflow_engine.workflow_json_serializer.WorkflowJsonSerializer.load_workflow">
+<em class="property">classmethod </em><code class="descname">load_workflow</code><span class="sig-paren">(</span><em>filepath</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_json_serializer.html#WorkflowJsonSerializer.load_workflow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_json_serializer.WorkflowJsonSerializer.load_workflow" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="workflow_engine.workflow_json_serializer.WorkflowJsonSerializer.serialize_workflow">
+<em class="property">classmethod </em><code class="descname">serialize_workflow</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_json_serializer.html#WorkflowJsonSerializer.serialize_workflow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_json_serializer.WorkflowJsonSerializer.serialize_workflow" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.workflow_status">
+<span id="workflow-engine-workflow-status-module"></span><h2>workflow_engine.workflow_status module<a class="headerlink" href="#module-workflow_engine.workflow_status" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="workflow_engine.workflow_status.WorkflowStatus">
+<em class="property">class </em><code class="descclassname">workflow_engine.workflow_status.</code><code class="descname">WorkflowStatus</code><span class="sig-paren">(</span><em>workflow_names=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_status.html#WorkflowStatus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_status.WorkflowStatus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="workflow_engine.workflow_status.WorkflowStatus.pending_queued_running_index">
+<code class="descname">pending_queued_running_index</code><span class="sig-paren">(</span><em>self</em>, <em>df</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_status.html#WorkflowStatus.pending_queued_running_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_status.WorkflowStatus.pending_queued_running_index" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.workflow_status.WorkflowStatus.query_edges">
+<code class="descname">query_edges</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_status.html#WorkflowStatus.query_edges"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_status.WorkflowStatus.query_edges" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.workflow_status.WorkflowStatus.query_nodes">
+<code class="descname">query_nodes</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_status.html#WorkflowStatus.query_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_status.WorkflowStatus.query_nodes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.workflow_status.WorkflowStatus.query_run_state_counts">
+<code class="descname">query_run_state_counts</code><span class="sig-paren">(</span><em>self</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_status.html#WorkflowStatus.query_run_state_counts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_status.WorkflowStatus.query_run_state_counts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.workflow_status.WorkflowStatus.query_run_states">
+<code class="descname">query_run_states</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_status.html#WorkflowStatus.query_run_states"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_status.WorkflowStatus.query_run_states" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.workflow_status.WorkflowStatus.reindex_run_state_counts">
+<code class="descname">reindex_run_state_counts</code><span class="sig-paren">(</span><em>self</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_status.html#WorkflowStatus.reindex_run_state_counts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_status.WorkflowStatus.reindex_run_state_counts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.workflow_status.WorkflowStatus.status_as_dict">
+<code class="descname">status_as_dict</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_status.html#WorkflowStatus.status_as_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_status.WorkflowStatus.status_as_dict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.workflow_status.WorkflowStatus.status_as_json">
+<code class="descname">status_as_json</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_status.html#WorkflowStatus.status_as_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_status.WorkflowStatus.status_as_json" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.workflow_status.WorkflowStatus.sum_pending_queued_running">
+<code class="descname">sum_pending_queued_running</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_status.html#WorkflowStatus.sum_pending_queued_running"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_status.WorkflowStatus.sum_pending_queued_running" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="workflow_engine.workflow_status.WorkflowStatus.total_run_states">
+<code class="descname">total_run_states</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/workflow_status.html#WorkflowStatus.total_run_states"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.workflow_status.WorkflowStatus.total_run_states" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-workflow_engine.wsgi">
+<span id="workflow-engine-wsgi-module"></span><h2>workflow_engine.wsgi module<a class="headerlink" href="#module-workflow_engine.wsgi" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="workflow_engine.wsgi.application">
+<code class="descclassname">workflow_engine.wsgi.</code><code class="descname">application</code><span class="sig-paren">(</span><em>env</em>, <em>start_response</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/workflow_engine/wsgi.html#application"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#workflow_engine.wsgi.application" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="settings.html">Settings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="customizing.html">Customization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="workflows.html">Workflows</a></li>
+<li class="toctree-l1"><a class="reference internal" href="strategies.html">Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configurations.html">Configuration Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="develop.html">Developers Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">Authors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Source Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.admin.html">workflow_engine.admin package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.celery.html">workflow_engine.celery package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.migrations.html">workflow_engine.migrations package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.mixins.html">workflow_engine.mixins package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.models.html">workflow_engine.models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.serializers.html">workflow_engine.serializers package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.strategies.html">workflow_engine.strategies package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.views.html">workflow_engine.views package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_engine.worker.html">workflow_engine.worker package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="workflow_engine.worker.qsub.html">workflow_engine.worker.qsub package</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="workflow_client.html">Client Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="workflow_client.ingest.html">workflow_client.ingest package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_client.nb_utils.html">workflow_client.nb_utils package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="workflow_client.tasks.html">workflow_client.tasks package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/AllenInstitute/BlueSkyWorkflowEngine">Github Profile</a></li>
+</ul>
+
+<h3> Questions </h3>
+<p class="questions">
+  Send any questions using the <a href="http://alleninstitute.org/contact_us/index.html">Send Us a Message</a> link below, 
+  or submit your question to <a href="http://stackoverflow.com/">StackOverflow</a> using with the 'allen-sdk' tag.
+</p>
+
+<p class="questions">
+  If you encounter any problems using the AllenSDK, please create an issue on <a href="http://github.com/alleninstitute/allensdk/issues/">Github's issue tracker</a>.
+</p>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+
+    <div class="footer" role="contentinfo">
+    </div>
+<script type="text/javascript" src="http://www.brain-map.org/external_assets/javascripts/portalFooter.js"></script>
+
+
+  </body>
+</html>

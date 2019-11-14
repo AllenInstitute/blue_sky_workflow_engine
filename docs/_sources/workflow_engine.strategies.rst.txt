@@ -1,0 +1,52 @@
+workflow\_engine\.strategies package
+====================================
+
+.. automodule:: workflow_engine.strategies
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Submodules
+----------
+
+workflow\_engine\.strategies\.base\_strategy module
+---------------------------------------------------
+
+.. automodule:: workflow_engine.strategies.base_strategy
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+workflow\_engine\.strategies\.execution\_strategy module
+--------------------------------------------------------
+
+.. automodule:: workflow_engine.strategies.execution_strategy
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+workflow\_engine\.strategies\.ingest\_strategy module
+-----------------------------------------------------
+
+.. automodule:: workflow_engine.strategies.ingest_strategy
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+workflow\_engine\.strategies\.input\_config\_mixin module
+---------------------------------------------------------
+
+.. automodule:: workflow_engine.strategies.input_config_mixin
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+workflow\_engine\.strategies\.wait\_strategy module
+---------------------------------------------------
+
+.. automodule:: workflow_engine.strategies.wait_strategy
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+

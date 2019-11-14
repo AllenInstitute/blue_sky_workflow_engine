@@ -2,7 +2,7 @@
 # license plus a third clause that prohibits redistribution for commercial
 # purposes without further permission.
 #
-# Copyright 2017. Allen Institute. All rights reserved.
+# Copyright 2017-2019. Allen Institute. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -34,31 +34,21 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 import traceback
-from workflow_engine.import_class import import_class
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
+from django_fsm import can_proceed
+from django.db import (
+    transaction
+)
 import logging
-from workflow_engine.celery.signatures import run_workflow_node_jobs_signature
+from workflow_engine.signatures import (
+    run_workflow_node_jobs_signature
+)
+from builtins import classmethod
 
 
 class WorkflowController(object):
-    _logger = logging.getLogger('workflow_engine.workflow_controller')
-
-    @classmethod
-    def create_job(cls, workflow_node_id,
-                   enqueued_object_id, priority):
-        try:
-            workflow_node = WorkflowNode.objects.get(
-                id=workflow_node_id)
-            job = Job.enqueue_object(
-                workflow_node, enqueued_object_id, priority)
-            run_workflow_node_jobs_signature.delay(job.workflow_node.id)
-
-            return job
-        except Exception as e:
-            WorkflowController._logger.error(
-                'Something went wrong running jobs: ' + str(e) + "\n" + \
-                traceback.format_exc())
-            raise e
+    _log = logging.getLogger('workflow_engine.workflow_controller')
 
     @classmethod
     def run_workflow_nodes(cls, workflow_object):
@@ -69,63 +59,37 @@ class WorkflowController(object):
 
     @classmethod
     def run_workflow_node_jobs(cls, workflow_node):
-        try:
-            if not workflow_node.workflow.disabled and not workflow_node.disabled:
-                WorkflowController._logger.info(
-                    "running job in workflow %s:%s" % (
-                        str(workflow_node.workflow),
-                        str(workflow_node.job_queue.name)))
-                #check if more jobs can be run
-                batch_size = workflow_node.batch_size
+        WorkflowController._log.info(
+            "Node: %s",
+            str(workflow_node)
+        )
 
-                try:
-                    number_of_queued_and_running_jobs = \
-                        workflow_node.get_number_of_queued_and_running_jobs()
-                except Exception as e:
-                    number_of_queued_and_running_jobs = ZERO
+        if (workflow_node.workflow.disabled or
+            workflow_node.disabled):
+            return
 
-                number_jobs_to_run = \
-                    batch_size - number_of_queued_and_running_jobs
+        number_of_queued_and_running_jobs = \
+            workflow_node.get_number_of_queued_and_running_jobs()
 
-                WorkflowController._logger.info(
-                    ("%d jobs to be run. %d queued and running, "
-                     "batch size %d in workflow %s:%s") % (
-                        number_jobs_to_run,
-                        number_of_queued_and_running_jobs,
-                        batch_size,
-                        str(workflow_node.workflow),
-                        str(workflow_node.job_queue.name)))
+        number_jobs_to_run = (
+            workflow_node.batch_size - 
+            number_of_queued_and_running_jobs
+        )
 
-                #run more jobs
-                if number_jobs_to_run > ZERO:
-                    try:
-                        pending_jobs = \
-                            Job.objects.filter(
-                                run_state_id=RunState.get_pending_state().id,
-                                workflow_node=workflow_node,
-                                archived=False).order_by('priority',
-                                                         '-updated_at')
-                        WorkflowController._logger.info(
-                            'pending jobs: %d' % (len(pending_jobs)))
-                    except Exception as e:
-                        WorkflowController._logger.info(
-                            'pending jobs exception: %s' % (str(e)))
-                        pending_jobs = []
+        WorkflowController._log.info(
+            "%d available jobs slots (batch size - queued and running)",
+            number_jobs_to_run
+        )
 
-                    for i in range(number_jobs_to_run):
-                        if i < len(pending_jobs):
-                            job = pending_jobs[i]
-                            WorkflowController.job_run(job)
-            else:
-                WorkflowController._logger.info(
-                    "not running jobs in disabled workflow %s" % (
-                        str(workflow_node.workflow)))
-
-        except Exception as e:
-            WorkflowController._logger.error(
-                'Something went wrong running jobs: ' + str(e) + "\n" + \
-                traceback.format_exc())
-
+        # run more jobs
+        if number_jobs_to_run > ZERO:
+            for job_to_run in workflow_node.get_n_pending_jobs(
+                number_jobs_to_run):
+                WorkflowController._log.info(
+                    "running job %s",
+                    str(job_to_run)
+                )
+                WorkflowController.job_run(job_to_run)
 
     # TODO: this is the signal from an out-of-band job
     @classmethod
@@ -140,15 +104,15 @@ class WorkflowController(object):
         '''
         jobs = Job.objects.filter(
             workflow_node__job_queue__name=queue_name,
-            run_state__in=[
-                RunState.get_pending_state(),
-                RunState.get_queued_state()],
-            archived=False)
+            running_state__in=[
+                Runnable.STATE.PENDING,
+                Runnable.STATE.QUEUED
+            ]
+         )
 
         for job in jobs:
             job.set_pending_state()
             run_workflow_node_jobs_signature.delay(job.workflow_node.id)
-
 
     @classmethod
     def enqueue_next_queue_by_job_id(cls, job_id):
@@ -156,47 +120,70 @@ class WorkflowController(object):
         WorkflowController.enqueue_next_queue(job)
 
     @classmethod
-    def enqueue_next_queue(cls, job):
-        WorkflowController._logger.info('enqueue_next_queue')
-        children = job.workflow_node.get_children()
-        for child in children:
-            strategy = child.get_strategy()
-            enqueued_objects = strategy.get_objects_for_queue(job)
+    def enqueue_next_queue(cls, source_job):
+        source_node = source_job.workflow_node
 
-            for enqueued_object in enqueued_objects:
-                if strategy.can_transition(enqueued_object):
-                    #try to get the job
-                    jobs = Job.objects.filter(
-                        enqueued_object_id=enqueued_object.id,
-                        workflow_node_id=child.id,
-                        archived=False)
+        for target_node in source_node.get_children():
+            cls.enqueue_in_target_node(source_node, target_node, source_job)
 
-                    if len(jobs) > ZERO:
-                        index = ZERO
-                        for job in jobs:
-                            #reset job if needed
-                            if index == ZERO:
-                                job.run_state = RunState.get_pending_state()
-                                job.priority = child.priority
-                                job.archived = False
-                                job.save()
-                                WorkflowController.set_job_for_run(job)
-                                
-                            #should not have more than one job but just in case
-                            else:
-                                job.archived = True
-                                job.save()
+    @classmethod
+    def enqueue_from_admin_form(
+        cls,
+        workflow_name,
+        job_queue_name,
+        source_object
+    ):
+        target_node = WorkflowController.find_workflow_node(
+            workflow_name,
+            job_queue_name
+        )
 
-                            index += ONE
-                    else:
-                        # create the job if needed
-                        job = Job(enqueued_object_id=enqueued_object.id,
-                                  workflow_node=child,
-                                  run_state=RunState.get_pending_state(),
-                                  priority=child.priority)
-                        job.save()
-                        
-                        WorkflowController.set_job_for_run(job)
+        try:
+            strategy = target_node.get_strategy()
+        except:
+            WorkflowController._log.error(
+                'Error loading strategy for %s',
+                str(target_node)
+            )
+
+        enqueued_objects = strategy.transform_objects_for_queue(source_object)
+
+        WorkflowController._log.info(
+            "enqueued_objects: %d",
+            len(enqueued_objects)
+        )
+
+        for enqueued_object in enqueued_objects:
+            if strategy.can_transition(enqueued_object):
+                WorkflowController.start_workflow_helper(
+                    target_node,
+                    enqueued_object,
+                    target_node.overwrite_previous_job)
+
+    @classmethod
+    def enqueue_in_target_node(cls, source_node, target_node, source_job):
+        try:
+            strategy = target_node.get_strategy()
+        except:
+            WorkflowController._log.error(
+                'Error loading strategy for %s',
+                str(target_node)
+            )
+
+        source_object = source_job.enqueued_object
+
+        enqueued_objects = strategy.transform_objects_for_queue(source_object)
+        WorkflowController._log.info(
+            "Found %d enqueued objects",
+            len(enqueued_objects)
+        )
+
+        for enqueued_object in enqueued_objects:
+            if strategy.can_transition(enqueued_object, source_node):
+                WorkflowController.start_workflow_helper(
+                    target_node,
+                    enqueued_object,
+                    target_node.overwrite_previous_job)
 
     @classmethod
     def set_job_for_run_if_valid(cls, job):
@@ -205,7 +192,7 @@ class WorkflowController(object):
 
     @classmethod
     def set_job_for_run(cls, job):
-        WorkflowController._logger.info('set for run')
+        WorkflowController._log.info('set for run')
         job.set_pending_state()
         run_workflow_node_jobs_signature.delay(job.workflow_node.id)
 
@@ -223,225 +210,215 @@ class WorkflowController(object):
             job.kill()
             run_workflow_node_jobs_signature.delay(job.workflow_node.id)
         except ObjectDoesNotExist:
-            WorkflowController._logger.warning(
+            WorkflowController._log.warning(
                 'Tried to kill job %d which does not exist',
                 job_id)
 
-
     @classmethod
     def create_tasks(cls, job):
-        reused_tasks = {}
         strategy = job.get_strategy()
-        pending_state = RunState.get_pending_state()
 
-        task_objects = \
-            strategy.get_task_objects_for_queue(
-                job.get_enqueued_object())
+        task_objects = strategy.get_task_objects_for_queue(
+            job.enqueued_object
+        )
 
         for task_object in task_objects:
-            enqueued_object_full_class = \
-                type(task_object).__module__ + '.' + type(task_object).__name__
+            default_options = {
+                'running_state': Runnable.STATE.PENDING,
+                'archived': False,
+                'retry_count': ZERO
+            }
 
-            if job.workflow_node.overwrite_previous_job:
+            enqueued_task_object_type = ContentType.objects.get_for_model(
+                task_object
+            )
+
+            with transaction.atomic():
                 try:
-                    WorkflowController._logger.info(
-                        'overwriting task with enqueued class: %s' %
-                        (enqueued_object_full_class))
-                    task = Task.objects.get(
+                    tsk, created = Task.objects.get_or_create(
+                        enqueued_task_object_type=enqueued_task_object_type,
                         enqueued_task_object_id=task_object.id,
-                        enqueued_task_object_class=enqueued_object_full_class,
-                        job=job)
-                    task.run_state = pending_state
-                    task.archived = False
-                    task.retry_count = ZERO
-                    task.save()
-                except:
-                    WorkflowController._logger.info(
-                        'creating task with enqueued class: %s' %
-                        (enqueued_object_full_class))
-                    task = Task(
-                        enqueued_task_object_id=task_object.id,
-                        enqueued_task_object_class=enqueued_object_full_class,
-                        run_state=pending_state,
-                        job=job)
-                    task.save()
-            else:
-                WorkflowController._logger.info(
-                    'creating task with enqueued class: %s' %
-                    (enqueued_object_full_class))
-                task = Task(
-                    enqueued_task_object_id=task_object.id,
-                    enqueued_task_object_class=enqueued_object_full_class,
-                    run_state=pending_state, job=job)
-                task.save()
+                        job=job,
+                        defaults=default_options
+                    )
 
-            reused_tasks[task.id] = True
-
-        return reused_tasks
-
-    @classmethod
-    def enqueue_object(cls, workflow_node, enqueued_object):
-        job = Job()
-        job.workflow_node = workflow_node
-        job.enqueued_object_id = enqueued_object.id
-        job.run_state = RunState.get_pending_state()
-        job.priority = job.workflow_node.priority
-        job.save()
+                    if not created:
+                        tsk.archived=False
+                        tsk.retry_count=0
+                        tsk.set_pending_state()
+                except Exception as e:
+                    raise(e)
 
     @classmethod
     def job_run(cls, job):
-        WorkflowController._logger.info('run')
-        try:
-            job.set_queued_state()
+        if not can_proceed(job.submit_to_queue):
+            return
 
+        try:
             job.set_start_run_time()
             job.clear_error_message()
-
             job.prep_job()
+            job.submit_to_queue()
 
-            reused_tasks = WorkflowController.create_tasks(job)
-
-            job.remove_tasks(reused_tasks)
+            WorkflowController.create_tasks(job)
 
             for task in job.get_tasks():
                 task.run_task()
-
         except Exception as e:
             job.set_error_message(
                 str(e) + ' - ' + str(traceback.format_exc()), None)
-            WorkflowController._logger.info(
-                "Job exception: %s" % (job.error_message))
+            WorkflowController._log.info(
+                "Job exception: %s",
+                str(job.error_message)
+            )
             job.set_failed_state()
             run_workflow_node_jobs_signature.delay(job.workflow_node.id)
 
     @classmethod
-    def start_workflow(cls,
-                       workflow_name,
-                       enqueued_object,
-                       start_node_name=None):
-        workflow = Workflow.objects.get(name=workflow_name)
-        WorkflowController._logger.info(
-            "starting %s at %s" % (
-                workflow_name, str(start_node_name)))
-
+    def find_workflow_node(
+        cls,
+        workflow_name,
+        start_node_name=None
+    ):
         if start_node_name is not None:
-            workflow_nodes = WorkflowNode.objects.filter(
-                job_queue__name=start_node_name)
+            return WorkflowNode.objects.get(
+                workflow__name=workflow_name,
+                job_queue__name=start_node_name
+            )
         else:
-            workflow_nodes = WorkflowNode.objects.filter(
-                workflow=workflow, parent=None)
-
-        if len(workflow_nodes) != ONE:
-            raise Exception(
-                'Expected to find a single head workflow node but found: ' + \
-                str(len(workflow_nodes)) + ': ' + \
-                    ', '.join(str(wn) for wn in workflow_nodes))
-
-        workflow_node = workflow_nodes[ZERO]
-
-        job = Job()
-        job.enqueued_object_id=enqueued_object.id
-        job.workflow_node=workflow_node
-        job.run_state=RunState.get_pending_state()
-        job.priority = workflow_node.priority
-        job.save()
-
-        WorkflowController._logger.info("Start workflow job state: %s" % (str(job.run_state)))
-
-        run_workflow_node_jobs_signature.delay(job.workflow_node.id)
+            return WorkflowNode.objects.get(
+                workflow__name=workflow_name,
+                sources=None
+            )
 
     @classmethod
-    def start_workflow_2(
+    def enqueue_next_queue_by_workflow_node(
         cls,
         workflow_name,
         enqueued_object,
         start_node_name=None,
+        set_success=True):
+        workflow_node = cls.find_workflow_node(
+            workflow_name,
+            start_node_name)
+
+        job = workflow_node.job_set.get(
+            enqueued_object=enqueued_object,
+            archived=False)
+
+        if set_success:
+            job.set_success_state()
+
+        cls.enqueue_next_queue(job)
+
+    @classmethod
+    def enqueue_object(
+        cls,
+        workflow_node,
+        enqueued_object,
+        priority=None,
         reuse_job=False):
-        workflow = Workflow.objects.get(name=workflow_name)
-        WorkflowController._logger.info(
-            "starting %s at %s" % (
-                workflow_name, str(start_node_name)))
-
-        if start_node_name is not None:
-            workflow_nodes = WorkflowNode.objects.filter(
-                job_queue__name=start_node_name)
-        else:
-            workflow_nodes = WorkflowNode.objects.filter(
-                workflow=workflow, parent=None)
-
-        if len(workflow_nodes) != ONE:
-            raise Exception(
-                'Expected to find a single head workflow node but found: ' + \
-                str(len(workflow_nodes)) + ': ' + \
-                    ', '.join(str(wn) for wn in workflow_nodes))
-
-        workflow_node = workflow_nodes[ZERO]
+        if priority is None:
+            priority = workflow_node.priority
 
         if reuse_job:
+            default_options = {
+                'running_state': Runnable.STATE.PENDING,
+                'priority': priority
+            }
+
+            enqueued_object_type = ContentType.objects.get_for_model(
+                enqueued_object
+            )
+
             job, _ = Job.objects.update_or_create(
+                enqueued_object_type=enqueued_object_type,
                 enqueued_object_id=enqueued_object.id,
                 workflow_node=workflow_node,
-                defaults={
-                    'run_state': RunState.get_pending_state(),
-                    'priority': workflow_node.priority
-                })
+                defaults=default_options)
         else:
             job = Job()
-            job.enqueued_object_id=enqueued_object.id
-            job.workflow_node=workflow_node
-            job.run_state=RunState.get_pending_state()
+            job.enqueued_object = enqueued_object
+            job.workflow_node = workflow_node
             job.priority = workflow_node.priority
-            job.save()
 
-        WorkflowController._logger.info("Start workflow job state: %s" % (str(job.run_state)))
+        job.set_pending_state() # does save and keeps run_state/running_state in sync
+
+        return job
+
+    @classmethod
+    def start_workflow_helper(
+        cls,
+        workflow_node,
+        enqueued_object,
+        reuse_job=False,
+        raise_priority=False):
+        if raise_priority:
+            priority = workflow_node.priority - 10
+        else:
+            priority = workflow_node.priority
+
+        job = WorkflowController.enqueue_object(
+            workflow_node,
+            enqueued_object,
+            priority,
+            reuse_job
+        )
+
+        WorkflowController._log.info(
+            "Start workflow job state: %s",
+            str(job.running_state)
+        )
 
         run_workflow_node_jobs_signature.delay(job.workflow_node.id)
 
+        return job.id
+
     @classmethod
-    def get_enqueued_object(cls, task):
-        WorkflowController._logger.info(
-            'WorkflowController.get_enqueued_object')
-        if task.enqueued_task_object_class == None:
-            WorkflowController._logger.info(
-                'enqueued_task_object_class is nil for task')
-            raise Exception(
-                'enqueued_task_object_class is nil for task: ' + str(task.id))
+    def start_workflow(
+        cls,
+        workflow_name,
+        enqueued_object,
+        start_node_name=None,
+        reuse_job=False,
+        raise_priority=False):
+        workflow_node = cls.find_workflow_node(
+            workflow_name,
+            start_node_name)
 
-        if task.enqueued_task_object_id == None:
-            WorkflowController._logger.info(
-                'enqueued_task_object_id is nil for task')
-            raise Exception(
-                'enqueued_task_object_id is nil for task: ' + str(task.id))
+        WorkflowController.start_workflow_helper(
+            workflow_node,
+            enqueued_object,
+            reuse_job,
+            raise_priority
+        )
 
-        WorkflowController._logger.info(
-            'task enqueued object class: %s' % (
-                task.enqueued_task_object_class))
-        enqueued_object_class = import_class(
-            task.enqueued_task_object_class)
-        enqueued_object = enqueued_object_class.objects.get(
-            id=task.enqueued_task_object_id)
+    @classmethod
+    def create_job(
+        cls,
+        workflow_node_id,
+        enqueued_object_id,
+        priority):
 
-        if enqueued_object == None:
-            WorkflowController._logger.info('enqueued_object is None')
-            msg = \
-                'enqueued_object does not exist for enqueued_object_class of ' + \
-                str(task.enqueued_task_object_class) + \
-                ' and id of ' + \
-                str(task.enqueued_task_object_id)
-            WorkflowController._logger.info(msg)
-            raise Exception(msg)  
-        
-        WorkflowController._logger.info(
-            'task enqueued object: %s' % (enqueued_object))
+        workflow_node = WorkflowNode.objects.get(
+            id=workflow_node_id)
+        enqueued_object_type = workflow_node.job_queue.enqueued_object_type
+        enqueued_object = enqueued_object_type.get_object_for_this_type(
+            pk=enqueued_object_id)
 
-        return enqueued_object
+        return WorkflowController.start_workflow_helper(
+            workflow_node,
+            enqueued_object,
+            workflow_node.overwrite_previous_job,
+            priority)
 
 
 # circular imports
-from workflow_engine.models import ZERO, ONE
-from workflow_engine.models.job import Job
-from workflow_engine.models.task import Task
-from workflow_engine.models.run_state import RunState
-from workflow_engine.models.workflow_node import WorkflowNode
-from workflow_engine.models.workflow import Workflow
+from workflow_engine.mixins import Runnable
+from workflow_engine.models import (
+    ZERO,
+    Job,
+    Task,
+    WorkflowNode
+)
 
