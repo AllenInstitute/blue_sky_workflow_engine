@@ -21,13 +21,12 @@ def copy_edges(apps, schema_editor):
     for node in nodes:
         parent = node.parent
         if parent:  # NOTE: workaround for PBS-1921
-            archived = False
-        else:
-            
             if node.archived is True and parent.archived is True:
                 archived = True
             else:
                 archived = False
+        else:
+            archived = False
 
         if parent:
             edge = WorkflowEdge(
