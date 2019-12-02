@@ -49,8 +49,8 @@ class METHODS:
     CHECK_CIRCUS_TASK_STATUS = 'workflow_engine.check_circus_task_status'
     
     CHECK_MOAB_STATUS = 'workflow_engine.process.workers.moab_status_tasks.check_moab_status'
-    SUBMIT_MOAB_TASK = 'workflow_engine.process.workers.moab.moab_tasks.submit_moab_task'
-    KILL_MOAB_TASK = 'workflow_engine.process.workers.moab.moab_tasks.kill_moab_task'
+    SUBMIT_MOAB_TASK = 'workflow_engine.process.workers.moab_tasks.submit_moab_task'
+    KILL_MOAB_TASK = 'workflow_engine.process.workers.moab_tasks.kill_moab_task'
 
     SUBMIT_WORKER_TASK = 'workflow_engine.process.workers.submit_worker_task'
 
@@ -141,7 +141,7 @@ run_jobs_by_id_signature = signature(METHODS.RUN_JOBS_BY_ID)
 
 # TODO: unimplemented?
 run_tasks_signature = signature(
-    'workflow_engine.process.workers.moab.moab_tasks.run_task')
+    'workflow_engine.process.workers.moab_tasks.run_task')
 
 
 create_job_signature = signature(METHODS.CREATE_JOB)

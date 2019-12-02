@@ -64,10 +64,10 @@ def get_arbiter_list(app_name, workdir, log_dir=None):
     bg_conda_env = os.path.join(_CONDA_ENVS, 'py_37')
     base_env = copy.deepcopy(_BASE_ENV)
     base_env['APP_PACKAGE'] = app_name
-    base_env['PYTHONPATH'] = workdir
+    base_env['PYTHONPATH'] = "/source/at_em_imaging_workflow:/source/blue_sky_workflow_engine:/render_modules:/EM_aligner_python:" + workdir
 
     django_env = dmerge(base_env, {
-        'DJANGO_SETTINGS_MODULE': 'settings' # in workdir
+        'DJANGO_SETTINGS_MODULE': 'at_em_imaging_workflow.settings' # in workdir
     })
     
     arbiter_list = [

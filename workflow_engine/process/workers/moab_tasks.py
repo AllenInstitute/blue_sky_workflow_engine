@@ -36,7 +36,7 @@
 import django; django.setup()
 from django.conf import settings
 from workflow_engine.client_settings import configure_worker_app
-from workflow_engine.process.workers.moab.moab_api import (
+from workflow_engine.process.workers.moab_api import (
     submit_job,
     submit_job_array,
     delete_moab_task
@@ -53,10 +53,10 @@ import traceback
 import os
 
 
-_log = logging.getLogger('workflow_engine.process.workers.moab.moab_tasks')
+_log = logging.getLogger('workflow_engine.process.workers.moab_tasks')
 
 
-app = celery.Celery('workflow_engine.process.workers.moab.moab_tasks')
+app = celery.Celery('workflow_engine.process.workers.moab_tasks')
 configure_worker_app(app, settings.APP_PACKAGE, 'moab')
 app.conf.imports = ()
 

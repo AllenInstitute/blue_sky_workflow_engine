@@ -34,7 +34,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 import celery
-from workflow_engine.process.workers.moab.moab_api import (
+from workflow_engine.process.workers.moab_api import (
     query_and_combine_states,
     submit_job,
     delete_moab_task
