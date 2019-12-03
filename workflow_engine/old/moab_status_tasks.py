@@ -36,7 +36,7 @@
 import django; django.setup()
 from django.conf import settings
 from workflow_engine.client_settings import configure_worker_app
-from workflow_engine.process.workers.moab.moab_api import (
+from workflow_engine.process.workers.moab_api import (
     query_and_combine_states
 )
 from workflow_engine.signatures import (
