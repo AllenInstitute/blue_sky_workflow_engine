@@ -12,17 +12,6 @@ from workflow_engine.signatures import (
 _RESPONSE_TIMEOUT = 10
 
 
-APP_NAME='at_em_imaging_workflow'
-BLUE_GREEN='blue'
-
-
-def route_task(name, args, kwargs,
-              options, task=None, **kw):
-    return {
-        'queue': 'result@at_em_imaging_workflow',
-    }
-
-
 def send_queued(task_id, pbs_id):
     r = process_pbs_id_signature.delay(task_id, pbs_id)
 
@@ -49,12 +38,13 @@ if __name__ == '__main__':
     parser.add_argument("--action")
     parser.add_argument("--pbs_id")
     parser.add_argument("task_id")
+    parser.add_argument("--app-name")
+    parser.add_argument("app_name")
 
     args = parser.parse_args()
 
-    app = Celery('miniclient')
-    configure_worker_app(app, 'miniclient')
-    app.conf.task_routes = (route_task,)
+    app = Celery(args.app_name)
+    configure_worker_app(app, args.app_name)
 
     if args.action == 'queued':
         print(send_queued(args.task_id, args.pbs_id))

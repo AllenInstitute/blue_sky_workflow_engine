@@ -128,7 +128,7 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
 
         task_arguments = self.get_task_arguments(task)  # pylint: disable= E1128
 
-        input_file = self.get_input_file(task, create_dir=False)
+        input_file = self.get_input_file(task)
 
         # populate the input file
         storage_dir = self.get_task_storage_directory(task)

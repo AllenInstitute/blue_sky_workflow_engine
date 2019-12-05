@@ -95,7 +95,7 @@ def record_json_response(fn):
                     data = {}
 
                 for record_object in records:
-                    fn(record_object, request, result, record_type, data)
+                    fn(record_object, result, record_type, data)
             else:
                 result['success'] = False
                 result['message'] = 'Missing record_ids'
