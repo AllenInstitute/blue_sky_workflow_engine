@@ -58,7 +58,7 @@ _log = logging.getLogger('workflow_engine.process.workers.moab_tasks')
 
 app = celery.Celery('workflow_engine.process.workers.moab_tasks')
 configure_worker_app(app, settings.APP_PACKAGE, 'moab')
-app.conf.imports = ()
+# app.conf.imports = ()
 
 
 @celery.shared_task(bind=True, trail=True)
