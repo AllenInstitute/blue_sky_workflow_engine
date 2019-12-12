@@ -12,6 +12,7 @@ function finish {
     python -m workflow_engine.mini_response --action finished {{ task.id }} --app-name {{ settings.APP_PACKAGE }}
 }
 
+trap finish TERM
 trap finish EXIT
 
 source /etc/profile
