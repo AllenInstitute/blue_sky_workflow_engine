@@ -106,6 +106,7 @@ def configure_worker_app(
     )
     app.config_from_object(load_settings_yaml())
     app.conf.task_queue_max_priority = 10
+    app.conf.broker_heartbeat = 0 # Fix https://github.com/celery/celery/issues/4867
     app.conf.task_queues = router.task_queues(worker_names)
     app.conf.task_routes = (
         router.route_task,
