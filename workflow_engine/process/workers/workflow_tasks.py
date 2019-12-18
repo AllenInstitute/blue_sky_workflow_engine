@@ -105,10 +105,15 @@ def set_jobs_for_run_by_id(self, job_ids):
     bind=True,
     name=METHODS.RUN_WORKFLOW_NODE_JOBS
 )
-def run_workflow_node_jobs_by_id(self, workflow_node_id):
+def run_workflow_node_jobs_by_id(self, workflow_node_id = None):
     try:
-        workflow_node = WorkflowNode.objects.get(id=workflow_node_id)
-        WorkflowController.run_workflow_node_jobs(workflow_node)
+        if workflow_node_id is None:
+            workflow_nodes = get_workflow_nodes_with_pending_jobs()
+            for workflow_node in workflow_nodes:
+                WorkflowController.run_workflow_node_jobs(workflow_node)
+        else:
+            workflow_node = WorkflowNode.objects.get(id=workflow_node_id)
+            WorkflowController.run_workflow_node_jobs(workflow_node)
     except ObjectDoesNotExist as e:
         _log.error(str(e) + ' - ' + str(traceback.format_exc()))
     except SoftTimeLimitExceeded:
@@ -119,6 +124,13 @@ def run_workflow_node_jobs_by_id(self, workflow_node_id):
         return 'error'
 
     return 'done'
+
+
+# Returns a list of WorkflowNodes that have jobs stuck in the PENDING state
+# TODO: this should be somewhere else
+def get_workflow_nodes_with_pending_jobs():
+    nodes = WorkflowNode.objects.filter(job__running_state='PENDING').distinct()
+    return [node for node in nodes]
 
 
 @celery.shared_task(bind=True)

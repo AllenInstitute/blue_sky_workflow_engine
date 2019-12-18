@@ -1,6 +1,15 @@
 from django.contrib import admin
 from .configuration_inline import ConfigurationInline
+from workflow_engine import signatures
 from workflow_engine.models import WorkflowNode
+
+
+def start_jobs(ModelAdmin, request, queryset):
+    start_jobs.short_description = \
+        'Start jobs in node'
+    
+    for node in queryset:
+        signatures.run_workflow_node_jobs_signature.delay(node.id)
 
 
 class SourcesInline(admin.TabularInline):
@@ -44,7 +53,9 @@ class WorkflowNodeAdmin(admin.ModelAdmin):
         'sources',
         'sinks'
     )
-    actions = ()
+    actions = (
+        start_jobs,
+    )
     inlines = (ConfigurationInline, SourcesInline, SinksInline)
 
     def get_queryset(self, request):
