@@ -170,6 +170,8 @@ class Runnable(models.Model):
                     str(self)
                 )
             self.running_state = Runnable.STATE.FINISHED_EXECUTION
+        elif self.running_state == Runnable.STATE.FAILED_EXECUTION:
+            Runnable._log.warning('Unexpected state transition - remaining in FAILED_EXECUTION')
         else:
             self.finish()  # trigger exception
 
