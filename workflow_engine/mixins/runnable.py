@@ -236,7 +236,7 @@ class Runnable(models.Model):
         elif self.running_state != Runnable.STATE.FAILED_EXECUTION:
             if not quiet:
                 Runnable._log.warning(
-                    'Forced transition to RUNNING from {} for {}',
+                    'Forced transition to RUNNING from %s for %s',
                     str(self.running_state),
                     str(self)
                 )

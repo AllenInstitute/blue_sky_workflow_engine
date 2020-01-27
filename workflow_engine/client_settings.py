@@ -54,7 +54,7 @@ _DEFAULT_SETTINGS_DICT = {
     'result_serializer': 'json',
     'result_expires': 3600, # 1 hour in seconds
     'broker_connection_timeout': 10,
-    'broker_connection_retry': False,
+    'broker_connection_retry': True,
     'soft_time_limit': 600,
     'time_limit': 2400,
     'accept_content': ['json'],
