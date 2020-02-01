@@ -131,7 +131,7 @@ def get_arbiter_list(app_name, workdir, log_dir=None):
                 '/bin/bash -c ',
                 '"source {} {}; '.format(_ACTIVATE_PATH, bg_conda_env),
                 'python -m celery ',
-                '-A workflow_engine.celery.job_start_beat_tasks beat"',
+                '-A workflow_engine.process.workers.job_start_beat_tasks beat"',
             )),
             "env": dmerge(django_env, {
                 'DEBUG_LOG': debug_log_path(log_dir, 'beat')
