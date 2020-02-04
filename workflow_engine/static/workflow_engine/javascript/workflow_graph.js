@@ -3,7 +3,7 @@ function draw_workflow1(workflow_nodes, workflow_edges) {
     alert(workflow_nodes);
 }
 
-function node_color(n, state_hash, run_states) {
+function node_color(n, count_hash, run_states) {
     reverse_run_states = {}
     node_index = n.toString()
 
@@ -13,12 +13,14 @@ function node_color(n, state_hash, run_states) {
         }
     )
 
-    failed = '[' + node_index + ',' + reverse_run_states['FAILED'] + ']';
-    failed_execution = '[' + node_index + ',' + reverse_run_states['FAILED_EXECUTION'] + ']';
-    process_killed = '[' + node_index + ',' + reverse_run_states['PROCESS_KILLED'] + ']';
-    running = '[' + node_index + ',' + reverse_run_states['RUNNING'] + ']';
-    pending = '[' + node_index + ',' + reverse_run_states['PENDING'] + ']';
-    queued = '[' + node_index + ',' + reverse_run_states['QUEUED'] + ']';
+    state_hash = count_hash[node_index]
+
+    failed = reverse_run_states['FAILED'];
+    failed_execution = reverse_run_states['FAILED_EXECUTION'];
+    process_killed = reverse_run_states['PROCESS_KILLED'];
+    running = reverse_run_states['RUNNING'];
+    pending = reverse_run_states['PENDING'];
+    queued = reverse_run_states['QUEUED'];
 
     try {
         if ((state_hash[failed] > 0) ||
@@ -36,7 +38,7 @@ function node_color(n, state_hash, run_states) {
         } else {
             return 'blue';
         }
-    } catch(err) {
+    } catch (err) {
         return 'grey';
     }
 }
@@ -74,7 +76,7 @@ function node_summary_tables(
     job_queues, batch_size, run_states, counts, pending_queued_running, totals) {
 
     var reverse_run_states = {};
-    $.each(run_states, function(run_state_id, run_state_name) {
+    $.each(run_states, function (run_state_id, run_state_name) {
         reverse_run_states[run_state_name] = run_state_id;
     });
 
@@ -90,7 +92,7 @@ function node_summary_tables(
     ];
 
     $('div.info').empty();
-    $.each(job_queues, function(node_id, node_name) {
+    $.each(job_queues, function (node_id, node_name) {
         var node_tbl = $('<table>').attr('border', 1).width('300px');
         node_tbl.addClass('node_info');
         node_tbl.hide();
@@ -105,15 +107,15 @@ function node_summary_tables(
         link.attr(
             'href',
             '/admin/workflow_engine/workflownode/' +
-                node_id.toString() +
-                '/change'
+            node_id.toString() +
+            '/change'
         );
         link.text(node_name)
         td.append(link);
         tr.append(td);
         node_tbl.append(tr);
 
-        $.each(run_state_order, function(run_state_order, run_state_name) {
+        $.each(run_state_order, function (run_state_order, run_state_name) {
             var run_state_index = reverse_run_states[run_state_name];
             var count_index = '[' + node_id + ',' + run_state_index + ']';
             var link_td = $('<td>');
@@ -121,8 +123,8 @@ function node_summary_tables(
             link.attr(
                 'href',
                 '/admin/workflow_engine/job?run_state__id__exact=' +
-                    run_state_index + '&workflow_node__id__exact=' +
-                    node_id.toString());
+                run_state_index + '&workflow_node__id__exact=' +
+                node_id.toString());
             link.text(run_state_name);
             link_td.append(link);
             var count_td = $('<td>').text(counts[count_index]);
@@ -136,131 +138,133 @@ function node_summary_tables(
 }
 
 function draw_workflow(workflow_nodes, workflow_edges) {
-var cy = window.cy = cytoscape({
-  container: document.getElementById('cy'),
+    var cy = window.cy = cytoscape({
+        container: document.getElementById('cy'),
 
-  boxSelectionEnabled: false,
-  autounselectify: true,
+        boxSelectionEnabled: false,
+        autounselectify: true,
 
-  layout: {
-    name: 'dagre',
-    fit: false,
-    transform: function( node, pos ) {
-        return {
-            x: pos['y'],
-            y: pos['x'] + 100
-        };
-    },
-    spacingFactor: 0.7
-  },
+        layout: {
+            name: 'dagre',
+            fit: false,
+            transform: function (node, pos) {
+                return {
+                    x: pos['y'],
+                    y: pos['x'] + 100
+                };
+            },
+            spacingFactor: 0.7
+        },
 
-  zoom: 1,
+        zoom: 1,
 
-  style: [
-    {
-      selector: 'node',
-      style: {
-        'shape': 'roundrectangle',
-        'content': 'data(label)',
-        'font-size': '10px',
-        'font-weight': 'bold',
-        'text-opacity': 0.6,
-        'text-valign': 'center',
-        'text-halign': 'center',
-        'text-wrap': 'wrap',
-        //'text-max-width': 50,
-        'width': 60,
-        'height': 60,
-      }
-    },
-
-    {
-      selector: '.focused',
-      style: {
-        'border-color': 'red',
-      }
-    },
-
-    {
-      selector: 'edge',
-      style: {
-        'curve-style': 'bezier',
-        'width': 4,
-        'target-arrow-shape': 'triangle',
-        'line-color': 'steelblue',
-        'opacity': 0.3,
-        'target-arrow-color': 'steelblue'
-      }
-    },
-
-    {
-        selector: '.redClass',
-        style: {
-        'background-color': 'lightcoral',
-        'shape': 'rectangle'
-       }
-    },
-    {
-        selector: '.greenClass',
-        style: {
-        'background-color': 'lightgreen',
-        'shape': 'rectangle'
-       }
-    },
-    {
-        selector: '.blueClass',
-        style: {
-        'background-color': 'lightblue',
-        'shape': 'rectangle'
-       }
-    },
-    {
-        selector: '.greyClass',
-        style: {
-        'background-color': 'lightgrey',
-        'shape': 'rectangle'
-       }
-    }
-    ],
-
-  elements: {
-    nodes: Object.keys(workflow_nodes).map(
-        n => {
-            return {
-                data: {
-                    id: n,
-                    label: workflow_nodes[n]
-                },
-                classes: 'multiline-manual'
-            } }),
-    edges: workflow_edges.map(
-        e => {
-            return {
-                data: {
-                    source: e[0],
-                    target: e[1]
+        style: [
+            {
+                selector: 'node',
+                style: {
+                    'shape': 'roundrectangle',
+                    'content': 'data(label)',
+                    'font-size': '10px',
+                    'font-weight': 'bold',
+                    'text-opacity': 0.6,
+                    'text-valign': 'center',
+                    'text-halign': 'center',
+                    'text-wrap': 'wrap',
+                    //'text-max-width': 50,
+                    'width': 60,
+                    'height': 60,
                 }
-            } }),
-  },
-});
+            },
 
-cy.on('click', 'node', function(e) {
-    tgt = e.cyTarget
-    
-    if (tgt === cy) {
-    } else {
-        node_id = e.target.data()['node_id'];
-        // url = 'http://ibs-timf-ux1.corp.alleninstitute.org:9001/admin/workflow_engine/job/?run_state__name=PROCESS_KILLED&workflow_node__job_queue__name=Load+Z+Mapping';
-        $('table.node_info').each(function(i, tbl) {
-           tbl = $(tbl)
-           if (tbl.data('node_id') == node_id) {
-               tbl.show();
-           } else {
-               tbl.hide();
-           }
-        });
-    }
-});
+            {
+                selector: '.focused',
+                style: {
+                    'border-color': 'red',
+                }
+            },
+
+            {
+                selector: 'edge',
+                style: {
+                    'curve-style': 'bezier',
+                    'width': 4,
+                    'target-arrow-shape': 'triangle',
+                    'line-color': 'steelblue',
+                    'opacity': 0.3,
+                    'target-arrow-color': 'steelblue'
+                }
+            },
+
+            {
+                selector: '.redClass',
+                style: {
+                    'background-color': 'lightcoral',
+                    'shape': 'rectangle'
+                }
+            },
+            {
+                selector: '.greenClass',
+                style: {
+                    'background-color': 'lightgreen',
+                    'shape': 'rectangle'
+                }
+            },
+            {
+                selector: '.blueClass',
+                style: {
+                    'background-color': 'lightblue',
+                    'shape': 'rectangle'
+                }
+            },
+            {
+                selector: '.greyClass',
+                style: {
+                    'background-color': 'lightgrey',
+                    'shape': 'rectangle'
+                }
+            }
+        ],
+
+        elements: {
+            nodes: Object.keys(workflow_nodes).map(
+                n => {
+                    return {
+                        data: {
+                            id: n,
+                            label: workflow_nodes[n]
+                        },
+                        classes: 'multiline-manual'
+                    }
+                }),
+            edges: workflow_edges.map(
+                e => {
+                    return {
+                        data: {
+                            source: e[0],
+                            target: e[1]
+                        }
+                    }
+                }),
+        },
+    });
+
+    cy.on('click', 'node', function (e) {
+        tgt = e.cyTarget
+
+        if (tgt === cy) {
+        } else {
+            node_id = e.target.data()['node_id'];
+            // url = 'http://ibs-timf-ux1.corp.alleninstitute.org:9001/admin/workflow_engine/job/?run_state__name=PROCESS_KILLED&workflow_node__job_queue__name=Load+Z+Mapping';
+            $('table.node_info').each(function (i, tbl) {
+                tbl = $(tbl)
+                if (tbl.data('node_id') == node_id) {
+                    tbl.show();
+                } else {
+                    tbl.hide();
+                }
+            });
+        }
+    });
 
 }
 
@@ -274,10 +278,10 @@ function render_workflow_graph() {
             'Accept': 'application/json'
         }
     })
-    .then((response) => {
-        response.json().then(obj => {
-            draw_workflow(obj['job_queue_name'], obj['edges']);
-            node_summary_tables(
+        .then((response) => {
+            response.json().then(obj => {
+                draw_workflow(obj['job_queue_name'], obj['edges']);
+                node_summary_tables(
                     obj['job_queue_name'],
                     obj['batch_size'],
                     obj['run_state_name'],
@@ -285,21 +289,21 @@ function render_workflow_graph() {
                     obj['pending_queued_running'],
                     obj['total']
                 );
-            color_nodes(
-                obj['job_queue_name'],
-                obj['batch_size'],
-                obj['run_state_name'],
-                obj['count'],
-                obj['pending_queued_running'],
-                obj['total']
-            );
+                color_nodes(
+                    obj['job_queue_name'],
+                    obj['batch_size'],
+                    obj['run_state_name'],
+                    obj['count'],
+                    obj['pending_queued_running'],
+                    obj['total']
+                );
+            })
         })
-    })
 }
 
 
 var $ = django.jQuery;
-$(document).ready(function(){
+$(document).ready(function () {
     render_workflow_graph();
     //setInterval(render_workflow_graph, 5000);
 })

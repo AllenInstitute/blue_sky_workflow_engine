@@ -249,8 +249,15 @@ class WorkflowStatus(object):
         out_dict.update(
             self.nodes.to_dict(orient='dict')
         )
+
+        # pandas to_json changes how it writes multiindex keys so instead,
+        # write out as a nested dictionary.
+        count_obj = {
+            'count': self.run_state_counts.groupby(level=0).apply(
+                lambda df: df.xs(df.name)['count'].to_dict()).to_dict()
+        }
         out_dict.update(
-            json.loads(self.run_state_counts.to_json(orient='columns'))
+            count_obj
         )
         out_dict.update(
             self.pending_queued_running.to_dict(orient='dict')
