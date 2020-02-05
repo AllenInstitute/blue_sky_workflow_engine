@@ -117,7 +117,6 @@ function node_summary_tables(
 
         $.each(run_state_order, function (run_state_order, run_state_name) {
             var run_state_index = reverse_run_states[run_state_name];
-            var count_index = '[' + node_id + ',' + run_state_index + ']';
             var link_td = $('<td>');
             var link = $('<a>');
             link.attr(
@@ -127,7 +126,7 @@ function node_summary_tables(
                 node_id.toString());
             link.text(run_state_name);
             link_td.append(link);
-            var count_td = $('<td>').text(counts[count_index]);
+            var count_td = $('<td>').text(counts[node_id][run_state_index]);
             var tr = $('<tr>');
             tr.append(link_td);
             tr.append(count_td);
