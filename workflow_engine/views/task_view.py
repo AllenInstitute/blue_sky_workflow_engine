@@ -37,6 +37,7 @@ from django.http import JsonResponse
 from django.http import HttpResponse
 import traceback
 from django.template import loader
+from workflow_engine.mixins import Runnable
 from workflow_engine.models import (
     Task,
     ONE
@@ -85,7 +86,8 @@ def tasks_page(request, page, url = None):
         records = records.filter(job_id__in=(job_ids.split(',')))
 
     if run_state_ids != None:
-        records = records.filter(run_state_id__in=(run_state_ids.split(',')))
+        running_states = Runnable.get_run_state_names_by_ids(run_state_ids.split(','))
+        records = records.filter(running_state__in=(running_states))
 
     if sort == None:
         sort = '-updated_at'
