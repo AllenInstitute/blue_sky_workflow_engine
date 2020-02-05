@@ -95,8 +95,8 @@ def jobs_page(request, page, url=None):
         set_params = True
 
     if run_state_ids != None:
-        running_states = Runnable.get_run_state_names_by_ids(run_state_ids.split(','))
-        records = records.filter(running_state__in=(running_states))
+        run_states = Runnable.get_run_state_names_by_ids(run_state_ids.split(','))
+        records = records.filter(running_state__in=(run_states))
         set_params = True
 
     if running_states != None:
