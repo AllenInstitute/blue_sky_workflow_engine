@@ -61,6 +61,12 @@ class Runnable(models.Model):
             Runnable.STATE.PROCESS_KILLED,
         ]
 
+    @classmethod
+    def get_run_state_names_by_ids(cls, run_state_id_list):
+        run_states = Runnable.get_run_state_names()
+        running_states = map(lambda x: run_states[int(x)], run_state_id_list)
+        return list(running_states)
+
     def in_failed_state(self):
         run_state_name = self.running_state
         return (run_state_name == Runnable.STATE.FAILED or

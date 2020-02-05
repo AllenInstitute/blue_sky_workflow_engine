@@ -35,6 +35,7 @@
 #
 from django.http import HttpResponse
 from django.template import loader
+from workflow_engine.mixins import Runnable
 from workflow_engine.models import (
     Job,
     WorkflowNode,
@@ -78,6 +79,7 @@ def jobs_page(request, page, url=None):
 
     workflow_node_ids = request.GET.get('workflow_node_ids')
     run_state_ids = request.GET.get('run_state_ids')
+    running_states = request.GET.get('running_state') # To handle when request is coming from workflow page
     enqueued_object_ids = request.GET.get('enqueued_object_ids')
     workflow_ids = request.GET.get('workflow_ids')
     
@@ -93,7 +95,12 @@ def jobs_page(request, page, url=None):
         set_params = True
 
     if run_state_ids != None:
-        records = records.filter(run_state_id__in=(run_state_ids.split(',')))
+        running_states = Runnable.get_run_state_names_by_ids(run_state_ids.split(','))
+        records = records.filter(running_state__in=(running_states))
+        set_params = True
+
+    if running_states != None:
+        records = records.filter(running_state__in=(running_states.split(',')))
         set_params = True
 
     if enqueued_object_ids != None:
