@@ -38,7 +38,7 @@ if __name__ == '__main__':
     parser.add_argument("--action")
     parser.add_argument("--pbs_id")
     parser.add_argument("task_id")
-    parser.add_argument("app-name", dest = 'app_name')
+    parser.add_argument("--app-name", dest = 'app_name')
 
     args = parser.parse_args()
 
