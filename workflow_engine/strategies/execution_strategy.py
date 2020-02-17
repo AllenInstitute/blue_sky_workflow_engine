@@ -41,6 +41,7 @@ import json
 from celery.exceptions import SoftTimeLimitExceeded
 from workflow_engine.signatures import (
     enqueue_next_queue_signature,
+    run_workflow_node_jobs_signature,
     kill_moab_task_signature,
     submit_moab_task_signature,
     submit_task_signature,
@@ -221,6 +222,9 @@ class ExecutionStrategy(base_strategy.BaseStrategy):
                 task.job.set_end_run_time()
 
                 enqueue_next_queue_signature.delay(task.job.id)
+
+                # Start more jobs on current workflow node
+                run_workflow_node_jobs_signature.delay(task.job.workflow_node.id)
 
         except Exception as e:
             ExecutionStrategy._log.error(
