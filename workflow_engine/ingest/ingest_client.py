@@ -1,14 +1,16 @@
 #!/usr/bin/env python
 '''
-Ingest EM tile directory
+Ingest json message
 
 Send EM tileset data using blue sky's celery ingest call
 '''
+from workflow_engine.client_settings import configure_worker_app
 import celery
 from celery import Celery, signature
 import sys
 import os
 import json
+import click
 import datetime
 import pytz
 import logging
@@ -55,13 +57,19 @@ class IngestClient():
     def gen_timestring(cls, timestr, **kwargs):
         return cls.gen_datetime(timestr, **kwargs).isoformat()
 
-    def run(self, input_data):
+    def run(self, input_data, tag = None):
+        if tag is None:
+            tags = []
+        else:
+            tags = [ tag ]
+
         with open(input_data, 'r') as f:
             body = json.load(f)
 
-        response = self.send(body)
+        response = self.send(body, fix_option=tags)
 
         IngestClient._log.info("celery ingest returned {}".format(response))
+        print("celery ingest returned {}".format(response))
         # TODO return this or have it set in order to facilitate RefSet
         IngestClient._log.info("enqueued object: %s",
             str(response))
@@ -73,22 +81,29 @@ class IngestClient():
         except:
             pass
 
-        blue_sky_settings = os.environ['BLUE_SKY_SETTINGS_JSON']
+        #settings = load_settings_yaml()
 
-        with open(blue_sky_settings, 'r') as f:
-            settings = json.load(f)
+        #blue_sky_settings = os.environ['BLUE_SKY_SETTINGS']
+
+        #with open(blue_sky_settings, 'r') as f:
+        #    settings = yaml.load(f, Loader=yaml.SafeLoader)
 
         app = Celery('workflow_engine.celery')
-        blue_sky_settings = settings_attr_dict(settings)
-        app.config_from_object(blue_sky_settings)
+        #blue_sky_settings = settings_attr_dict(settings)
+        #app.config_from_object(blue_sky_settings)
+        configure_worker_app(app, 'blue_sky')
 
+
+@click.command()
+@click.option('--exchange', default='blue_sky__blue', help="messaging system exchange name")
+@click.option('--workflow', default='mock_workflow', help="destination for message")
+@click.option('--message_file', default='message.json', help="json file containing message boy")
+@click.option('--tag', required=False, help="additional information for ingest strategy")
+def main(exchange, workflow, message_file, tag):
+    IngestClient._log.info('RUNNING')
+    mod = IngestClient(exchange, workflow)
+    mod.configure_celery_app()
+    mod.run(message_file, tag)
 
 if __name__ == "__main__":
-    IngestClient._log.info('RUNNING')
-    print('RUNNING')
-    mod = IngestClient(
-        sys.argv[-3],
-        sys.argv[-2]
-    )
-    mod.configure_celery_app()
-    mod.run(sys.argv[-1])
+    main()
