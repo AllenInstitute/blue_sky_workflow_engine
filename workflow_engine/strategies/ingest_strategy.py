@@ -107,10 +107,14 @@ class IngestStrategy(ExecutionStrategy):
 
         IngestStrategy._log.info("Starting workflow: %s", workflow_name)
 
-        WorkflowController.start_workflow(
-            workflow_name,
-            enqueued_object,
-            start_node_name=start_node)
+        try:
+            WorkflowController.start_workflow(
+                workflow_name,
+                enqueued_object,
+                start_node_name=start_node)
+        except Exception as e:
+            ret['status'] = 'ENQUEUE_FAIL'
+            ret['message'] = 'object created, but workflow failed'
 
         return ret
 

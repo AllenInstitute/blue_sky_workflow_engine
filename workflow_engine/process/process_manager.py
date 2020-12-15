@@ -3,17 +3,15 @@ import copy
 import os
 import sys
 import yaml
+import click
 
-_APP_NAME='at_em_imaging_workflow'
+_APP_NAME='blue_sky'
 _CONDA_ENVS = '/conda_envs'
 _CELERY_PATH = os.path.join(
     _CONDA_ENVS,
-    'py_37/bin/celery'
+    'py_36/bin/celery'
 )
-_ACTIVATE_PATH = os.path.join(
-    _CONDA_ENVS,
-    'py_37/bin/activate'
-)
+_ACTIVATE_PATH = 'activate'
 _FLOWER_DELAY = 1
 _FLOWER_PORT = 5557
 
@@ -57,35 +55,36 @@ except:
 
 
 
-def get_arbiter_list(app_name, workdir, log_dir=None):
+def get_arbiter_list(app_name, workdir, log_dir=None, python_path=None):
     if log_dir is None:
         log_dir = os.path.join(workdir, 'logs')
 
-    bg_conda_env = os.path.join(_CONDA_ENVS, 'py_37')
+    bg_conda_env = os.path.join(_CONDA_ENVS, 'py_36')
     base_env = copy.deepcopy(_BASE_ENV)
     base_env['APP_PACKAGE'] = app_name
-    base_env['PYTHONPATH'] = "/source/at_em_imaging_workflow:/source/blue_sky_workflow_engine:/render_modules:/EM_aligner_python:" + workdir
+    base_env['PYTHONPATH'] = python_path
 
     django_env = dmerge(base_env, {
-        'DJANGO_SETTINGS_MODULE': 'at_em_imaging_workflow.settings' # in workdir
+        'DJANGO_SETTINGS_MODULE': 'blue_sky.settings' # in PYTHONPATH
     })
     
     arbiter_list = [
         {
             'cmd': ' '.join((
                 "/bin/bash -c ",
-                "'source {} {}; ".format(_ACTIVATE_PATH, bg_conda_env),
+                "'source /opt/conda/etc/profile.d/conda.sh ; conda {} {}; ".format(_ACTIVATE_PATH, bg_conda_env),
                 "python -m workflow_engine.process.workers.ui_server'"
             )),
             "env": dmerge(django_env, {
                 'DEBUG_LOG': debug_log_path(log_dir, 'ui')
             }), 
+            'use_fds': True,
             'numprocesses': 1
         },
         {
             'cmd': ' '.join([
                 '/bin/bash -c',
-                '"source {} {};'.format(_ACTIVATE_PATH, bg_conda_env),
+                '"source /opt/conda/etc/profile.d/conda.sh; conda {} {};'.format(_ACTIVATE_PATH, bg_conda_env),
                 'sleep {};'.format(_FLOWER_DELAY),
                 'python -m celery flower',
                 '--url_prefix=flower --backend=rpc',
@@ -99,7 +98,7 @@ def get_arbiter_list(app_name, workdir, log_dir=None):
         },
 #        {
 #            'cmd': ' '.join((
-#                '/bin/bash -c',
+#                '/bin/bash -l -c',
 #                '"source {} {}_circus; '.format(_ACTIVATE_PATH, bg),
 #                'unset DJANGO_SETTINGS_MODULE; ',
 #                'python -m celery ',
@@ -115,20 +114,20 @@ def get_arbiter_list(app_name, workdir, log_dir=None):
 #            }), 
 #            'numprocesses': 1
 #        },
-        {
-            'cmd': ' '.join((
-                '/bin/bash -c ', '"source {} {}; '.format(_ACTIVATE_PATH, bg_conda_env),
-                'cd /{}/notebooks; '.format(workdir),
-                'python -m workflow_engine.management.manage shell_plus --notebook"'
-            )),
-            "env": dmerge(django_env, {
-                'DEBUG_LOG': debug_log_path(log_dir, 'nb')
-            }), 
-            'numprocesses': 1
-        },
+#        {
+#            'cmd': ' '.join((
+#                '/bin/bash -l -c ', '"source {} {}; '.format(_ACTIVATE_PATH, bg_conda_env),
+#                'cd /{}/notebooks; '.format(workdir),
+#                'python -m workflow_engine.management.manage shell_plus --notebook"'
+#            )),
+#            "env": dmerge(django_env, {
+#                'DEBUG_LOG': debug_log_path(log_dir, 'nb')
+#            }), 
+#            'numprocesses': 1
+#        },
         # {
         #     'cmd': ' '.join((
-        #         '/bin/bash -c ',
+        #         '/bin/bash -l -c ',
         #         '"source {} {}; '.format(_ACTIVATE_PATH, bg_conda_env),
         #         'python -m celery ',
         #         '-A workflow_engine.process.workers.job_start_beat_tasks beat"',
@@ -151,7 +150,7 @@ def get_arbiter_list(app_name, workdir, log_dir=None):
             {
                 "cmd": (
                     '/bin/bash -c '
-                    '"source {} {}; {}"'
+                    '"source /opt/conda/etc/profile.d/conda.sh; conda {} {}; {}"'
                 ).format(
                     _ACTIVATE_PATH,
                     bg_conda_env,
@@ -165,25 +164,36 @@ def get_arbiter_list(app_name, workdir, log_dir=None):
 
     return arbiter_list
 
-if __name__ == '__main__':
 
-    # TODO: these should not just be docker paths
-    app_name = sys.argv[-2]
-    workdir = sys.argv[-1]
-    log_dir = '/home/blue_sky_user/work/logs'
+@click.command()
+@click.option('--app_name', default='blue_sky', help='blue sky application package')
+@click.option('--workdir', default='/source/blue_sky', help='directory where processes should be launched')
+@click.option('--log_dir', default='/home/blue_sky_user/work/logs', help='directory where log files are stored')
+@click.option('--controller', default='tcp://127.0.0.1:9055', help='circusd controller uri')
+@click.option('--pubsub_endpoint', default='tcp://127.0.0.1:9056', help='circus pubsub endpoint uri')
+@click.option('--python_path', default='/source/blue_sky:/source/blue_sky_workflow_engine:', help='circus pubsub endpoint uri')
+def main(app_name, workdir, log_dir, controller, pubsub_endpoint, python_path):
+    if python_path is None:
+        python_path = "/source/at_em_imaging_workflow:/source/blue_sky_workflow_engine:/render_modules:/EM_aligner_python:"
 
     arbiter_list = get_arbiter_list(
         app_name,
         workdir,
-        log_dir)
+        log_dir,
+        python_path=(':'.join([python_path, workdir]))
+    )
 
     arbiter = get_arbiter(
         arbiter_list, 
-        controller='tcp://127.0.0.1:9055',
-        pubsub_endpoint='tcp://127.0.0.1:9056'
+        controller=controller,
+        pubsub_endpoint=pubsub_endpoint
     )
 
     try:
         arbiter.start()
     finally:
         arbiter.stop()
+
+
+if __name__ == '__main__':
+    main()
