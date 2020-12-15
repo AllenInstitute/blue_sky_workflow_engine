@@ -145,6 +145,7 @@ class WorkflowController(object):
                 'Error loading strategy for %s',
                 str(target_node)
             )
+            return
 
         enqueued_objects = strategy.transform_objects_for_queue(source_object)
 
@@ -169,6 +170,7 @@ class WorkflowController(object):
                 'Error loading strategy for %s',
                 str(target_node)
             )
+            return
 
         source_object = source_job.enqueued_object
 
@@ -271,7 +273,7 @@ class WorkflowController(object):
                 "Job exception: %s",
                 str(job.error_message)
             )
-            job.set_failed_state()
+            job.set_failed_execution_state()
             run_workflow_node_jobs_signature.delay(job.workflow_node.id)
 
     @classmethod
@@ -350,7 +352,7 @@ class WorkflowController(object):
     def start_workflow_helper(
         cls,
         workflow_node,
-        enqueued_object,
+        enqueued_objects,
         reuse_job=False,
         raise_priority=False):
         if raise_priority:
@@ -358,13 +360,16 @@ class WorkflowController(object):
         else:
             priority = workflow_node.priority
 
-        job = WorkflowController.enqueue_object(
-            workflow_node,
-            enqueued_object,
-            priority,
-            reuse_job
-        )
+        if not isinstance(enqueued_objects, list):
+           enqueued_objects = [ enqueued_objects ]
 
+        for enqueued_object in enqueued_objects:
+            job = WorkflowController.enqueue_object(
+                workflow_node,
+                enqueued_object,
+                priority,
+                reuse_job
+            )
         WorkflowController._log.info(
             "Start workflow job state: %s",
             str(job.running_state)
