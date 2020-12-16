@@ -41,4 +41,4 @@ class WaitStrategy(ExecutionStrategy):
             mess = str(e) + ' - ' + str(traceback.format_exc())
             WaitStrategy._log.error(mess)
             task.set_error_message(mess)
-            self.fail_task(task)
+            self.fail_execution_task(task)
