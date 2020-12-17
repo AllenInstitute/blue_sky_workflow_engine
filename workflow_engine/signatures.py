@@ -66,6 +66,11 @@ class METHODS:
     RUN_JOBS_BY_ID = 'workflow_engine.process.workers.workflow_tasks.set_jobs_for_run_by_id'
     ENQUEUE_NEXT = 'workflow_engine.process.workers.workflow_tasks.enqueue_next_queue'
     KILL_JOB = 'workflow_engine.process.workers.workflow_tasks.kill_job'
+
+_PRIORITY_HIGH=6
+_PRIORITY_NORMAL=5
+_PRIORITY_LOW=4
+
 #
 # INGEST TASKS
 #
@@ -111,24 +116,32 @@ submit_worker_task_signature.set(
 # RESULT TASKS
 #
 process_running_signature = signature(METHODS.PROCESS_RUNNING)
+process_running_signature.set(
+    time_limit=_DEFAULT_TIME_LIMIT,
+    priority=_PRIORITY_NORMAL
+)
 # process_running_signature.set(
 #     time_limit=_DEFAULT_TIME_LIMIT
 # )
 process_finished_execution_signature = signature(METHODS.PROCESS_FINISHED_EXECUTION)
 process_finished_execution_signature.set(
-    time_limit=_DEFAULT_TIME_LIMIT
+    time_limit=_DEFAULT_TIME_LIMIT,
+    priority=_PRIORITY_NORMAL
 )
 process_failed_execution_signature = signature(METHODS.PROCESS_FAILED_EXECUTION)
 process_failed_execution_signature.set(
-    time_limit=_DEFAULT_TIME_LIMIT
+    time_limit=_DEFAULT_TIME_LIMIT,
+    priority=_PRIORITY_NORMAL
 )
 process_failed_signature = signature(METHODS.PROCESS_FAILED)
 process_failed_signature.set(
-    time_limit=_DEFAULT_TIME_LIMIT
+    time_limit=_DEFAULT_TIME_LIMIT,
+    priority=_PRIORITY_NORMAL
 )
 process_pbs_id_signature = signature(METHODS.PROCESS_PBS_ID)
 process_pbs_id_signature.set(
-    time_limit=_DEFAULT_TIME_LIMIT
+    time_limit=_DEFAULT_TIME_LIMIT,
+    priority=_PRIORITY_NORMAL
 )
 
 
@@ -136,7 +149,13 @@ process_pbs_id_signature.set(
 # WORKFLOW / UI TASKS
 #
 run_workflow_node_jobs_signature = signature(METHODS.RUN_WORKFLOW_NODE_JOBS)
+run_workflow_node_jobs_signature.set(
+    priority=_PRIORITY_NORMAL
+)
 run_jobs_by_id_signature = signature(METHODS.RUN_JOBS_BY_ID)
+run_jobs_by_id_signature.set(
+    priority=_PRIORITY_HIGH
+)
 
 
 # TODO: unimplemented?
@@ -145,17 +164,26 @@ run_tasks_signature = signature(
 
 
 create_job_signature = signature(METHODS.CREATE_JOB)
+create_job_signature.set(
+    priority=_PRIORITY_NORMAL
+)
 queue_job_signature = signature(METHODS.QUEUE_JOB)
+create_job_signature.set(
+    priority=_PRIORITY_NORMAL
+)
 enqueue_next_queue_signature = signature(METHODS.ENQUEUE_NEXT)
+enqueue_next_queue_signature.set(
+    priority=_PRIORITY_HIGH
+)
 kill_job_signature = signature(METHODS.KILL_JOB)
+kill_job_signature.set(
+    priority=_PRIORITY_NORMAL
+)
 
 
 #
 # CIRCUS PROCESS WORKER TASKS
 #
-_PRIORITY_HIGH=6
-_PRIORITY_NORMAL=5
-_PRIORITY_LOW=4
 
 
 submit_task_signature = signature(
