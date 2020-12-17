@@ -2,7 +2,7 @@
 # license plus a third clause that prohibits redistribution for commercial
 # purposes without further permission.
 #
-# Copyright 2018. Allen Institute. All rights reserved.
+# Copyright 2018-2020. Allen Institute. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -38,12 +38,15 @@ from django.conf import settings
 from workflow_engine.client_settings import configure_worker_app
 import celery
 import logging
+from traceback import format_stack
 from workflow_engine import signatures
 
 
 _log = logging.getLogger('workflow_engine.process.workers.mock_tasks')
 
-
+PBS_ID_DELAY =  5
+RUNNING_DELAY = 20
+FINISH_DELAY = 30
 SUCCESS_EXIT_CODE = 0
 ERROR_EXIT_CODE = 1
 
@@ -92,23 +95,17 @@ def submit_mock_task(self, task_id):
 
         if the_task.in_pending_state():
             mock_moab_id = task_id
-            signatures.process_pbs_id_signature.delay(task_id, mock_moab_id)
-            signatures.process_running_signature.delay(task_id)
+            signatures.process_pbs_id_signature.apply_async((task_id, mock_moab_id), countdown=PBS_ID_DELAY)
+            signatures.process_running_signature.apply_async((task_id,), countdown=RUNNING_DELAY)
 
             exit_code = SUCCESS_EXIT_CODE
 
             if exit_code == SUCCESS_EXIT_CODE:
-                signatures.process_finished_execution_signature.delay(task_id)
-
-                # with open(logfile, "a") as log:
-                #     log.write("SUCCESS - execution finished successfully for task " +
-                #     str(task_id))
+                signatures.process_finished_execution_signature.apply_async((task_id,), countdown=FINISH_DELAY)
             else:
-                signatures.process_failed_execution_signature.delay(task_id)
-
-                # with open(logfile, "a") as log:
-                #    log.write("FAILURE - execution failed for task " + str(task_id))
-    except:
+                signatures.process_failed_execution_signature.apply_async((task_id,), countdown=30)
+    except Exception as e:
+        _log.error('MOCK FAILED EXECUTION task %d\n%s', task_id, e) 
         signatures.process_failed_execution_signature.delay(task_id)
 
     return None
