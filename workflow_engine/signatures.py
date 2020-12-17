@@ -120,9 +120,6 @@ process_running_signature.set(
     time_limit=_DEFAULT_TIME_LIMIT,
     priority=_PRIORITY_NORMAL
 )
-# process_running_signature.set(
-#     time_limit=_DEFAULT_TIME_LIMIT
-# )
 process_finished_execution_signature = signature(METHODS.PROCESS_FINISHED_EXECUTION)
 process_finished_execution_signature.set(
     time_limit=_DEFAULT_TIME_LIMIT,
