@@ -154,7 +154,6 @@ def process_pbs_id(self, task_id, moab_id, chained=False):
         if (moab_id is not None):
             task.pbs_id = moab_id
             task.set_queued_state(moab_id)
-            task.job.set_queued_state()
         else:
             _log.warning('Got None for moab id: %s', str(task_id))
     except ObjectDoesNotExist:

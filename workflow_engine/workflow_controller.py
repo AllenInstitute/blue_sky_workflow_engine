@@ -261,6 +261,7 @@ class WorkflowController(object):
             job.clear_error_message()
             job.prep_job()
             job.submit_to_queue()
+            job.save()
 
             WorkflowController.create_tasks(job)
 
