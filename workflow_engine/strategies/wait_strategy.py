@@ -1,7 +1,6 @@
 from workflow_engine.strategies.execution_strategy import (
     ExecutionStrategy
 )
-import traceback
 import logging
 
 
@@ -27,18 +26,3 @@ class WaitStrategy(ExecutionStrategy):
     # TODO: execution strategy should inherit from wait strategy
     def set_error_message_from_log(self, task):
         pass
-
-    def run_task(self, task):
-        try:
-            enqueued_object = task.enqueued_task_object
-
-            if self.must_wait(enqueued_object):
-                task.set_queued_state()
-            else:
-                self.prep_task(task)
-                self.finish_task(task)
-        except Exception as e:
-            mess = str(e) + ' - ' + str(traceback.format_exc())
-            WaitStrategy._log.error(mess)
-            task.set_error_message(mess)
-            self.fail_execution_task(task)
