@@ -1,7 +1,6 @@
 from workflow_engine.strategies.execution_strategy import (
     ExecutionStrategy
 )
-#import traceback
 import logging
 
 
