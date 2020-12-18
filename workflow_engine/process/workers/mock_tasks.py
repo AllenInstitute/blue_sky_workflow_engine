@@ -40,12 +40,13 @@ import celery
 import logging
 from traceback import format_stack
 from workflow_engine import signatures
+import random
 
 
 _log = logging.getLogger('workflow_engine.process.workers.mock_tasks')
 
 PBS_ID_DELAY =  5
-RUNNING_DELAY = 20
+RUNNING_DELAY = 10
 FINISH_DELAY = 30
 SUCCESS_EXIT_CODE = 0
 ERROR_EXIT_CODE = 1
@@ -53,6 +54,10 @@ ERROR_EXIT_CODE = 1
 
 app = celery.Celery('workflow_engine.process.workers.mock_tasks')
 configure_worker_app(app, settings.APP_PACKAGE, 'mock')
+
+
+def message_delay(lower_limit, upper_limit):
+    return random.randint(lower_limit, upper_limit)
 
 
 def query_running_task_dicts():
@@ -95,15 +100,27 @@ def submit_mock_task(self, task_id):
 
         if the_task.in_pending_state():
             mock_moab_id = task_id
-            signatures.process_pbs_id_signature.apply_async((task_id, mock_moab_id), countdown=PBS_ID_DELAY)
-            signatures.process_running_signature.apply_async((task_id,), countdown=RUNNING_DELAY)
+            signatures.process_pbs_id_signature.apply_async(
+                (task_id, mock_moab_id),
+                countdown=message_delay(0, PBS_ID_DELAY)
+            )
+            signatures.process_running_signature.apply_async(
+                (task_id,),
+                countdown=message_delay(PBS_ID_DELAY+1, RUNNING_DELAY)
+            )
 
             exit_code = SUCCESS_EXIT_CODE
 
             if exit_code == SUCCESS_EXIT_CODE:
-                signatures.process_finished_execution_signature.apply_async((task_id,), countdown=FINISH_DELAY)
+                signatures.process_finished_execution_signature.apply_async(
+                    (task_id,),
+                    countdown=message_delay(RUNNING_DELAY+1, FINISH_DELAY)
+                )
             else:
-                signatures.process_failed_execution_signature.apply_async((task_id,), countdown=30)
+                signatures.process_failed_execution_signature.apply_async(
+                    (task_id,),
+                    countdown=message_delay(RUNNING_DELAY+1, FINISH_DELAY)
+                )
     except Exception as e:
         _log.error('MOCK FAILED EXECUTION task %d\n%s', task_id, e) 
         signatures.process_failed_execution_signature.delay(task_id)
