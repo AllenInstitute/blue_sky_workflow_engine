@@ -193,7 +193,6 @@ submit_task_signature.set(
     ignore_result=False
 )
 
-
 submit_mock_signature = signature(
     'workflow_engine.process.workers.submit_mock_task')
 submit_task_signature.set(
@@ -202,7 +201,8 @@ submit_task_signature.set(
     priority=_PRIORITY_NORMAL,
     retry=False,
     ignore_result=False,
-    expires=60,
+    soft_time_limit=6,
+    time_limit=8
 )
 
 

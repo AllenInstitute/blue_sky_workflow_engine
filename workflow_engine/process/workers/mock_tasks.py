@@ -41,6 +41,7 @@ import logging
 from traceback import format_stack
 from workflow_engine import signatures
 import random
+from time import sleep
 
 
 _log = logging.getLogger('workflow_engine.process.workers.mock_tasks')
@@ -83,17 +84,27 @@ def query_running_task_dicts():
 def check_status(self):
     return 'OK'
 
+class CallbackTask(celery.Task):
+    def on_success(self, retval, task_id, args, kwargs):
+        pass
+
+    def on_failure(self, exc, task_id, args, kwargs, einfo):
+        pass
+
 
 @celery.shared_task(
     name='workflow_engine.process.workers.submit_mock_task',
     bind=True,
-    trail=True
+    trail=True,
+    base=CallbackTask
 )
 def submit_mock_task(self, task_id):
     _log.info(
         'Submitting task %d',
         task_id
     )
+
+    sleep(random.randint(2,10))
 
     try:
         the_task = Task.objects.get(id=task_id)

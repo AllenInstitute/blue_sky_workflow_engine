@@ -114,17 +114,18 @@ def get_arbiter_list(app_name, workdir, log_dir=None, python_path=None):
 #            }), 
 #            'numprocesses': 1
 #        },
-#        {
-#            'cmd': ' '.join((
-#                '/bin/bash -l -c ', '"source {} {}; '.format(_ACTIVATE_PATH, bg_conda_env),
-#                'cd /{}/notebooks; '.format(workdir),
-#                'python -m workflow_engine.management.manage shell_plus --notebook"'
-#            )),
-#            "env": dmerge(django_env, {
-#                'DEBUG_LOG': debug_log_path(log_dir, 'nb')
-#            }), 
-#            'numprocesses': 1
-#        },
+        {
+            'cmd': ' '.join((
+                '/bin/bash -c',
+                '"source /opt/conda/etc/profile.d/conda.sh; conda {} {};'.format(_ACTIVATE_PATH, bg_conda_env),
+                'cd {}/notebooks; '.format(workdir),
+                'python -m workflow_engine.management.manage shell_plus --notebook"'
+            )),
+            "env": dmerge(django_env, {
+                'DEBUG_LOG': debug_log_path(log_dir, 'nb')
+            }), 
+            'numprocesses': 1
+        },
         # {
         #     'cmd': ' '.join((
         #         '/bin/bash -l -c ',
