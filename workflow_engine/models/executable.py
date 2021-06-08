@@ -65,7 +65,7 @@ class Executable(Archivable, Configurable, Nameable, Timestamped, models.Model):
     )
     remote_queue = models.CharField(
         max_length=255,
-        default='pbs',
+        default='slurm',
         blank=True
     )
     pbs_processor = models.CharField(

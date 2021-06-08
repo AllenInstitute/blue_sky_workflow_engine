@@ -2,7 +2,7 @@
 # license plus a third clause that prohibits redistribution for commercial
 # purposes without further permission.
 #
-# Copyright 2017. Allen Institute. All rights reserved.
+# Copyright 2017-2021. Allen Institute. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -144,7 +144,7 @@ class Task(Archivable, Runnable, Tagable, Timestamped, models.Model):
         self.job.workflow_node.workflow.use_pbs
 
     def has_pbs_executable(self):
-        return self.get_executable().remote_queue in ['pbs', 'spark_moab']
+        return self.get_executable().remote_queue in ['pbs', 'slurm', 'spark_moab']
 
     def pbs_task(self):
         is_pbs = self.has_pbs_executable() or self.has_pbs_workflow() 
