@@ -121,7 +121,6 @@ def moab_auth():
         _log.error('check MOAB_AUTH format')
 
     auth = HTTPBasicAuth(moab_user, moab_pass)
-    _log.info('AUTH: {}'.format(auth))
 
     return auth
 

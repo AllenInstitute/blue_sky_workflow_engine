@@ -2,7 +2,7 @@
 # license plus a third clause that prohibits redistribution for commercial
 # purposes without further permission.
 #
-# Copyright 2018. Allen Institute. All rights reserved.
+# Copyright 2018-2021. Allen Institute. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -41,6 +41,7 @@ from workflow_engine.process.workers.moab_api import (
     submit_job_array,
     delete_moab_task
 )
+from workflow_engine.process.workers.slurm_api import SlurmApi
 from workflow_engine.signatures import (
     process_failed_execution_signature,
     process_pbs_id_signature
@@ -81,7 +82,9 @@ def submit_moab_task(self, task_id):
             except:
                 moab_cfg = None
 
-            if the_task.get_executable().remote_queue == 'spark_moab':
+            remote_queue = the_task.get_executable().remote_queue
+
+            if remote_queue == 'spark_moab':
                 #Log4j
                 log_dir = the_strategy.get_or_create_task_storage_directory(the_task)
                 log4j_properties_path = os.path.join(log_dir, 'log4j.properties')
@@ -97,11 +100,24 @@ def submit_moab_task(self, task_id):
                     the_task.id,
                     the_task.pbs_file,
                     moab_cfg=moab_cfg)
+            elif remote_queue == 'slurm':
+                slurm = SlurmApi()
+                slurm_script = PbsUtils().get_template(
+                    the_task.get_executable(),
+                    the_task,
+                    settings
+                )
+                moab_id = slurm.submit_job(
+                    the_task.id,
+                    os.path.dirname(the_task.pbs_file),
+                    slurm_script
+                )
             else:
                 moab_id = submit_job(
                     the_task.id,
                     the_task.pbs_file,
-                    moab_cfg=moab_cfg)
+                    moab_cfg=moab_cfg
+                )
 
             if moab_id != 'ERROR':
                 # the_task.set_queued_state(moab_id)
@@ -138,7 +154,15 @@ def kill_moab_task(self, task_id):
 
     try:
         the_task = Task.objects.get(id=task_id)
-        delete_moab_task(the_task.pbs_id)
+
+        remote_queue = the_task.get_executable().remote_queue
+
+        if remote_queue in ['spark_moab', 'pbs']:
+            delete_moab_task(the_task.pbs_id)
+        elif remote_queue == 'slurm':
+                slurm = SlurmApi()
+                slurm.delete_slurm_task(the_task.pbs_id)
+
         the_task.set_process_killed_state()  # TODO: rename for task/process
         response_message = str(the_task.pbs_id)
     except ObjectDoesNotExist as e:

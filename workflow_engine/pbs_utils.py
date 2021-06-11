@@ -2,7 +2,7 @@
 # license plus a third clause that prohibits redistribution for commercial
 # purposes without further permission.
 #
-# Copyright 2017. Allen Institute. All rights reserved.
+# Copyright 2017-2021. Allen Institute. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -48,6 +48,7 @@ class PbsUtils(object):
             # 'spark': 'spark_submit_cluster.pbs',
             'circus': 'script_template.pbs',
             'pbs': 'script_template.pbs',
+            'slurm': 'script_template.slurm',
             'default': 'script_template.pbs'
         }
 
