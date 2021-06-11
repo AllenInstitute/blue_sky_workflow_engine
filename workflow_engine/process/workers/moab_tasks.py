@@ -41,6 +41,7 @@ from workflow_engine.process.workers.moab_api import (
     submit_job_array,
     delete_moab_task
 )
+from workflow_engine.process.workers.slurm_api import SlurmApi
 from workflow_engine.signatures import (
     process_failed_execution_signature,
     process_pbs_id_signature
@@ -101,33 +102,22 @@ def submit_moab_task(self, task_id):
                     moab_cfg=moab_cfg)
             elif remote_queue == 'slurm':
                 slurm = SlurmApi()
-
                 slurm_script = PbsUtils().get_template(
                     the_task.get_executable(),
                     the_task,
                     settings
                 )
-
                 moab_id = slurm.submit_job(
                     the_task.id,
                     os.path.dirname(the_task.pbs_file),
                     slurm_script
                 )
-
-            if moab_id != 'ERROR':
-                # the_task.set_queued_state(moab_id)
-                process_pbs_id_signature.delay(
-                    task_id, moab_id)
-            else:
-                process_failed_execution_signature.delay(
-                    task_id,
-                    fail_now=True
-                )
             else:
                 moab_id = submit_job(
                     the_task.id,
                     the_task.pbs_file,
-                    moab_cfg=moab_cfg)
+                    moab_cfg=moab_cfg
+                )
 
             if moab_id != 'ERROR':
                 # the_task.set_queued_state(moab_id)
