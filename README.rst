@@ -2,7 +2,7 @@ blue_sky_workflow_engine
 ########################
 A workflow scheduler that integrates the celery messaging library with a django admin interface.
 
-Documentation for this packatge and a reference workflow are available at `alleninstitute/blue_sky_reference <https://github.com/AllenInstitute/blue_sky_reference>_` 
+Documentation for this package and a reference workflow are available at `alleninstitute/blue_sky_reference https://github.com/AllenInstitute/blue_sky_reference 
 
 support
 #######
